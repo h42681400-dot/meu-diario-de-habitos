@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Meu Diário — comunidade</title>
+<title>Cottontail 🐰</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
@@ -15,8 +15,10 @@
   --rose-hover:#c39494;
   --line:#f0eae9;
   --red:#ff4d4f;
-  --bubble-me:#fceeee;
-  --bubble-other:#f4edea;
+  --bubble-me:#007aff;
+  --bubble-me-text:#ffffff;
+  --bubble-other:#e9e9eb;
+  --bubble-other-text:#000000;
   --font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -29,8 +31,10 @@ body.theme-dark {
   --rose-hover:#c39494;
   --line:#383332;
   --red:#ff4d4f;
-  --bubble-me:#3d2c2c;
-  --bubble-other:#2e2a29;
+  --bubble-me:#0a84ff;
+  --bubble-me-text:#ffffff;
+  --bubble-other:#262628;
+  --bubble-other-text:#f5ecea;
 }
 
 *{box-sizing:border-box}
@@ -46,7 +50,7 @@ input,textarea,select{width:100%;padding:12px;border:1px solid var(--line);borde
 input:focus,textarea:focus,select:focus{border-color:var(--rose)}
 textarea{min-height:85px;resize:vertical}
 .hidden{display:none!important}
-.wrap{max-width:680px;margin:0 auto;padding:0 16px 85px 16px}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px 85px 16px}
 .card{background:var(--card-bg);border-radius:20px;padding:20px;margin:14px 0;box-shadow:0 2px 12px rgba(0,0,0,0.02);border:1px solid var(--line)}
 
 /* Login & Cadastro */
@@ -55,21 +59,71 @@ textarea{min-height:85px;resize:vertical}
 .muted,.hint{color:var(--muted);font-size:13px}
 .login-actions{display:flex;flex-direction:column;gap:12px;margin-top:16px}
 
-.top{display:flex;justify-content:space-between;align-items:center;padding:16px 0}
+.top{display:flex;justify-content:center;align-items:center;padding:20px 0 10px 0}
 
-/* Music Player Soft */
-.music-bar{display:flex;align-items:center;gap:10px;background:var(--card-bg);padding:8px 14px;border-radius:50px;border:1px solid var(--line);font-size:12px}
-.music-bar button{padding:6px 10px;border-radius:50px;font-size:12px}
+/* Navegação Adaptável (Mobile / Desktop) */
+.nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:var(--card-bg);
+  border-top:1px solid var(--line);
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  padding:10px 0;
+  z-index:1000;
+  box-shadow:0 -2px 10px rgba(0,0,0,0.02);
+}
 
-/* Navegação Estilo Instagram */
-.nav{position:fixed;bottom:0;left:0;right:0;background:var(--card-bg);border-top:1px solid var(--line);display:flex;justify-space-around;padding:10px 0;z-index:1000;box-shadow:0 -2px 10px rgba(0,0,0,0.02)}
-.nav button{background:transparent;color:var(--muted);border-radius:50px;padding:8px 14px;font-size:18px;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative}
+/* Ajuste Elegante no PC / Desktop */
+@media (min-width: 768px) {
+  .wrap { padding-top: 70px; padding-bottom: 20px; }
+  .nav {
+    top: 0;
+    bottom: auto;
+    border-top: 0;
+    border-bottom: 1px solid var(--line);
+    max-width: 720px;
+    margin: 0 auto;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+  .nav button {
+    flex-direction: row !important;
+    gap: 8px !important;
+    padding: 10px 18px !important;
+  }
+  .nav button span {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+  }
+  .fab-post {
+    bottom: 30px !important;
+    right: calc(50vw - 340px) !important;
+  }
+}
+
+.nav button{
+  background:transparent;
+  color:var(--muted);
+  border-radius:50px;
+  padding:8px 14px;
+  font-size:18px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  position:relative;
+  transition: all 0.2s;
+}
 .nav button span{font-size:10px;font-weight:500}
-.nav button.active{color:var(--rose);background:transparent}
+.nav button.active{color:var(--rose);background:rgba(212,165,165,0.1)}
 .badge-red{background:var(--red);color:white;border-radius:50px;width:10px;height:10px;position:absolute;top:6px;right:18px}
 
-/* Transição Suave (Slow Transition) */
-.page{display:none;opacity:0;transition:opacity 0.35s ease-in-out}
+/* Transição Suave */
+.page{display:none;opacity:0;transition:opacity 0.3s ease-in-out}
 .page.active{display:block;opacity:1}
 
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -102,11 +156,12 @@ textarea{min-height:85px;resize:vertical}
 .comments-section{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
 .comment-item{font-size:13px;margin:6px 0;padding:6px;background:var(--bg);border-radius:8px}
 
-/* Mensagens */
-.messages{height:340px;overflow:auto;border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0;background:var(--bg)}
-.bubble{max-width:80%;padding:10px 14px;border-radius:16px;background:var(--bubble-other);margin:8px 0;font-size:14px;word-break:break-word}
-.bubble.mine{background:var(--bubble-me);color:var(--ink);margin-left:auto}
-.bubble-status{font-size:10px;text-align:right;margin-top:4px;color:var(--muted)}
+/* Mensagens Estilo iPhone */
+.messages{height:360px;overflow:auto;border:1px solid var(--line);border-radius:18px;padding:14px;margin:10px 0;background:var(--bg);display:flex;flex-direction:column;gap:6px}
+.bubble{max-width:75%;padding:10px 14px;border-radius:18px;font-size:14px;word-break:break-word;line-height:1.35;box-shadow:0 1px 2px rgba(0,0,0,0.05)}
+.bubble.other{background:var(--bubble-other);color:var(--bubble-other-text);align-self:flex-start;border-bottom-left-radius:4px}
+.bubble.mine{background:var(--bubble-me);color:var(--bubble-me-text);align-self:flex-end;border-bottom-right-radius:4px}
+.bubble-status{font-size:10px;text-align:right;margin-top:3px;opacity:0.8}
 
 /* Perfil */
 .profile-card{padding:0;overflow:hidden}
@@ -121,24 +176,19 @@ textarea{min-height:85px;resize:vertical}
 .profile-tab{flex:1;text-align:center;padding:12px;cursor:pointer;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;font-size:13px;white-space:nowrap}
 .profile-tab.active{color:var(--ink);border-bottom-color:var(--rose)}
 
-/* Modais & Editor de Imagens (Crop Box) */
+/* Modais & Cortador de Imagens */
 .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px}
 .modal-box{background:var(--card-bg);width:100%;max-width:480px;border-radius:20px;padding:20px;max-height:85vh;overflow:auto}
 .tweet-media-btn{background:var(--line);color:var(--ink);padding:8px 12px;border-radius:10px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
-
 .crop-preview-box{width:100%;background:#000;border-radius:12px;overflow:hidden;margin:10px 0;position:relative;display:flex;align-items:center;justify-content:center}
-.crop-preview-box img{max-width:100%;max-height:220px;object-fit:contain}
-
-.notif-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
-.notif-item .icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bubble-me);color:var(--red)}
-.person{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.crop-preview-box img{max-width:100%;max-height:200px;object-fit:cover}
 </style></head>
 <body>
 
-<!-- TELA DE LOGIN & CADASTRO -->
+<!-- LOGIN -->
 <div id="loginScreen" class="wrap login">
   <div class="card">
-    <h1 class="brand">Meu Diário 🤍</h1>
+    <h1 class="brand">Cottontail 🐰</h1>
     <p class="muted" style="text-align:center;margin-bottom:20px">Seu espaço de hábitos e comunidade.</p>
     
     <div style="display:flex;border-bottom:1px solid var(--line);margin-bottom:16px">
@@ -160,7 +210,6 @@ textarea{min-height:85px;resize:vertical}
       <div class="field"><label>Nome de usuário (@)</label><input id="regUsername" placeholder="ex: mariana.fit"></div>
       <div class="field"><label>E-mail</label><input id="regEmail" type="email" placeholder="seuemail@exemplo.com"></div>
       <div class="field"><label>Senha</label><input id="regPassword" type="password" placeholder="Mínimo 6 caracteres"></div>
-      
       <div class="field">
         <label>Idioma Preferido</label>
         <select id="regLanguage">
@@ -170,23 +219,20 @@ textarea{min-height:85px;resize:vertical}
           <option value="ko">🇰🇷 한국어 (Coreano)</option>
         </select>
       </div>
-
       <div class="field">
         <label>Foto de Perfil</label>
         <label class="tweet-media-btn" style="width:100%;justify-content:center">
-          <i class="fa-regular fa-image"></i> Escolher Foto de Perfil
+          <i class="fa-regular fa-image"></i> Escolher Foto
           <input type="file" id="regAvatarInput" accept="image/*" class="hidden" onchange="previewRegAvatar(this)">
         </label>
         <div id="regAvatarPreviewBox" class="crop-preview-box hidden" style="margin-top:8px">
           <img id="regAvatarPreviewImg">
         </div>
       </div>
-
       <div class="login-actions">
         <button onclick="signUp()" style="width:100%">Criar Perfil e Entrar</button>
       </div>
     </div>
-
     <p id="loginStatus" class="status"></p>
   </div>
 </div>
@@ -194,27 +240,13 @@ textarea{min-height:85px;resize:vertical}
 <!-- APP PRINCIPAL -->
 <div id="app" class="wrap hidden">
   <header class="top">
-    <div>
-      <h2 class="brand" style="margin:0;font-size:20px">Meu Diário 🤍</h2>
-    </div>
-    <!-- WIDGET DE MÚSICA PERSONALIZADO -->
-    <div class="music-bar">
-      <i class="fa-solid fa-music" style="color:var(--rose)"></i>
-      <span id="songTitle" style="font-weight:600">Lo-Fi Soft</span>
-      <button onclick="toggleMusic()"><i id="musicIcon" class="fa-solid fa-play"></i></button>
-      <audio id="audioPlayer" loop src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"></audio>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <button class="secondary" onclick="signOut()" style="padding:6px 12px;font-size:12px">Sair</button>
-    </div>
+    <h2 class="brand" style="margin:0;font-size:22px">Cottontail 🐰</h2>
   </header>
 
-  <!-- BOTÃO FLUTUANTE DE NOVO POST -->
   <div id="fabPostBtn" class="fab-post" onclick="openFloatingPostModal()">
     <i class="fa-solid fa-pen"></i>
   </div>
 
-  <!-- NAVEGAÇÃO -->
   <nav class="nav">
     <button data-page="feed" class="active" onclick="showPage('feed')"><i class="fa-solid fa-house"></i><span>Início</span></button>
     <button data-page="diary" onclick="showPage('diary')"><i class="fa-solid fa-book-open"></i><span>Diário</span></button>
@@ -270,11 +302,11 @@ textarea{min-height:85px;resize:vertical}
     </div>
   </section>
 
-  <!-- EXPLORAR COM BUSCA AVANÇADA -->
+  <!-- EXPLORAR -->
   <section id="explore" class="page">
     <div class="card">
       <div style="display:flex;gap:6px">
-        <input id="searchPeople" placeholder="🔍 Buscar @usuário, nome ou palavras em posts..." oninput="searchProfilesAndPosts()">
+        <input id="searchPeople" placeholder="🔍 Buscar @usuário, nome ou posts..." oninput="searchProfilesAndPosts()">
         <button class="secondary" onclick="clearRecentSearches()"><i class="fa-solid fa-trash-can"></i></button>
       </div>
       <div id="recentSearchesBox" class="muted" style="font-size:12px;margin:6px 0"></div>
@@ -355,7 +387,7 @@ textarea{min-height:85px;resize:vertical}
   </section>
 </div>
 
-<!-- MODAL: NOVA POSTAGEM COM CORTE DE IMAGEM -->
+<!-- MODAL: NOVA POSTAGEM -->
 <div id="floatingPostModal" class="modal-overlay hidden">
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
@@ -366,7 +398,7 @@ textarea{min-height:85px;resize:vertical}
     
     <div style="margin-top:10px">
       <label class="tweet-media-btn">
-        <i class="fa-regular fa-image"></i> Escolher e Cortar Imagem
+        <i class="fa-regular fa-image"></i> Escolher Imagem
         <input type="file" id="modalPostImageInput" accept="image/*" class="hidden" onchange="previewFloatingPostImage()">
       </label>
     </div>
@@ -386,7 +418,7 @@ textarea{min-height:85px;resize:vertical}
   </div>
 </div>
 
-<!-- MODAL POPUP DE CONFIRMAÇÃO DE EXCLUSÃO (ESTILO SOFT) -->
+<!-- POPUP DE EXCLUSÃO -->
 <div id="deleteConfirmModal" class="modal-overlay hidden">
   <div class="modal-box" style="text-align:center;max-width:360px">
     <h3 style="margin-top:0;color:var(--red)"><i class="fa-solid fa-trash-can"></i> Excluir postagem</h3>
@@ -398,7 +430,7 @@ textarea{min-height:85px;resize:vertical}
   </div>
 </div>
 
-<!-- MODAL POPUP DE DENÚNCIA -->
+<!-- POPUP DE DENÚNCIA -->
 <div id="reportModal" class="modal-overlay hidden">
   <div class="modal-box">
     <h3 style="margin-top:0">Denunciar publicação</h3>
@@ -419,7 +451,7 @@ textarea{min-height:85px;resize:vertical}
   </div>
 </div>
 
-<!-- MODAL: CONFIGURAÇÕES -->
+<!-- MODAL: CONFIGURAÇÕES & GALERIA DE MÚSICAS & BOTÃO SAIR -->
 <div id="settingsModal" class="modal-overlay hidden">
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
@@ -428,8 +460,20 @@ textarea{min-height:85px;resize:vertical}
     </div>
 
     <div class="field">
-      <label>Música de Fundo</label>
-      <input id="customMusicUrlInput" placeholder="Link direto de áudio (.mp3)" onchange="changeMusicUrl(this.value)">
+      <label>🎵 Galeria de Músicas (Player)</label>
+      <select id="musicSelect" onchange="changePresetMusic(this.value)">
+        <option value="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3">Lo-Fi Soft / Café</option>
+        <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c3673f44.mp3">Piano Relaxante</option>
+        <option value="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3">Acústico Calmo</option>
+      </select>
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <input id="customMusicUrlInput" placeholder="Ou cole URL direta .mp3" style="margin:0">
+        <button class="secondary" onclick="changeMusicUrl($('customMusicUrlInput').value)">Tocar</button>
+      </div>
+      <div style="display:flex;justify-content:center;gap:10px;margin-top:8px">
+        <button class="secondary" onclick="toggleMusic()"><i id="musicIcon" class="fa-solid fa-play"></i> Tocar / Pausar Música</button>
+      </div>
+      <audio id="audioPlayer" loop src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"></audio>
     </div>
 
     <div class="field">
@@ -456,14 +500,16 @@ textarea{min-height:85px;resize:vertical}
 
     <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
 
-    <div>
+    <div style="margin-bottom:16px">
       <h4 style="margin:0 0 10px 0">Usuários Bloqueados</h4>
       <div id="blockedUsersList"><p class="muted">Carregando bloqueios...</p></div>
     </div>
+
+    <button class="danger" onclick="signOut()" style="width:100%"><i class="fa-solid fa-right-from-bracket"></i> Sair da Conta</button>
   </div>
 </div>
 
-<!-- MODAL: EDITAR PERFIL COM PRÉVIA E CORTE ESTILO TWITTER -->
+<!-- MODAL: EDITAR PERFIL COM CORTADOR -->
 <div id="editProfileModal" class="modal-overlay hidden">
   <div class="modal-box">
     <h3 style="margin-top:0">Editar Perfil</h3>
@@ -474,7 +520,7 @@ textarea{min-height:85px;resize:vertical}
     <div class="field">
       <label>Foto de Perfil (Quadrada)</label>
       <label class="tweet-media-btn" style="width:100%;justify-content:center">
-        <i class="fa-regular fa-image"></i> Escolher e Ajustar Foto
+        <i class="fa-regular fa-image"></i> Escolher Foto
         <input type="file" id="avatarFileInput" accept="image/*" class="hidden" onchange="previewEditImage(this, 'avatar')">
       </label>
       <div id="avatarCropBox" class="crop-preview-box hidden" style="border-radius:50%;width:90px;height:90px;margin:10px auto">
@@ -485,7 +531,7 @@ textarea{min-height:85px;resize:vertical}
     <div class="field">
       <label>Foto de Capa (Retângulo)</label>
       <label class="tweet-media-btn" style="width:100%;justify-content:center">
-        <i class="fa-regular fa-image"></i> Escolher e Ajustar Capa
+        <i class="fa-regular fa-image"></i> Escolher Capa
         <input type="file" id="bannerFileInput" accept="image/*" class="hidden" onchange="previewEditImage(this, 'banner')">
       </label>
       <div id="bannerCropBox" class="crop-preview-box hidden" style="height:110px;margin:10px 0">
@@ -506,7 +552,7 @@ textarea{min-height:85px;resize:vertical}
   </div>
 </div>
 
-<!-- MODAL: VER PERFIL DE OUTRO USUÁRIO -->
+<!-- MODAL: PERFIL DE OUTRO USUÁRIO -->
 <div id="userModal" class="modal-overlay hidden">
   <div class="modal-box">
     <div style="display:flex;justify-content:flex-end">
@@ -523,8 +569,8 @@ const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let user=null, selected=new Date(), entries={}, profile=null, activeChat=null, chatProfiles={};
 let currentFloatingPostImage=null, editAvatarFile=null, editBannerFile=null, postToDeleteId=null, postToReportId=null;
+let chatInterval=null;
 
-/* TRAVA DE SEGURANÇA E CONTEÚDO PROIBIDO */
 const FORBIDDEN_WORDS = ['gore', 'mutilacao', 'suicidio', 'sangue', 'morte', 'estupro', 'assidio', 'mutilação', 'suicídio'];
 
 const $=id=>document.getElementById(id);
@@ -550,7 +596,9 @@ function toggleMusic(){
     icon.className='fa-solid fa-play';
   }
 }
-
+function changePresetMusic(url){
+  changeMusicUrl(url);
+}
 function changeMusicUrl(url){
   if(url){
     $('audioPlayer').src = url;
@@ -622,7 +670,10 @@ async function resetPassword(){
   status('loginStatus',error?error.message:'Link enviado para o seu e-mail.');
 }
 
-async function signOut(){await db.auth.signOut()}
+async function signOut(){
+  if(chatInterval) clearInterval(chatInterval);
+  await db.auth.signOut();
+}
 
 db.auth.onAuthStateChange(async(_event,session)=>{
   user=session?.user||null;
@@ -646,6 +697,7 @@ async function ensureProfile(){
 }
 
 function showPage(id){
+  if(chatInterval){ clearInterval(chatInterval); chatInterval=null; }
   document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));
   document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
   
@@ -714,7 +766,7 @@ async function saveEntry(){
   await loadMonth();
 }
 
-/* CONFIGURAÇÕES & FONTES */
+/* CONFIGURAÇÕES */
 function changeTheme(theme){
   if(theme==='dark') document.body.classList.add('theme-dark');
   else document.body.classList.remove('theme-dark');
@@ -760,7 +812,7 @@ async function unblockUser(id){
   loadFeed('all');
 }
 
-/* POSTAGEM FLUTUANTE COM TRAVA ANTICONTEÚDO SENSÍVEL */
+/* POSTAGENS */
 function openFloatingPostModal(){ $('floatingPostModal').classList.remove('hidden'); }
 function closeFloatingPostModal(){ 
   $('floatingPostModal').classList.add('hidden'); 
@@ -770,7 +822,6 @@ function closeFloatingPostModal(){
 function previewFloatingPostImage(){
   let file=$('modalPostImageInput').files[0];
   if(file){
-    currentFloatingPostImage=file;
     let reader=new FileReader();
     reader.onload=e=>{
       $('modalImagePreview').src=e.target.result;
@@ -787,12 +838,10 @@ function removeFloatingPostImage(){
 
 async function submitFloatingPost(){
   let content=$('modalPostContent').value.trim();
-  
-  // Trava no sistema para proibir conteúdos violentos ou explícitos
   let lowerContent = content.toLowerCase();
   for(let word of FORBIDDEN_WORDS){
     if(lowerContent.includes(word)){
-      return status('modalPostStatus','Esta publicação contém palavras violatórias e não pode ser postada.');
+      return status('modalPostStatus','Esta publicação contém termos violatórios e não pode ser postada.');
     }
   }
 
@@ -809,7 +858,6 @@ async function submitFloatingPost(){
   } catch(err){ status('modalPostStatus',err.message); }
 }
 
-/* POPUP DE CONFIRMAÇÃO DE EXCLUSÃO */
 function openDeleteConfirmModal(postId){
   postToDeleteId = postId;
   $('deleteConfirmModal').classList.remove('hidden');
@@ -827,7 +875,6 @@ async function confirmExecuteDelete(){
   }
 }
 
-/* DENÚNCIAS DE POSTS */
 function openReportModal(postId){
   postToReportId = postId;
   $('reportModal').classList.remove('hidden');
@@ -844,7 +891,7 @@ async function submitReport(){
   closeReportModal();
 }
 
-/* PERFIL & CORTADOR ESTILO TWITTER */
+/* PERFIL & CORTADOR */
 async function loadProfile(){
   let {data}=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
   profile=data||{};
@@ -1090,11 +1137,9 @@ async function addComment(postId, postOwnerId){
   loadFeed('all');
 }
 
-/* EXPLORAR AVANÇADO (USUÁRIOS + POSTS + PREFIXO + APAGAR HISTÓRICO) */
+/* EXPLORAR */
 async function searchProfilesAndPosts(){
   let q=$('searchPeople').value.trim().replace(/^@/,'').toLowerCase();
-  
-  // Salvar pesquisa recente
   if(q){
     let searches = JSON.parse(localStorage.getItem('recentSearches')||'[]');
     if(!searches.includes(q)){
@@ -1107,12 +1152,10 @@ async function searchProfilesAndPosts(){
 
   let userQuery=db.from('user_profiles').select('*').neq('user_id',user.id).limit(20);
   if(q){
-    // Busca flexível permitindo início do nome (mari, maria, marian...)
     userQuery=userQuery.or(`username.ilike.${q}%,full_name.ilike.${q}%,username.ilike.%${q}%,full_name.ilike.%${q}%`);
   }
   let {data:users}=await userQuery;
 
-  // Busca em postagens por palavra-chave
   let postsHtml = '';
   if(q){
     let {data:matchingPosts}=await db.from('posts').select('*').ilike('content', `%${q}%`).limit(10);
@@ -1148,7 +1191,6 @@ function renderRecentSearches(){
     $('recentSearchesBox').innerHTML = '';
   }
 }
-
 function clearRecentSearches(){
   localStorage.removeItem('recentSearches');
   renderRecentSearches();
@@ -1220,7 +1262,7 @@ async function toggleBlockUser(targetId, isBlocked){
   loadFeed('all');
 }
 
-/* CHAT */
+/* CHAT ESTILO IPHONE */
 async function loadChats(){
   let {data}=await db.from('direct_messages').select('*').or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`).order('created_at',{ascending:false});
   let peers=[...new Set((data||[]).map(m=>m.sender_id===user.id?m.receiver_id:m.sender_id))];
@@ -1247,9 +1289,13 @@ async function openChat(id){
   $('chatListView').classList.add('hidden');
   $('chatRoomView').classList.remove('hidden');
   await loadMessages();
+  
+  if(chatInterval) clearInterval(chatInterval);
+  chatInterval = setInterval(loadMessages, 3000);
 }
 
 function backToChatList(){
+  if(chatInterval){ clearInterval(chatInterval); chatInterval=null; }
   activeChat=null;
   $('chatRoomView').classList.add('hidden');
   $('chatListView').classList.remove('hidden');
@@ -1273,9 +1319,9 @@ async function loadMessages(){
     let isMine=m.sender_id===user.id;
     let statusText=m.read_at?'✓✓ lido':(m.created_at?'✓ enviado':'enviando...');
     return `
-      <div class="bubble ${isMine?'mine':''}">
+      <div class="bubble ${isMine?'mine':'other'}">
         ${esc(m.content)}
-        ${isMine?`<div class="bubble-status">${statusText}</div>`:''}
+        <div class="bubble-status">${statusText}</div>
       </div>
     `;
   }).join('');
