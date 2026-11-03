@@ -4,54 +4,159 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Meu Diário — comunidade</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- FontAwesome para os ícones estilo Instagram/Twitter -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-:root{--rose:#ad8580;--rose2:#9b706d;--ink:#493e3a;--muted:#887b76;--bg:#f8f4f1;--line:#eadfda;--white:#fff}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px Arial,sans-serif}button,input,textarea{font:inherit}button{border:0;border-radius:11px;padding:11px 15px;background:var(--rose);color:white;font-weight:700;cursor:pointer}button.secondary{background:#eee4e0;color:#624e49}button.ghost{background:transparent;color:var(--rose2);border:1px solid var(--line)}button:disabled{opacity:.5;cursor:not-allowed}input,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);margin:5px 0}textarea{min-height:85px;resize:vertical}.hidden{display:none!important}.wrap{max-width:1050px;margin:24px auto;padding:0 16px}.card{background:white;border-radius:18px;padding:20px;margin:14px 0;box-shadow:0 4px 18px #00000008}.login{max-width:420px;margin:8vh auto}.brand{text-align:center;color:var(--rose2)}.muted,.hint{color:var(--muted);font-size:13px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.nav{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.nav button{flex:1;min-width:90px}.nav button.active{background:#765a56}.page{display:none}.page.active{display:block}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.calendar-head button{width:auto}.week,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}.week div{font-weight:bold;padding:8px 0;color:var(--rose2)}.day{padding:12px 3px;border-radius:9px;background:var(--bg);cursor:pointer}.day.selected{background:var(--rose);color:white}.day.today{outline:2px solid var(--rose)}.day.has-entry:after{content:' •';color:var(--rose2)}.day.selected:after{color:white}.field{margin:10px 0}.field label{font-weight:700;font-size:14px}.post{border:1px solid var(--line);border-radius:14px;padding:15px;margin:12px 0}.post-head{display:flex;align-items:center;gap:10px}.avatar{width:40px;height:40px;border-radius:50%;background:#eee4e0;display:flex;align-items:center;justify-content:center;color:var(--rose2);font-weight:bold;overflow:hidden;flex:none}.avatar img{width:100%;height:100%;object-fit:cover}.post-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.post-actions button{padding:8px 11px}.person{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.person:last-child{border:0}.chat-list{max-height:220px;overflow:auto}.chat-item{padding:10px;border-bottom:1px solid var(--line);cursor:pointer}.chat-item:hover{background:var(--bg)}.messages{height:260px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}.bubble{max-width:80%;padding:9px 12px;border-radius:13px;background:#f1e8e4;margin:7px 0}.bubble.mine{background:#ad8580;color:white;margin-left:auto}.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}.status{min-height:20px;color:var(--rose2);font-size:13px}.tag{display:inline-block;background:#f5ece8;border-radius:20px;padding:5px 9px;font-size:12px;color:#765a56}@media(max-width:650px){.grid{grid-template-columns:1fr}.wrap{margin:10px auto}.card{padding:15px}.day{padding:10px 1px}}
-</style></head><body>
+:root{
+  --bg:#faf7f6;
+  --card-bg:#ffffff;
+  --ink:#332928;
+  --muted:#8c7e7b;
+  --rose:#d4a5a5;
+  --rose-hover:#c39494;
+  --line:#f0eae9;
+  --red:#ff4d4f;
+  --bubble-me:#fceeee;
+  --bubble-other:#f4edea;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
+button,input,textarea{font:inherit}
+button{border:0;border-radius:12px;padding:10px 16px;background:var(--rose);color:white;font-weight:600;cursor:pointer;transition:all 0.2s}
+button:hover{background:var(--rose-hover)}
+button.secondary{background:#f0eae9;color:var(--ink)}
+button.ghost{background:transparent;color:var(--rose);border:1px solid var(--line)}
+button:disabled{opacity:.5;cursor:not-allowed}
+input,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#faf7f6;color:var(--ink);margin:6px 0;outline:none}
+input:focus,textarea:focus{border-color:var(--rose);background:#fff}
+textarea{min-height:85px;resize:vertical}
+.hidden{display:none!important}
+.wrap{max-width:680px;margin:0 auto;padding:0 16px 85px 16px}
+.card{background:var(--card-bg);border-radius:20px;padding:20px;margin:14px 0;box-shadow:0 2px 12px rgba(0,0,0,0.02);border:1px solid var(--line)}
 
+/* Login Espaçado */
+.login{max-width:400px;margin:10vh auto;padding:24px}
+.brand{text-align:center;color:var(--ink);font-weight:800;letter-spacing:-0.5px}
+.muted,.hint{color:var(--muted);font-size:13px}
+.login-actions{display:flex;flex-direction:column;gap:14px;margin-top:20px}
+
+.top{display:flex;justify-content:space-between;align-items:center;padding:16px 0}
+
+/* Navegação Estilo Instagram com Ícones */
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--card-bg);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:10px 0;z-index:1000;box-shadow:0 -2px 10px rgba(0,0,0,0.02)}
+.nav button{background:transparent;color:var(--muted);border-radius:50px;padding:8px 14px;font-size:18px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.nav button span{font-size:10px;font-weight:500}
+.nav button.active{color:var(--rose);background:transparent}
+
+.page{display:none}.page.active{display:block}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* Calendário */
+.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.calendar-head button{width:auto}
+.week,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
+.week div{font-weight:bold;padding:8px 0;color:var(--muted);font-size:13px}
+.day{padding:12px 3px;border-radius:10px;background:#faf7f6;cursor:pointer;font-size:13px}
+.day.selected{background:var(--rose);color:white}
+.day.today{border:1px solid var(--rose)}
+.day.has-entry:after{content:' •';color:var(--rose)}
+.field{margin:12px 0}.field label{font-weight:600;font-size:13px;color:var(--muted)}
+
+/* Posts e Interações */
+.post{border-bottom:1px solid var(--line);padding:16px 0}
+.post:last-child{border-bottom:0}
+.post-head{display:flex;align-items:center;gap:12px}
+.avatar{width:44px;height:44px;border-radius:50%;background:#f0eae9;display:flex;align-items:center;justify-content:center;color:var(--rose);font-weight:bold;overflow:hidden;flex:none}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.post-actions{display:flex;gap:16px;margin-top:12px;color:var(--muted)}
+.post-actions button{background:transparent;color:var(--muted);padding:4px 8px;font-size:13px;display:flex;align-items:center;gap:6px}
+.post-actions button:hover,.post-actions button.liked{color:var(--red);background:transparent}
+.post-actions button.reposted{color:var(--rose);background:transparent}
+
+/* Pessoas e Chats */
+.person{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.person:last-child{border:0}
+.chat-list{max-height:300px;overflow:auto}
+.chat-item{padding:12px;border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.chat-item:hover{background:#faf7f6}
+.messages{height:300px;overflow:auto;border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0;background:#faf7f6}
+.bubble{max-width:75%;padding:10px 14px;border-radius:16px;background:var(--bubble-other);margin:8px 0;font-size:14px;word-break:break-word}
+.bubble.mine{background:var(--bubble-me);color:var(--ink);margin-left:auto}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
+.status{min-height:20px;color:var(--rose);font-size:13px;text-align:center;margin-top:8px}
+
+/* Badge Notificação */
+.badge-red{background:var(--red);color:white;border-radius:50px;padding:2px 6px;font-size:9px;position:absolute;top:3px;right:16px;font-weight:bold}
+
+/* Perfil Twitter (X) */
+.profile-card{padding:0;overflow:hidden}
+.profile-banner{height:130px;background:#f0eae9;position:relative}
+.profile-banner img{width:100%;height:100%;object-fit:cover}
+.profile-avatar-area{position:relative;padding:0 20px;margin-top:-40px;display:flex;justify-content:space-between;align-items:flex-end}
+.profile-big-avatar{width:86px;height:86px;border-radius:50%;border:4px solid white;background:#e2d5d3;overflow:hidden;font-size:30px;display:flex;align-items:center;justify-content:center;color:var(--rose)}
+.profile-big-avatar img{width:100%;height:100%;object-fit:cover}
+.profile-tabs{display:flex;border-bottom:1px solid var(--line);margin-top:10px}
+.profile-tab{flex:1;text-align:center;padding:12px;cursor:pointer;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;font-size:14px}
+.profile-tab.active{color:var(--ink);border-bottom-color:var(--rose)}
+
+/* Notificações Item */
+.notif-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.notif-item .icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fceeee;color:var(--red)}
+</style></head>
+<body>
+
+<!-- TELA DE LOGIN ESPAÇADA -->
 <div id="loginScreen" class="wrap login">
   <div class="card">
-    <h1 class="brand">Meu Diário 💗</h1>
-    <p class="muted">Seu espaço de hábitos, rotina e comunidade.</p>
+    <h1 class="brand">Meu Diário 🤍</h1>
+    <p class="muted" style="text-align:center;margin-bottom:24px">Seu espaço de hábitos e rotina.</p>
     <input id="email" type="email" placeholder="Seu e-mail">
     <input id="password" type="password" placeholder="Sua senha">
-    <button style="width:100%" onclick="signIn()">Entrar</button>
-    <button class="secondary" style="width:100%" onclick="signUp()">Criar minha conta</button>
-    <button class="ghost" style="width:100%" onclick="resetPassword()">Esqueci minha senha</button>
+    <div class="login-actions">
+      <button onclick="signIn()" style="width:100%">Entrar</button>
+      <button class="secondary" onclick="signUp()" style="width:100%">Criar minha conta</button>
+      <button class="ghost" onclick="resetPassword()" style="width:100%">Esqueci minha senha</button>
+    </div>
     <p id="loginStatus" class="status"></p>
   </div>
 </div>
 
+<!-- APLICATIVO PRINCIPAL -->
 <div id="app" class="wrap hidden">
   <header class="top">
     <div>
-      <h1 class="brand" style="margin:0">Meu Diário 💗</h1>
-      <span class="muted">hábitos que florescem juntos</span>
+      <h2 class="brand" style="margin:0;font-size:20px">Meu Diário 🤍</h2>
     </div>
-    <div class="row" style="flex:0 1 auto">
+    <div style="display:flex;align-items:center;gap:10px">
       <span id="hello" class="muted"></span>
-      <button class="secondary" onclick="signOut()">Sair</button>
+      <button class="secondary" onclick="signOut()" style="padding:6px 12px;font-size:12px">Sair</button>
     </div>
   </header>
 
+  <!-- BARRA DE NAVEGAÇÃO INFERIOR ESTILO INSTAGRAM -->
   <nav class="nav">
-    <button data-page="feed" class="active" onclick="showPage('feed')">Início</button>
-    <button data-page="diary" onclick="showPage('diary')">Meu diário</button>
-    <button data-page="explore" onclick="showPage('explore')">Explorar</button>
-    <button data-page="messages" onclick="showPage('messages')">Mensagens</button>
-    <button data-page="profile" onclick="showPage('profile')">Perfil</button>
+    <button data-page="feed" class="active" onclick="showPage('feed')"><i class="fa-solid fa-house"></i><span>Início</span></button>
+    <button data-page="diary" onclick="showPage('diary')"><i class="fa-solid fa-book-open"></i><span>Diário</span></button>
+    <button data-page="explore" onclick="showPage('explore')"><i class="fa-solid fa-compass"></i><span>Explorar</span></button>
+    <button data-page="messages" onclick="showPage('messages')"><i class="fa-solid fa-paper-plane"></i><span>Mensagens</span></button>
+    <button data-page="notifications" onclick="showPage('notifications')" style="position:relative">
+      <i class="fa-solid fa-heart"></i><span>Notificações</span>
+      <span id="notifBadge" class="badge-red hidden">0</span>
+    </button>
+    <button data-page="profile" onclick="showPage('profile')"><i class="fa-solid fa-user"></i><span>Perfil</span></button>
   </nav>
 
+  <!-- PÁGINA: FEED -->
   <section id="feed" class="page active">
     <div class="card">
-      <h2>Seu feed</h2>
-      <p class="muted">Compartilhe uma conquista, uma reflexão ou um hábito do dia.</p>
       <textarea id="postContent" maxlength="2000" placeholder="O que você quer compartilhar hoje?"></textarea>
-      <button onclick="createPost()">Publicar</button>
+      <div style="display:flex;justify-content:flex-end;margin-top:8px">
+        <button onclick="createPost()">Publicar</button>
+      </div>
       <p id="feedStatus" class="status"></p>
     </div>
     <div class="card">
-      <div class="row">
+      <div class="row" style="margin-bottom:14px">
         <button class="secondary" onclick="loadFeed('all')">Todos</button>
         <button class="secondary" onclick="loadFeed('following')">Quem sigo</button>
       </div>
@@ -59,80 +164,66 @@
     </div>
   </section>
 
+  <!-- PÁGINA: DIÁRIO DA ROTINA -->
   <section id="diary" class="page">
     <div class="card">
-      <h2>Meu calendário</h2>
       <div class="calendar-head">
         <button class="secondary" onclick="changeMonth(-1)">‹</button>
-        <h3 id="monthTitle"></h3>
+        <h3 id="monthTitle" style="margin:0;font-size:16px"></h3>
         <button class="secondary" onclick="changeMonth(1)">›</button>
       </div>
-      <div class="week">
+      <div class="week" style="margin-top:12px">
         <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
       </div>
       <div id="days" class="days"></div>
     </div>
     <div class="card">
-      <h2 id="selectedDate"></h2>
+      <h3 id="selectedDate" style="margin-top:0"></h3>
       <div class="grid">
-        <div class="field">
-          <label>☀️ Café da manhã</label>
-          <textarea id="breakfast" placeholder="O que você comeu?"></textarea>
-        </div>
-        <div class="field">
-          <label>🍽️ Almoço</label>
-          <textarea id="lunch" placeholder="O que você comeu?"></textarea>
-        </div>
-        <div class="field">
-          <label>🍎 Lanches</label>
-          <textarea id="snacks" placeholder="O que você comeu?"></textarea>
-        </div>
-        <div class="field">
-          <label>🌙 Jantar</label>
-          <textarea id="dinner" placeholder="O que você comeu?"></textarea>
-        </div>
+        <div class="field"><label>☀️ Café da manhã</label><textarea id="breakfast"></textarea></div>
+        <div class="field"><label>🍽️ Almoço</label><textarea id="lunch"></textarea></div>
+        <div class="field"><label>🍎 Lanches</label><textarea id="snacks"></textarea></div>
+        <div class="field"><label>🌙 Jantar</label><textarea id="dinner"></textarea></div>
       </div>
-      <div class="field">
-        <label>💧 Água (ml)</label>
-        <input id="water" type="number" min="0" placeholder="Ex.: 2000">
-      </div>
-      <div class="field">
-        <label>🏃 Exercícios</label>
-        <textarea id="exercise" placeholder="Qual atividade você fez?"></textarea>
-      </div>
-      <div class="field">
-        <label>📝 Observações</label>
-        <textarea id="notes" placeholder="Como foi seu dia?"></textarea>
-      </div>
-      <button onclick="saveEntry()">Salvar meu dia</button>
+      <div class="field"><label>💧 Água (ml)</label><input id="water" type="number" min="0"></div>
+      <div class="field"><label>🏃 Exercícios</label><textarea id="exercise"></textarea></div>
+      <div class="field"><label>📝 Observações</label><textarea id="notes"></textarea></div>
+      <button onclick="saveEntry()" style="width:100%;margin-top:10px">Salvar meu dia</button>
       <p id="diaryStatus" class="status"></p>
     </div>
   </section>
 
+  <!-- PÁGINA: EXPLORAR -->
   <section id="explore" class="page">
     <div class="card">
-      <h2>Encontre pessoas</h2>
-      <input id="searchPeople" placeholder="Buscar por nome ou @usuário" oninput="searchProfiles()">
-      <div id="peopleList"></div>
-      <p class="hint">Nesta versão beta, os perfis são descobertos por usuários conectados.</p>
+      <input id="searchPeople" placeholder="🔍 Buscar por nome ou @usuário" oninput="searchProfiles()">
+      <div id="peopleList" style="margin-top:12px"></div>
     </div>
   </section>
 
+  <!-- PÁGINA: MENSAGENS -->
   <section id="messages" class="page">
     <div class="card">
-      <h2>Mensagens diretas</h2>
-      <p class="muted">Busque alguém pelo @ na aba Explorar e toque em Mensagem.</p>
       <div class="grid">
         <div>
-          <h3>Conversas</h3>
+          <h3 style="margin-top:0;font-size:15px">Conversas</h3>
           <div id="chatList" class="chat-list"></div>
         </div>
         <div>
-          <h3 id="chatTitle">Abra uma conversa</h3>
+          <h3 id="chatTitle" style="margin-top:0;font-size:15px">Abra uma conversa</h3>
           <div id="messageBox" class="messages"></div>
+          <!-- EMOJIS ESTILO IPHONE -->
+          <div style="display:flex;gap:4px;margin-bottom:6px">
+            <button class="secondary" style="padding:4px 8px;font-size:14px" onclick="addEmoji('✨')">✨</button>
+            <button class="secondary" style="padding:4px 8px;font-size:14px" onclick="addEmoji('🤍')">🤍</button>
+            <button class="secondary" style="padding:4px 8px;font-size:14px" onclick="addEmoji('🥺')">🥺</button>
+            <button class="secondary" style="padding:4px 8px;font-size:14px" onclick="addEmoji('🌷')">🌷</button>
+            <button class="secondary" style="padding:4px 8px;font-size:14px" onclick="addEmoji('☕')">☕</button>
+            <button class="secondary" style="padding:4px 8px;font-size:14px" onclick="addEmoji('🎀')">🎀</button>
+          </div>
           <div class="row">
             <input id="messageInput" placeholder="Escreva uma mensagem..." onkeydown="if(event.key==='Enter')sendMessage()">
-            <button onclick="sendMessage()">Enviar</button>
+            <button onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
           </div>
           <p id="messageStatus" class="status"></p>
         </div>
@@ -140,31 +231,80 @@
     </div>
   </section>
 
-  <section id="profile" class="page">
+  <!-- PÁGINA: NOTIFICAÇÕES (EM VERMELHO) -->
+  <section id="notifications" class="page">
     <div class="card">
-      <h2>Meu perfil</h2>
-      <div class="field">
-        <label>Nome</label>
-        <input id="profileName" placeholder="Seu nome">
-      </div>
-      <div class="field">
-        <label>Nome de usuário (@)</label>
-        <input id="profileUsername" placeholder="ex.: mariana.fit" maxlength="24">
-        <p class="hint">Use letras minúsculas, números, ponto ou underline. Sem espaços.</p>
-      </div>
-      <div class="field">
-        <label>Biografia</label>
-        <textarea id="profileBio" maxlength="240" placeholder="Conte um pouquinho sobre você..."></textarea>
-      </div>
-      <button onclick="saveProfile()">Salvar perfil</button>
-      <p id="profileStatus" class="status"></p>
-    </div>
-    <div class="card">
-      <h3>Seu espaço</h3>
-      <p id="myHandle" class="tag">@seuusuario</p>
-      <p class="muted">Em breve: foto de perfil, metas, evolução e configurações de privacidade.</p>
+      <h3 style="margin-top:0;font-size:16px">Notificações 🤍</h3>
+      <div id="notifList"><p class="muted">Nenhuma notificação por enquanto.</p></div>
     </div>
   </section>
+
+  <!-- PÁGINA: PERFIL COMPLETO TWITTER -->
+  <section id="profile" class="page">
+    <div class="card profile-card">
+      <div class="profile-banner">
+        <img id="bannerImg" src="" class="hidden">
+      </div>
+      <div class="profile-avatar-area">
+        <div class="profile-big-avatar" id="profileBigAvatar">?</div>
+        <div>
+          <button class="secondary" onclick="openEditProfileModal()"><i class="fa-solid fa-pen"></i> Editar Perfil</button>
+        </div>
+      </div>
+      <div style="padding:16px 20px 10px 20px">
+        <h2 id="viewProfileName" style="margin:0;font-size:20px">Nome</h2>
+        <div id="viewProfileUsername" class="muted">@usuario</div>
+        <p id="viewProfileBio" style="margin:10px 0;font-size:14px"></p>
+        <div style="display:flex;gap:16px;font-size:13px;color:var(--muted)">
+          <span style="cursor:pointer" onclick="switchProfileTab('following')"><b id="countFollowing" style="color:var(--ink)">0</b> Seguindo</span>
+          <span style="cursor:pointer" onclick="switchProfileTab('followers')"><b id="countFollowers" style="color:var(--ink)">0</b> Seguidores</span>
+        </div>
+      </div>
+      <!-- ABAS DO PERFIL -->
+      <div class="profile-tabs">
+        <div class="profile-tab active" onclick="switchProfileTab('posts')">Posts</div>
+        <div class="profile-tab" onclick="switchProfileTab('following')">Seguindo</div>
+        <div class="profile-tab" onclick="switchProfileTab('followers')">Seguidores</div>
+      </div>
+    </div>
+    
+    <div id="profileTabContent" class="card"></div>
+  </section>
+</div>
+
+<!-- MODAL: VISUALIZAR PERFIL DE OUTRO USUÁRIO (ABRIR ANTES DE SEGUIR) -->
+<div id="userModal" class="wrap hidden" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px">
+  <div class="card" style="width:100%;max-width:480px;max-height:85vh;overflow:auto;margin:0">
+    <div style="display:flex;justify-content:flex-end">
+      <button class="ghost" onclick="closeUserModal()" style="padding:4px 10px">✕</button>
+    </div>
+    <div id="modalProfileContent"></div>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR PERFIL COM UPLOAD DE FOTOS -->
+<div id="editProfileModal" class="wrap hidden" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px">
+  <div class="card" style="width:100%;max-width:450px;max-height:90vh;overflow:auto;margin:0">
+    <h3 style="margin-top:0">Editar Perfil</h3>
+    <div class="field"><label>Nome</label><input id="profileName" placeholder="Seu nome"></div>
+    <div class="field"><label>Nome de usuário (@)</label><input id="profileUsername" placeholder="ex: mariana"></div>
+    <div class="field"><label>Biografia</label><textarea id="profileBio" maxlength="240"></textarea></div>
+    
+    <div class="field">
+      <label>Foto de Perfil</label>
+      <input type="file" id="avatarFileInput" accept="image/*">
+    </div>
+    <div class="field">
+      <label>Foto de Capa</label>
+      <input type="file" id="bannerFileInput" accept="image/*">
+    </div>
+    
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="secondary" onclick="closeEditProfileModal()" style="flex:1">Cancelar</button>
+      <button onclick="saveProfile()" style="flex:1">Salvar</button>
+    </div>
+    <p id="profileStatus" class="status"></p>
+  </div>
 </div>
 
 <script>
@@ -190,7 +330,7 @@ async function signUp(){
   if(!email||password.length<6)
     return status('loginStatus','Informe e-mail e senha com pelo menos 6 caracteres.');
   let {data,error}=await db.auth.signUp({email,password});
-  status('loginStatus',error?error.message:(data.session?'Conta criada!':'Cadastro criado! Confira seu e-mail para confirmar.'));
+  status('loginStatus',error?error.message:(data.session?'Conta criada!':'Confirme seu e-mail.'));
 }
 
 async function signIn(){
@@ -205,7 +345,7 @@ async function resetPassword(){
   let email=$('email').value.trim();
   if(!email)return status('loginStatus','Digite seu e-mail primeiro.');
   let {error}=await db.auth.resetPasswordForEmail(email);
-  status('loginStatus',error?error.message:'Se o e-mail estiver cadastrado, enviaremos um link.');
+  status('loginStatus',error?error.message:'Link enviado para o seu e-mail.');
 }
 
 async function signOut(){await db.auth.signOut()}
@@ -220,17 +360,15 @@ db.auth.onAuthStateChange(async(_event,session)=>{
     await loadProfile();
     await loadFeed('all');
     await loadChats();
-    $('hello').textContent='Olá! 💗';
+    await checkNotifications();
+    $('hello').textContent='Olá! 🤍';
   }
 });
 
 async function ensureProfile(){
   let {data}=await db.from('user_profiles').select('user_id').eq('user_id',user.id).maybeSingle();
   if(!data){
-    let {error}=await db.from('user_profiles').insert({
-      user_id:user.id,full_name:'',username:null,bio:''
-    });
-    if(error)console.warn(error.message);
+    await db.from('user_profiles').insert({user_id:user.id,full_name:'',username:null,bio:''});
   }
 }
 
@@ -240,8 +378,11 @@ function showPage(id){
   if(id==='explore')searchProfiles();
   if(id==='messages')loadChats();
   if(id==='feed')loadFeed('all');
+  if(id==='notifications')loadNotifications();
+  if(id==='profile')loadProfileDataTab('posts');
 }
 
+/* CALENDÁRIO DO DIÁRIO */
 function changeMonth(n){
   selected=new Date(selected.getFullYear(),selected.getMonth()+n,1);
   loadMonth();
@@ -251,11 +392,10 @@ async function loadMonth(){
   let first=new Date(selected.getFullYear(),selected.getMonth(),1);
   let last=new Date(selected.getFullYear(),selected.getMonth()+1,0);
   $('monthTitle').textContent=first.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
-  let {data,error}=await db.from('diary_entries').select('*')
+  let {data}=await db.from('diary_entries').select('*')
     .eq('user_id',user.id)
     .gte('entry_date',dateKey(first))
     .lte('entry_date',dateKey(last));
-  if(error){status('diaryStatus','Erro ao carregar: '+error.message);return}
   entries={};
   (data||[]).forEach(r=>entries[r.entry_date]=r);
   drawCalendar();
@@ -283,13 +423,11 @@ async function selectDay(d){
   $('selectedDate').textContent=selected.toLocaleDateString('pt-BR',{
     weekday:'long',day:'numeric',month:'long',year:'numeric'
   });
-  let {data,error}=await db.from('diary_entries').select('*')
+  let {data}=await db.from('diary_entries').select('*')
     .eq('user_id',user.id).eq('entry_date',dateKey(selected)).maybeSingle();
-  if(error)return status('diaryStatus',error.message);
   let r=data||{};
   for(let f of ['breakfast','lunch','snacks','dinner','exercise','notes'])$(f).value=r[f]||'';
   $('water').value=r.water_ml??'';
-  status('diaryStatus','');
 }
 
 async function saveEntry(){
@@ -302,263 +440,369 @@ async function saveEntry(){
     exercise:$('exercise').value.trim(),
     notes:$('notes').value.trim()
   };
-  if(v.water_ml!==null&&(!Number.isFinite(v.water_ml)||v.water_ml<0))
-    return status('diaryStatus','Informe uma quantidade de água válida.');
-
   let k=dateKey(selected);
-  let {data:old,error:e}=await db.from('diary_entries').select('id')
+  let {data:old}=await db.from('diary_entries').select('id')
     .eq('user_id',user.id).eq('entry_date',k).maybeSingle();
-  if(e)return status('diaryStatus',e.message);
+  
+  let empty=!v.breakfast&&!v.lunch&&!v.snacks&&!v.dinner&&v.water_ml===null&&!v.exercise&&!v.notes;
+  if(empty&&old)await db.from('diary_entries').delete().eq('id',old.id);
+  else if(!empty&&old)await db.from('diary_entries').update(v).eq('id',old.id);
+  else if(!empty)await db.from('diary_entries').insert({user_id:user.id,entry_date:k,...v});
 
-  let empty=!v.breakfast&&!v.lunch&&!v.snacks&&!v.dinner&&
-    v.water_ml===null&&!v.exercise&&!v.notes;
-  let r;
-
-  if(empty&&old)r=await db.from('diary_entries').delete().eq('id',old.id);
-  else if(!empty&&old)r=await db.from('diary_entries').update(v).eq('id',old.id);
-  else if(!empty)r=await db.from('diary_entries').insert({user_id:user.id,entry_date:k,...v});
-
-  if(r?.error)return status('diaryStatus','Erro ao salvar: '+r.error.message);
-  status('diaryStatus','Dia salvo com sucesso! 💗');
+  status('diaryStatus','Salvo com sucesso! 🤍');
   await loadMonth();
 }
 
+/* PERFIL E STORAGE SUPABASE */
 async function loadProfile(){
-  let {data,error}=await db.from('user_profiles').select('*')
-    .eq('user_id',user.id).maybeSingle();
-  if(error)return status('profileStatus',error.message);
+  let {data}=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
   profile=data||{};
   $('profileName').value=profile.full_name||'';
   $('profileUsername').value=profile.username||'';
   $('profileBio').value=profile.bio||'';
-  $('myHandle').textContent=profile.username?'@'+profile.username:'Escolha seu @usuário';
+
+  $('viewProfileName').textContent=profile.full_name||'Sem Nome';
+  $('viewProfileUsername').textContent=profile.username?'@'+profile.username:'@usuario';
+  $('viewProfileBio').textContent=profile.bio||'';
+
+  if(profile.avatar_url){
+    $('profileBigAvatar').innerHTML=`<img src="${esc(profile.avatar_url)}">`;
+  } else {
+    $('profileBigAvatar').textContent=(profile.full_name?profile.full_name[0]:'?').toUpperCase();
+  }
+  if(profile.banner_url){
+    $('bannerImg').src=profile.banner_url;
+    $('bannerImg').classList.remove('hidden');
+  } else {
+    $('bannerImg').classList.add('hidden');
+  }
+
+  let {count:fCount}=await db.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',user.id);
+  let {count:wCount}=await db.from('follows').select('*',{count:'exact',head:true}).eq('following_id',user.id);
+  $('countFollowing').textContent=fCount||0;
+  $('countFollowers').textContent=wCount||0;
+}
+
+function openEditProfileModal(){ $('editProfileModal').classList.remove('hidden'); }
+function closeEditProfileModal(){ $('editProfileModal').classList.add('hidden'); }
+
+async function uploadFile(file, path){
+  let {data,error}=await db.storage.from('avatars').upload(path, file, {upsert:true});
+  if(error) throw error;
+  let {data:urlData}=db.storage.from('avatars').getPublicUrl(path);
+  return urlData.publicUrl;
 }
 
 async function saveProfile(){
+  status('profileStatus','Salvando...');
   let name=$('profileName').value.trim();
   let username=$('profileUsername').value.trim().toLowerCase().replace(/^@/,'');
   let bio=$('profileBio').value.trim();
 
-  if(!/^[a-z0-9._]{3,24}$/.test(username))
-    return status('profileStatus','O @ deve ter de 3 a 24 caracteres: letras minúsculas, números, ponto ou underline.');
+  let avatar_url=profile.avatar_url;
+  let banner_url=profile.banner_url;
 
-  let {error}=await db.from('user_profiles').upsert({
-    user_id:user.id,full_name:name,username,bio,updated_at:new Date().toISOString()
-  },{onConflict:'user_id'});
+  try {
+    let avatarFile=$('avatarFileInput').files[0];
+    if(avatarFile){
+      avatar_url=await uploadFile(avatarFile, `avatar_${user.id}_${Date.now()}`);
+    }
+    let bannerFile=$('bannerFileInput').files[0];
+    if(bannerFile){
+      banner_url=await uploadFile(bannerFile, `banner_${user.id}_${Date.now()}`);
+    }
 
-  if(error)return status('profileStatus',error.code==='23505'?'Esse @ já está sendo usado. Escolha outro.':error.message);
-  status('profileStatus','Perfil salvo! 💗');
-  await loadProfile();
+    let {error}=await db.from('user_profiles').upsert({
+      user_id:user.id,full_name:name,username,bio,avatar_url,banner_url,updated_at:new Date().toISOString()
+    },{onConflict:'user_id'});
+
+    if(error) throw error;
+
+    status('profileStatus','Perfil atualizado! 🤍');
+    closeEditProfileModal();
+    await loadProfile();
+  } catch(err){
+    status('profileStatus', err.message);
+  }
 }
 
+async function switchProfileTab(tab){
+  document.querySelectorAll('.profile-tab').forEach(el=>el.classList.remove('active'));
+  event.target.classList.add('active');
+  await loadProfileDataTab(tab);
+}
+
+async function loadProfileDataTab(tab){
+  let box=$('profileTabContent');
+  if(tab==='posts'){
+    let {data}=await db.from('posts').select('*').eq('user_id',user.id).order('created_at',{ascending:false});
+    box.innerHTML=(data||[]).map(p=>renderPostHtml(p, profile, false)).join('')||'<p class="muted">Você ainda não publicou nada.</p>';
+  } else if(tab==='following'||tab==='followers'){
+    let col=tab==='following'?'follower_id':'following_id';
+    let targetCol=tab==='following'?'following_id':'follower_id';
+    let {data:f}=await db.from('follows').select(targetCol).eq(col,user.id);
+    let ids=(f||[]).map(x=>x[targetCol]);
+    if(!ids.length){box.innerHTML=`<p class="muted">Nenhum registro.</p>`;return;}
+    let {data:users}=await db.from('user_profiles').select('*').in('user_id',ids);
+    box.innerHTML=(users||[]).map(u=>`
+      <div class="person">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="avatar" style="width:36px;height:36px">${u.avatar_url?`<img src="${u.avatar_url}">`:(u.full_name?u.full_name[0]:'?')}</div>
+          <div><b>${esc(u.full_name||'')}</b><div class="muted">@${esc(u.username||'')}</div></div>
+        </div>
+        <button class="secondary" onclick="inspectProfile('${u.user_id}')">Ver Perfil</button>
+      </div>
+    `).join('');
+  }
+}
+
+/* FEED & INTERAÇÕES (CURTIR & REPOST) */
 async function createPost(){
   let content=$('postContent').value.trim();
-  if(!content)return status('feedStatus','Escreva alguma coisa antes de publicar.');
-  let {error}=await db.from('posts').insert({user_id:user.id,content});
-  if(error)return status('feedStatus','Não foi possível publicar: '+error.message);
+  if(!content)return;
+  await db.from('posts').insert({user_id:user.id,content});
   $('postContent').value='';
-  status('feedStatus','Publicado!');
   await loadFeed('all');
 }
 
 async function loadFeed(mode='all'){
-  let {data:posts,error}=await db.from('posts').select('*')
-    .order('created_at',{ascending:false}).limit(60);
-  if(error){$('feedList').textContent='Erro ao carregar feed: '+error.message;return}
+  let {data:posts}=await db.from('posts').select('*').order('created_at',{ascending:false}).limit(50);
   let rows=posts||[];
-
   if(mode==='following'){
     let {data:f}=await db.from('follows').select('following_id').eq('follower_id',user.id);
     let ids=(f||[]).map(x=>x.following_id);
     rows=rows.filter(p=>ids.includes(p.user_id)||p.user_id===user.id);
   }
-
-  let ids=[...new Set(rows.map(p=>p.user_id))],profs={};
+  let ids=[...new Set(rows.map(p=>p.user_id))];
+  let profs={};
   if(ids.length){
-    let {data}=await db.from('user_profiles').select('user_id,full_name,username').in('user_id',ids);
+    let {data}=await db.from('user_profiles').select('*').in('user_id',ids);
     (data||[]).forEach(p=>profs[p.user_id]=p);
   }
 
-  let postIds=rows.map(p=>p.id),likes={},mine=new Set(),comments={};
+  let postIds=rows.map(p=>p.id);
+  let likes={}, mineLikes=new Set(), mineReposts=new Set();
   if(postIds.length){
     let {data:l}=await db.from('post_likes').select('post_id,user_id').in('post_id',postIds);
     (l||[]).forEach(x=>{
       likes[x.post_id]=(likes[x.post_id]||0)+1;
-      if(x.user_id===user.id)mine.add(x.post_id);
+      if(x.user_id===user.id) mineLikes.add(x.post_id);
     });
-    let {data:c}=await db.from('post_comments').select('post_id').in('post_id',postIds);
-    (c||[]).forEach(x=>comments[x.post_id]=(comments[x.post_id]||0)+1);
+    let {data:r}=await db.from('post_reposts').select('post_id,user_id').in('post_id',postIds);
+    (r||[]).forEach(x=>{
+      if(x.user_id===user.id) mineReposts.add(x.post_id);
+    });
   }
 
-  $('feedList').innerHTML=rows.length?rows.map(p=>{
-    let a=profs[p.user_id]||{},name=esc(a.full_name||'Pessoa');
-    let handle=a.username?'@'+esc(a.username):'@usuario';
-    return `<article class="post">
-      <div class="post-head">
-        <div class="avatar">${name.slice(0,1).toUpperCase()}</div>
-        <div><b>${name}</b><div class="muted">${handle} · ${new Date(p.created_at).toLocaleString('pt-BR')}</div></div>
-      </div>
-      <p>${esc(p.content).replace(/\n/g,'<br>')}</p>
-      <div class="post-actions">
-        <button class="secondary" onclick="toggleLike('${p.id}',${mine.has(p.id)})">${mine.has(p.id)?'♥':'♡'} ${likes[p.id]||0}</button>
-        <button class="ghost" onclick="toggleComments('${p.id}')">Comentários (${comments[p.id]||0})</button>
-      </div>
-      <div id="comments-${p.id}" class="hidden">
-        <div id="comment-list-${p.id}"></div>
-        <div class="row">
-          <input id="comment-input-${p.id}" placeholder="Escreva um comentário">
-          <button onclick="addComment('${p.id}')">Comentar</button>
-        </div>
-      </div>
-    </article>`;
-  }).join(''):'<p class="muted">Ainda não há publicações por aqui. Seja a primeira a postar! 💗</p>';
+  $('feedList').innerHTML=rows.length?rows.map(p=>renderPostHtml(p, profs[p.user_id]||{}, true, likes[p.id]||0, mineLikes.has(p.id), mineReposts.has(p.id))).join(''):'<p class="muted">Nenhuma publicação por aqui.</p>';
 }
 
-async function toggleLike(id,liked){
-  let q=liked
-    ?db.from('post_likes').delete().eq('post_id',id).eq('user_id',user.id)
-    :db.from('post_likes').insert({post_id:id,user_id:user.id});
-  let {error}=await q;
-  if(error)alert(error.message);else loadFeed('all');
+function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false, isReposted=false){
+  let name=esc(author.full_name||'Pessoa');
+  let handle=author.username?'@'+esc(author.username):'@usuario';
+  let avatarHtml=author.avatar_url?`<img src="${esc(author.avatar_url)}">`:name[0].toUpperCase();
+  return `
+    <article class="post">
+      <div class="post-head" style="cursor:pointer" onclick="inspectProfile('${p.user_id}')">
+        <div class="avatar">${avatarHtml}</div>
+        <div><b>${name}</b><div class="muted">${handle} · ${new Date(p.created_at).toLocaleDateString('pt-BR')}</div></div>
+      </div>
+      <p style="margin:10px 0;line-height:1.4">${esc(p.content).replace(/\n/g,'<br>')}</p>
+      ${interactive?`
+        <div class="post-actions">
+          <button class="${isLiked?'liked':''}" onclick="toggleLike('${p.id}',${isLiked},'${p.user_id}')">
+            <i class="${isLiked?'fa-solid':'fa-regular'} fa-heart"></i> ${likeCount}
+          </button>
+          <button class="${isReposted?'reposted':''}" onclick="toggleRepost('${p.id}',${isReposted},'${p.user_id}')">
+            <i class="fa-solid fa-retweet"></i> Repostar
+          </button>
+        </div>`:''}
+    </article>
+  `;
 }
 
-async function toggleComments(id){
-  let box=$('comments-'+id);
-  box.classList.toggle('hidden');
-  if(box.classList.contains('hidden'))return;
-
-  let {data,error}=await db.from('post_comments').select('content,user_id,created_at')
-    .eq('post_id',id).order('created_at');
-  if(error)return;
-
-  let ids=[...new Set((data||[]).map(c=>c.user_id))],names={};
-  if(ids.length){
-    let {data:p}=await db.from('user_profiles').select('user_id,username,full_name').in('user_id',ids);
-    (p||[]).forEach(x=>names[x.user_id]=x);
+async function toggleLike(postId, isLiked, postOwnerId){
+  if(isLiked){
+    await db.from('post_likes').delete().eq('post_id',postId).eq('user_id',user.id);
+  } else {
+    await db.from('post_likes').insert({post_id:postId,user_id:user.id});
+    if(postOwnerId !== user.id){
+      await db.from('notifications').insert({user_id:postOwnerId, actor_id:user.id, type:'like', post_id:postId});
+    }
   }
-
-  $('comment-list-'+id).innerHTML=(data||[]).map(c=>
-    `<p class="muted"><b>${esc(names[c.user_id]?.username?'@'+names[c.user_id].username:names[c.user_id]?.full_name||'Pessoa')}:</b> ${esc(c.content)}</p>`
-  ).join('')||'<p class="muted">Seja a primeira pessoa a comentar.</p>';
+  loadFeed('all');
 }
 
-async function addComment(id){
-  let input=$('comment-input-'+id),content=input.value.trim();
-  if(!content)return;
-  let {error}=await db.from('post_comments').insert({post_id:id,user_id:user.id,content});
-  if(error)return alert(error.message);
-  input.value='';
-  await toggleComments(id);
-  await toggleComments(id);
+async function toggleRepost(postId, isReposted, postOwnerId){
+  if(isReposted){
+    await db.from('post_reposts').delete().eq('post_id',postId).eq('user_id',user.id);
+  } else {
+    await db.from('post_reposts').insert({post_id:postId, user_id:user.id});
+    if(postOwnerId !== user.id){
+      await db.from('notifications').insert({user_id:postOwnerId, actor_id:user.id, type:'repost', post_id:postId});
+    }
+  }
+  loadFeed('all');
 }
 
+/* EXPLORAR E VISUALIZAR PERFIL ANTES DE SEGUIR */
 async function searchProfiles(){
   let q=$('searchPeople').value.trim().replace(/^@/,'').toLowerCase();
-  let query=db.from('user_profiles').select('user_id,full_name,username,bio')
-    .neq('user_id',user.id).not('username','is',null).limit(40);
+  let query=db.from('user_profiles').select('*').neq('user_id',user.id).limit(30);
   if(q)query=query.or(`username.ilike.%${q}%,full_name.ilike.%${q}%`);
-
-  let {data,error}=await query;
-  if(error){$('peopleList').textContent=error.message;return}
-
-  let ids=(data||[]).map(p=>p.user_id),following=new Set();
-  if(ids.length){
-    let {data:f}=await db.from('follows').select('following_id')
-      .eq('follower_id',user.id).in('following_id',ids);
-    (f||[]).forEach(x=>following.add(x.following_id));
-  }
-
-  $('peopleList').innerHTML=(data||[]).map(p=>
-    `<div class="person">
-      <div><b>${esc(p.full_name||'Pessoa')}</b><div class="muted">@${esc(p.username)} · ${esc(p.bio||'')}</div></div>
-      <div style="display:flex;gap:6px">
-        <button class="secondary" onclick="openChat('${p.user_id}','${esc(p.username)}')">Mensagem</button>
-        <button onclick="toggleFollow('${p.user_id}',${following.has(p.user_id)})">${following.has(p.user_id)?'Seguindo':'Seguir'}</button>
+  let {data}=await query;
+  $('peopleList').innerHTML=(data||[]).map(p=>`
+    <div class="person">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="avatar" style="width:38px;height:38px">${p.avatar_url?`<img src="${p.avatar_url}">`:(p.full_name?p.full_name[0]:'?')}</div>
+        <div><b>${esc(p.full_name||'')}</b><div class="muted">@${esc(p.username||'')}</div></div>
       </div>
-    </div>`
-  ).join('')||'<p class="muted">Ninguém encontrado. Tente outro @.</p>';
+      <div style="display:flex;gap:6px">
+        <button class="secondary" onclick="inspectProfile('${p.user_id}')">Ver Perfil</button>
+        <button class="secondary" onclick="openChat('${p.user_id}')"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </div>
+  `).join('')||'<p class="muted">Nenhum usuário encontrado.</p>';
 }
 
-async function toggleFollow(id,isFollowing){
-  let r=isFollowing
-    ?await db.from('follows').delete().eq('follower_id',user.id).eq('following_id',id)
-    :await db.from('follows').insert({follower_id:user.id,following_id:id});
-  if(r.error)return alert(r.error.message);
-  searchProfiles();
+async function inspectProfile(id){
+  let {data:u}=await db.from('user_profiles').select('*').eq('user_id',id).maybeSingle();
+  let {data:posts}=await db.from('posts').select('*').eq('user_id',id);
+  let {count:fCount}=await db.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',id);
+  let {count:wCount}=await db.from('follows').select('*',{count:'exact',head:true}).eq('following_id',id);
+  let {data:isF}=await db.from('follows').select('*').eq('follower_id',user.id).eq('following_id',id).maybeSingle();
+
+  $('modalProfileContent').innerHTML=`
+    <div style="text-align:center">
+      <div class="profile-big-avatar" style="margin:0 auto;width:74px;height:74px">${u?.avatar_url?`<img src="${u.avatar_url}">`:(u?.full_name?u.full_name[0]:'?')}</div>
+      <h3 style="margin:8px 0 2px 0">${esc(u?.full_name||'Usuário')}</h3>
+      <div class="muted">@${esc(u?.username||'')}</div>
+      <p style="font-size:14px;margin:10px 0">${esc(u?.bio||'')}</p>
+      <div style="display:flex;justify-content:center;gap:16px;font-size:13px;margin:12px 0">
+        <span><b>${wCount||0}</b> Seguidores</span>
+        <span><b>${fCount||0}</b> Seguindo</span>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:14px">
+        <button onclick="toggleFollowModal('${id}',${!!isF})">${isF?'Seguindo':'Seguir'}</button>
+        <button class="secondary" onclick="closeUserModal();openChat('${id}')">Mensagem</button>
+      </div>
+    </div>
+    <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+    <div>${(posts||[]).map(p=>renderPostHtml(p,u,false)).join('')||'<p class="muted">Sem publicações.</p>'}</div>
+  `;
+  $('userModal').classList.remove('hidden');
 }
 
-async function loadChats(){
-  let {data,error}=await db.from('direct_messages').select('sender_id,receiver_id,content,created_at')
-    .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-    .order('created_at',{ascending:false}).limit(200);
+function closeUserModal(){ $('userModal').classList.add('hidden'); }
 
-  if(error){$('chatList').textContent=error.message;return}
-
-  let peers=[...new Set((data||[]).map(m=>m.sender_id===user.id?m.receiver_id:m.sender_id))];
-  if(!peers.length){
-    $('chatList').innerHTML='<p class="muted">Suas conversas aparecerão aqui. Encontre alguém em Explorar.</p>';
-    return;
+async function toggleFollowModal(targetId, isFollowing){
+  if(isFollowing){
+    await db.from('follows').delete().eq('follower_id',user.id).eq('following_id',targetId);
+  } else {
+    await db.from('follows').insert({follower_id:user.id,following_id:targetId});
+    await db.from('notifications').insert({user_id:targetId, actor_id:user.id, type:'follow'});
   }
+  inspectProfile(targetId);
+}
 
-  let {data:p}=await db.from('user_profiles').select('user_id,username,full_name').in('user_id',peers);
+/* CHAT & MENSAGENS EMOJI */
+async function loadChats(){
+  let {data}=await db.from('direct_messages').select('*').or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`).order('created_at',{ascending:false});
+  let peers=[...new Set((data||[]).map(m=>m.sender_id===user.id?m.receiver_id:m.sender_id))];
+  if(!peers.length){$('chatList').innerHTML='<p class="muted">Nenhuma conversa recente.</p>';return;}
+  let {data:p}=await db.from('user_profiles').select('*').in('user_id',peers);
   chatProfiles={};
   (p||[]).forEach(x=>chatProfiles[x.user_id]=x);
-
-  $('chatList').innerHTML=peers.map(id=>
-    `<div class="chat-item" onclick="openChat('${id}')">
-      <b>${esc(chatProfiles[id]?.full_name||'Pessoa')}</b>
-      <div class="muted">@${esc(chatProfiles[id]?.username||'usuario')}</div>
-    </div>`
-  ).join('');
+  $('chatList').innerHTML=peers.map(id=>`
+    <div class="chat-item" onclick="openChat('${id}')">
+      <div class="avatar" style="width:34px;height:34px">${chatProfiles[id]?.avatar_url?`<img src="${chatProfiles[id].avatar_url}">`:(chatProfiles[id]?.full_name?chatProfiles[id].full_name[0]:'?')}</div>
+      <div><b>${esc(chatProfiles[id]?.full_name||'Pessoa')}</b><div class="muted">@${esc(chatProfiles[id]?.username||'')}</div></div>
+    </div>
+  `).join('');
 }
 
-async function openChat(id,username=''){
+async function openChat(id){
   activeChat=id;
   let p=chatProfiles[id];
   if(!p){
-    let {data}=await db.from('user_profiles').select('username,full_name').eq('user_id',id).maybeSingle();
+    let {data}=await db.from('user_profiles').select('*').eq('user_id',id).maybeSingle();
     p=data||{};
+    chatProfiles[id]=p;
   }
-  $('chatTitle').textContent=(p.full_name||'Conversa')+' · @'+(p.username||username||'usuario');
+  $('chatTitle').textContent=(p.full_name||'Conversa')+' · @'+(p.username||'');
   showPage('messages');
   await loadMessages();
 }
 
+function addEmoji(emoji){ $('messageInput').value += emoji; }
+
 async function loadMessages(){
   if(!activeChat)return;
-  let {data,error}=await db.from('direct_messages').select('*')
+  let {data}=await db.from('direct_messages').select('*')
     .or(`and(sender_id.eq.${user.id},receiver_id.eq.${activeChat}),and(sender_id.eq.${activeChat},receiver_id.eq.${user.id})`)
     .order('created_at');
-
-  if(error){$('messageBox').textContent=error.message;return}
-
-  $('messageBox').innerHTML=(data||[]).map(m=>
-    `<div class="bubble ${m.sender_id===user.id?'mine':''}">
+  $('messageBox').innerHTML=(data||[]).map(m=>`
+    <div class="bubble ${m.sender_id===user.id?'mine':''}">
       ${esc(m.content)}
-      <div style="font-size:10px;opacity:.7;margin-top:4px">${new Date(m.created_at).toLocaleString('pt-BR')}</div>
-    </div>`
-  ).join('');
-
+    </div>
+  `).join('');
   $('messageBox').scrollTop=$('messageBox').scrollHeight;
-  let unread=(data||[]).filter(m=>m.receiver_id===user.id&&!m.read_at).map(m=>m.id);
-  if(unread.length)
-    await db.from('direct_messages').update({read_at:new Date().toISOString()}).in('id',unread);
 }
 
 async function sendMessage(){
-  if(!activeChat)return status('messageStatus','Escolha uma conversa primeiro.');
+  if(!activeChat)return;
   let content=$('messageInput').value.trim();
   if(!content)return;
-
-  let {error}=await db.from('direct_messages').insert({
-    sender_id:user.id,receiver_id:activeChat,content
-  });
-  if(error)return status('messageStatus',error.message);
-
+  await db.from('direct_messages').insert({sender_id:user.id,receiver_id:activeChat,content});
   $('messageInput').value='';
-  status('messageStatus','');
   await loadMessages();
   await loadChats();
+}
+
+/* NOTIFICAÇÕES (RED BADGE) */
+async function checkNotifications(){
+  let {count}=await db.from('notifications').select('*',{count:'exact',head:true}).eq('user_id',user.id).eq('read',false);
+  let badge=$('notifBadge');
+  if(count > 0){
+    badge.textContent=count;
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+}
+
+async function loadNotifications(){
+  $('notifBadge').classList.add('hidden');
+  await db.from('notifications').update({read:true}).eq('user_id',user.id);
+
+  let {data}=await db.from('notifications').select('*').eq('user_id',user.id).order('created_at',{ascending:false}).limit(30);
+  if(!data || !data.length){
+    $('notifList').innerHTML='<p class="muted">Nenhuma notificação por enquanto.</p>';
+    return;
+  }
+  let actorIds=[...new Set(data.map(n=>n.actor_id))];
+  let {data:actors}=await db.from('user_profiles').select('*').in('user_id',actorIds);
+  let actorMap={};
+  (actors||[]).forEach(a=>actorMap[a.user_id]=a);
+
+  $('notifList').innerHTML=data.map(n=>{
+    let actor=actorMap[n.actor_id]||{};
+    let name=esc(actor.full_name||'Alguém');
+    let text='';
+    if(n.type==='like') text='curtiu sua publicação. 🤍';
+    if(n.type==='repost') text='repostou sua publicação. 🔁';
+    if(n.type==='follow') text='começou a seguir você. ✨';
+    
+    return `
+      <div class="notif-item">
+        <div class="icon"><i class="fa-solid fa-bell"></i></div>
+        <div>
+          <b>${name}</b> ${text}
+          <div class="muted" style="font-size:11px;margin-top:2px">${new Date(n.created_at).toLocaleDateString('pt-BR')}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 </script>
 </body>
