@@ -40,6 +40,7 @@ button{border:0;border-radius:12px;padding:10px 16px;background:var(--rose);colo
 button:hover{background:var(--rose-hover)}
 button.secondary{background:var(--line);color:var(--ink)}
 button.ghost{background:transparent;color:var(--rose);border:1px solid var(--line)}
+button.danger{background:var(--red);color:white}
 button:disabled{opacity:.5;cursor:not-allowed}
 input,textarea,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);margin:6px 0;outline:none}
 input:focus,textarea:focus,select:focus{border-color:var(--rose)}
@@ -48,7 +49,7 @@ textarea{min-height:85px;resize:vertical}
 .wrap{max-width:680px;margin:0 auto;padding:0 16px 85px 16px}
 .card{background:var(--card-bg);border-radius:20px;padding:20px;margin:14px 0;box-shadow:0 2px 12px rgba(0,0,0,0.02);border:1px solid var(--line)}
 
-/* Login & Cadastro Espaçado */
+/* Login & Cadastro */
 .login{max-width:440px;margin:6vh auto;padding:24px}
 .brand{text-align:center;color:var(--ink);font-weight:800;letter-spacing:-0.5px}
 .muted,.hint{color:var(--muted);font-size:13px}
@@ -56,7 +57,7 @@ textarea{min-height:85px;resize:vertical}
 
 .top{display:flex;justify-content:space-between;align-items:center;padding:16px 0}
 
-/* Navegação Estilo Instagram com Badges */
+/* Navegação Estilo Instagram */
 .nav{position:fixed;bottom:0;left:0;right:0;background:var(--card-bg);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:10px 0;z-index:1000;box-shadow:0 -2px 10px rgba(0,0,0,0.02)}
 .nav button{background:transparent;color:var(--muted);border-radius:50px;padding:8px 14px;font-size:18px;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative}
 .nav button span{font-size:10px;font-weight:500}
@@ -68,6 +69,16 @@ textarea{min-height:85px;resize:vertical}
 
 /* FAB - Botão Flutuante */
 .fab-post{position:fixed;bottom:75px;right:20px;width:54px;height:54px;border-radius:50%;background:var(--rose);color:white;font-size:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(0,0,0,0.15);z-index:999;cursor:pointer}
+
+/* Calendário Original Estilizado */
+.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.calendar-head button{width:auto;padding:6px 12px}
+.week,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
+.week div{font-weight:bold;padding:6px 0;color:var(--muted);font-size:12px}
+.day{padding:10px 2px;border-radius:8px;background:var(--bg);cursor:pointer;font-size:13px;border:1px solid transparent}
+.day.selected{background:var(--rose);color:white}
+.day.today{border-color:var(--rose)}
+.day.has-entry::after{content:' •';color:var(--rose2);display:block;font-size:10px}
 
 /* Posts */
 .post{border-bottom:1px solid var(--line);padding:16px 0}
@@ -103,34 +114,36 @@ textarea{min-height:85px;resize:vertical}
 .profile-tab{flex:1;text-align:center;padding:12px;cursor:pointer;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;font-size:13px;white-space:nowrap}
 .profile-tab.active{color:var(--ink);border-bottom-color:var(--rose)}
 
-/* Preview da imagem */
+/* Modais & Editor Estilo Twitter para Imagens */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal-box{background:var(--card-bg);width:100%;max-width:480px;border-radius:20px;padding:20px;max-height:85vh;overflow:auto}
+.tweet-media-btn{background:var(--line);color:var(--ink);padding:8px 12px;border-radius:10px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+
+/* Estilo de corte/prévia de imagem estilo Twitter */
+.crop-preview-box{width:100%;text-align:center;background:#000;border-radius:12px;overflow:hidden;margin:10px 0;position:relative}
+.crop-preview-box img{max-width:100%;max-height:220px;object-fit:contain;display:block;margin:0 auto}
+
 .img-preview-container{position:relative;margin-top:10px;display:inline-block;max-width:100%}
 .img-preview-container img{max-height:180px;border-radius:12px;object-fit:cover}
 .remove-preview-btn{position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.6);color:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 
-/* Modais */
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px}
-.modal-box{background:var(--card-bg);width:100%;max-width:480px;border-radius:20px;padding:20px;max-height:85vh;overflow:auto}
-.tweet-media-btn{background:var(--line);color:var(--ink);padding:8px 12px;border-radius:10px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 .notif-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
 .notif-item .icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bubble-me);color:var(--red)}
 .person{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
 </style></head>
 <body>
 
-<!-- TELA DE LOGIN & CADASTRO COMPLETO -->
+<!-- TELA DE LOGIN & CADASTRO -->
 <div id="loginScreen" class="wrap login">
   <div class="card">
     <h1 class="brand">Meu Diário 🤍</h1>
     <p class="muted" style="text-align:center;margin-bottom:20px">Seu espaço de hábitos e comunidade.</p>
     
-    <!-- ABA DE ALTERNÂNCIA (LOGIN x CADASTRO) -->
     <div style="display:flex;border-bottom:1px solid var(--line);margin-bottom:16px">
       <div id="tabLoginBtn" class="profile-tab active" onclick="toggleAuthTab('login')">Entrar</div>
       <div id="tabSignUpBtn" class="profile-tab" onclick="toggleAuthTab('signup')">Criar Conta</div>
     </div>
 
-    <!-- FORMULÁRIO DE LOGIN -->
     <div id="loginForm">
       <div class="field"><label>E-mail</label><input id="loginEmail" type="email" placeholder="seuemail@exemplo.com"></div>
       <div class="field"><label>Senha</label><input id="loginPassword" type="password" placeholder="Sua senha"></div>
@@ -140,7 +153,6 @@ textarea{min-height:85px;resize:vertical}
       </div>
     </div>
 
-    <!-- FORMULÁRIO DE CADASTRO COMPLETO (DE CARA) -->
     <div id="signUpForm" class="hidden">
       <div class="field"><label>Nome Completo</label><input id="regName" placeholder="Ex: Mariana Silva"></div>
       <div class="field"><label>Nome de usuário (@)</label><input id="regUsername" placeholder="ex: mariana.fit"></div>
@@ -161,9 +173,11 @@ textarea{min-height:85px;resize:vertical}
         <label>Foto de Perfil</label>
         <label class="tweet-media-btn" style="width:100%;justify-content:center">
           <i class="fa-regular fa-image"></i> Escolher Foto de Perfil
-          <input type="file" id="regAvatarInput" accept="image/*" class="hidden" onchange="$('regAvatarName').textContent=this.files[0]?.name||''">
+          <input type="file" id="regAvatarInput" accept="image/*" class="hidden" onchange="previewRegAvatar(this)">
         </label>
-        <span id="regAvatarName" class="muted" style="font-size:12px;display:block;text-align:center;margin-top:4px"></span>
+        <div id="regAvatarPreviewBox" class="crop-preview-box hidden" style="margin-top:8px">
+          <img id="regAvatarPreviewImg">
+        </div>
       </div>
 
       <div class="login-actions">
@@ -187,8 +201,8 @@ textarea{min-height:85px;resize:vertical}
     </div>
   </header>
 
-  <!-- BOTÃO FLUTUANTE DE NOVO POST -->
-  <div class="fab-post" onclick="openFloatingPostModal()">
+  <!-- BOTÃO FLUTUANTE DE NOVO POST (OCULTO NAS MENSAGENS) -->
+  <div id="fabPostBtn" class="fab-post" onclick="openFloatingPostModal()">
     <i class="fa-solid fa-pen"></i>
   </div>
 
@@ -224,13 +238,13 @@ textarea{min-height:85px;resize:vertical}
     <div class="card">
       <div class="calendar-head">
         <button class="secondary" onclick="changeMonth(-1)">‹</button>
-        <h3 id="monthTitle" style="margin:0;font-size:16px"></h3>
+        <h3 id="monthTitle" style="margin:0;font-size:15px"></h3>
         <button class="secondary" onclick="changeMonth(1)">›</button>
       </div>
-      <div class="week" style="margin-top:12px">
+      <div class="week">
         <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
       </div>
-      <div id="days" class="days"></div>
+      <div id="days" class="days" style="margin-top:8px"></div>
     </div>
     <div class="card">
       <h3 id="selectedDate" style="margin-top:0"></h3>
@@ -346,10 +360,10 @@ textarea{min-height:85px;resize:vertical}
     </div>
 
     <div id="modalImagePreviewBox" class="hidden">
-      <div class="img-preview-container">
-        <img id="modalImagePreview" src="">
-        <div class="remove-preview-btn" onclick="removeFloatingPostImage()">✕</div>
+      <div class="crop-preview-box">
+        <img id="modalImagePreview">
       </div>
+      <button class="ghost" onclick="removeFloatingPostImage()" style="font-size:12px;color:var(--red)">Remover imagem</button>
     </div>
 
     <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px">
@@ -360,7 +374,7 @@ textarea{min-height:85px;resize:vertical}
   </div>
 </div>
 
-<!-- MODAL: CONFIGURAÇÕES DO APLICATIVO -->
+<!-- MODAL: CONFIGURAÇÕES & PRIVACIDADE DE MENSAGENS -->
 <div id="settingsModal" class="modal-overlay hidden">
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
@@ -385,6 +399,11 @@ textarea{min-height:85px;resize:vertical}
       </select>
     </div>
 
+    <div class="field" style="display:flex;align-items:center;gap:10px;margin-top:15px">
+      <input type="checkbox" id="settingsMsgFollowingOnly" style="width:20px;height:20px" onchange="saveMsgPrivacySetting(this.checked)">
+      <label for="settingsMsgFollowingOnly" style="margin:0;cursor:pointer">Receber mensagens apenas de quem eu sigo 💌</label>
+    </div>
+
     <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
 
     <div>
@@ -394,25 +413,41 @@ textarea{min-height:85px;resize:vertical}
   </div>
 </div>
 
-<!-- MODAL: EDITAR PERFIL -->
+<!-- MODAL: EDITAR PERFIL COM PRÉVIA E CORTE ESTILO TWITTER -->
 <div id="editProfileModal" class="modal-overlay hidden">
   <div class="modal-box">
     <h3 style="margin-top:0">Editar Perfil</h3>
     <div class="field"><label>Nome</label><input id="profileName" placeholder="Seu nome"></div>
     <div class="field"><label>Nome de usuário (@)</label><input id="profileUsername" placeholder="ex: mariana"></div>
     <div class="field"><label>Biografia</label><textarea id="profileBio" maxlength="240"></textarea></div>
+    
     <div class="field">
       <label>Foto de Perfil</label>
-      <input type="file" id="avatarFileInput" accept="image/*">
+      <label class="tweet-media-btn" style="width:100%;justify-content:center">
+        <i class="fa-regular fa-image"></i> Escolher Foto de Perfil
+        <input type="file" id="avatarFileInput" accept="image/*" class="hidden" onchange="previewEditImage(this, 'avatar')">
+      </label>
+      <div id="avatarCropBox" class="crop-preview-box hidden" style="border-radius:50%;width:90px;height:90px;margin:10px auto">
+        <img id="avatarCropImg">
+      </div>
     </div>
+
     <div class="field">
       <label>Foto de Capa</label>
-      <input type="file" id="bannerFileInput" accept="image/*">
+      <label class="tweet-media-btn" style="width:100%;justify-content:center">
+        <i class="fa-regular fa-image"></i> Escolher Capa
+        <input type="file" id="bannerFileInput" accept="image/*" class="hidden" onchange="previewEditImage(this, 'banner')">
+      </label>
+      <div id="bannerCropBox" class="crop-preview-box hidden" style="height:100px;margin:10px 0">
+        <img id="bannerCropImg" style="height:100%;object-fit:cover">
+      </div>
     </div>
+
     <div class="field" style="display:flex;align-items:center;gap:10px;margin-top:15px">
       <input type="checkbox" id="profileIsPrivate" style="width:20px;height:20px">
       <label for="profileIsPrivate" style="margin:0;cursor:pointer">Perfil privado 🔒</label>
     </div>
+
     <div style="display:flex;gap:10px;margin-top:16px">
       <button class="secondary" onclick="closeEditProfileModal()" style="flex:1">Cancelar</button>
       <button onclick="saveProfile()" style="flex:1">Salvar</button>
@@ -436,7 +471,8 @@ const SUPABASE_URL='https://qhveyeqpwguqbokfwlwf.supabase.co';
 const SUPABASE_KEY='sb_publishable_FWLt3OH6KIOwXZ-DqJGacw_vcoMg-eM';
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let user=null, selected=new Date(), entries={}, profile=null, activeChat=null, chatProfiles={}, currentFloatingPostImage=null;
+let user=null, selected=new Date(), entries={}, profile=null, activeChat=null, chatProfiles={};
+let currentFloatingPostImage=null, editAvatarFile=null, editBannerFile=null;
 
 const $=id=>document.getElementById(id);
 const pad=n=>String(n).padStart(2,'0');
@@ -457,7 +493,18 @@ function toggleAuthTab(tab){
   status('loginStatus','');
 }
 
-/* AUTENTICAÇÃO E CRIAR PERFIL COMPLETO */
+function previewRegAvatar(input){
+  let file=input.files[0];
+  if(file){
+    let reader=new FileReader();
+    reader.onload=e=>{
+      $('regAvatarPreviewImg').src=e.target.result;
+      $('regAvatarPreviewBox').classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
 async function signUp(){
   let name=$('regName').value.trim();
   let username=$('regUsername').value.trim().toLowerCase().replace(/^@/,'');
@@ -470,7 +517,6 @@ async function signUp(){
   }
 
   status('loginStatus','Criando conta e perfil...');
-
   let {data,error}=await db.auth.signUp({email,password});
   if(error) return status('loginStatus', error.message);
 
@@ -479,22 +525,14 @@ async function signUp(){
     let avatar_url = null;
     let avatarFile = $('regAvatarInput').files[0];
     if(avatarFile){
-      try {
-        avatar_url = await uploadFile(avatarFile, `avatar_${newUser.id}_${Date.now()}`);
-      } catch(e){ console.warn('Erro avatar:', e.message); }
+      try { avatar_url = await uploadFile(avatarFile, `avatar_${newUser.id}_${Date.now()}`); } catch(e){}
     }
 
-    let {error:pErr}=await db.from('user_profiles').upsert({
-      user_id:newUser.id,
-      full_name:name,
-      username:username,
-      language:language,
-      avatar_url:avatar_url,
-      updated_at:new Date().toISOString()
+    await db.from('user_profiles').upsert({
+      user_id:newUser.id, full_name:name, username:username, language:language, avatar_url:avatar_url, updated_at:new Date().toISOString()
     },{onConflict:'user_id'});
 
-    if(pErr) status('loginStatus','Conta criada! ' + pErr.message);
-    else status('loginStatus', data.session?'Perfil criado com sucesso!':'Conta criada! Confirme seu e-mail.');
+    status('loginStatus', data.session?'Perfil criado com sucesso!':'Conta criada! Confirme seu e-mail.');
   }
 }
 
@@ -537,6 +575,10 @@ async function ensureProfile(){
 function showPage(id){
   document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));
   document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
+  
+  // Ocultar botão flutuante na aba de mensagens
+  $('fabPostBtn').classList.toggle('hidden', id==='messages');
+
   if(id==='explore')searchProfiles();
   if(id==='messages'){ loadChats(); backToChatList(); }
   if(id==='feed')loadFeed('all');
@@ -545,7 +587,6 @@ function showPage(id){
   checkUnreadBadges();
 }
 
-/* BADGES VERMELHOS */
 async function checkUnreadBadges(){
   if(!user) return;
   let {count:notifCount}=await db.from('notifications').select('*',{count:'exact',head:true}).eq('user_id',user.id).eq('read',false);
@@ -555,7 +596,7 @@ async function checkUnreadBadges(){
   $('msgBadge').classList.toggle('hidden', !msgCount || msgCount <= 0);
 }
 
-/* CALENDÁRIO */
+/* CALENDÁRIO ORIGINAL */
 function changeMonth(n){ selected=new Date(selected.getFullYear(),selected.getMonth()+n,1); loadMonth(); }
 async function loadMonth(){
   let first=new Date(selected.getFullYear(),selected.getMonth(),1);
@@ -601,7 +642,7 @@ async function saveEntry(){
   await loadMonth();
 }
 
-/* TEMA E FONTE */
+/* CONFIGURAÇÕES, TEMA, FONTES E PRIVACIDADE DE MENSAGENS */
 function changeTheme(theme){
   if(theme==='dark') document.body.classList.add('theme-dark');
   else document.body.classList.remove('theme-dark');
@@ -616,8 +657,17 @@ function changeFont(font){
 if(localStorage.getItem('userTheme')==='dark'){ changeTheme('dark'); $('themeSelect').value='dark'; }
 if(localStorage.getItem('userFont')){ changeFont(localStorage.getItem('userFont')); $('fontSelect').value=localStorage.getItem('userFont'); }
 
-function openSettingsModal(){ $('settingsModal').classList.remove('hidden'); loadBlockedUsers(); }
+function openSettingsModal(){ 
+  $('settingsModal').classList.remove('hidden'); 
+  loadBlockedUsers(); 
+  $('settingsMsgFollowingOnly').checked = profile.messages_from_following_only || false;
+}
 function closeSettingsModal(){ $('settingsModal').classList.add('hidden'); }
+
+async function saveMsgPrivacySetting(val){
+  await db.from('user_profiles').update({messages_from_following_only: val}).eq('user_id', user.id);
+  profile.messages_from_following_only = val;
+}
 
 async function loadBlockedUsers(){
   let {data:blocks}=await db.from('blocks').select('blocked_id').eq('blocker_id',user.id);
@@ -675,9 +725,7 @@ async function submitFloatingPost(){
     await db.from('posts').insert({user_id:user.id,content,media_url});
     closeFloatingPostModal();
     loadFeed('all');
-  } catch(err){
-    status('modalPostStatus',err.message);
-  }
+  } catch(err){ status('modalPostStatus',err.message); }
 }
 
 async function deletePost(postId){
@@ -688,7 +736,7 @@ async function deletePost(postId){
   }
 }
 
-/* PERFIL */
+/* PERFIL & CORTADOR ESTILO TWITTER */
 async function loadProfile(){
   let {data}=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
   profile=data||{};
@@ -714,8 +762,33 @@ async function loadProfile(){
   $('countFollowers').textContent=wCount||0;
 }
 
-function openEditProfileModal(){ $('editProfileModal').classList.remove('hidden'); }
+function openEditProfileModal(){ 
+  editAvatarFile = null;
+  editBannerFile = null;
+  $('avatarCropBox').classList.add('hidden');
+  $('bannerCropBox').classList.add('hidden');
+  $('editProfileModal').classList.remove('hidden'); 
+}
 function closeEditProfileModal(){ $('editProfileModal').classList.add('hidden'); }
+
+function previewEditImage(input, type){
+  let file=input.files[0];
+  if(file){
+    let reader=new FileReader();
+    reader.onload=e=>{
+      if(type==='avatar'){
+        editAvatarFile=file;
+        $('avatarCropImg').src=e.target.result;
+        $('avatarCropBox').classList.remove('hidden');
+      } else {
+        editBannerFile=file;
+        $('bannerCropImg').src=e.target.result;
+        $('bannerCropBox').classList.remove('hidden');
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+}
 
 async function uploadFile(file, path){
   let {data,error}=await db.storage.from('avatars').upload(path, file, {upsert:true});
@@ -733,10 +806,8 @@ async function saveProfile(){
   let avatar_url=profile.avatar_url, banner_url=profile.banner_url;
 
   try {
-    let avatarFile=$('avatarFileInput').files[0];
-    if(avatarFile) avatar_url=await uploadFile(avatarFile, `avatar_${user.id}_${Date.now()}`);
-    let bannerFile=$('bannerFileInput').files[0];
-    if(bannerFile) banner_url=await uploadFile(bannerFile, `banner_${user.id}_${Date.now()}`);
+    if(editAvatarFile) avatar_url=await uploadFile(editAvatarFile, `avatar_${user.id}_${Date.now()}`);
+    if(editBannerFile) banner_url=await uploadFile(editBannerFile, `banner_${user.id}_${Date.now()}`);
 
     let {error}=await db.from('user_profiles').upsert({
       user_id:user.id,full_name:name,username,bio,avatar_url,banner_url,is_private,updated_at:new Date().toISOString()
@@ -908,7 +979,7 @@ async function addComment(postId, postOwnerId){
   loadFeed('all');
 }
 
-/* EXPLORAR & PERFIL DE OUTROS */
+/* EXPLORAR & ABRIR CHAT DIRETAMENTE */
 async function searchProfiles(){
   let q=$('searchPeople').value.trim().replace(/^@/,'').toLowerCase();
   let query=db.from('user_profiles').select('*').neq('user_id',user.id).limit(30);
@@ -916,16 +987,28 @@ async function searchProfiles(){
   let {data}=await query;
   $('peopleList').innerHTML=(data||[]).map(p=>`
     <div class="person">
-      <div style="display:flex;align-items:center;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="inspectProfile('${p.user_id}')">
         <div class="avatar" style="width:38px;height:38px">${p.avatar_url?`<img src="${p.avatar_url}">`:(p.full_name?p.full_name[0]:'?')}</div>
         <div><b>${esc(p.full_name||'')}</b><div class="muted">@${esc(p.username||'')}</div></div>
       </div>
       <div style="display:flex;gap:6px">
         <button class="secondary" onclick="inspectProfile('${p.user_id}')">Ver Perfil</button>
-        <button class="secondary" onclick="openChat('${p.user_id}')"><i class="fa-solid fa-paper-plane"></i></button>
+        <button class="secondary" onclick="openChatFromExplore('${p.user_id}')"><i class="fa-solid fa-paper-plane"></i></button>
       </div>
     </div>
   `).join('')||'<p class="muted">Nenhum usuário encontrado.</p>';
+}
+
+async function openChatFromExplore(id){
+  let {data:targetProfile}=await db.from('user_profiles').select('*').eq('user_id',id).maybeSingle();
+  if(targetProfile && targetProfile.messages_from_following_only){
+    let {data:isF}=await db.from('follows').select('*').eq('follower_id',id).eq('following_id',user.id).maybeSingle();
+    if(!isF){
+      alert('Este usuário aceita mensagens apenas de quem ele segue.');
+      return;
+    }
+  }
+  openChat(id);
 }
 
 async function inspectProfile(id){
@@ -950,7 +1033,7 @@ async function inspectProfile(id){
       </div>
       <div style="display:flex;gap:8px;justify-content:center;margin-top:14px">
         <button onclick="toggleFollowModal('${id}',${!!isF})">${isF?'Seguindo':'Seguir'}</button>
-        <button class="secondary" onclick="closeUserModal();openChat('${id}')">Mensagem</button>
+        <button class="secondary" onclick="closeUserModal();openChatFromExplore('${id}')">Mensagem</button>
         <button class="ghost" onclick="toggleBlockUser('${id}',${!!isB})" style="color:var(--red);border-color:var(--red)">${isB?'Desbloquear':'Bloquear'}</button>
       </div>
     </div>
@@ -1047,6 +1130,16 @@ async function sendMessage(){
   if(!activeChat)return;
   let content=$('messageInput').value.trim();
   if(!content)return;
+  
+  let {data:targetProfile}=await db.from('user_profiles').select('*').eq('user_id',activeChat).maybeSingle();
+  if(targetProfile && targetProfile.messages_from_following_only){
+    let {data:isF}=await db.from('follows').select('*').eq('follower_id',activeChat).eq('following_id',user.id).maybeSingle();
+    if(!isF){
+      alert('Este usuário aceita mensagens apenas de quem ele segue.');
+      return;
+    }
+  }
+
   await db.from('direct_messages').insert({sender_id:user.id,receiver_id:activeChat,content});
   $('messageInput').value='';
   await loadMessages();
