@@ -1,3 +1,351 @@
+<!-- MODAL: NOVA POSTAGEM -->
+<div id="floatingPostModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="row" style="justify-content:space-between;margin-bottom:16px">
+      <h3 style="margin:0">Criar publicação</h3>
+      <button class="ghost" onclick="closeFloatingPostModal()">✕</button>
+    </div>
+    <textarea id="modalPostContent" maxlength="2000" placeholder="O que você está pensando?"></textarea>
+    <label class="tweet-media-btn">
+      <i class="fa-regular fa-image"></i> Escolher Imagem
+      <input type="file" id="modalPostImageInput" accept="image/*" class="hidden" onchange="previewFloatingPostImage()">
+    </label>
+    <div id="modalImagePreviewBox" class="hidden">
+      <div class="crop-preview-box"><img id="modalImagePreview"></div>
+      <button class="ghost" onclick="removeFloatingPostImage()">Remover imagem</button>
+    </div>
+    <div class="row" style="justify-content:flex-end;margin-top:18px">
+      <button class="secondary" onclick="closeFloatingPostModal()">Cancelar</button>
+      <button onclick="submitFloatingPost()">Publicar</button>
+    </div>
+    <p id="modalPostStatus" class="status"></p>
+  </div>
+</div>
+
+<!-- CONFIRMAR EXCLUSÃO DE POST -->
+<div id="deleteConfirmModal" class="modal-overlay hidden">
+  <div class="modal-box" style="text-align:center;max-width:360px">
+    <h3 style="color:var(--red)"> <i class="fa-solid fa-trash-can"></i> Excluir postagem</h3>
+    <p class="muted">Tem certeza de que deseja apagar esta publicação permanentemente?</p>
+    <div class="row" style="margin-top:20px">
+      <button class="secondary" onclick="closeDeleteConfirmModal()" style="flex:1">Cancelar</button>
+      <button class="danger" onclick="confirmExecuteDelete()" style="flex:1">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXCLUIR CONTA -->
+<div id="deleteAccountModal" class="modal-overlay hidden">
+  <div class="modal-box" style="text-align:center;max-width:380px">
+    <h3 style="color:var(--red)"><i class="fa-solid fa-triangle-exclamation"></i> Excluir Conta</h3>
+    <p class="muted">Isso apagará os dados que suas permissões permitirem excluir. Essa ação não pode ser desfeita.</p>
+    <div class="row" style="margin-top:20px">
+      <button class="secondary" onclick="closeDeleteAccountModal()" style="flex:1">Cancelar</button>
+      <button class="danger" onclick="executeDeleteAccount()" style="flex:1">Sim, excluir</button>
+    </div>
+    <p id="deleteAccStatus" class="status"></p>
+  </div>
+</div>
+
+<!-- DENÚNCIA -->
+<div id="reportModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h3>Denunciar publicação</h3>
+    <p class="muted">Ajude-nos a manter a comunidade segura.</p>
+    <label>Motivo da denúncia</label>
+    <select id="reportReasonSelect">
+      <option value="gore">Gore / Violência Extrema</option>
+      <option value="bullying">Assédio / Bullying</option>
+      <option value="mutilation">Automutilação</option>
+      <option value="inappropriate">Conteúdo Inadequado</option>
+    </select>
+    <div class="row" style="margin-top:18px">
+      <button class="secondary" onclick="closeReportModal()" style="flex:1">Cancelar</button>
+      <button class="danger" onclick="submitReport()" style="flex:1">Enviar denúncia</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIGURAÇÕES -->
+<div id="settingsModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="row" style="justify-content:space-between;margin-bottom:18px">
+      <h3 style="margin:0"><i class="fa-solid fa-gear"></i> Configurações</h3>
+      <button class="ghost" onclick="closeSettingsModal()">✕</button>
+    </div>
+
+    <div>
+      <label>🎵 Galeria de Músicas</label>
+      <select id="musicSelect" onchange="changePresetMusic(this.value)">
+        <option value="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3">Lo-Fi Soft / Café</option>
+        <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c3673f44.mp3">Piano Relaxante</option>
+        <option value="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3">Acústico Calmo</option>
+      </select>
+      <div class="row">
+        <input id="customMusicUrlInput" placeholder="URL direta .mp3" style="margin:0">
+        <button class="secondary" onclick="changeMusicUrl($('customMusicUrlInput').value)">Tocar</button>
+      </div>
+    </div>
+
+    <div style="margin-top:18px">
+      <label>Tema da Interface</label>
+      <select id="themeSelect" onchange="changeTheme(this.value)">
+        <option value="light">☀️ Claro</option>
+        <option value="dark">🌙 Escuro</option>
+      </select>
+    </div>
+
+    <div style="margin-top:18px">
+      <label>Fonte do Aplicativo</label>
+      <select id="fontSelect" onchange="changeFont(this.value)">
+        <option value="system">Padrão do Sistema</option>
+        <option value="serif">Serifada / Elegante</option>
+        <option value="monospace">Monoespaçada</option>
+      </select>
+    </div>
+
+    <div class="row" style="margin-top:20px;align-items:center">
+      <input type="checkbox" id="settingsMsgFollowingOnly" style="width:20px;height:20px;margin:0" onchange="saveMsgPrivacySetting(this.checked)">
+      <label for="settingsMsgFollowingOnly" style="margin:0">Receber mensagens apenas de quem eu sigo 💌</label>
+    </div>
+
+    <hr style="border:0;border-top:1px solid var(--line);margin:22px 0">
+    <h4>Usuários Bloqueados</h4>
+    <div id="blockedUsersList"><p class="muted">Carregando bloqueios...</p></div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;margin-top:22px">
+      <button class="secondary" onclick="signOut()"><i class="fa-solid fa-right-from-bracket"></i> Sair da Conta</button>
+      <button class="danger" onclick="openDeleteAccountModal()"><i class="fa-solid fa-user-xmark"></i> Excluir Minha Conta</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDITAR PERFIL -->
+<div id="editProfileModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h3 style="margin-top:0">Editar Perfil</h3>
+    <label>Nome</label><input id="profileName" placeholder="Seu nome">
+    <label>Nome de usuário (@)</label><input id="profileUsername" placeholder="ex: mariana">
+    <label>Biografia</label><textarea id="profileBio" maxlength="240"></textarea>
+
+    <div style="margin-top:16px">
+      <label>Foto de Perfil</label>
+      <label class="tweet-media-btn" style="width:100%;justify-content:center">
+        <i class="fa-regular fa-image"></i> Escolher Foto
+        <input type="file" id="avatarFileInput" accept="image/*" class="hidden" onchange="previewEditImage(this,'avatar')">
+      </label>
+      <div id="avatarCropBox" class="crop-preview-box hidden" style="border-radius:50%;width:90px;height:90px;margin:12px auto">
+        <img id="avatarCropImg">
+      </div>
+    </div>
+
+    <div style="margin-top:16px">
+      <label>Foto de Capa</label>
+      <label class="tweet-media-btn" style="width:100%;justify-content:center">
+        <i class="fa-regular fa-image"></i> Escolher Capa
+        <input type="file" id="bannerFileInput" accept="image/*" class="hidden" onchange="previewEditImage(this,'banner')">
+      </label>
+      <div id="bannerCropBox" class="crop-preview-box hidden" style="height:110px">
+        <img id="bannerCropImg" style="height:100%;width:100%;object-fit:cover">
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:18px">
+      <input type="checkbox" id="profileIsPrivate" style="width:20px;height:20px;margin:0">
+      <label for="profileIsPrivate" style="margin:0">Perfil privado 🔒</label>
+    </div>
+
+    <div class="row" style="margin-top:20px">
+      <button class="secondary" onclick="closeEditProfileModal()" style="flex:1">Cancelar</button>
+      <button onclick="saveProfile()" style="flex:1">Salvar</button>
+    </div>
+    <p id="profileStatus" class="status"></p>
+  </div>
+</div>
+
+<!-- PERFIL DE OUTRO USUÁRIO -->
+<div id="userModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="row" style="justify-content:flex-end">
+      <button class="ghost" onclick="closeUserModal()">✕</button>
+    </div>
+    <div id="modalProfileContent"></div>
+  </div>
+</div>
+<!-- MODAL: NOVA POSTAGEM -->
+<div id="floatingPostModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="row" style="justify-content:space-between;margin-bottom:16px">
+      <h3 style="margin:0">Criar publicação</h3>
+      <button class="ghost" onclick="closeFloatingPostModal()">✕</button>
+    </div>
+    <textarea id="modalPostContent" maxlength="2000" placeholder="O que você está pensando?"></textarea>
+    <label class="tweet-media-btn">
+      <i class="fa-regular fa-image"></i> Escolher Imagem
+      <input type="file" id="modalPostImageInput" accept="image/*" class="hidden" onchange="previewFloatingPostImage()">
+    </label>
+    <div id="modalImagePreviewBox" class="hidden">
+      <div class="crop-preview-box"><img id="modalImagePreview"></div>
+      <button class="ghost" onclick="removeFloatingPostImage()">Remover imagem</button>
+    </div>
+    <div class="row" style="justify-content:flex-end;margin-top:18px">
+      <button class="secondary" onclick="closeFloatingPostModal()">Cancelar</button>
+      <button onclick="submitFloatingPost()">Publicar</button>
+    </div>
+    <p id="modalPostStatus" class="status"></p>
+  </div>
+</div>
+
+<!-- CONFIRMAR EXCLUSÃO DE POST -->
+<div id="deleteConfirmModal" class="modal-overlay hidden">
+  <div class="modal-box" style="text-align:center;max-width:360px">
+    <h3 style="color:var(--red)"> <i class="fa-solid fa-trash-can"></i> Excluir postagem</h3>
+    <p class="muted">Tem certeza de que deseja apagar esta publicação permanentemente?</p>
+    <div class="row" style="margin-top:20px">
+      <button class="secondary" onclick="closeDeleteConfirmModal()" style="flex:1">Cancelar</button>
+      <button class="danger" onclick="confirmExecuteDelete()" style="flex:1">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXCLUIR CONTA -->
+<div id="deleteAccountModal" class="modal-overlay hidden">
+  <div class="modal-box" style="text-align:center;max-width:380px">
+    <h3 style="color:var(--red)"><i class="fa-solid fa-triangle-exclamation"></i> Excluir Conta</h3>
+    <p class="muted">Isso apagará os dados que suas permissões permitirem excluir. Essa ação não pode ser desfeita.</p>
+    <div class="row" style="margin-top:20px">
+      <button class="secondary" onclick="closeDeleteAccountModal()" style="flex:1">Cancelar</button>
+      <button class="danger" onclick="executeDeleteAccount()" style="flex:1">Sim, excluir</button>
+    </div>
+    <p id="deleteAccStatus" class="status"></p>
+  </div>
+</div>
+
+<!-- DENÚNCIA -->
+<div id="reportModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h3>Denunciar publicação</h3>
+    <p class="muted">Ajude-nos a manter a comunidade segura.</p>
+    <label>Motivo da denúncia</label>
+    <select id="reportReasonSelect">
+      <option value="gore">Gore / Violência Extrema</option>
+      <option value="bullying">Assédio / Bullying</option>
+      <option value="mutilation">Automutilação</option>
+      <option value="inappropriate">Conteúdo Inadequado</option>
+    </select>
+    <div class="row" style="margin-top:18px">
+      <button class="secondary" onclick="closeReportModal()" style="flex:1">Cancelar</button>
+      <button class="danger" onclick="submitReport()" style="flex:1">Enviar denúncia</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIGURAÇÕES -->
+<div id="settingsModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="row" style="justify-content:space-between;margin-bottom:18px">
+      <h3 style="margin:0"><i class="fa-solid fa-gear"></i> Configurações</h3>
+      <button class="ghost" onclick="closeSettingsModal()">✕</button>
+    </div>
+
+    <div>
+      <label>🎵 Galeria de Músicas</label>
+      <select id="musicSelect" onchange="changePresetMusic(this.value)">
+        <option value="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3">Lo-Fi Soft / Café</option>
+        <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c3673f44.mp3">Piano Relaxante</option>
+        <option value="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3">Acústico Calmo</option>
+      </select>
+      <div class="row">
+        <input id="customMusicUrlInput" placeholder="URL direta .mp3" style="margin:0">
+        <button class="secondary" onclick="changeMusicUrl($('customMusicUrlInput').value)">Tocar</button>
+      </div>
+    </div>
+
+    <div style="margin-top:18px">
+      <label>Tema da Interface</label>
+      <select id="themeSelect" onchange="changeTheme(this.value)">
+        <option value="light">☀️ Claro</option>
+        <option value="dark">🌙 Escuro</option>
+      </select>
+    </div>
+
+    <div style="margin-top:18px">
+      <label>Fonte do Aplicativo</label>
+      <select id="fontSelect" onchange="changeFont(this.value)">
+        <option value="system">Padrão do Sistema</option>
+        <option value="serif">Serifada / Elegante</option>
+        <option value="monospace">Monoespaçada</option>
+      </select>
+    </div>
+
+    <div class="row" style="margin-top:20px;align-items:center">
+      <input type="checkbox" id="settingsMsgFollowingOnly" style="width:20px;height:20px;margin:0" onchange="saveMsgPrivacySetting(this.checked)">
+      <label for="settingsMsgFollowingOnly" style="margin:0">Receber mensagens apenas de quem eu sigo 💌</label>
+    </div>
+
+    <hr style="border:0;border-top:1px solid var(--line);margin:22px 0">
+    <h4>Usuários Bloqueados</h4>
+    <div id="blockedUsersList"><p class="muted">Carregando bloqueios...</p></div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;margin-top:22px">
+      <button class="secondary" onclick="signOut()"><i class="fa-solid fa-right-from-bracket"></i> Sair da Conta</button>
+      <button class="danger" onclick="openDeleteAccountModal()"><i class="fa-solid fa-user-xmark"></i> Excluir Minha Conta</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDITAR PERFIL -->
+<div id="editProfileModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h3 style="margin-top:0">Editar Perfil</h3>
+    <label>Nome</label><input id="profileName" placeholder="Seu nome">
+    <label>Nome de usuário (@)</label><input id="profileUsername" placeholder="ex: mariana">
+    <label>Biografia</label><textarea id="profileBio" maxlength="240"></textarea>
+
+    <div style="margin-top:16px">
+      <label>Foto de Perfil</label>
+      <label class="tweet-media-btn" style="width:100%;justify-content:center">
+        <i class="fa-regular fa-image"></i> Escolher Foto
+        <input type="file" id="avatarFileInput" accept="image/*" class="hidden" onchange="previewEditImage(this,'avatar')">
+      </label>
+      <div id="avatarCropBox" class="crop-preview-box hidden" style="border-radius:50%;width:90px;height:90px;margin:12px auto">
+        <img id="avatarCropImg">
+      </div>
+    </div>
+
+    <div style="margin-top:16px">
+      <label>Foto de Capa</label>
+      <label class="tweet-media-btn" style="width:100%;justify-content:center">
+        <i class="fa-regular fa-image"></i> Escolher Capa
+        <input type="file" id="bannerFileInput" accept="image/*" class="hidden" onchange="previewEditImage(this,'banner')">
+      </label>
+      <div id="bannerCropBox" class="crop-preview-box hidden" style="height:110px">
+        <img id="bannerCropImg" style="height:100%;width:100%;object-fit:cover">
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:18px">
+      <input type="checkbox" id="profileIsPrivate" style="width:20px;height:20px;margin:0">
+      <label for="profileIsPrivate" style="margin:0">Perfil privado 🔒</label>
+    </div>
+
+    <div class="row" style="margin-top:20px">
+      <button class="secondary" onclick="closeEditProfileModal()" style="flex:1">Cancelar</button>
+      <button onclick="saveProfile()" style="flex:1">Salvar</button>
+    </div>
+    <p id="profileStatus" class="status"></p>
+  </div>
+</div>
+
+<!-- PERFIL DE OUTRO USUÁRIO -->
+<div id="userModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="row" style="justify-content:flex-end">
+      <button class="ghost" onclick="closeUserModal()">✕</button>
+    </div>
+    <div id="modalProfileContent"></div>
+  </div>
+</div>
 <script>
 const SUPABASE_URL='https://qhveyeqpwguqbokfwlwf.supabase.co';
 const SUPABASE_KEY='sb_publishable_FWLt3OH6KIOwXZ-DqJGacw_vcoMg-eM';
