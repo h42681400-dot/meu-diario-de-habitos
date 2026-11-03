@@ -4,7 +4,6 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Meu Diário — comunidade</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- FontAwesome para os ícones -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 :root{
@@ -18,114 +17,165 @@
   --red:#ff4d4f;
   --bubble-me:#fceeee;
   --bubble-other:#f4edea;
+  --font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
+
+body.theme-dark {
+  --bg:#1a1818;
+  --card-bg:#262323;
+  --ink:#f5ecea;
+  --muted:#a39592;
+  --rose:#d4a5a5;
+  --rose-hover:#c39494;
+  --line:#383332;
+  --red:#ff4d4f;
+  --bubble-me:#3d2c2c;
+  --bubble-other:#2e2a29;
+}
+
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif}
-button,input,textarea{font:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px var(--font-family);transition:background 0.3s, color 0.3s}
+button,input,textarea,select{font:inherit}
 button{border:0;border-radius:12px;padding:10px 16px;background:var(--rose);color:white;font-weight:600;cursor:pointer;transition:all 0.2s}
 button:hover{background:var(--rose-hover)}
-button.secondary{background:#f0eae9;color:var(--ink)}
+button.secondary{background:var(--line);color:var(--ink)}
 button.ghost{background:transparent;color:var(--rose);border:1px solid var(--line)}
 button:disabled{opacity:.5;cursor:not-allowed}
-input,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#faf7f6;color:var(--ink);margin:6px 0;outline:none}
-input:focus,textarea:focus{border-color:var(--rose);background:#fff}
+input,textarea,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);margin:6px 0;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--rose)}
 textarea{min-height:85px;resize:vertical}
 .hidden{display:none!important}
 .wrap{max-width:680px;margin:0 auto;padding:0 16px 85px 16px}
 .card{background:var(--card-bg);border-radius:20px;padding:20px;margin:14px 0;box-shadow:0 2px 12px rgba(0,0,0,0.02);border:1px solid var(--line)}
 
-/* Login */
-.login{max-width:400px;margin:10vh auto;padding:24px}
+/* Login & Cadastro Espaçado */
+.login{max-width:440px;margin:6vh auto;padding:24px}
 .brand{text-align:center;color:var(--ink);font-weight:800;letter-spacing:-0.5px}
 .muted,.hint{color:var(--muted);font-size:13px}
-.login-actions{display:flex;flex-direction:column;gap:14px;margin-top:20px}
+.login-actions{display:flex;flex-direction:column;gap:12px;margin-top:16px}
 
 .top{display:flex;justify-content:space-between;align-items:center;padding:16px 0}
 
-/* Navegação Estilo Instagram */
+/* Navegação Estilo Instagram com Badges */
 .nav{position:fixed;bottom:0;left:0;right:0;background:var(--card-bg);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:10px 0;z-index:1000;box-shadow:0 -2px 10px rgba(0,0,0,0.02)}
-.nav button{background:transparent;color:var(--muted);border-radius:50px;padding:8px 14px;font-size:18px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.nav button{background:transparent;color:var(--muted);border-radius:50px;padding:8px 14px;font-size:18px;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative}
 .nav button span{font-size:10px;font-weight:500}
 .nav button.active{color:var(--rose);background:transparent}
+.badge-red{background:var(--red);color:white;border-radius:50px;width:10px;height:10px;position:absolute;top:6px;right:18px}
 
 .page{display:none}.page.active{display:block}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
-/* Calendário */
-.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.calendar-head button{width:auto}
-.week,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
-.week div{font-weight:bold;padding:8px 0;color:var(--muted);font-size:13px}
-.day{padding:12px 3px;border-radius:10px;background:#faf7f6;cursor:pointer;font-size:13px}
-.day.selected{background:var(--rose);color:white}
-.day.today{border:1px solid var(--rose)}
-.day.has-entry:after{content:' •';color:var(--rose)}
-.field{margin:12px 0}.field label{font-weight:600;font-size:13px;color:var(--muted)}
+/* FAB - Botão Flutuante */
+.fab-post{position:fixed;bottom:75px;right:20px;width:54px;height:54px;border-radius:50%;background:var(--rose);color:white;font-size:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(0,0,0,0.15);z-index:999;cursor:pointer}
 
-/* Posts e Mídia */
+/* Posts */
 .post{border-bottom:1px solid var(--line);padding:16px 0}
 .post:last-child{border-bottom:0}
-.post-head{display:flex;align-items:center;gap:12px}
-.avatar{width:44px;height:44px;border-radius:50%;background:#f0eae9;display:flex;align-items:center;justify-content:center;color:var(--rose);font-weight:bold;overflow:hidden;flex:none}
+.post-head{display:flex;align-items:center;justify-content:space-between}
+.post-user-info{display:flex;align-items:center;gap:12px;cursor:pointer}
+.avatar{width:44px;height:44px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;color:var(--rose);font-weight:bold;overflow:hidden;flex:none}
 .avatar img{width:100%;height:100%;object-fit:cover}
-.post-media{width:100%;max-height:300px;border-radius:12px;object-fit:cover;margin-top:10px}
+.post-media{width:100%;max-height:320px;border-radius:14px;object-fit:cover;margin-top:10px}
 .post-actions{display:flex;gap:16px;margin-top:12px;color:var(--muted)}
 .post-actions button{background:transparent;color:var(--muted);padding:4px 8px;font-size:13px;display:flex;align-items:center;gap:6px}
-.post-actions button:hover,.post-actions button.liked{color:var(--red);background:transparent}
-.post-actions button.reposted{color:var(--rose);background:transparent}
-
-/* Comentários */
+.post-actions button.liked{color:var(--red)}
+.post-actions button.reposted{color:var(--rose)}
 .comments-section{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
-.comment-item{font-size:13px;margin:6px 0;padding:6px;background:#faf7f6;border-radius:8px}
+.comment-item{font-size:13px;margin:6px 0;padding:6px;background:var(--bg);border-radius:8px}
 
-/* Mensagens Estilo Celular */
-.chat-container{display:flex;flex-direction:column}
-.messages{height:340px;overflow:auto;border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0;background:#faf7f6}
-.bubble{max-width:80%;padding:10px 14px;border-radius:16px;background:var(--bubble-other);margin:8px 0;font-size:14px;word-break:break-word;position:relative}
+/* Mensagens */
+.messages{height:340px;overflow:auto;border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0;background:var(--bg)}
+.bubble{max-width:80%;padding:10px 14px;border-radius:16px;background:var(--bubble-other);margin:8px 0;font-size:14px;word-break:break-word}
 .bubble.mine{background:var(--bubble-me);color:var(--ink);margin-left:auto}
 .bubble-status{font-size:10px;text-align:right;margin-top:4px;color:var(--muted)}
 
-/* Perfil Estilo Twitter e Mídia Estilo Tweet */
+/* Perfil */
 .profile-card{padding:0;overflow:hidden}
-.profile-banner{height:130px;background:#f0eae9;position:relative}
+.profile-banner{height:130px;background:var(--line);position:relative}
 .profile-banner img{width:100%;height:100%;object-fit:cover}
 .profile-avatar-area{position:relative;padding:0 20px;margin-top:-40px;display:flex;justify-content:space-between;align-items:flex-end}
-.profile-big-avatar{width:86px;height:86px;border-radius:50%;border:4px solid white;background:#e2d5d3;overflow:hidden;font-size:30px;display:flex;align-items:center;justify-content:center;color:var(--rose)}
+.profile-big-avatar{width:86px;height:86px;border-radius:50%;border:4px solid var(--card-bg);background:var(--line);overflow:hidden;font-size:30px;display:flex;align-items:center;justify-content:center;color:var(--rose)}
 .profile-big-avatar img{width:100%;height:100%;object-fit:cover}
+.profile-top-actions{position:absolute;top:15px;right:15px;display:flex;gap:8px;z-index:10}
+.gear-btn{background:rgba(0,0,0,0.4);color:white;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .profile-tabs{display:flex;border-bottom:1px solid var(--line);margin-top:10px;overflow-x:auto}
 .profile-tab{flex:1;text-align:center;padding:12px;cursor:pointer;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;font-size:13px;white-space:nowrap}
 .profile-tab.active{color:var(--ink);border-bottom-color:var(--rose)}
 
-/* Caixa de mídia estilo Twitter no Perfil / Posts */
-.tweet-media-box{display:flex;align-items:center;gap:10px;margin-top:8px}
-.tweet-media-btn{background:#f0eae9;color:var(--ink);padding:8px 12px;border-radius:10px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
-.tweet-media-btn:hover{background:#e2d5d3}
+/* Preview da imagem */
+.img-preview-container{position:relative;margin-top:10px;display:inline-block;max-width:100%}
+.img-preview-container img{max-height:180px;border-radius:12px;object-fit:cover}
+.remove-preview-btn{position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.6);color:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 
-/* Notificações */
+/* Modais */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal-box{background:var(--card-bg);width:100%;max-width:480px;border-radius:20px;padding:20px;max-height:85vh;overflow:auto}
+.tweet-media-btn{background:var(--line);color:var(--ink);padding:8px 12px;border-radius:10px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 .notif-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
-.notif-item .icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fceeee;color:var(--red)}
-.badge-red{background:var(--red);color:white;border-radius:50px;padding:2px 6px;font-size:9px;position:absolute;top:3px;right:16px;font-weight:bold}
+.notif-item .icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bubble-me);color:var(--red)}
 .person{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
 </style></head>
 <body>
 
-<!-- TELA DE LOGIN -->
+<!-- TELA DE LOGIN & CADASTRO COMPLETO -->
 <div id="loginScreen" class="wrap login">
   <div class="card">
     <h1 class="brand">Meu Diário 🤍</h1>
-    <p class="muted" style="text-align:center;margin-bottom:24px">Seu espaço de hábitos e rotina.</p>
-    <input id="email" type="email" placeholder="Seu e-mail">
-    <input id="password" type="password" placeholder="Sua senha">
-    <div class="login-actions">
-      <button onclick="signIn()" style="width:100%">Entrar</button>
-      <button class="secondary" onclick="signUp()" style="width:100%">Criar minha conta</button>
-      <button class="ghost" onclick="resetPassword()" style="width:100%">Esqueci minha senha</button>
+    <p class="muted" style="text-align:center;margin-bottom:20px">Seu espaço de hábitos e comunidade.</p>
+    
+    <!-- ABA DE ALTERNÂNCIA (LOGIN x CADASTRO) -->
+    <div style="display:flex;border-bottom:1px solid var(--line);margin-bottom:16px">
+      <div id="tabLoginBtn" class="profile-tab active" onclick="toggleAuthTab('login')">Entrar</div>
+      <div id="tabSignUpBtn" class="profile-tab" onclick="toggleAuthTab('signup')">Criar Conta</div>
     </div>
+
+    <!-- FORMULÁRIO DE LOGIN -->
+    <div id="loginForm">
+      <div class="field"><label>E-mail</label><input id="loginEmail" type="email" placeholder="seuemail@exemplo.com"></div>
+      <div class="field"><label>Senha</label><input id="loginPassword" type="password" placeholder="Sua senha"></div>
+      <div class="login-actions">
+        <button onclick="signIn()" style="width:100%">Entrar</button>
+        <button class="ghost" onclick="resetPassword()" style="width:100%">Esqueci minha senha</button>
+      </div>
+    </div>
+
+    <!-- FORMULÁRIO DE CADASTRO COMPLETO (DE CARA) -->
+    <div id="signUpForm" class="hidden">
+      <div class="field"><label>Nome Completo</label><input id="regName" placeholder="Ex: Mariana Silva"></div>
+      <div class="field"><label>Nome de usuário (@)</label><input id="regUsername" placeholder="ex: mariana.fit"></div>
+      <div class="field"><label>E-mail</label><input id="regEmail" type="email" placeholder="seuemail@exemplo.com"></div>
+      <div class="field"><label>Senha</label><input id="regPassword" type="password" placeholder="Mínimo 6 caracteres"></div>
+      
+      <div class="field">
+        <label>Idioma Preferido</label>
+        <select id="regLanguage">
+          <option value="pt-BR">🇧🇷 Português (Brasil)</option>
+          <option value="en">🇺🇸 English</option>
+          <option value="es">🇪🇸 Español</option>
+          <option value="ko">🇰🇷 한국어 (Coreano)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Foto de Perfil</label>
+        <label class="tweet-media-btn" style="width:100%;justify-content:center">
+          <i class="fa-regular fa-image"></i> Escolher Foto de Perfil
+          <input type="file" id="regAvatarInput" accept="image/*" class="hidden" onchange="$('regAvatarName').textContent=this.files[0]?.name||''">
+        </label>
+        <span id="regAvatarName" class="muted" style="font-size:12px;display:block;text-align:center;margin-top:4px"></span>
+      </div>
+
+      <div class="login-actions">
+        <button onclick="signUp()" style="width:100%">Criar Perfil e Entrar</button>
+      </div>
+    </div>
+
     <p id="loginStatus" class="status"></p>
   </div>
 </div>
 
-<!-- APLICATIVO PRINCIPAL -->
+<!-- APP PRINCIPAL -->
 <div id="app" class="wrap hidden">
   <header class="top">
     <div>
@@ -137,35 +187,29 @@ textarea{min-height:85px;resize:vertical}
     </div>
   </header>
 
-  <!-- NAVEGAÇÃO INFERIOR -->
+  <!-- BOTÃO FLUTUANTE DE NOVO POST -->
+  <div class="fab-post" onclick="openFloatingPostModal()">
+    <i class="fa-solid fa-pen"></i>
+  </div>
+
+  <!-- NAVEGAÇÃO -->
   <nav class="nav">
     <button data-page="feed" class="active" onclick="showPage('feed')"><i class="fa-solid fa-house"></i><span>Início</span></button>
     <button data-page="diary" onclick="showPage('diary')"><i class="fa-solid fa-book-open"></i><span>Diário</span></button>
     <button data-page="explore" onclick="showPage('explore')"><i class="fa-solid fa-compass"></i><span>Explorar</span></button>
-    <button data-page="messages" onclick="showPage('messages')"><i class="fa-solid fa-paper-plane"></i><span>Mensagens</span></button>
-    <button data-page="notifications" onclick="showPage('notifications')" style="position:relative">
+    <button data-page="messages" onclick="showPage('messages')">
+      <i class="fa-solid fa-paper-plane"></i><span>Mensagens</span>
+      <span id="msgBadge" class="badge-red hidden"></span>
+    </button>
+    <button data-page="notifications" onclick="showPage('notifications')">
       <i class="fa-solid fa-heart"></i><span>Notificações</span>
-      <span id="notifBadge" class="badge-red hidden">0</span>
+      <span id="notifBadge" class="badge-red hidden"></span>
     </button>
     <button data-page="profile" onclick="showPage('profile')"><i class="fa-solid fa-user"></i><span>Perfil</span></button>
   </nav>
 
-  <!-- PÁGINA: FEED -->
+  <!-- FEED -->
   <section id="feed" class="page active">
-    <div class="card">
-      <textarea id="postContent" maxlength="2000" placeholder="O que você quer compartilhar hoje?"></textarea>
-      <div class="tweet-media-box">
-        <label class="tweet-media-btn">
-          <i class="fa-regular fa-image"></i> Adicionar Foto
-          <input type="file" id="postImageInput" accept="image/*" class="hidden" onchange="previewPostImage()">
-        </label>
-        <span id="postImageName" class="muted" style="font-size:12px"></span>
-      </div>
-      <div style="display:flex;justify-content:flex-end;margin-top:10px">
-        <button onclick="createPost()">Publicar</button>
-      </div>
-      <p id="feedStatus" class="status"></p>
-    </div>
     <div class="card">
       <div class="row" style="margin-bottom:14px">
         <button class="secondary" onclick="loadFeed('all')">Todos</button>
@@ -175,7 +219,7 @@ textarea{min-height:85px;resize:vertical}
     </div>
   </section>
 
-  <!-- PÁGINA: DIÁRIO -->
+  <!-- DIÁRIO -->
   <section id="diary" class="page">
     <div class="card">
       <div class="calendar-head">
@@ -204,7 +248,7 @@ textarea{min-height:85px;resize:vertical}
     </div>
   </section>
 
-  <!-- PÁGINA: EXPLORAR -->
+  <!-- EXPLORAR -->
   <section id="explore" class="page">
     <div class="card">
       <input id="searchPeople" placeholder="🔍 Buscar por nome ou @usuário" oninput="searchProfiles()">
@@ -212,16 +256,13 @@ textarea{min-height:85px;resize:vertical}
     </div>
   </section>
 
-  <!-- PÁGINA: MENSAGENS (ADAPTADA PARA CELULAR - ABRE CHAT SÓ AO CLICAR) -->
+  <!-- MENSAGENS -->
   <section id="messages" class="page">
     <div class="card">
-      <!-- Tela de Lista de Conversas -->
       <div id="chatListView">
         <h3 style="margin-top:0">Conversas</h3>
         <div id="chatList" class="chat-list"></div>
       </div>
-
-      <!-- Tela de Chat Individual -->
       <div id="chatRoomView" class="hidden">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
           <button class="secondary" onclick="backToChatList()" style="padding:6px 12px"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
@@ -244,7 +285,7 @@ textarea{min-height:85px;resize:vertical}
     </div>
   </section>
 
-  <!-- PÁGINA: NOTIFICAÇÕES -->
+  <!-- NOTIFICAÇÕES -->
   <section id="notifications" class="page">
     <div class="card">
       <h3 style="margin-top:0;font-size:16px">Notificações 🤍</h3>
@@ -252,10 +293,13 @@ textarea{min-height:85px;resize:vertical}
     </div>
   </section>
 
-  <!-- PÁGINA: PERFIL COMPLETO (TWITTER + PRIVADO + BLOQUEIOS) -->
+  <!-- PERFIL -->
   <section id="profile" class="page">
     <div class="card profile-card">
       <div class="profile-banner">
+        <div class="profile-top-actions">
+          <div class="gear-btn" onclick="openSettingsModal()"><i class="fa-solid fa-gear"></i></div>
+        </div>
         <img id="bannerImg" src="" class="hidden">
       </div>
       <div class="profile-avatar-area">
@@ -272,9 +316,8 @@ textarea{min-height:85px;resize:vertical}
           <span style="cursor:pointer" onclick="switchProfileTab('following')"><b id="countFollowing" style="color:var(--ink)">0</b> Seguindo</span>
           <span style="cursor:pointer" onclick="switchProfileTab('followers')"><b id="countFollowers" style="color:var(--ink)">0</b> Seguidores</span>
         </div>
-        <div id="profilePrivacyBadge" class="muted" style="font-size:12px">🔒 Perfil Público</div>
+        <div id="profilePrivacyBadge" class="muted" style="font-size:12px">🔓 Perfil Público</div>
       </div>
-      <!-- ABAS DO PERFIL -->
       <div class="profile-tabs">
         <div class="profile-tab active" onclick="switchProfileTab('posts')">Posts</div>
         <div class="profile-tab" onclick="switchProfileTab('reposts')">Reposts</div>
@@ -282,51 +325,94 @@ textarea{min-height:85px;resize:vertical}
         <div class="profile-tab" onclick="switchProfileTab('followers')">Seguidores</div>
       </div>
     </div>
-    
     <div id="profileTabContent" class="card"></div>
   </section>
 </div>
 
-<!-- MODAL: PERFIL DE OUTRO USUÁRIO -->
-<div id="userModal" class="wrap hidden" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px">
-  <div class="card" style="width:100%;max-width:480px;max-height:85vh;overflow:auto;margin:0">
-    <div style="display:flex;justify-content:flex-end">
-      <button class="ghost" onclick="closeUserModal()" style="padding:4px 10px">✕</button>
+<!-- MODAL: NOVA POSTAGEM FLUTUANTE -->
+<div id="floatingPostModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 style="margin:0">Criar publicação</h3>
+      <button class="ghost" onclick="closeFloatingPostModal()" style="padding:4px 8px">✕</button>
     </div>
-    <div id="modalProfileContent"></div>
+    <textarea id="modalPostContent" maxlength="2000" placeholder="O que você está pensando?"></textarea>
+    
+    <div style="margin-top:10px">
+      <label class="tweet-media-btn">
+        <i class="fa-regular fa-image"></i> Anexar Imagem
+        <input type="file" id="modalPostImageInput" accept="image/*" class="hidden" onchange="previewFloatingPostImage()">
+      </label>
+    </div>
+
+    <div id="modalImagePreviewBox" class="hidden">
+      <div class="img-preview-container">
+        <img id="modalImagePreview" src="">
+        <div class="remove-preview-btn" onclick="removeFloatingPostImage()">✕</div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px">
+      <button class="secondary" onclick="closeFloatingPostModal()">Cancelar</button>
+      <button onclick="submitFloatingPost()">Publicar</button>
+    </div>
+    <p id="modalPostStatus" class="status"></p>
   </div>
 </div>
 
-<!-- MODAL: EDITAR PERFIL (ESTILO TWITTER PARA FOTOS + PRIVACIDADE + BLOQUEIOS) -->
-<div id="editProfileModal" class="wrap hidden" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px">
-  <div class="card" style="width:100%;max-width:450px;max-height:90vh;overflow:auto;margin:0">
+<!-- MODAL: CONFIGURAÇÕES DO APLICATIVO -->
+<div id="settingsModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="margin:0"><i class="fa-solid fa-gear"></i> Configurações</h3>
+      <button class="ghost" onclick="closeSettingsModal()" style="padding:4px 8px">✕</button>
+    </div>
+
+    <div class="field">
+      <label>Tema da Interface</label>
+      <select id="themeSelect" onchange="changeTheme(this.value)">
+        <option value="light">☀️ Claro (Coreano Soft)</option>
+        <option value="dark">🌙 Escuro (Dark Minimalist)</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Fonte do Aplicativo</label>
+      <select id="fontSelect" onchange="changeFont(this.value)">
+        <option value="system">Padrão do Sistema</option>
+        <option value="serif">Serifada / Elegante (Georgia)</option>
+        <option value="monospace">Monospaçada / Diário Digital (Courier)</option>
+      </select>
+    </div>
+
+    <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+
+    <div>
+      <h4 style="margin:0 0 10px 0">Usuários Bloqueados</h4>
+      <div id="blockedUsersList"><p class="muted">Carregando bloqueios...</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR PERFIL -->
+<div id="editProfileModal" class="modal-overlay hidden">
+  <div class="modal-box">
     <h3 style="margin-top:0">Editar Perfil</h3>
     <div class="field"><label>Nome</label><input id="profileName" placeholder="Seu nome"></div>
     <div class="field"><label>Nome de usuário (@)</label><input id="profileUsername" placeholder="ex: mariana"></div>
     <div class="field"><label>Biografia</label><textarea id="profileBio" maxlength="240"></textarea></div>
-    
-    <!-- Upload Estilo Twitter -->
     <div class="field">
       <label>Foto de Perfil</label>
-      <div class="tweet-media-box">
-        <label class="tweet-media-btn"><i class="fa-regular fa-image"></i> Escolher Foto<input type="file" id="avatarFileInput" accept="image/*" class="hidden" onchange="$('avatarFileName').textContent=this.files[0]?.name||''"></label>
-        <span id="avatarFileName" class="muted" style="font-size:12px"></span>
-      </div>
+      <input type="file" id="avatarFileInput" accept="image/*">
     </div>
     <div class="field">
       <label>Foto de Capa</label>
-      <div class="tweet-media-box">
-        <label class="tweet-media-btn"><i class="fa-regular fa-image"></i> Escolher Capa<input type="file" id="bannerFileInput" accept="image/*" class="hidden" onchange="$('bannerFileName').textContent=this.files[0]?.name||''"></label>
-        <span id="bannerFileName" class="muted" style="font-size:12px"></span>
-      </div>
+      <input type="file" id="bannerFileInput" accept="image/*">
     </div>
-
-    <!-- Opção de Perfil Privado -->
     <div class="field" style="display:flex;align-items:center;gap:10px;margin-top:15px">
       <input type="checkbox" id="profileIsPrivate" style="width:20px;height:20px">
-      <label for="profileIsPrivate" style="margin:0;cursor:pointer">Tentar perfil privado 🔒</label>
+      <label for="profileIsPrivate" style="margin:0;cursor:pointer">Perfil privado 🔒</label>
     </div>
-
     <div style="display:flex;gap:10px;margin-top:16px">
       <button class="secondary" onclick="closeEditProfileModal()" style="flex:1">Cancelar</button>
       <button onclick="saveProfile()" style="flex:1">Salvar</button>
@@ -335,12 +421,22 @@ textarea{min-height:85px;resize:vertical}
   </div>
 </div>
 
+<!-- MODAL: VER PERFIL DE OUTRO USUÁRIO -->
+<div id="userModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:flex-end">
+      <button class="ghost" onclick="closeUserModal()" style="padding:4px 10px">✕</button>
+    </div>
+    <div id="modalProfileContent"></div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL='https://qhveyeqpwguqbokfwlwf.supabase.co';
 const SUPABASE_KEY='sb_publishable_FWLt3OH6KIOwXZ-DqJGacw_vcoMg-eM';
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let user=null, selected=new Date(), entries={}, profile=null, activeChat=null, chatProfiles={}, currentPostImageFile=null;
+let user=null, selected=new Date(), entries={}, profile=null, activeChat=null, chatProfiles={}, currentFloatingPostImage=null;
 
 const $=id=>document.getElementById(id);
 const pad=n=>String(n).padStart(2,'0');
@@ -353,25 +449,63 @@ function esc(s=''){
   }[c]));
 }
 
+function toggleAuthTab(tab){
+  $('tabLoginBtn').classList.toggle('active', tab==='login');
+  $('tabSignUpBtn').classList.toggle('active', tab==='signup');
+  $('loginForm').classList.toggle('hidden', tab!=='login');
+  $('signUpForm').classList.toggle('hidden', tab!=='signup');
+  status('loginStatus','');
+}
+
+/* AUTENTICAÇÃO E CRIAR PERFIL COMPLETO */
 async function signUp(){
-  let email=$('email').value.trim(),password=$('password').value;
-  if(!email||password.length<6)
-    return status('loginStatus','Informe e-mail e senha com pelo menos 6 caracteres.');
+  let name=$('regName').value.trim();
+  let username=$('regUsername').value.trim().toLowerCase().replace(/^@/,'');
+  let email=$('regEmail').value.trim();
+  let password=$('regPassword').value;
+  let language=$('regLanguage').value;
+
+  if(!name || !username || !email || password.length<6){
+    return status('loginStatus','Preencha nome, @usuário, e-mail e senha (mín. 6 caracteres).');
+  }
+
+  status('loginStatus','Criando conta e perfil...');
+
   let {data,error}=await db.auth.signUp({email,password});
-  status('loginStatus',error?error.message:(data.session?'Conta criada!':'Confirme seu e-mail.'));
+  if(error) return status('loginStatus', error.message);
+
+  let newUser = data.user;
+  if(newUser){
+    let avatar_url = null;
+    let avatarFile = $('regAvatarInput').files[0];
+    if(avatarFile){
+      try {
+        avatar_url = await uploadFile(avatarFile, `avatar_${newUser.id}_${Date.now()}`);
+      } catch(e){ console.warn('Erro avatar:', e.message); }
+    }
+
+    let {error:pErr}=await db.from('user_profiles').upsert({
+      user_id:newUser.id,
+      full_name:name,
+      username:username,
+      language:language,
+      avatar_url:avatar_url,
+      updated_at:new Date().toISOString()
+    },{onConflict:'user_id'});
+
+    if(pErr) status('loginStatus','Conta criada! ' + pErr.message);
+    else status('loginStatus', data.session?'Perfil criado com sucesso!':'Conta criada! Confirme seu e-mail.');
+  }
 }
 
 async function signIn(){
-  let {error}=await db.auth.signInWithPassword({
-    email:$('email').value.trim(),
-    password:$('password').value
-  });
+  let {error}=await db.auth.signInWithPassword({ email:$('loginEmail').value.trim(), password:$('loginPassword').value });
   if(error)status('loginStatus',error.message);
 }
 
 async function resetPassword(){
-  let email=$('email').value.trim();
-  if(!email)return status('loginStatus','Digite seu e-mail primeiro.');
+  let email=$('loginEmail').value.trim();
+  if(!email)return status('loginStatus','Digite seu e-mail no campo de e-mail primeiro.');
   let {error}=await db.auth.resetPasswordForEmail(email);
   status('loginStatus',error?error.message:'Link enviado para o seu e-mail.');
 }
@@ -388,7 +522,7 @@ db.auth.onAuthStateChange(async(_event,session)=>{
     await loadProfile();
     await loadFeed('all');
     await loadChats();
-    await checkNotifications();
+    await checkUnreadBadges();
     $('hello').textContent='Olá! 🤍';
   }
 });
@@ -408,28 +542,31 @@ function showPage(id){
   if(id==='feed')loadFeed('all');
   if(id==='notifications')loadNotifications();
   if(id==='profile')loadProfileDataTab('posts');
+  checkUnreadBadges();
+}
+
+/* BADGES VERMELHOS */
+async function checkUnreadBadges(){
+  if(!user) return;
+  let {count:notifCount}=await db.from('notifications').select('*',{count:'exact',head:true}).eq('user_id',user.id).eq('read',false);
+  $('notifBadge').classList.toggle('hidden', !notifCount || notifCount <= 0);
+
+  let {count:msgCount}=await db.from('direct_messages').select('*',{count:'exact',head:true}).eq('receiver_id',user.id).is('read_at',null);
+  $('msgBadge').classList.toggle('hidden', !msgCount || msgCount <= 0);
 }
 
 /* CALENDÁRIO */
-function changeMonth(n){
-  selected=new Date(selected.getFullYear(),selected.getMonth()+n,1);
-  loadMonth();
-}
-
+function changeMonth(n){ selected=new Date(selected.getFullYear(),selected.getMonth()+n,1); loadMonth(); }
 async function loadMonth(){
   let first=new Date(selected.getFullYear(),selected.getMonth(),1);
   let last=new Date(selected.getFullYear(),selected.getMonth()+1,0);
   $('monthTitle').textContent=first.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
-  let {data}=await db.from('diary_entries').select('*')
-    .eq('user_id',user.id)
-    .gte('entry_date',dateKey(first))
-    .lte('entry_date',dateKey(last));
+  let {data}=await db.from('diary_entries').select('*').eq('user_id',user.id).gte('entry_date',dateKey(first)).lte('entry_date',dateKey(last));
   entries={};
   (data||[]).forEach(r=>entries[r.entry_date]=r);
   drawCalendar();
   await selectDay(selected);
 }
-
 function drawCalendar(){
   let y=selected.getFullYear(),m=selected.getMonth();
   let offset=new Date(y,m,1).getDay(),total=new Date(y,m+1,0).getDate();
@@ -437,51 +574,121 @@ function drawCalendar(){
   for(let i=0;i<offset;i++)$('days').append(document.createElement('div'));
   for(let n=1;n<=total;n++){
     let d=new Date(y,m,n),k=dateKey(d),el=document.createElement('div');
-    el.className='day'+(k===dateKey(selected)?' selected':'')+
-      (k===dateKey(new Date())?' today':'')+(entries[k]?' has-entry':'');
+    el.className='day'+(k===dateKey(selected)?' selected':'')+(k===dateKey(new Date())?' today':'')+(entries[k]?' has-entry':'');
     el.textContent=n;
     el.onclick=()=>selectDay(d);
     $('days').append(el);
   }
 }
-
 async function selectDay(d){
   selected=new Date(d.getFullYear(),d.getMonth(),d.getDate());
   drawCalendar();
-  $('selectedDate').textContent=selected.toLocaleDateString('pt-BR',{
-    weekday:'long',day:'numeric',month:'long',year:'numeric'
-  });
-  let {data}=await db.from('diary_entries').select('*')
-    .eq('user_id',user.id).eq('entry_date',dateKey(selected)).maybeSingle();
+  $('selectedDate').textContent=selected.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  let {data}=await db.from('diary_entries').select('*').eq('user_id',user.id).eq('entry_date',dateKey(selected)).maybeSingle();
   let r=data||{};
   for(let f of ['breakfast','lunch','snacks','dinner','exercise','notes'])$(f).value=r[f]||'';
   $('water').value=r.water_ml??'';
 }
-
 async function saveEntry(){
-  let v={
-    breakfast:$('breakfast').value.trim(),
-    lunch:$('lunch').value.trim(),
-    snacks:$('snacks').value.trim(),
-    dinner:$('dinner').value.trim(),
-    water_ml:$('water').value===''?null:Number($('water').value),
-    exercise:$('exercise').value.trim(),
-    notes:$('notes').value.trim()
-  };
+  let v={breakfast:$('breakfast').value.trim(),lunch:$('lunch').value.trim(),snacks:$('snacks').value.trim(),dinner:$('dinner').value.trim(),water_ml:$('water').value===''?null:Number($('water').value),exercise:$('exercise').value.trim(),notes:$('notes').value.trim()};
   let k=dateKey(selected);
-  let {data:old}=await db.from('diary_entries').select('id')
-    .eq('user_id',user.id).eq('entry_date',k).maybeSingle();
-  
+  let {data:old}=await db.from('diary_entries').select('id').eq('user_id',user.id).eq('entry_date',k).maybeSingle();
   let empty=!v.breakfast&&!v.lunch&&!v.snacks&&!v.dinner&&v.water_ml===null&&!v.exercise&&!v.notes;
   if(empty&&old)await db.from('diary_entries').delete().eq('id',old.id);
   else if(!empty&&old)await db.from('diary_entries').update(v).eq('id',old.id);
   else if(!empty)await db.from('diary_entries').insert({user_id:user.id,entry_date:k,...v});
-
   status('diaryStatus','Salvo com sucesso! 🤍');
   await loadMonth();
 }
 
-/* PERFIL E STORAGE SUPABASE */
+/* TEMA E FONTE */
+function changeTheme(theme){
+  if(theme==='dark') document.body.classList.add('theme-dark');
+  else document.body.classList.remove('theme-dark');
+  localStorage.setItem('userTheme', theme);
+}
+function changeFont(font){
+  if(font==='serif') document.documentElement.style.setProperty('--font-family', 'Georgia, serif');
+  else if(font==='monospace') document.documentElement.style.setProperty('--font-family', '"Courier New", monospace');
+  else document.documentElement.style.setProperty('--font-family', '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif');
+  localStorage.setItem('userFont', font);
+}
+if(localStorage.getItem('userTheme')==='dark'){ changeTheme('dark'); $('themeSelect').value='dark'; }
+if(localStorage.getItem('userFont')){ changeFont(localStorage.getItem('userFont')); $('fontSelect').value=localStorage.getItem('userFont'); }
+
+function openSettingsModal(){ $('settingsModal').classList.remove('hidden'); loadBlockedUsers(); }
+function closeSettingsModal(){ $('settingsModal').classList.add('hidden'); }
+
+async function loadBlockedUsers(){
+  let {data:blocks}=await db.from('blocks').select('blocked_id').eq('blocker_id',user.id);
+  let ids=(blocks||[]).map(b=>b.blocked_id);
+  if(!ids.length){ $('blockedUsersList').innerHTML='<p class="muted">Nenhum usuário bloqueado.</p>'; return; }
+  let {data:users}=await db.from('user_profiles').select('*').in('user_id',ids);
+  $('blockedUsersList').innerHTML=(users||[]).map(u=>`
+    <div class="person">
+      <div><b>${esc(u.full_name||'')}</b><div class="muted">@${esc(u.username||'')}</div></div>
+      <button class="ghost" onclick="unblockUser('${u.user_id}')" style="color:var(--red);border-color:var(--red)">Desbloquear</button>
+    </div>
+  `).join('');
+}
+
+async function unblockUser(id){
+  await db.from('blocks').delete().eq('blocker_id',user.id).eq('blocked_id',id);
+  loadBlockedUsers();
+  loadFeed('all');
+}
+
+/* POSTAGEM FLUTUANTE */
+function openFloatingPostModal(){ $('floatingPostModal').classList.remove('hidden'); }
+function closeFloatingPostModal(){ 
+  $('floatingPostModal').classList.add('hidden'); 
+  $('modalPostContent').value='';
+  removeFloatingPostImage();
+}
+function previewFloatingPostImage(){
+  let file=$('modalPostImageInput').files[0];
+  if(file){
+    currentFloatingPostImage=file;
+    let reader=new FileReader();
+    reader.onload=e=>{
+      $('modalImagePreview').src=e.target.result;
+      $('modalImagePreviewBox').classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+  }
+}
+function removeFloatingPostImage(){
+  currentFloatingPostImage=null;
+  $('modalPostImageInput').value='';
+  $('modalImagePreviewBox').classList.add('hidden');
+}
+
+async function submitFloatingPost(){
+  let content=$('modalPostContent').value.trim();
+  if(!content && !currentFloatingPostImage) return;
+  status('modalPostStatus','Publicando...');
+  try {
+    let media_url=null;
+    if(currentFloatingPostImage){
+      media_url=await uploadFile(currentFloatingPostImage, `post_${user.id}_${Date.now()}`);
+    }
+    await db.from('posts').insert({user_id:user.id,content,media_url});
+    closeFloatingPostModal();
+    loadFeed('all');
+  } catch(err){
+    status('modalPostStatus',err.message);
+  }
+}
+
+async function deletePost(postId){
+  if(confirm("Tem certeza que deseja excluir esta publicação?")){
+    await db.from('posts').delete().eq('id',postId).eq('user_id',user.id);
+    loadFeed('all');
+    if(!$('profile').classList.contains('hidden')) loadProfileDataTab('posts');
+  }
+}
+
+/* PERFIL */
 async function loadProfile(){
   let {data}=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
   profile=data||{};
@@ -495,17 +702,11 @@ async function loadProfile(){
   $('viewProfileBio').textContent=profile.bio||'';
   $('profilePrivacyBadge').textContent=profile.is_private?'🔒 Perfil Privado':'🔓 Perfil Público';
 
-  if(profile.avatar_url){
-    $('profileBigAvatar').innerHTML=`<img src="${esc(profile.avatar_url)}">`;
-  } else {
-    $('profileBigAvatar').textContent=(profile.full_name?profile.full_name[0]:'?').toUpperCase();
-  }
-  if(profile.banner_url){
-    $('bannerImg').src=profile.banner_url;
-    $('bannerImg').classList.remove('hidden');
-  } else {
-    $('bannerImg').classList.add('hidden');
-  }
+  if(profile.avatar_url){ $('profileBigAvatar').innerHTML=`<img src="${esc(profile.avatar_url)}">`; }
+  else { $('profileBigAvatar').textContent=(profile.full_name?profile.full_name[0]:'?').toUpperCase(); }
+  
+  if(profile.banner_url){ $('bannerImg').src=profile.banner_url; $('bannerImg').classList.remove('hidden'); }
+  else { $('bannerImg').classList.add('hidden'); }
 
   let {count:fCount}=await db.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',user.id);
   let {count:wCount}=await db.from('follows').select('*',{count:'exact',head:true}).eq('following_id',user.id);
@@ -529,32 +730,21 @@ async function saveProfile(){
   let username=$('profileUsername').value.trim().toLowerCase().replace(/^@/,'');
   let bio=$('profileBio').value.trim();
   let is_private=$('profileIsPrivate').checked;
-
-  let avatar_url=profile.avatar_url;
-  let banner_url=profile.banner_url;
+  let avatar_url=profile.avatar_url, banner_url=profile.banner_url;
 
   try {
     let avatarFile=$('avatarFileInput').files[0];
-    if(avatarFile){
-      avatar_url=await uploadFile(avatarFile, `avatar_${user.id}_${Date.now()}`);
-    }
+    if(avatarFile) avatar_url=await uploadFile(avatarFile, `avatar_${user.id}_${Date.now()}`);
     let bannerFile=$('bannerFileInput').files[0];
-    if(bannerFile){
-      banner_url=await uploadFile(bannerFile, `banner_${user.id}_${Date.now()}`);
-    }
+    if(bannerFile) banner_url=await uploadFile(bannerFile, `banner_${user.id}_${Date.now()}`);
 
     let {error}=await db.from('user_profiles').upsert({
       user_id:user.id,full_name:name,username,bio,avatar_url,banner_url,is_private,updated_at:new Date().toISOString()
     },{onConflict:'user_id'});
-
     if(error) throw error;
-
-    status('profileStatus','Perfil atualizado! 🤍');
     closeEditProfileModal();
     await loadProfile();
-  } catch(err){
-    status('profileStatus', err.message);
-  }
+  } catch(err){ status('profileStatus', err.message); }
 }
 
 async function switchProfileTab(tab){
@@ -575,8 +765,7 @@ async function loadProfileDataTab(tab){
     let {data:posts}=await db.from('posts').select('*').in('id',postIds).order('created_at',{ascending:false});
     let authorIds=[...new Set((posts||[]).map(p=>p.user_id))];
     let {data:authors}=await db.from('user_profiles').select('*').in('user_id',authorIds);
-    let authorMap={};
-    (authors||[]).forEach(a=>authorMap[a.user_id]=a);
+    let authorMap={}; (authors||[]).forEach(a=>authorMap[a.user_id]=a);
     box.innerHTML=(posts||[]).map(p=>renderPostHtml(p, authorMap[p.user_id]||{}, true)).join('')||'<p class="muted">Nenhum repost encontrado.</p>';
   } else if(tab==='following'||tab==='followers'){
     let col=tab==='following'?'follower_id':'following_id';
@@ -597,36 +786,7 @@ async function loadProfileDataTab(tab){
   }
 }
 
-/* FEED & POSTS COM IMAGENS E COMENTÁRIOS */
-function previewPostImage(){
-  let file=$('postImageInput').files[0];
-  if(file){
-    currentPostImageFile=file;
-    $('postImageName').textContent=file.name;
-  }
-}
-
-async function createPost(){
-  let content=$('postContent').value.trim();
-  if(!content && !currentPostImageFile)return;
-  status('feedStatus','Publicando...');
-  try {
-    let media_url=null;
-    if(currentPostImageFile){
-      media_url=await uploadFile(currentPostImageFile, `post_${user.id}_${Date.now()}`);
-    }
-    await db.from('posts').insert({user_id:user.id,content,media_url});
-    $('postContent').value='';
-    $('postImageInput').value='';
-    currentPostImageFile=null;
-    $('postImageName').textContent='';
-    status('feedStatus','');
-    await loadFeed('all');
-  } catch(err){
-    status('feedStatus', err.message);
-  }
-}
-
+/* FEED & POSTS */
 async function loadFeed(mode='all'){
   let {data:blocked}=await db.from('blocks').select('blocked_id').eq('blocker_id',user.id);
   let blockedIds=(blocked||[]).map(b=>b.blocked_id);
@@ -650,18 +810,11 @@ async function loadFeed(mode='all'){
   let likes={}, mineLikes=new Set(), mineReposts=new Set(), commentCounts={};
   if(postIds.length){
     let {data:l}=await db.from('post_likes').select('post_id,user_id').in('post_id',postIds);
-    (l||[]).forEach(x=>{
-      likes[x.post_id]=(likes[x.post_id]||0)+1;
-      if(x.user_id===user.id) mineLikes.add(x.post_id);
-    });
+    (l||[]).forEach(x=>{ likes[x.post_id]=(likes[x.post_id]||0)+1; if(x.user_id===user.id) mineLikes.add(x.post_id); });
     let {data:r}=await db.from('post_reposts').select('post_id,user_id').in('post_id',postIds);
-    (r||[]).forEach(x=>{
-      if(x.user_id===user.id) mineReposts.add(x.post_id);
-    });
+    (r||[]).forEach(x=>{ if(x.user_id===user.id) mineReposts.add(x.post_id); });
     let {data:c}=await db.from('post_comments').select('post_id').in('post_id',postIds);
-    (c||[]).forEach(x=>{
-      commentCounts[x.post_id]=(commentCounts[x.post_id]||0)+1;
-    });
+    (c||[]).forEach(x=>{ commentCounts[x.post_id]=(commentCounts[x.post_id]||0)+1; });
   }
 
   $('feedList').innerHTML=rows.length?rows.map(p=>renderPostHtml(p, profs[p.user_id]||{}, true, likes[p.id]||0, mineLikes.has(p.id), mineReposts.has(p.id), commentCounts[p.id]||0)).join(''):'<p class="muted">Nenhuma publicação por aqui.</p>';
@@ -671,11 +824,16 @@ function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false,
   let name=esc(author.full_name||'Pessoa');
   let handle=author.username?'@'+esc(author.username):'@usuario';
   let avatarHtml=author.avatar_url?`<img src="${esc(author.avatar_url)}">`:name[0].toUpperCase();
+  let isMine=p.user_id===user.id;
+
   return `
     <article class="post">
-      <div class="post-head" style="cursor:pointer" onclick="inspectProfile('${p.user_id}')">
-        <div class="avatar">${avatarHtml}</div>
-        <div><b>${name}</b><div class="muted">${handle} · ${new Date(p.created_at).toLocaleDateString('pt-BR')}</div></div>
+      <div class="post-head">
+        <div class="post-user-info" onclick="inspectProfile('${p.user_id}')">
+          <div class="avatar">${avatarHtml}</div>
+          <div><b>${name}</b><div class="muted">${handle} · ${new Date(p.created_at).toLocaleDateString('pt-BR')}</div></div>
+        </div>
+        ${isMine?`<button class="ghost" onclick="deletePost('${p.id}')" style="color:var(--red);padding:4px 8px;font-size:12px"><i class="fa-solid fa-trash"></i></button>`:''}
       </div>
       <p style="margin:10px 0;line-height:1.4">${esc(p.content).replace(/\n/g,'<br>')}</p>
       ${p.media_url?`<img src="${esc(p.media_url)}" class="post-media">`:''}
@@ -703,25 +861,19 @@ function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false,
 }
 
 async function toggleLike(postId, isLiked, postOwnerId){
-  if(isLiked){
-    await db.from('post_likes').delete().eq('post_id',postId).eq('user_id',user.id);
-  } else {
+  if(isLiked) await db.from('post_likes').delete().eq('post_id',postId).eq('user_id',user.id);
+  else {
     await db.from('post_likes').insert({post_id:postId,user_id:user.id});
-    if(postOwnerId !== user.id){
-      await db.from('notifications').insert({user_id:postOwnerId, actor_id:user.id, type:'like', post_id:postId});
-    }
+    if(postOwnerId !== user.id) await db.from('notifications').insert({user_id:postOwnerId, actor_id:user.id, type:'like', post_id:postId});
   }
   loadFeed('all');
 }
 
 async function toggleRepost(postId, isReposted, postOwnerId){
-  if(isReposted){
-    await db.from('post_reposts').delete().eq('post_id',postId).eq('user_id',user.id);
-  } else {
+  if(isReposted) await db.from('post_reposts').delete().eq('post_id',postId).eq('user_id',user.id);
+  else {
     await db.from('post_reposts').insert({post_id:postId, user_id:user.id});
-    if(postOwnerId !== user.id){
-      await db.from('notifications').insert({user_id:postOwnerId, actor_id:user.id, type:'repost', post_id:postId});
-    }
+    if(postOwnerId !== user.id) await db.from('notifications').insert({user_id:postOwnerId, actor_id:user.id, type:'repost', post_id:postId});
   }
   loadFeed('all');
 }
@@ -729,9 +881,7 @@ async function toggleRepost(postId, isReposted, postOwnerId){
 async function toggleCommentsSection(postId){
   let box=$('comments-box-'+postId);
   box.classList.toggle('hidden');
-  if(!box.classList.contains('hidden')){
-    await loadPostComments(postId);
-  }
+  if(!box.classList.contains('hidden')) await loadPostComments(postId);
 }
 
 async function loadPostComments(postId){
@@ -744,26 +894,21 @@ async function loadPostComments(postId){
   }
   $('comments-list-'+postId).innerHTML=(data||[]).map(c=>{
     let author=authors[c.user_id]||{};
-    let name=esc(author.full_name||'Usuário');
-    let handle=author.username?'@'+esc(author.username):'@usuario';
-    return `<div class="comment-item"><b>${name} (${handle}):</b> ${esc(c.content)}</div>`;
+    return `<div class="comment-item"><b>${esc(author.full_name||'Usuário')}:</b> ${esc(c.content)}</div>`;
   }).join('')||'<p class="muted" style="font-size:13px">Nenhum comentário ainda.</p>';
 }
 
 async function addComment(postId, postOwnerId){
-  let input=$('comment-input-'+postId);
-  let content=input.value.trim();
+  let input=$('comment-input-'+postId), content=input.value.trim();
   if(!content)return;
   await db.from('post_comments').insert({post_id:postId, user_id:user.id, content});
   input.value='';
-  if(postOwnerId !== user.id){
-    await db.from('notifications').insert({user_id:postOwnerId, actor_id:user.id, type:'comment', post_id:postId});
-  }
+  if(postOwnerId !== user.id) await db.from('notifications').insert({user_id:postOwnerId, actor_id:user.id, type:'comment', post_id:postId});
   await loadPostComments(postId);
   loadFeed('all');
 }
 
-/* EXPLORAR E BLOQUEIO */
+/* EXPLORAR & PERFIL DE OUTROS */
 async function searchProfiles(){
   let q=$('searchPeople').value.trim().replace(/^@/,'').toLowerCase();
   let query=db.from('user_profiles').select('*').neq('user_id',user.id).limit(30);
@@ -810,9 +955,7 @@ async function inspectProfile(id){
       </div>
     </div>
     <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
-    <div>
-      ${isPrivateAndNotFollowing ? '<p class="muted" style="text-align:center">Este perfil é privado. Siga-o para ver as publicações.</p>' : (posts||[]).map(p=>renderPostHtml(p,u,false)).join('')||'<p class="muted">Sem publicações.</p>'}
-    </div>
+    <div>${isPrivateAndNotFollowing ? '<p class="muted" style="text-align:center">Este perfil é privado. Siga-o para ver as publicações.</p>' : (posts||[]).map(p=>renderPostHtml(p,u,false)).join('')||'<p class="muted">Sem publicações.</p>'}</div>
   `;
   $('userModal').classList.remove('hidden');
 }
@@ -820,9 +963,8 @@ async function inspectProfile(id){
 function closeUserModal(){ $('userModal').classList.add('hidden'); }
 
 async function toggleFollowModal(targetId, isFollowing){
-  if(isFollowing){
-    await db.from('follows').delete().eq('follower_id',user.id).eq('following_id',targetId);
-  } else {
+  if(isFollowing) await db.from('follows').delete().eq('follower_id',user.id).eq('following_id',targetId);
+  else {
     await db.from('follows').insert({follower_id:user.id,following_id:targetId});
     await db.from('notifications').insert({user_id:targetId, actor_id:user.id, type:'follow'});
   }
@@ -830,28 +972,23 @@ async function toggleFollowModal(targetId, isFollowing){
 }
 
 async function toggleBlockUser(targetId, isBlocked){
-  if(isBlocked){
-    await db.from('blocks').delete().eq('blocker_id',user.id).eq('blocked_id',targetId);
-    alert('Usuário desbloqueado.');
-  } else {
+  if(isBlocked) await db.from('blocks').delete().eq('blocker_id',user.id).eq('blocked_id',targetId);
+  else {
     await db.from('blocks').insert({blocker_id:user.id, blocked_id:targetId});
-    // Remove follow mútuo se houver
     await db.from('follows').delete().eq('follower_id',user.id).eq('following_id',targetId);
     await db.from('follows').delete().eq('follower_id',targetId).eq('following_id',user.id);
-    alert('Usuário bloqueado com sucesso.');
   }
   closeUserModal();
   loadFeed('all');
 }
 
-/* CHAT ADAPTADO PARA CELULAR & STATUS */
+/* CHAT */
 async function loadChats(){
   let {data}=await db.from('direct_messages').select('*').or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`).order('created_at',{ascending:false});
   let peers=[...new Set((data||[]).map(m=>m.sender_id===user.id?m.receiver_id:m.sender_id))];
   if(!peers.length){$('chatList').innerHTML='<p class="muted">Nenhuma conversa recente.</p>';return;}
   let {data:p}=await db.from('user_profiles').select('*').in('user_id',peers);
-  chatProfiles={};
-  (p||[]).forEach(x=>chatProfiles[x.user_id]=x);
+  chatProfiles={}; (p||[]).forEach(x=>chatProfiles[x.user_id]=x);
   $('chatList').innerHTML=peers.map(id=>`
     <div class="chat-item" onclick="openChat('${id}')">
       <div class="avatar" style="width:34px;height:34px">${chatProfiles[id]?.avatar_url?`<img src="${chatProfiles[id].avatar_url}">`:(chatProfiles[id]?.full_name?chatProfiles[id].full_name[0]:'?')}</div>
@@ -865,8 +1002,7 @@ async function openChat(id){
   let p=chatProfiles[id];
   if(!p){
     let {data}=await db.from('user_profiles').select('*').eq('user_id',id).maybeSingle();
-    p=data||{};
-    chatProfiles[id]=p;
+    p=data||{}; chatProfiles[id]=p;
   }
   $('chatTitle').textContent=(p.full_name||'Conversa')+' · @'+(p.username||'');
   $('chatListView').classList.add('hidden');
@@ -879,27 +1015,24 @@ function backToChatList(){
   $('chatRoomView').classList.add('hidden');
   $('chatListView').classList.remove('hidden');
   loadChats();
+  checkUnreadBadges();
 }
 
 function addEmoji(emoji){ $('messageInput').value += emoji; }
 
 async function loadMessages(){
   if(!activeChat)return;
-  let {data}=await db.from('direct_messages').select('*')
-    .or(`and(sender_id.eq.${user.id},receiver_id.eq.${activeChat}),and(sender_id.eq.${activeChat},receiver_id.eq.${user.id})`)
-    .order('created_at');
+  let {data}=await db.from('direct_messages').select('*').or(`and(sender_id.eq.${user.id},receiver_id.eq.${activeChat}),and(sender_id.eq.${activeChat},receiver_id.eq.${user.id})`).order('created_at');
   
-  // Marcar como lidas
   let unread=(data||[]).filter(m=>m.receiver_id===user.id && !m.read_at).map(m=>m.id);
   if(unread.length){
     await db.from('direct_messages').update({read_at:new Date().toISOString()}).in('id',unread);
+    checkUnreadBadges();
   }
 
   $('messageBox').innerHTML=(data||[]).map(m=>{
     let isMine=m.sender_id===user.id;
-    let statusText='enviando...';
-    if(m.created_at) statusText='✓ enviado';
-    if(m.read_at) statusText='✓✓ lido';
+    let statusText=m.read_at?'✓✓ lido':(m.created_at?'✓ enviado':'enviando...');
     return `
       <div class="bubble ${isMine?'mine':''}">
         ${esc(m.content)}
@@ -920,30 +1053,17 @@ async function sendMessage(){
 }
 
 /* NOTIFICAÇÕES */
-async function checkNotifications(){
-  let {count}=await db.from('notifications').select('*',{count:'exact',head:true}).eq('user_id',user.id).eq('read',false);
-  let badge=$('notifBadge');
-  if(count > 0){
-    badge.textContent=count;
-    badge.classList.remove('hidden');
-  } else {
-    badge.classList.add('hidden');
-  }
-}
-
 async function loadNotifications(){
   $('notifBadge').classList.add('hidden');
   await db.from('notifications').update({read:true}).eq('user_id',user.id);
+  checkUnreadBadges();
 
   let {data}=await db.from('notifications').select('*').eq('user_id',user.id).order('created_at',{ascending:false}).limit(30);
-  if(!data || !data.length){
-    $('notifList').innerHTML='<p class="muted">Nenhuma notificação por enquanto.</p>';
-    return;
-  }
+  if(!data || !data.length){ $('notifList').innerHTML='<p class="muted">Nenhuma notificação por enquanto.</p>'; return; }
+  
   let actorIds=[...new Set(data.map(n=>n.actor_id))];
   let {data:actors}=await db.from('user_profiles').select('*').in('user_id',actorIds);
-  let actorMap={};
-  (actors||[]).forEach(a=>actorMap[a.user_id]=a);
+  let actorMap={}; (actors||[]).forEach(a=>actorMap[a.user_id]=a);
 
   $('notifList').innerHTML=data.map(n=>{
     let actor=actorMap[n.actor_id]||{};
