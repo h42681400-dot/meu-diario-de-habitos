@@ -1,284 +1,565 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Meu Diário de Hábitos</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meu Diário — comunidade</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#f8f4f1;color:#493e3a;font-family:Arial,sans-serif}
-.container{max-width:900px;margin:30px auto;padding:20px}
-.card{background:white;border-radius:18px;padding:24px;margin-bottom:18px;box-shadow:0 4px 18px #0000000a}
-h1,h2{color:#9b706d}
-h1{text-align:center}
-input,textarea,button{font:inherit;border-radius:10px;padding:12px;width:100%;margin:6px 0;border:1px solid #e5d8d3}
-textarea{min-height:75px;resize:vertical}
-button{background:#ad8580;color:white;border:0;cursor:pointer;font-weight:bold}
-button:hover{opacity:.85}
-button.secondary{background:#eee4e0;color:#624e49}
-.hidden{display:none!important}
-.login{max-width:420px;margin:70px auto}
-.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.calendar-head button{width:auto}
-.week,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
-.week div{font-weight:bold;padding:8px 0;color:#9b706d}
-.day{padding:12px 3px;border-radius:9px;background:#f8f4f1;cursor:pointer}
-.day.selected{background:#ad8580;color:white}
-.day.today{outline:2px solid #ad8580}
-.day.has-entry:after{content:" •";color:#9b706d}
-.day.selected:after{color:white}
-.small{font-size:13px;color:#887b76}
-#status{min-height:22px;color:#8b625e}
-</style>
-</head>
-<body>
+:root{--rose:#ad8580;--rose2:#9b706d;--ink:#493e3a;--muted:#887b76;--bg:#f8f4f1;--line:#eadfda;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px Arial,sans-serif}button,input,textarea{font:inherit}button{border:0;border-radius:11px;padding:11px 15px;background:var(--rose);color:white;font-weight:700;cursor:pointer}button.secondary{background:#eee4e0;color:#624e49}button.ghost{background:transparent;color:var(--rose2);border:1px solid var(--line)}button:disabled{opacity:.5;cursor:not-allowed}input,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);margin:5px 0}textarea{min-height:85px;resize:vertical}.hidden{display:none!important}.wrap{max-width:1050px;margin:24px auto;padding:0 16px}.card{background:white;border-radius:18px;padding:20px;margin:14px 0;box-shadow:0 4px 18px #00000008}.login{max-width:420px;margin:8vh auto}.brand{text-align:center;color:var(--rose2)}.muted,.hint{color:var(--muted);font-size:13px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.nav{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.nav button{flex:1;min-width:90px}.nav button.active{background:#765a56}.page{display:none}.page.active{display:block}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.calendar-head button{width:auto}.week,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}.week div{font-weight:bold;padding:8px 0;color:var(--rose2)}.day{padding:12px 3px;border-radius:9px;background:var(--bg);cursor:pointer}.day.selected{background:var(--rose);color:white}.day.today{outline:2px solid var(--rose)}.day.has-entry:after{content:' •';color:var(--rose2)}.day.selected:after{color:white}.field{margin:10px 0}.field label{font-weight:700;font-size:14px}.post{border:1px solid var(--line);border-radius:14px;padding:15px;margin:12px 0}.post-head{display:flex;align-items:center;gap:10px}.avatar{width:40px;height:40px;border-radius:50%;background:#eee4e0;display:flex;align-items:center;justify-content:center;color:var(--rose2);font-weight:bold;overflow:hidden;flex:none}.avatar img{width:100%;height:100%;object-fit:cover}.post-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.post-actions button{padding:8px 11px}.person{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.person:last-child{border:0}.chat-list{max-height:220px;overflow:auto}.chat-item{padding:10px;border-bottom:1px solid var(--line);cursor:pointer}.chat-item:hover{background:var(--bg)}.messages{height:260px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}.bubble{max-width:80%;padding:9px 12px;border-radius:13px;background:#f1e8e4;margin:7px 0}.bubble.mine{background:#ad8580;color:white;margin-left:auto}.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}.status{min-height:20px;color:var(--rose2);font-size:13px}.tag{display:inline-block;background:#f5ece8;border-radius:20px;padding:5px 9px;font-size:12px;color:#765a56}@media(max-width:650px){.grid{grid-template-columns:1fr}.wrap{margin:10px auto}.card{padding:15px}.day{padding:10px 1px}}
+</style></head><body>
 
-<div id="loginScreen" class="container login">
+<div id="loginScreen" class="wrap login">
   <div class="card">
-    <h1>Meu Diário de Hábitos</h1>
-    <p class="small">Entre na sua conta ou crie seu cadastro.</p>
+    <h1 class="brand">Meu Diário 💗</h1>
+    <p class="muted">Seu espaço de hábitos, rotina e comunidade.</p>
     <input id="email" type="email" placeholder="Seu e-mail">
     <input id="password" type="password" placeholder="Sua senha">
-    <button onclick="signIn()">Entrar</button>
-    <button class="secondary" onclick="signUp()">Criar minha conta</button>
-    <button class="secondary" onclick="resetPassword()">Esqueci minha senha</button>
-    <p id="loginStatus"></p>
+    <button style="width:100%" onclick="signIn()">Entrar</button>
+    <button class="secondary" style="width:100%" onclick="signUp()">Criar minha conta</button>
+    <button class="ghost" style="width:100%" onclick="resetPassword()">Esqueci minha senha</button>
+    <p id="loginStatus" class="status"></p>
   </div>
 </div>
 
-<div id="app" class="container hidden">
-  <h1>Meu Diário de Hábitos</h1>
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <span id="welcome">Meu diário</span>
-      <button style="width:auto" onclick="signOut()">Sair</button>
+<div id="app" class="wrap hidden">
+  <header class="top">
+    <div>
+      <h1 class="brand" style="margin:0">Meu Diário 💗</h1>
+      <span class="muted">hábitos que florescem juntos</span>
     </div>
-  </div>
-
-  <div class="card">
-    <div class="calendar-head">
-      <button class="secondary" onclick="changeMonth(-1)">‹</button>
-      <h2 id="monthTitle"></h2>
-      <button class="secondary" onclick="changeMonth(1)">›</button>
+    <div class="row" style="flex:0 1 auto">
+      <span id="hello" class="muted"></span>
+      <button class="secondary" onclick="signOut()">Sair</button>
     </div>
-    <div class="week">
-      <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div>
-      <div>Qui</div><div>Sex</div><div>Sáb</div>
+  </header>
+
+  <nav class="nav">
+    <button data-page="feed" class="active" onclick="showPage('feed')">Início</button>
+    <button data-page="diary" onclick="showPage('diary')">Meu diário</button>
+    <button data-page="explore" onclick="showPage('explore')">Explorar</button>
+    <button data-page="messages" onclick="showPage('messages')">Mensagens</button>
+    <button data-page="profile" onclick="showPage('profile')">Perfil</button>
+  </nav>
+
+  <section id="feed" class="page active">
+    <div class="card">
+      <h2>Seu feed</h2>
+      <p class="muted">Compartilhe uma conquista, uma reflexão ou um hábito do dia.</p>
+      <textarea id="postContent" maxlength="2000" placeholder="O que você quer compartilhar hoje?"></textarea>
+      <button onclick="createPost()">Publicar</button>
+      <p id="feedStatus" class="status"></p>
     </div>
-    <div class="days" id="days"></div>
-  </div>
+    <div class="card">
+      <div class="row">
+        <button class="secondary" onclick="loadFeed('all')">Todos</button>
+        <button class="secondary" onclick="loadFeed('following')">Quem sigo</button>
+      </div>
+      <div id="feedList"></div>
+    </div>
+  </section>
 
-  <div class="card">
-    <h2 id="selectedDate"></h2>
-    <p class="small">Registre seus hábitos do dia.</p>
+  <section id="diary" class="page">
+    <div class="card">
+      <h2>Meu calendário</h2>
+      <div class="calendar-head">
+        <button class="secondary" onclick="changeMonth(-1)">‹</button>
+        <h3 id="monthTitle"></h3>
+        <button class="secondary" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="week">
+        <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+      </div>
+      <div id="days" class="days"></div>
+    </div>
+    <div class="card">
+      <h2 id="selectedDate"></h2>
+      <div class="grid">
+        <div class="field">
+          <label>☀️ Café da manhã</label>
+          <textarea id="breakfast" placeholder="O que você comeu?"></textarea>
+        </div>
+        <div class="field">
+          <label>🍽️ Almoço</label>
+          <textarea id="lunch" placeholder="O que você comeu?"></textarea>
+        </div>
+        <div class="field">
+          <label>🍎 Lanches</label>
+          <textarea id="snacks" placeholder="O que você comeu?"></textarea>
+        </div>
+        <div class="field">
+          <label>🌙 Jantar</label>
+          <textarea id="dinner" placeholder="O que você comeu?"></textarea>
+        </div>
+      </div>
+      <div class="field">
+        <label>💧 Água (ml)</label>
+        <input id="water" type="number" min="0" placeholder="Ex.: 2000">
+      </div>
+      <div class="field">
+        <label>🏃 Exercícios</label>
+        <textarea id="exercise" placeholder="Qual atividade você fez?"></textarea>
+      </div>
+      <div class="field">
+        <label>📝 Observações</label>
+        <textarea id="notes" placeholder="Como foi seu dia?"></textarea>
+      </div>
+      <button onclick="saveEntry()">Salvar meu dia</button>
+      <p id="diaryStatus" class="status"></p>
+    </div>
+  </section>
 
-    <label>☀️ Café da manhã</label>
-    <textarea id="breakfast" placeholder="O que você comeu no café da manhã?"></textarea>
+  <section id="explore" class="page">
+    <div class="card">
+      <h2>Encontre pessoas</h2>
+      <input id="searchPeople" placeholder="Buscar por nome ou @usuário" oninput="searchProfiles()">
+      <div id="peopleList"></div>
+      <p class="hint">Nesta versão beta, os perfis são descobertos por usuários conectados.</p>
+    </div>
+  </section>
 
-    <label>🍽️ Almoço</label>
-    <textarea id="lunch" placeholder="O que você comeu no almoço?"></textarea>
+  <section id="messages" class="page">
+    <div class="card">
+      <h2>Mensagens diretas</h2>
+      <p class="muted">Busque alguém pelo @ na aba Explorar e toque em Mensagem.</p>
+      <div class="grid">
+        <div>
+          <h3>Conversas</h3>
+          <div id="chatList" class="chat-list"></div>
+        </div>
+        <div>
+          <h3 id="chatTitle">Abra uma conversa</h3>
+          <div id="messageBox" class="messages"></div>
+          <div class="row">
+            <input id="messageInput" placeholder="Escreva uma mensagem..." onkeydown="if(event.key==='Enter')sendMessage()">
+            <button onclick="sendMessage()">Enviar</button>
+          </div>
+          <p id="messageStatus" class="status"></p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <label>🍎 Lanches</label>
-    <textarea id="snacks" placeholder="O que você comeu nos lanches?"></textarea>
-
-    <label>🌙 Jantar</label>
-    <textarea id="dinner" placeholder="O que você comeu no jantar?"></textarea>
-
-    <label>💧 Água consumida (em ml)</label>
-    <input id="water" type="number" min="0" placeholder="Ex.: 2000">
-
-    <label>🏃 Exercícios</label>
-    <textarea id="exercise" placeholder="Qual atividade física você fez?"></textarea>
-
-    <label>📝 Observações do dia</label>
-    <textarea id="notes" placeholder="Como foi seu dia?"></textarea>
-
-    <button onclick="saveEntry()">Salvar meu dia</button>
-    <p id="status"></p>
-  </div>
+  <section id="profile" class="page">
+    <div class="card">
+      <h2>Meu perfil</h2>
+      <div class="field">
+        <label>Nome</label>
+        <input id="profileName" placeholder="Seu nome">
+      </div>
+      <div class="field">
+        <label>Nome de usuário (@)</label>
+        <input id="profileUsername" placeholder="ex.: mariana.fit" maxlength="24">
+        <p class="hint">Use letras minúsculas, números, ponto ou underline. Sem espaços.</p>
+      </div>
+      <div class="field">
+        <label>Biografia</label>
+        <textarea id="profileBio" maxlength="240" placeholder="Conte um pouquinho sobre você..."></textarea>
+      </div>
+      <button onclick="saveProfile()">Salvar perfil</button>
+      <p id="profileStatus" class="status"></p>
+    </div>
+    <div class="card">
+      <h3>Seu espaço</h3>
+      <p id="myHandle" class="tag">@seuusuario</p>
+      <p class="muted">Em breve: foto de perfil, metas, evolução e configurações de privacidade.</p>
+    </div>
+  </section>
 </div>
 
 <script>
-const SUPABASE_URL = "https://qhveyeqpwguqbokfwlwf.supabase.co";
-const SUPABASE_KEY = "sb_publishable_FWLt3OH6KIOwXZ-DqJGacw_vcoMg-eM";
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL='https://qhveyeqpwguqbokfwlwf.supabase.co';
+const SUPABASE_KEY='sb_publishable_FWLt3OH6KIOwXZ-DqJGacw_vcoMg-eM';
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let currentUser = null;
-let selected = new Date();
-let entries = {};
+let user=null, selected=new Date(), entries={}, profile=null, activeChat=null, chatProfiles={};
 
-const fields = ["breakfast","lunch","snacks","dinner","water","exercise","notes"];
-const pad = n => String(n).padStart(2,"0");
-const dateKey = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,'0');
+const dateKey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 
-function message(id, text) {
-  document.getElementById(id).textContent = text;
+function status(id,t){$(id).textContent=t||''}
+function esc(s=''){
+  return String(s).replace(/[&<>"']/g,c=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
 }
 
-async function signUp() {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-  if (!email || password.length < 6) {
-    return message("loginStatus","Informe seu e-mail e uma senha com pelo menos 6 caracteres.");
-  }
-  const {data,error} = await db.auth.signUp({email,password});
-  if(error) return message("loginStatus",error.message);
-  message("loginStatus",data.session ? "Conta criada! Você já pode entrar." : "Cadastro criado! Confira seu e-mail para confirmar a conta.");
+async function signUp(){
+  let email=$('email').value.trim(),password=$('password').value;
+  if(!email||password.length<6)
+    return status('loginStatus','Informe e-mail e senha com pelo menos 6 caracteres.');
+  let {data,error}=await db.auth.signUp({email,password});
+  status('loginStatus',error?error.message:(data.session?'Conta criada!':'Cadastro criado! Confira seu e-mail para confirmar.'));
 }
 
-async function signIn() {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-  const {error} = await db.auth.signInWithPassword({email,password});
-  if(error) return message("loginStatus",error.message);
+async function signIn(){
+  let {error}=await db.auth.signInWithPassword({
+    email:$('email').value.trim(),
+    password:$('password').value
+  });
+  if(error)status('loginStatus',error.message);
 }
 
-async function resetPassword() {
-  const email = document.getElementById("email").value.trim();
-  if(!email) return message("loginStatus","Digite seu e-mail primeiro.");
-  const {error} = await db.auth.resetPasswordForEmail(email);
-  message("loginStatus",error ? error.message : "Se o e-mail estiver cadastrado, você receberá o link de recuperação.");
+async function resetPassword(){
+  let email=$('email').value.trim();
+  if(!email)return status('loginStatus','Digite seu e-mail primeiro.');
+  let {error}=await db.auth.resetPasswordForEmail(email);
+  status('loginStatus',error?error.message:'Se o e-mail estiver cadastrado, enviaremos um link.');
 }
 
-async function signOut() {
-  await db.auth.signOut();
-}
+async function signOut(){await db.auth.signOut()}
 
-db.auth.onAuthStateChange(async (event, session) => {
-  currentUser = session?.user || null;
-  document.getElementById("loginScreen").classList.toggle("hidden",!!currentUser);
-  document.getElementById("app").classList.toggle("hidden",!currentUser);
-  if(currentUser) {
-    message("welcome","Olá! Seu diário está pronto 💗");
+db.auth.onAuthStateChange(async(_event,session)=>{
+  user=session?.user||null;
+  $('loginScreen').classList.toggle('hidden',!!user);
+  $('app').classList.toggle('hidden',!user);
+  if(user){
+    await ensureProfile();
     await loadMonth();
+    await loadProfile();
+    await loadFeed('all');
+    await loadChats();
+    $('hello').textContent='Olá! 💗';
   }
 });
 
-function changeMonth(amount) {
-  selected.setMonth(selected.getMonth()+amount);
+async function ensureProfile(){
+  let {data}=await db.from('user_profiles').select('user_id').eq('user_id',user.id).maybeSingle();
+  if(!data){
+    let {error}=await db.from('user_profiles').insert({
+      user_id:user.id,full_name:'',username:null,bio:''
+    });
+    if(error)console.warn(error.message);
+  }
+}
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));
+  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
+  if(id==='explore')searchProfiles();
+  if(id==='messages')loadChats();
+  if(id==='feed')loadFeed('all');
+}
+
+function changeMonth(n){
+  selected=new Date(selected.getFullYear(),selected.getMonth()+n,1);
   loadMonth();
 }
 
-async function loadMonth() {
-  const year = selected.getFullYear();
-  const month = selected.getMonth();
-  const first = new Date(year,month,1);
-  const last = new Date(year,month+1,0);
-  message("monthTitle",first.toLocaleDateString("pt-BR",{month:"long",year:"numeric"}));
-
-  const {data,error} = await db.from("diary_entries")
-    .select("*")
-    .eq("user_id",currentUser.id)
-    .gte("entry_date",dateKey(first))
-    .lte("entry_date",dateKey(last));
-
-  if(error) {
-    message("status","Erro ao carregar: "+error.message);
-    return;
-  }
-  entries = {};
-  (data||[]).forEach(row => entries[row.entry_date]=row);
+async function loadMonth(){
+  let first=new Date(selected.getFullYear(),selected.getMonth(),1);
+  let last=new Date(selected.getFullYear(),selected.getMonth()+1,0);
+  $('monthTitle').textContent=first.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  let {data,error}=await db.from('diary_entries').select('*')
+    .eq('user_id',user.id)
+    .gte('entry_date',dateKey(first))
+    .lte('entry_date',dateKey(last));
+  if(error){status('diaryStatus','Erro ao carregar: '+error.message);return}
+  entries={};
+  (data||[]).forEach(r=>entries[r.entry_date]=r);
   drawCalendar();
   await selectDay(selected);
 }
 
-function drawCalendar() {
-  const year=selected.getFullYear(), month=selected.getMonth();
-  const firstDay=new Date(year,month,1).getDay();
-  const total=new Date(year,month+1,0).getDate();
-  const today=dateKey(new Date());
-  const box=document.getElementById("days");
-  box.innerHTML="";
-
-  for(let i=0;i<firstDay;i++) {
-    box.appendChild(document.createElement("div"));
-  }
-  for(let n=1;n<=total;n++) {
-    const d=new Date(year,month,n);
-    const key=dateKey(d);
-    const el=document.createElement("div");
-    el.className="day";
-    if(key===dateKey(selected)) el.classList.add("selected");
-    if(key===today) el.classList.add("today");
-    if(entries[key]) el.classList.add("has-entry");
+function drawCalendar(){
+  let y=selected.getFullYear(),m=selected.getMonth();
+  let offset=new Date(y,m,1).getDay(),total=new Date(y,m+1,0).getDate();
+  $('days').innerHTML='';
+  for(let i=0;i<offset;i++)$('days').append(document.createElement('div'));
+  for(let n=1;n<=total;n++){
+    let d=new Date(y,m,n),k=dateKey(d),el=document.createElement('div');
+    el.className='day'+(k===dateKey(selected)?' selected':'')+
+      (k===dateKey(new Date())?' today':'')+(entries[k]?' has-entry':'');
     el.textContent=n;
     el.onclick=()=>selectDay(d);
-    box.appendChild(el);
+    $('days').append(el);
   }
 }
 
-async function selectDay(date) {
-  selected=new Date(date.getFullYear(),date.getMonth(),date.getDate());
+async function selectDay(d){
+  selected=new Date(d.getFullYear(),d.getMonth(),d.getDate());
   drawCalendar();
-  message("selectedDate",selected.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long",year:"numeric"}));
-
-  const {data,error}=await db.from("diary_entries")
-    .select("*").eq("user_id",currentUser.id)
-    .eq("entry_date",dateKey(selected)).maybeSingle();
-
-  if(error) return message("status","Erro ao abrir dia: "+error.message);
-  const row=data||{};
-  document.getElementById("breakfast").value=row.breakfast||"";
-  document.getElementById("lunch").value=row.lunch||"";
-  document.getElementById("snacks").value=row.snacks||"";
-  document.getElementById("dinner").value=row.dinner||"";
-  document.getElementById("water").value=row.water_ml??"";
-  document.getElementById("exercise").value=row.exercise||"";
-  document.getElementById("notes").value=row.notes||"";
-  message("status","");
+  $('selectedDate').textContent=selected.toLocaleDateString('pt-BR',{
+    weekday:'long',day:'numeric',month:'long',year:'numeric'
+  });
+  let {data,error}=await db.from('diary_entries').select('*')
+    .eq('user_id',user.id).eq('entry_date',dateKey(selected)).maybeSingle();
+  if(error)return status('diaryStatus',error.message);
+  let r=data||{};
+  for(let f of ['breakfast','lunch','snacks','dinner','exercise','notes'])$(f).value=r[f]||'';
+  $('water').value=r.water_ml??'';
+  status('diaryStatus','');
 }
 
-async function saveEntry() {
-  if(!currentUser) return;
-  const values={
-    breakfast:document.getElementById("breakfast").value.trim(),
-    lunch:document.getElementById("lunch").value.trim(),
-    snacks:document.getElementById("snacks").value.trim(),
-    dinner:document.getElementById("dinner").value.trim(),
-    water_ml:document.getElementById("water").value==="" ? null : Number(document.getElementById("water").value),
-    exercise:document.getElementById("exercise").value.trim(),
-    notes:document.getElementById("notes").value.trim()
+async function saveEntry(){
+  let v={
+    breakfast:$('breakfast').value.trim(),
+    lunch:$('lunch').value.trim(),
+    snacks:$('snacks').value.trim(),
+    dinner:$('dinner').value.trim(),
+    water_ml:$('water').value===''?null:Number($('water').value),
+    exercise:$('exercise').value.trim(),
+    notes:$('notes').value.trim()
   };
+  if(v.water_ml!==null&&(!Number.isFinite(v.water_ml)||v.water_ml<0))
+    return status('diaryStatus','Informe uma quantidade de água válida.');
 
-  if(values.water_ml!==null && (!Number.isFinite(values.water_ml)||values.water_ml<0)) {
-    return message("status","Informe uma quantidade de água válida.");
-  }
+  let k=dateKey(selected);
+  let {data:old,error:e}=await db.from('diary_entries').select('id')
+    .eq('user_id',user.id).eq('entry_date',k).maybeSingle();
+  if(e)return status('diaryStatus',e.message);
 
-  const empty=!values.breakfast&&!values.lunch&&!values.snacks&&!values.dinner&&
-    values.water_ml===null&&!values.exercise&&!values.notes;
+  let empty=!v.breakfast&&!v.lunch&&!v.snacks&&!v.dinner&&
+    v.water_ml===null&&!v.exercise&&!v.notes;
+  let r;
 
-  const key=dateKey(selected);
-  const {data:existing,error:findError}=await db.from("diary_entries")
-    .select("id").eq("user_id",currentUser.id).eq("entry_date",key).maybeSingle();
+  if(empty&&old)r=await db.from('diary_entries').delete().eq('id',old.id);
+  else if(!empty&&old)r=await db.from('diary_entries').update(v).eq('id',old.id);
+  else if(!empty)r=await db.from('diary_entries').insert({user_id:user.id,entry_date:k,...v});
 
-  if(findError) return message("status","Erro: "+findError.message);
-
-  let result;
-  if(empty && existing) {
-    result=await db.from("diary_entries").delete().eq("id",existing.id);
-  } else if(!empty && existing) {
-    result=await db.from("diary_entries").update(values).eq("id",existing.id);
-  } else if(!empty) {
-    result=await db.from("diary_entries").insert({
-      user_id:currentUser.id,entry_date:key,...values
-    });
-  }
-
-  if(result?.error) return message("status","Não foi possível salvar: "+result.error.message);
-  message("status","Dia salvo com sucesso! 💗");
+  if(r?.error)return status('diaryStatus','Erro ao salvar: '+r.error.message);
+  status('diaryStatus','Dia salvo com sucesso! 💗');
   await loadMonth();
 }
 
-db.auth.getSession().then(({data}) => {
-  currentUser=data.session?.user||null;
-  document.getElementById("loginScreen").classList.toggle("hidden",!!currentUser);
-  document.getElementById("app").classList.toggle("hidden",!currentUser);
-  if(currentUser) {
-    message("welcome","Olá! Seu diário está pronto 💗");
-    loadMonth();
+async function loadProfile(){
+  let {data,error}=await db.from('user_profiles').select('*')
+    .eq('user_id',user.id).maybeSingle();
+  if(error)return status('profileStatus',error.message);
+  profile=data||{};
+  $('profileName').value=profile.full_name||'';
+  $('profileUsername').value=profile.username||'';
+  $('profileBio').value=profile.bio||'';
+  $('myHandle').textContent=profile.username?'@'+profile.username:'Escolha seu @usuário';
+}
+
+async function saveProfile(){
+  let name=$('profileName').value.trim();
+  let username=$('profileUsername').value.trim().toLowerCase().replace(/^@/,'');
+  let bio=$('profileBio').value.trim();
+
+  if(!/^[a-z0-9._]{3,24}$/.test(username))
+    return status('profileStatus','O @ deve ter de 3 a 24 caracteres: letras minúsculas, números, ponto ou underline.');
+
+  let {error}=await db.from('user_profiles').upsert({
+    user_id:user.id,full_name:name,username,bio,updated_at:new Date().toISOString()
+  },{onConflict:'user_id'});
+
+  if(error)return status('profileStatus',error.code==='23505'?'Esse @ já está sendo usado. Escolha outro.':error.message);
+  status('profileStatus','Perfil salvo! 💗');
+  await loadProfile();
+}
+
+async function createPost(){
+  let content=$('postContent').value.trim();
+  if(!content)return status('feedStatus','Escreva alguma coisa antes de publicar.');
+  let {error}=await db.from('posts').insert({user_id:user.id,content});
+  if(error)return status('feedStatus','Não foi possível publicar: '+error.message);
+  $('postContent').value='';
+  status('feedStatus','Publicado!');
+  await loadFeed('all');
+}
+
+async function loadFeed(mode='all'){
+  let {data:posts,error}=await db.from('posts').select('*')
+    .order('created_at',{ascending:false}).limit(60);
+  if(error){$('feedList').textContent='Erro ao carregar feed: '+error.message;return}
+  let rows=posts||[];
+
+  if(mode==='following'){
+    let {data:f}=await db.from('follows').select('following_id').eq('follower_id',user.id);
+    let ids=(f||[]).map(x=>x.following_id);
+    rows=rows.filter(p=>ids.includes(p.user_id)||p.user_id===user.id);
   }
-});
+
+  let ids=[...new Set(rows.map(p=>p.user_id))],profs={};
+  if(ids.length){
+    let {data}=await db.from('user_profiles').select('user_id,full_name,username').in('user_id',ids);
+    (data||[]).forEach(p=>profs[p.user_id]=p);
+  }
+
+  let postIds=rows.map(p=>p.id),likes={},mine=new Set(),comments={};
+  if(postIds.length){
+    let {data:l}=await db.from('post_likes').select('post_id,user_id').in('post_id',postIds);
+    (l||[]).forEach(x=>{
+      likes[x.post_id]=(likes[x.post_id]||0)+1;
+      if(x.user_id===user.id)mine.add(x.post_id);
+    });
+    let {data:c}=await db.from('post_comments').select('post_id').in('post_id',postIds);
+    (c||[]).forEach(x=>comments[x.post_id]=(comments[x.post_id]||0)+1);
+  }
+
+  $('feedList').innerHTML=rows.length?rows.map(p=>{
+    let a=profs[p.user_id]||{},name=esc(a.full_name||'Pessoa');
+    let handle=a.username?'@'+esc(a.username):'@usuario';
+    return `<article class="post">
+      <div class="post-head">
+        <div class="avatar">${name.slice(0,1).toUpperCase()}</div>
+        <div><b>${name}</b><div class="muted">${handle} · ${new Date(p.created_at).toLocaleString('pt-BR')}</div></div>
+      </div>
+      <p>${esc(p.content).replace(/\n/g,'<br>')}</p>
+      <div class="post-actions">
+        <button class="secondary" onclick="toggleLike('${p.id}',${mine.has(p.id)})">${mine.has(p.id)?'♥':'♡'} ${likes[p.id]||0}</button>
+        <button class="ghost" onclick="toggleComments('${p.id}')">Comentários (${comments[p.id]||0})</button>
+      </div>
+      <div id="comments-${p.id}" class="hidden">
+        <div id="comment-list-${p.id}"></div>
+        <div class="row">
+          <input id="comment-input-${p.id}" placeholder="Escreva um comentário">
+          <button onclick="addComment('${p.id}')">Comentar</button>
+        </div>
+      </div>
+    </article>`;
+  }).join(''):'<p class="muted">Ainda não há publicações por aqui. Seja a primeira a postar! 💗</p>';
+}
+
+async function toggleLike(id,liked){
+  let q=liked
+    ?db.from('post_likes').delete().eq('post_id',id).eq('user_id',user.id)
+    :db.from('post_likes').insert({post_id:id,user_id:user.id});
+  let {error}=await q;
+  if(error)alert(error.message);else loadFeed('all');
+}
+
+async function toggleComments(id){
+  let box=$('comments-'+id);
+  box.classList.toggle('hidden');
+  if(box.classList.contains('hidden'))return;
+
+  let {data,error}=await db.from('post_comments').select('content,user_id,created_at')
+    .eq('post_id',id).order('created_at');
+  if(error)return;
+
+  let ids=[...new Set((data||[]).map(c=>c.user_id))],names={};
+  if(ids.length){
+    let {data:p}=await db.from('user_profiles').select('user_id,username,full_name').in('user_id',ids);
+    (p||[]).forEach(x=>names[x.user_id]=x);
+  }
+
+  $('comment-list-'+id).innerHTML=(data||[]).map(c=>
+    `<p class="muted"><b>${esc(names[c.user_id]?.username?'@'+names[c.user_id].username:names[c.user_id]?.full_name||'Pessoa')}:</b> ${esc(c.content)}</p>`
+  ).join('')||'<p class="muted">Seja a primeira pessoa a comentar.</p>';
+}
+
+async function addComment(id){
+  let input=$('comment-input-'+id),content=input.value.trim();
+  if(!content)return;
+  let {error}=await db.from('post_comments').insert({post_id:id,user_id:user.id,content});
+  if(error)return alert(error.message);
+  input.value='';
+  await toggleComments(id);
+  await toggleComments(id);
+}
+
+async function searchProfiles(){
+  let q=$('searchPeople').value.trim().replace(/^@/,'').toLowerCase();
+  let query=db.from('user_profiles').select('user_id,full_name,username,bio')
+    .neq('user_id',user.id).not('username','is',null).limit(40);
+  if(q)query=query.or(`username.ilike.%${q}%,full_name.ilike.%${q}%`);
+
+  let {data,error}=await query;
+  if(error){$('peopleList').textContent=error.message;return}
+
+  let ids=(data||[]).map(p=>p.user_id),following=new Set();
+  if(ids.length){
+    let {data:f}=await db.from('follows').select('following_id')
+      .eq('follower_id',user.id).in('following_id',ids);
+    (f||[]).forEach(x=>following.add(x.following_id));
+  }
+
+  $('peopleList').innerHTML=(data||[]).map(p=>
+    `<div class="person">
+      <div><b>${esc(p.full_name||'Pessoa')}</b><div class="muted">@${esc(p.username)} · ${esc(p.bio||'')}</div></div>
+      <div style="display:flex;gap:6px">
+        <button class="secondary" onclick="openChat('${p.user_id}','${esc(p.username)}')">Mensagem</button>
+        <button onclick="toggleFollow('${p.user_id}',${following.has(p.user_id)})">${following.has(p.user_id)?'Seguindo':'Seguir'}</button>
+      </div>
+    </div>`
+  ).join('')||'<p class="muted">Ninguém encontrado. Tente outro @.</p>';
+}
+
+async function toggleFollow(id,isFollowing){
+  let r=isFollowing
+    ?await db.from('follows').delete().eq('follower_id',user.id).eq('following_id',id)
+    :await db.from('follows').insert({follower_id:user.id,following_id:id});
+  if(r.error)return alert(r.error.message);
+  searchProfiles();
+}
+
+async function loadChats(){
+  let {data,error}=await db.from('direct_messages').select('sender_id,receiver_id,content,created_at')
+    .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+    .order('created_at',{ascending:false}).limit(200);
+
+  if(error){$('chatList').textContent=error.message;return}
+
+  let peers=[...new Set((data||[]).map(m=>m.sender_id===user.id?m.receiver_id:m.sender_id))];
+  if(!peers.length){
+    $('chatList').innerHTML='<p class="muted">Suas conversas aparecerão aqui. Encontre alguém em Explorar.</p>';
+    return;
+  }
+
+  let {data:p}=await db.from('user_profiles').select('user_id,username,full_name').in('user_id',peers);
+  chatProfiles={};
+  (p||[]).forEach(x=>chatProfiles[x.user_id]=x);
+
+  $('chatList').innerHTML=peers.map(id=>
+    `<div class="chat-item" onclick="openChat('${id}')">
+      <b>${esc(chatProfiles[id]?.full_name||'Pessoa')}</b>
+      <div class="muted">@${esc(chatProfiles[id]?.username||'usuario')}</div>
+    </div>`
+  ).join('');
+}
+
+async function openChat(id,username=''){
+  activeChat=id;
+  let p=chatProfiles[id];
+  if(!p){
+    let {data}=await db.from('user_profiles').select('username,full_name').eq('user_id',id).maybeSingle();
+    p=data||{};
+  }
+  $('chatTitle').textContent=(p.full_name||'Conversa')+' · @'+(p.username||username||'usuario');
+  showPage('messages');
+  await loadMessages();
+}
+
+async function loadMessages(){
+  if(!activeChat)return;
+  let {data,error}=await db.from('direct_messages').select('*')
+    .or(`and(sender_id.eq.${user.id},receiver_id.eq.${activeChat}),and(sender_id.eq.${activeChat},receiver_id.eq.${user.id})`)
+    .order('created_at');
+
+  if(error){$('messageBox').textContent=error.message;return}
+
+  $('messageBox').innerHTML=(data||[]).map(m=>
+    `<div class="bubble ${m.sender_id===user.id?'mine':''}">
+      ${esc(m.content)}
+      <div style="font-size:10px;opacity:.7;margin-top:4px">${new Date(m.created_at).toLocaleString('pt-BR')}</div>
+    </div>`
+  ).join('');
+
+  $('messageBox').scrollTop=$('messageBox').scrollHeight;
+  let unread=(data||[]).filter(m=>m.receiver_id===user.id&&!m.read_at).map(m=>m.id);
+  if(unread.length)
+    await db.from('direct_messages').update({read_at:new Date().toISOString()}).in('id',unread);
+}
+
+async function sendMessage(){
+  if(!activeChat)return status('messageStatus','Escolha uma conversa primeiro.');
+  let content=$('messageInput').value.trim();
+  if(!content)return;
+
+  let {error}=await db.from('direct_messages').insert({
+    sender_id:user.id,receiver_id:activeChat,content
+  });
+  if(error)return status('messageStatus',error.message);
+
+  $('messageInput').value='';
+  status('messageStatus','');
+  await loadMessages();
+  await loadChats();
+}
 </script>
 </body>
 </html>
