@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meu Diário de Hábitos</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f8f4f1;color:#493e3a;font-family:Arial,sans-serif}
+.container{max-width:900px;margin:30px auto;padding:20px}
+.card{background:white;border-radius:18px;padding:24px;margin-bottom:18px;box-shadow:0 4px 18px #0000000a}
+h1,h2{color:#9b706d}
+h1{text-align:center}
+input,textarea,button{font:inherit;border-radius:10px;padding:12px;width:100%;margin:6px 0;border:1px solid #e5d8d3}
+textarea{min-height:75px;resize:vertical}
+button{background:#ad8580;color:white;border:0;cursor:pointer;font-weight:bold}
+button:hover{opacity:.85}
+button.secondary{background:#eee4e0;color:#624e49}
+.hidden{display:none!important}
+.login{max-width:420px;margin:70px auto}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.calendar-head button{width:auto}
+.week,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
+.week div{font-weight:bold;padding:8px 0;color:#9b706d}
+.day{padding:12px 3px;border-radius:9px;background:#f8f4f1;cursor:pointer}
+.day.selected{background:#ad8580;color:white}
+.day.today{outline:2px solid #ad8580}
+.day.has-entry:after{content:" •";color:#9b706d}
+.day.selected:after{color:white}
+.small{font-size:13px;color:#887b76}
+#status{min-height:22px;color:#8b625e}
+</style>
+</head>
+<body>
+
+<div id="loginScreen" class="container login">
+  <div class="card">
+    <h1>Meu Diário de Hábitos</h1>
+    <p class="small">Entre na sua conta ou crie seu cadastro.</p>
+    <input id="email" type="email" placeholder="Seu e-mail">
+    <input id="password" type="password" placeholder="Sua senha">
+    <button onclick="signIn()">Entrar</button>
+    <button class="secondary" onclick="signUp()">Criar minha conta</button>
+    <button class="secondary" onclick="resetPassword()">Esqueci minha senha</button>
+    <p id="loginStatus"></p>
+  </div>
+</div>
+
+<div id="app" class="container hidden">
+  <h1>Meu Diário de Hábitos</h1>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span id="welcome">Meu diário</span>
+      <button style="width:auto" onclick="signOut()">Sair</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="calendar-head">
+      <button class="secondary" onclick="changeMonth(-1)">‹</button>
+      <h2 id="monthTitle"></h2>
+      <button class="secondary" onclick="changeMonth(1)">›</button>
+    </div>
+    <div class="week">
+      <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div>
+      <div>Qui</div><div>Sex</div><div>Sáb</div>
+    </div>
+    <div class="days" id="days"></div>
+  </div>
+
+  <div class="card">
+    <h2 id="selectedDate"></h2>
+    <p class="small">Registre seus hábitos do dia.</p>
+
+    <label>☀️ Café da manhã</label>
+    <textarea id="breakfast" placeholder="O que você comeu no café da manhã?"></textarea>
+
+    <label>🍽️ Almoço</label>
+    <textarea id="lunch" placeholder="O que você comeu no almoço?"></textarea>
+
+    <label>🍎 Lanches</label>
+    <textarea id="snacks" placeholder="O que você comeu nos lanches?"></textarea>
+
+    <label>🌙 Jantar</label>
+    <textarea id="dinner" placeholder="O que você comeu no jantar?"></textarea>
+
+    <label>💧 Água consumida (em ml)</label>
+    <input id="water" type="number" min="0" placeholder="Ex.: 2000">
+
+    <label>🏃 Exercícios</label>
+    <textarea id="exercise" placeholder="Qual atividade física você fez?"></textarea>
+
+    <label>📝 Observações do dia</label>
+    <textarea id="notes" placeholder="Como foi seu dia?"></textarea>
+
+    <button onclick="saveEntry()">Salvar meu dia</button>
+    <p id="status"></p>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://qhveyeqpwguqbokfwlwf.supabase.co";
+const SUPABASE_KEY = "sb_publishable_FWLt3OH6KIOwXZ-DqJGacw_vcoMg-eM";
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let selected = new Date();
+let entries = {};
+
+const fields = ["breakfast","lunch","snacks","dinner","water","exercise","notes"];
+const pad = n => String(n).padStart(2,"0");
+const dateKey = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+
+function message(id, text) {
+  document.getElementById(id).textContent = text;
+}
+
+async function signUp() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  if (!email || password.length < 6) {
+    return message("loginStatus","Informe seu e-mail e uma senha com pelo menos 6 caracteres.");
+  }
+  const {data,error} = await db.auth.signUp({email,password});
+  if(error) return message("loginStatus",error.message);
+  message("loginStatus",data.session ? "Conta criada! Você já pode entrar." : "Cadastro criado! Confira seu e-mail para confirmar a conta.");
+}
+
+async function signIn() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const {error} = await db.auth.signInWithPassword({email,password});
+  if(error) return message("loginStatus",error.message);
+}
+
+async function resetPassword() {
+  const email = document.getElementById("email").value.trim();
+  if(!email) return message("loginStatus","Digite seu e-mail primeiro.");
+  const {error} = await db.auth.resetPasswordForEmail(email);
+  message("loginStatus",error ? error.message : "Se o e-mail estiver cadastrado, você receberá o link de recuperação.");
+}
+
+async function signOut() {
+  await db.auth.signOut();
+}
+
+db.auth.onAuthStateChange(async (event, session) => {
+  currentUser = session?.user || null;
+  document.getElementById("loginScreen").classList.toggle("hidden",!!currentUser);
+  document.getElementById("app").classList.toggle("hidden",!currentUser);
+  if(currentUser) {
+    message("welcome","Olá! Seu diário está pronto 💗");
+    await loadMonth();
+  }
+});
+
+function changeMonth(amount) {
+  selected.setMonth(selected.getMonth()+amount);
+  loadMonth();
+}
+
+async function loadMonth() {
+  const year = selected.getFullYear();
+  const month = selected.getMonth();
+  const first = new Date(year,month,1);
+  const last = new Date(year,month+1,0);
+  message("monthTitle",first.toLocaleDateString("pt-BR",{month:"long",year:"numeric"}));
+
+  const {data,error} = await db.from("diary_entries")
+    .select("*")
+    .eq("user_id",currentUser.id)
+    .gte("entry_date",dateKey(first))
+    .lte("entry_date",dateKey(last));
+
+  if(error) {
+    message("status","Erro ao carregar: "+error.message);
+    return;
+  }
+  entries = {};
+  (data||[]).forEach(row => entries[row.entry_date]=row);
+  drawCalendar();
+  await selectDay(selected);
+}
+
+function drawCalendar() {
+  const year=selected.getFullYear(), month=selected.getMonth();
+  const firstDay=new Date(year,month,1).getDay();
+  const total=new Date(year,month+1,0).getDate();
+  const today=dateKey(new Date());
+  const box=document.getElementById("days");
+  box.innerHTML="";
+
+  for(let i=0;i<firstDay;i++) {
+    box.appendChild(document.createElement("div"));
+  }
+  for(let n=1;n<=total;n++) {
+    const d=new Date(year,month,n);
+    const key=dateKey(d);
+    const el=document.createElement("div");
+    el.className="day";
+    if(key===dateKey(selected)) el.classList.add("selected");
+    if(key===today) el.classList.add("today");
+    if(entries[key]) el.classList.add("has-entry");
+    el.textContent=n;
+    el.onclick=()=>selectDay(d);
+    box.appendChild(el);
+  }
+}
+
+async function selectDay(date) {
+  selected=new Date(date.getFullYear(),date.getMonth(),date.getDate());
+  drawCalendar();
+  message("selectedDate",selected.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long",year:"numeric"}));
+
+  const {data,error}=await db.from("diary_entries")
+    .select("*").eq("user_id",currentUser.id)
+    .eq("entry_date",dateKey(selected)).maybeSingle();
+
+  if(error) return message("status","Erro ao abrir dia: "+error.message);
+  const row=data||{};
+  document.getElementById("breakfast").value=row.breakfast||"";
+  document.getElementById("lunch").value=row.lunch||"";
+  document.getElementById("snacks").value=row.snacks||"";
+  document.getElementById("dinner").value=row.dinner||"";
+  document.getElementById("water").value=row.water_ml??"";
+  document.getElementById("exercise").value=row.exercise||"";
+  document.getElementById("notes").value=row.notes||"";
+  message("status","");
+}
+
+async function saveEntry() {
+  if(!currentUser) return;
+  const values={
+    breakfast:document.getElementById("breakfast").value.trim(),
+    lunch:document.getElementById("lunch").value.trim(),
+    snacks:document.getElementById("snacks").value.trim(),
+    dinner:document.getElementById("dinner").value.trim(),
+    water_ml:document.getElementById("water").value==="" ? null : Number(document.getElementById("water").value),
+    exercise:document.getElementById("exercise").value.trim(),
+    notes:document.getElementById("notes").value.trim()
+  };
+
+  if(values.water_ml!==null && (!Number.isFinite(values.water_ml)||values.water_ml<0)) {
+    return message("status","Informe uma quantidade de água válida.");
+  }
+
+  const empty=!values.breakfast&&!values.lunch&&!values.snacks&&!values.dinner&&
+    values.water_ml===null&&!values.exercise&&!values.notes;
+
+  const key=dateKey(selected);
+  const {data:existing,error:findError}=await db.from("diary_entries")
+    .select("id").eq("user_id",currentUser.id).eq("entry_date",key).maybeSingle();
+
+  if(findError) return message("status","Erro: "+findError.message);
+
+  let result;
+  if(empty && existing) {
+    result=await db.from("diary_entries").delete().eq("id",existing.id);
+  } else if(!empty && existing) {
+    result=await db.from("diary_entries").update(values).eq("id",existing.id);
+  } else if(!empty) {
+    result=await db.from("diary_entries").insert({
+      user_id:currentUser.id,entry_date:key,...values
+    });
+  }
+
+  if(result?.error) return message("status","Não foi possível salvar: "+result.error.message);
+  message("status","Dia salvo com sucesso! 💗");
+  await loadMonth();
+}
+
+db.auth.getSession().then(({data}) => {
+  currentUser=data.session?.user||null;
+  document.getElementById("loginScreen").classList.toggle("hidden",!!currentUser);
+  document.getElementById("app").classList.toggle("hidden",!currentUser);
+  if(currentUser) {
+    message("welcome","Olá! Seu diário está pronto 💗");
+    loadMonth();
+  }
+});
+</script>
+</body>
+</html>
