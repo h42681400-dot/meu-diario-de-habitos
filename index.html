@@ -57,20 +57,27 @@ textarea{min-height:85px;resize:vertical}
 
 .top{display:flex;justify-content:space-between;align-items:center;padding:16px 0}
 
+/* Music Player Soft */
+.music-bar{display:flex;align-items:center;gap:10px;background:var(--card-bg);padding:8px 14px;border-radius:50px;border:1px solid var(--line);font-size:12px}
+.music-bar button{padding:6px 10px;border-radius:50px;font-size:12px}
+
 /* Navegação Estilo Instagram */
-.nav{position:fixed;bottom:0;left:0;right:0;background:var(--card-bg);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:10px 0;z-index:1000;box-shadow:0 -2px 10px rgba(0,0,0,0.02)}
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--card-bg);border-top:1px solid var(--line);display:flex;justify-space-around;padding:10px 0;z-index:1000;box-shadow:0 -2px 10px rgba(0,0,0,0.02)}
 .nav button{background:transparent;color:var(--muted);border-radius:50px;padding:8px 14px;font-size:18px;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative}
 .nav button span{font-size:10px;font-weight:500}
 .nav button.active{color:var(--rose);background:transparent}
 .badge-red{background:var(--red);color:white;border-radius:50px;width:10px;height:10px;position:absolute;top:6px;right:18px}
 
-.page{display:none}.page.active{display:block}
+/* Transição Suave (Slow Transition) */
+.page{display:none;opacity:0;transition:opacity 0.35s ease-in-out}
+.page.active{display:block;opacity:1}
+
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
 /* FAB - Botão Flutuante */
 .fab-post{position:fixed;bottom:75px;right:20px;width:54px;height:54px;border-radius:50%;background:var(--rose);color:white;font-size:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(0,0,0,0.15);z-index:999;cursor:pointer}
 
-/* Calendário Original Estilizado */
+/* Calendário */
 .calendar-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
 .calendar-head button{width:auto;padding:6px 12px}
 .week,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
@@ -78,7 +85,7 @@ textarea{min-height:85px;resize:vertical}
 .day{padding:10px 2px;border-radius:8px;background:var(--bg);cursor:pointer;font-size:13px;border:1px solid transparent}
 .day.selected{background:var(--rose);color:white}
 .day.today{border-color:var(--rose)}
-.day.has-entry::after{content:' •';color:var(--rose2);display:block;font-size:10px}
+.day.has-entry::after{content:' •';color:var(--rose);display:block;font-size:10px}
 
 /* Posts */
 .post{border-bottom:1px solid var(--line);padding:16px 0}
@@ -114,18 +121,13 @@ textarea{min-height:85px;resize:vertical}
 .profile-tab{flex:1;text-align:center;padding:12px;cursor:pointer;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;font-size:13px;white-space:nowrap}
 .profile-tab.active{color:var(--ink);border-bottom-color:var(--rose)}
 
-/* Modais & Editor Estilo Twitter para Imagens */
+/* Modais & Editor de Imagens (Crop Box) */
 .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px}
 .modal-box{background:var(--card-bg);width:100%;max-width:480px;border-radius:20px;padding:20px;max-height:85vh;overflow:auto}
 .tweet-media-btn{background:var(--line);color:var(--ink);padding:8px 12px;border-radius:10px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 
-/* Estilo de corte/prévia de imagem estilo Twitter */
-.crop-preview-box{width:100%;text-align:center;background:#000;border-radius:12px;overflow:hidden;margin:10px 0;position:relative}
-.crop-preview-box img{max-width:100%;max-height:220px;object-fit:contain;display:block;margin:0 auto}
-
-.img-preview-container{position:relative;margin-top:10px;display:inline-block;max-width:100%}
-.img-preview-container img{max-height:180px;border-radius:12px;object-fit:cover}
-.remove-preview-btn{position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.6);color:white;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.crop-preview-box{width:100%;background:#000;border-radius:12px;overflow:hidden;margin:10px 0;position:relative;display:flex;align-items:center;justify-content:center}
+.crop-preview-box img{max-width:100%;max-height:220px;object-fit:contain}
 
 .notif-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
 .notif-item .icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bubble-me);color:var(--red)}
@@ -195,13 +197,19 @@ textarea{min-height:85px;resize:vertical}
     <div>
       <h2 class="brand" style="margin:0;font-size:20px">Meu Diário 🤍</h2>
     </div>
+    <!-- WIDGET DE MÚSICA PERSONALIZADO -->
+    <div class="music-bar">
+      <i class="fa-solid fa-music" style="color:var(--rose)"></i>
+      <span id="songTitle" style="font-weight:600">Lo-Fi Soft</span>
+      <button onclick="toggleMusic()"><i id="musicIcon" class="fa-solid fa-play"></i></button>
+      <audio id="audioPlayer" loop src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"></audio>
+    </div>
     <div style="display:flex;align-items:center;gap:10px">
-      <span id="hello" class="muted"></span>
       <button class="secondary" onclick="signOut()" style="padding:6px 12px;font-size:12px">Sair</button>
     </div>
   </header>
 
-  <!-- BOTÃO FLUTUANTE DE NOVO POST (OCULTO NAS MENSAGENS) -->
+  <!-- BOTÃO FLUTUANTE DE NOVO POST -->
   <div id="fabPostBtn" class="fab-post" onclick="openFloatingPostModal()">
     <i class="fa-solid fa-pen"></i>
   </div>
@@ -262,10 +270,14 @@ textarea{min-height:85px;resize:vertical}
     </div>
   </section>
 
-  <!-- EXPLORAR -->
+  <!-- EXPLORAR COM BUSCA AVANÇADA -->
   <section id="explore" class="page">
     <div class="card">
-      <input id="searchPeople" placeholder="🔍 Buscar por nome ou @usuário" oninput="searchProfiles()">
+      <div style="display:flex;gap:6px">
+        <input id="searchPeople" placeholder="🔍 Buscar @usuário, nome ou palavras em posts..." oninput="searchProfilesAndPosts()">
+        <button class="secondary" onclick="clearRecentSearches()"><i class="fa-solid fa-trash-can"></i></button>
+      </div>
+      <div id="recentSearchesBox" class="muted" style="font-size:12px;margin:6px 0"></div>
       <div id="peopleList" style="margin-top:12px"></div>
     </div>
   </section>
@@ -343,7 +355,7 @@ textarea{min-height:85px;resize:vertical}
   </section>
 </div>
 
-<!-- MODAL: NOVA POSTAGEM FLUTUANTE -->
+<!-- MODAL: NOVA POSTAGEM COM CORTE DE IMAGEM -->
 <div id="floatingPostModal" class="modal-overlay hidden">
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
@@ -354,7 +366,7 @@ textarea{min-height:85px;resize:vertical}
     
     <div style="margin-top:10px">
       <label class="tweet-media-btn">
-        <i class="fa-regular fa-image"></i> Anexar Imagem
+        <i class="fa-regular fa-image"></i> Escolher e Cortar Imagem
         <input type="file" id="modalPostImageInput" accept="image/*" class="hidden" onchange="previewFloatingPostImage()">
       </label>
     </div>
@@ -374,12 +386,50 @@ textarea{min-height:85px;resize:vertical}
   </div>
 </div>
 
-<!-- MODAL: CONFIGURAÇÕES & PRIVACIDADE DE MENSAGENS -->
+<!-- MODAL POPUP DE CONFIRMAÇÃO DE EXCLUSÃO (ESTILO SOFT) -->
+<div id="deleteConfirmModal" class="modal-overlay hidden">
+  <div class="modal-box" style="text-align:center;max-width:360px">
+    <h3 style="margin-top:0;color:var(--red)"><i class="fa-solid fa-trash-can"></i> Excluir postagem</h3>
+    <p class="muted">Tem certeza que deseja apagar esta publicação permanentemente?</p>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="secondary" onclick="closeDeleteConfirmModal()" style="flex:1">Cancelar</button>
+      <button class="danger" onclick="confirmExecuteDelete()" style="flex:1">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL POPUP DE DENÚNCIA -->
+<div id="reportModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h3 style="margin-top:0">Denunciar publicação</h3>
+    <p class="muted">Ajude-nos a manter a comunidade segura.</p>
+    <div class="field">
+      <label>Motivo da denúncia</label>
+      <select id="reportReasonSelect">
+        <option value="gore">Gore / Violência Extrema</option>
+        <option value="bullying">Assédio / Bullying</option>
+        <option value="mutilation">Automutilação</option>
+        <option value="inappropriate">Conteúdo Inadequado</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="secondary" onclick="closeReportModal()" style="flex:1">Cancelar</button>
+      <button class="danger" onclick="submitReport()" style="flex:1">Enviar Denúncia</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CONFIGURAÇÕES -->
 <div id="settingsModal" class="modal-overlay hidden">
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <h3 style="margin:0"><i class="fa-solid fa-gear"></i> Configurações</h3>
       <button class="ghost" onclick="closeSettingsModal()" style="padding:4px 8px">✕</button>
+    </div>
+
+    <div class="field">
+      <label>Música de Fundo</label>
+      <input id="customMusicUrlInput" placeholder="Link direto de áudio (.mp3)" onchange="changeMusicUrl(this.value)">
     </div>
 
     <div class="field">
@@ -422,9 +472,9 @@ textarea{min-height:85px;resize:vertical}
     <div class="field"><label>Biografia</label><textarea id="profileBio" maxlength="240"></textarea></div>
     
     <div class="field">
-      <label>Foto de Perfil</label>
+      <label>Foto de Perfil (Quadrada)</label>
       <label class="tweet-media-btn" style="width:100%;justify-content:center">
-        <i class="fa-regular fa-image"></i> Escolher Foto de Perfil
+        <i class="fa-regular fa-image"></i> Escolher e Ajustar Foto
         <input type="file" id="avatarFileInput" accept="image/*" class="hidden" onchange="previewEditImage(this, 'avatar')">
       </label>
       <div id="avatarCropBox" class="crop-preview-box hidden" style="border-radius:50%;width:90px;height:90px;margin:10px auto">
@@ -433,13 +483,13 @@ textarea{min-height:85px;resize:vertical}
     </div>
 
     <div class="field">
-      <label>Foto de Capa</label>
+      <label>Foto de Capa (Retângulo)</label>
       <label class="tweet-media-btn" style="width:100%;justify-content:center">
-        <i class="fa-regular fa-image"></i> Escolher Capa
+        <i class="fa-regular fa-image"></i> Escolher e Ajustar Capa
         <input type="file" id="bannerFileInput" accept="image/*" class="hidden" onchange="previewEditImage(this, 'banner')">
       </label>
-      <div id="bannerCropBox" class="crop-preview-box hidden" style="height:100px;margin:10px 0">
-        <img id="bannerCropImg" style="height:100%;object-fit:cover">
+      <div id="bannerCropBox" class="crop-preview-box hidden" style="height:110px;margin:10px 0">
+        <img id="bannerCropImg" style="height:100%;width:100%;object-fit:cover">
       </div>
     </div>
 
@@ -472,7 +522,10 @@ const SUPABASE_KEY='sb_publishable_FWLt3OH6KIOwXZ-DqJGacw_vcoMg-eM';
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let user=null, selected=new Date(), entries={}, profile=null, activeChat=null, chatProfiles={};
-let currentFloatingPostImage=null, editAvatarFile=null, editBannerFile=null;
+let currentFloatingPostImage=null, editAvatarFile=null, editBannerFile=null, postToDeleteId=null, postToReportId=null;
+
+/* TRAVA DE SEGURANÇA E CONTEÚDO PROIBIDO */
+const FORBIDDEN_WORDS = ['gore', 'mutilacao', 'suicidio', 'sangue', 'morte', 'estupro', 'assidio', 'mutilação', 'suicídio'];
 
 const $=id=>document.getElementById(id);
 const pad=n=>String(n).padStart(2,'0');
@@ -483,6 +536,27 @@ function esc(s=''){
   return String(s).replace(/[&<>"']/g,c=>({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
   }[c]));
+}
+
+/* MUSIC PLAYER */
+function toggleMusic(){
+  let player=$('audioPlayer');
+  let icon=$('musicIcon');
+  if(player.paused){
+    player.play();
+    icon.className='fa-solid fa-pause';
+  } else {
+    player.pause();
+    icon.className='fa-solid fa-play';
+  }
+}
+
+function changeMusicUrl(url){
+  if(url){
+    $('audioPlayer').src = url;
+    $('audioPlayer').play();
+    $('musicIcon').className='fa-solid fa-pause';
+  }
 }
 
 function toggleAuthTab(tab){
@@ -561,7 +635,6 @@ db.auth.onAuthStateChange(async(_event,session)=>{
     await loadFeed('all');
     await loadChats();
     await checkUnreadBadges();
-    $('hello').textContent='Olá! 🤍';
   }
 });
 
@@ -576,10 +649,9 @@ function showPage(id){
   document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));
   document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
   
-  // Ocultar botão flutuante na aba de mensagens
   $('fabPostBtn').classList.toggle('hidden', id==='messages');
 
-  if(id==='explore')searchProfiles();
+  if(id==='explore')searchProfilesAndPosts();
   if(id==='messages'){ loadChats(); backToChatList(); }
   if(id==='feed')loadFeed('all');
   if(id==='notifications')loadNotifications();
@@ -596,7 +668,7 @@ async function checkUnreadBadges(){
   $('msgBadge').classList.toggle('hidden', !msgCount || msgCount <= 0);
 }
 
-/* CALENDÁRIO ORIGINAL */
+/* CALENDÁRIO */
 function changeMonth(n){ selected=new Date(selected.getFullYear(),selected.getMonth()+n,1); loadMonth(); }
 async function loadMonth(){
   let first=new Date(selected.getFullYear(),selected.getMonth(),1);
@@ -642,7 +714,7 @@ async function saveEntry(){
   await loadMonth();
 }
 
-/* CONFIGURAÇÕES, TEMA, FONTES E PRIVACIDADE DE MENSAGENS */
+/* CONFIGURAÇÕES & FONTES */
 function changeTheme(theme){
   if(theme==='dark') document.body.classList.add('theme-dark');
   else document.body.classList.remove('theme-dark');
@@ -688,7 +760,7 @@ async function unblockUser(id){
   loadFeed('all');
 }
 
-/* POSTAGEM FLUTUANTE */
+/* POSTAGEM FLUTUANTE COM TRAVA ANTICONTEÚDO SENSÍVEL */
 function openFloatingPostModal(){ $('floatingPostModal').classList.remove('hidden'); }
 function closeFloatingPostModal(){ 
   $('floatingPostModal').classList.add('hidden'); 
@@ -715,6 +787,15 @@ function removeFloatingPostImage(){
 
 async function submitFloatingPost(){
   let content=$('modalPostContent').value.trim();
+  
+  // Trava no sistema para proibir conteúdos violentos ou explícitos
+  let lowerContent = content.toLowerCase();
+  for(let word of FORBIDDEN_WORDS){
+    if(lowerContent.includes(word)){
+      return status('modalPostStatus','Esta publicação contém palavras violatórias e não pode ser postada.');
+    }
+  }
+
   if(!content && !currentFloatingPostImage) return;
   status('modalPostStatus','Publicando...');
   try {
@@ -728,12 +809,39 @@ async function submitFloatingPost(){
   } catch(err){ status('modalPostStatus',err.message); }
 }
 
-async function deletePost(postId){
-  if(confirm("Tem certeza que deseja excluir esta publicação?")){
-    await db.from('posts').delete().eq('id',postId).eq('user_id',user.id);
+/* POPUP DE CONFIRMAÇÃO DE EXCLUSÃO */
+function openDeleteConfirmModal(postId){
+  postToDeleteId = postId;
+  $('deleteConfirmModal').classList.remove('hidden');
+}
+function closeDeleteConfirmModal(){
+  postToDeleteId = null;
+  $('deleteConfirmModal').classList.add('hidden');
+}
+async function confirmExecuteDelete(){
+  if(postToDeleteId){
+    await db.from('posts').delete().eq('id',postToDeleteId).eq('user_id',user.id);
+    closeDeleteConfirmModal();
     loadFeed('all');
     if(!$('profile').classList.contains('hidden')) loadProfileDataTab('posts');
   }
+}
+
+/* DENÚNCIAS DE POSTS */
+function openReportModal(postId){
+  postToReportId = postId;
+  $('reportModal').classList.remove('hidden');
+}
+function closeReportModal(){
+  postToReportId = null;
+  $('reportModal').classList.add('hidden');
+}
+async function submitReport(){
+  if(!postToReportId) return;
+  let reason = $('reportReasonSelect').value;
+  await db.from('post_reports').insert({post_id: postToReportId, reporter_id: user.id, reason: reason});
+  alert('Denúncia enviada! Nossa equipe revisará o conteúdo.');
+  closeReportModal();
 }
 
 /* PERFIL & CORTADOR ESTILO TWITTER */
@@ -904,7 +1012,10 @@ function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false,
           <div class="avatar">${avatarHtml}</div>
           <div><b>${name}</b><div class="muted">${handle} · ${new Date(p.created_at).toLocaleDateString('pt-BR')}</div></div>
         </div>
-        ${isMine?`<button class="ghost" onclick="deletePost('${p.id}')" style="color:var(--red);padding:4px 8px;font-size:12px"><i class="fa-solid fa-trash"></i></button>`:''}
+        <div>
+          ${isMine?`<button class="ghost" onclick="openDeleteConfirmModal('${p.id}')" style="color:var(--red);padding:4px 8px;font-size:12px"><i class="fa-solid fa-trash"></i></button>`:
+          `<button class="ghost" onclick="openReportModal('${p.id}')" style="color:var(--muted);padding:4px 8px;font-size:12px"><i class="fa-solid fa-triangle-exclamation"></i></button>`}
+        </div>
       </div>
       <p style="margin:10px 0;line-height:1.4">${esc(p.content).replace(/\n/g,'<br>')}</p>
       ${p.media_url?`<img src="${esc(p.media_url)}" class="post-media">`:''}
@@ -979,13 +1090,41 @@ async function addComment(postId, postOwnerId){
   loadFeed('all');
 }
 
-/* EXPLORAR & ABRIR CHAT DIRETAMENTE */
-async function searchProfiles(){
+/* EXPLORAR AVANÇADO (USUÁRIOS + POSTS + PREFIXO + APAGAR HISTÓRICO) */
+async function searchProfilesAndPosts(){
   let q=$('searchPeople').value.trim().replace(/^@/,'').toLowerCase();
-  let query=db.from('user_profiles').select('*').neq('user_id',user.id).limit(30);
-  if(q)query=query.or(`username.ilike.%${q}%,full_name.ilike.%${q}%`);
-  let {data}=await query;
-  $('peopleList').innerHTML=(data||[]).map(p=>`
+  
+  // Salvar pesquisa recente
+  if(q){
+    let searches = JSON.parse(localStorage.getItem('recentSearches')||'[]');
+    if(!searches.includes(q)){
+      searches.unshift(q);
+      if(searches.length>5) searches.pop();
+      localStorage.setItem('recentSearches', JSON.stringify(searches));
+    }
+  }
+  renderRecentSearches();
+
+  let userQuery=db.from('user_profiles').select('*').neq('user_id',user.id).limit(20);
+  if(q){
+    // Busca flexível permitindo início do nome (mari, maria, marian...)
+    userQuery=userQuery.or(`username.ilike.${q}%,full_name.ilike.${q}%,username.ilike.%${q}%,full_name.ilike.%${q}%`);
+  }
+  let {data:users}=await userQuery;
+
+  // Busca em postagens por palavra-chave
+  let postsHtml = '';
+  if(q){
+    let {data:matchingPosts}=await db.from('posts').select('*').ilike('content', `%${q}%`).limit(10);
+    if(matchingPosts && matchingPosts.length){
+      let authorIds=[...new Set(matchingPosts.map(p=>p.user_id))];
+      let {data:authors}=await db.from('user_profiles').select('*').in('user_id',authorIds);
+      let authorMap={}; (authors||[]).forEach(a=>authorMap[a.user_id]=a);
+      postsHtml = `<h4>Postagens encontradas</h4>` + matchingPosts.map(p=>renderPostHtml(p, authorMap[p.user_id]||{}, true)).join('');
+    }
+  }
+
+  let usersHtml = (users||[]).map(p=>`
     <div class="person">
       <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="inspectProfile('${p.user_id}')">
         <div class="avatar" style="width:38px;height:38px">${p.avatar_url?`<img src="${p.avatar_url}">`:(p.full_name?p.full_name[0]:'?')}</div>
@@ -996,7 +1135,23 @@ async function searchProfiles(){
         <button class="secondary" onclick="openChatFromExplore('${p.user_id}')"><i class="fa-solid fa-paper-plane"></i></button>
       </div>
     </div>
-  `).join('')||'<p class="muted">Nenhum usuário encontrado.</p>';
+  `).join('');
+
+  $('peopleList').innerHTML = usersHtml + (postsHtml ? `<hr style="border:0;border-top:1px solid var(--line);margin:16px 0">${postsHtml}` : '');
+}
+
+function renderRecentSearches(){
+  let searches = JSON.parse(localStorage.getItem('recentSearches')||'[]');
+  if(searches.length){
+    $('recentSearchesBox').innerHTML = 'Pesquisas recentes: ' + searches.map(s=>`<span style="cursor:pointer;text-decoration:underline;margin-right:8px" onclick="$('searchPeople').value='${s}';searchProfilesAndPosts()">${s}</span>`).join('');
+  } else {
+    $('recentSearchesBox').innerHTML = '';
+  }
+}
+
+function clearRecentSearches(){
+  localStorage.removeItem('recentSearches');
+  renderRecentSearches();
 }
 
 async function openChatFromExplore(id){
@@ -1082,6 +1237,7 @@ async function loadChats(){
 
 async function openChat(id){
   activeChat=id;
+  showPage('messages');
   let p=chatProfiles[id];
   if(!p){
     let {data}=await db.from('user_profiles').select('*').eq('user_id',id).maybeSingle();
