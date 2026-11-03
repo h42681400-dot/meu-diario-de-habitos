@@ -40,26 +40,47 @@ body.theme-dark {
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px var(--font-family);transition:background 0.3s, color 0.3s}
 button,input,textarea,select{font:inherit}
-button{border:0;border-radius:12px;padding:10px 16px;background:var(--rose);color:white;font-weight:600;cursor:pointer;transition:all 0.2s}
+button{border:0;border-radius:12px;padding:10px 18px;background:var(--rose);color:white;font-weight:600;cursor:pointer;transition:all 0.2s}
 button:hover{background:var(--rose-hover)}
 button.secondary{background:var(--line);color:var(--ink)}
 button.ghost{background:transparent;color:var(--rose);border:1px solid var(--line)}
 button.danger{background:var(--red);color:white}
 button:disabled{opacity:.5;cursor:not-allowed}
-input,textarea,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);margin:6px 0;outline:none}
+input,textarea,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);margin:8px 0;outline:none}
 input:focus,textarea:focus,select:focus{border-color:var(--rose)}
 textarea{min-height:85px;resize:vertical}
 .hidden{display:none!important}
-.wrap{max-width:720px;margin:0 auto;padding:0 16px 85px 16px}
-.card{background:var(--card-bg);border-radius:20px;padding:20px;margin:14px 0;box-shadow:0 2px 12px rgba(0,0,0,0.02);border:1px solid var(--line)}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px 90px 16px}
+.card{background:var(--card-bg);border-radius:20px;padding:24px;margin:16px 0;box-shadow:0 2px 12px rgba(0,0,0,0.02);border:1px solid var(--line)}
 
 /* Login & Cadastro */
 .login{max-width:440px;margin:6vh auto;padding:24px}
 .brand{text-align:center;color:var(--ink);font-weight:800;letter-spacing:-0.5px}
 .muted,.hint{color:var(--muted);font-size:13px}
-.login-actions{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.login-actions{display:flex;flex-direction:column;gap:14px;margin-top:18px}
 
-.top{display:flex;justify-content:center;align-items:center;padding:20px 0 10px 0}
+/* Cabeçalho com Player de Música Espaçado */
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 0;
+  gap:16px;
+  flex-wrap:wrap;
+}
+
+.music-bar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:var(--card-bg);
+  padding:8px 16px;
+  border-radius:50px;
+  border:1px solid var(--line);
+  font-size:13px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.02);
+}
+.music-bar button{padding:6px 14px;border-radius:50px;font-size:12px;margin:0}
 
 /* Navegação Adaptável (Mobile / Desktop) */
 .nav{
@@ -72,14 +93,13 @@ textarea{min-height:85px;resize:vertical}
   display:flex;
   justify-content:space-around;
   align-items:center;
-  padding:10px 0;
+  padding:10px 16px;
   z-index:1000;
   box-shadow:0 -2px 10px rgba(0,0,0,0.02);
 }
 
-/* Ajuste Elegante no PC / Desktop */
 @media (min-width: 768px) {
-  .wrap { padding-top: 70px; padding-bottom: 20px; }
+  .wrap { padding-top: 80px; padding-bottom: 30px; }
   .nav {
     top: 0;
     bottom: auto;
@@ -93,7 +113,7 @@ textarea{min-height:85px;resize:vertical}
   .nav button {
     flex-direction: row !important;
     gap: 8px !important;
-    padding: 10px 18px !important;
+    padding: 10px 16px !important;
   }
   .nav button span {
     font-size: 13px !important;
@@ -101,7 +121,7 @@ textarea{min-height:85px;resize:vertical}
   }
   .fab-post {
     bottom: 30px !important;
-    right: calc(50vw - 340px) !important;
+    right: calc(50vw - 360px) !important;
   }
 }
 
@@ -114,73 +134,73 @@ textarea{min-height:85px;resize:vertical}
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:2px;
+  gap:4px;
   position:relative;
   transition: all 0.2s;
 }
 .nav button span{font-size:10px;font-weight:500}
 .nav button.active{color:var(--rose);background:rgba(212,165,165,0.1)}
-.badge-red{background:var(--red);color:white;border-radius:50px;width:10px;height:10px;position:absolute;top:6px;right:18px}
+.badge-red{background:var(--red);color:white;border-radius:50px;width:10px;height:10px;position:absolute;top:6px;right:16px}
 
 /* Transição Suave */
 .page{display:none;opacity:0;transition:opacity 0.3s ease-in-out}
 .page.active{display:block;opacity:1}
 
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 
 /* FAB - Botão Flutuante */
-.fab-post{position:fixed;bottom:75px;right:20px;width:54px;height:54px;border-radius:50%;background:var(--rose);color:white;font-size:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(0,0,0,0.15);z-index:999;cursor:pointer}
+.fab-post{position:fixed;bottom:80px;right:24px;width:56px;height:56px;border-radius:50%;background:var(--rose);color:white;font-size:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(0,0,0,0.15);z-index:999;cursor:pointer}
 
 /* Calendário */
-.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
-.calendar-head button{width:auto;padding:6px 12px}
-.week,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.calendar-head button{width:auto;padding:8px 14px}
+.week,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;text-align:center}
 .week div{font-weight:bold;padding:6px 0;color:var(--muted);font-size:12px}
-.day{padding:10px 2px;border-radius:8px;background:var(--bg);cursor:pointer;font-size:13px;border:1px solid transparent}
+.day{padding:12px 2px;border-radius:10px;background:var(--bg);cursor:pointer;font-size:13px;border:1px solid transparent}
 .day.selected{background:var(--rose);color:white}
 .day.today{border-color:var(--rose)}
 .day.has-entry::after{content:' •';color:var(--rose);display:block;font-size:10px}
 
 /* Posts */
-.post{border-bottom:1px solid var(--line);padding:16px 0}
+.post{border-bottom:1px solid var(--line);padding:18px 0}
 .post:last-child{border-bottom:0}
 .post-head{display:flex;align-items:center;justify-content:space-between}
 .post-user-info{display:flex;align-items:center;gap:12px;cursor:pointer}
-.avatar{width:44px;height:44px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;color:var(--rose);font-weight:bold;overflow:hidden;flex:none}
+.avatar{width:46px;height:46px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;color:var(--rose);font-weight:bold;overflow:hidden;flex:none}
 .avatar img{width:100%;height:100%;object-fit:cover}
-.post-media{width:100%;max-height:320px;border-radius:14px;object-fit:cover;margin-top:10px}
-.post-actions{display:flex;gap:16px;margin-top:12px;color:var(--muted)}
-.post-actions button{background:transparent;color:var(--muted);padding:4px 8px;font-size:13px;display:flex;align-items:center;gap:6px}
+.post-media{width:100%;max-height:340px;border-radius:14px;object-fit:cover;margin-top:12px}
+.post-actions{display:flex;gap:18px;margin-top:14px;color:var(--muted)}
+.post-actions button{background:transparent;color:var(--muted);padding:6px 10px;font-size:13px;display:flex;align-items:center;gap:6px}
 .post-actions button.liked{color:var(--red)}
 .post-actions button.reposted{color:var(--rose)}
-.comments-section{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
-.comment-item{font-size:13px;margin:6px 0;padding:6px;background:var(--bg);border-radius:8px}
+.comments-section{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+.comment-item{font-size:13px;margin:8px 0;padding:8px;background:var(--bg);border-radius:10px}
 
 /* Mensagens Estilo iPhone */
-.messages{height:360px;overflow:auto;border:1px solid var(--line);border-radius:18px;padding:14px;margin:10px 0;background:var(--bg);display:flex;flex-direction:column;gap:6px}
-.bubble{max-width:75%;padding:10px 14px;border-radius:18px;font-size:14px;word-break:break-word;line-height:1.35;box-shadow:0 1px 2px rgba(0,0,0,0.05)}
+.messages{height:380px;overflow:auto;border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0;background:var(--bg);display:flex;flex-direction:column;gap:8px}
+.bubble{max-width:78%;padding:10px 14px;border-radius:18px;font-size:14px;word-break:break-word;line-height:1.4;box-shadow:0 1px 2px rgba(0,0,0,0.04)}
 .bubble.other{background:var(--bubble-other);color:var(--bubble-other-text);align-self:flex-start;border-bottom-left-radius:4px}
 .bubble.mine{background:var(--bubble-me);color:var(--bubble-me-text);align-self:flex-end;border-bottom-right-radius:4px}
 .bubble-status{font-size:10px;text-align:right;margin-top:3px;opacity:0.8}
 
 /* Perfil */
 .profile-card{padding:0;overflow:hidden}
-.profile-banner{height:130px;background:var(--line);position:relative}
+.profile-banner{height:140px;background:var(--line);position:relative}
 .profile-banner img{width:100%;height:100%;object-fit:cover}
-.profile-avatar-area{position:relative;padding:0 20px;margin-top:-40px;display:flex;justify-content:space-between;align-items:flex-end}
-.profile-big-avatar{width:86px;height:86px;border-radius:50%;border:4px solid var(--card-bg);background:var(--line);overflow:hidden;font-size:30px;display:flex;align-items:center;justify-content:center;color:var(--rose)}
+.profile-avatar-area{position:relative;padding:0 20px;margin-top:-44px;display:flex;justify-content:space-between;align-items:flex-end}
+.profile-big-avatar{width:90px;height:90px;border-radius:50%;border:4px solid var(--card-bg);background:var(--line);overflow:hidden;font-size:32px;display:flex;align-items:center;justify-content:center;color:var(--rose)}
 .profile-big-avatar img{width:100%;height:100%;object-fit:cover}
 .profile-top-actions{position:absolute;top:15px;right:15px;display:flex;gap:8px;z-index:10}
-.gear-btn{background:rgba(0,0,0,0.4);color:white;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.profile-tabs{display:flex;border-bottom:1px solid var(--line);margin-top:10px;overflow-x:auto}
+.gear-btn{background:rgba(0,0,0,0.4);color:white;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.profile-tabs{display:flex;border-bottom:1px solid var(--line);margin-top:12px;overflow-x:auto}
 .profile-tab{flex:1;text-align:center;padding:12px;cursor:pointer;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;font-size:13px;white-space:nowrap}
 .profile-tab.active{color:var(--ink);border-bottom-color:var(--rose)}
 
 /* Modais & Cortador de Imagens */
 .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px}
-.modal-box{background:var(--card-bg);width:100%;max-width:480px;border-radius:20px;padding:20px;max-height:85vh;overflow:auto}
-.tweet-media-btn{background:var(--line);color:var(--ink);padding:8px 12px;border-radius:10px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
-.crop-preview-box{width:100%;background:#000;border-radius:12px;overflow:hidden;margin:10px 0;position:relative;display:flex;align-items:center;justify-content:center}
+.modal-box{background:var(--card-bg);width:100%;max-width:480px;border-radius:20px;padding:24px;max-height:85vh;overflow:auto}
+.tweet-media-btn{background:var(--line);color:var(--ink);padding:10px 14px;border-radius:12px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.crop-preview-box{width:100%;background:#000;border-radius:12px;overflow:hidden;margin:12px 0;position:relative;display:flex;align-items:center;justify-content:center}
 .crop-preview-box img{max-width:100%;max-height:200px;object-fit:cover}
 </style></head>
 <body>
@@ -191,7 +211,7 @@ textarea{min-height:85px;resize:vertical}
     <h1 class="brand">Cottontail 🐰</h1>
     <p class="muted" style="text-align:center;margin-bottom:20px">Seu espaço de hábitos e comunidade.</p>
     
-    <div style="display:flex;border-bottom:1px solid var(--line);margin-bottom:16px">
+    <div style="display:flex;border-bottom:1px solid var(--line);margin-bottom:18px">
       <div id="tabLoginBtn" class="profile-tab active" onclick="toggleAuthTab('login')">Entrar</div>
       <div id="tabSignUpBtn" class="profile-tab" onclick="toggleAuthTab('signup')">Criar Conta</div>
     </div>
@@ -241,6 +261,13 @@ textarea{min-height:85px;resize:vertical}
 <div id="app" class="wrap hidden">
   <header class="top">
     <h2 class="brand" style="margin:0;font-size:22px">Cottontail 🐰</h2>
+    
+    <div class="music-bar">
+      <i class="fa-solid fa-music" style="color:var(--rose)"></i>
+      <span style="font-weight:600">Lo-Fi Soft</span>
+      <button onclick="toggleMusic()"><i id="musicIcon" class="fa-solid fa-play"></i></button>
+      <audio id="audioPlayer" loop src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"></audio>
+    </div>
   </header>
 
   <div id="fabPostBtn" class="fab-post" onclick="openFloatingPostModal()">
@@ -265,7 +292,7 @@ textarea{min-height:85px;resize:vertical}
   <!-- FEED -->
   <section id="feed" class="page active">
     <div class="card">
-      <div class="row" style="margin-bottom:14px">
+      <div class="row" style="margin-bottom:14px;display:flex;gap:10px">
         <button class="secondary" onclick="loadFeed('all')">Todos</button>
         <button class="secondary" onclick="loadFeed('following')">Quem sigo</button>
       </div>
@@ -284,7 +311,7 @@ textarea{min-height:85px;resize:vertical}
       <div class="week">
         <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
       </div>
-      <div id="days" class="days" style="margin-top:8px"></div>
+      <div id="days" class="days" style="margin-top:10px"></div>
     </div>
     <div class="card">
       <h3 id="selectedDate" style="margin-top:0"></h3>
@@ -297,7 +324,7 @@ textarea{min-height:85px;resize:vertical}
       <div class="field"><label>💧 Água (ml)</label><input id="water" type="number" min="0"></div>
       <div class="field"><label>🏃 Exercícios</label><textarea id="exercise"></textarea></div>
       <div class="field"><label>📝 Observações</label><textarea id="notes"></textarea></div>
-      <button onclick="saveEntry()" style="width:100%;margin-top:10px">Salvar meu dia</button>
+      <button onclick="saveEntry()" style="width:100%;margin-top:14px">Salvar meu dia</button>
       <p id="diaryStatus" class="status"></p>
     </div>
   </section>
@@ -305,12 +332,12 @@ textarea{min-height:85px;resize:vertical}
   <!-- EXPLORAR -->
   <section id="explore" class="page">
     <div class="card">
-      <div style="display:flex;gap:6px">
+      <div style="display:flex;gap:8px">
         <input id="searchPeople" placeholder="🔍 Buscar @usuário, nome ou posts..." oninput="searchProfilesAndPosts()">
         <button class="secondary" onclick="clearRecentSearches()"><i class="fa-solid fa-trash-can"></i></button>
       </div>
-      <div id="recentSearchesBox" class="muted" style="font-size:12px;margin:6px 0"></div>
-      <div id="peopleList" style="margin-top:12px"></div>
+      <div id="recentSearchesBox" class="muted" style="font-size:12px;margin:8px 0"></div>
+      <div id="peopleList" style="margin-top:14px"></div>
     </div>
   </section>
 
@@ -322,21 +349,21 @@ textarea{min-height:85px;resize:vertical}
         <div id="chatList" class="chat-list"></div>
       </div>
       <div id="chatRoomView" class="hidden">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <button class="secondary" onclick="backToChatList()" style="padding:6px 12px"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <button class="secondary" onclick="backToChatList()" style="padding:6px 14px"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
           <h3 id="chatTitle" style="margin:0;font-size:15px">Conversa</h3>
         </div>
         <div id="messageBox" class="messages"></div>
-        <div style="display:flex;gap:4px;margin-bottom:6px">
-          <button class="secondary" style="padding:4px 8px;font-size:14px" onclick="addEmoji('✨')">✨</button>
-          <button class="secondary" style="padding:4px 8px;font-size:14px" onclick="addEmoji('🤍')">🤍</button>
-          <button class="secondary" style="padding:4px 8px;font-size:14px" onclick="addEmoji('🥺')">🥺</button>
-          <button class="secondary" style="padding:4px 8px;font-size:14px" onclick="addEmoji('🌷')">🌷</button>
-          <button class="secondary" style="padding:4px 8px;font-size:14px" onclick="addEmoji('☕')">☕</button>
+        <div style="display:flex;gap:6px;margin-bottom:8px">
+          <button class="secondary" style="padding:6px 10px;font-size:14px" onclick="addEmoji('✨')">✨</button>
+          <button class="secondary" style="padding:6px 10px;font-size:14px" onclick="addEmoji('🤍')">🤍</button>
+          <button class="secondary" style="padding:6px 10px;font-size:14px" onclick="addEmoji('🥺')">🥺</button>
+          <button class="secondary" style="padding:6px 10px;font-size:14px" onclick="addEmoji('🌷')">🌷</button>
+          <button class="secondary" style="padding:6px 10px;font-size:14px" onclick="addEmoji('☕')">☕</button>
         </div>
-        <div class="row">
-          <input id="messageInput" placeholder="Escreva uma mensagem..." onkeydown="if(event.key==='Enter')sendMessage()">
-          <button onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+        <div class="row" style="display:flex;gap:8px">
+          <input id="messageInput" placeholder="Escreva uma mensagem..." onkeydown="if(event.key==='Enter')sendMessage()" style="margin:0">
+          <button onclick="sendMessage()" style="padding:10px 16px"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
         <p id="messageStatus" class="status"></p>
       </div>
@@ -366,11 +393,11 @@ textarea{min-height:85px;resize:vertical}
           <button class="secondary" onclick="openEditProfileModal()"><i class="fa-solid fa-pen"></i> Editar Perfil</button>
         </div>
       </div>
-      <div style="padding:16px 20px 10px 20px">
+      <div style="padding:18px 20px 12px 20px">
         <h2 id="viewProfileName" style="margin:0;font-size:20px">Nome</h2>
         <div id="viewProfileUsername" class="muted">@usuario</div>
-        <p id="viewProfileBio" style="margin:10px 0;font-size:14px"></p>
-        <div style="display:flex;gap:16px;font-size:13px;color:var(--muted);margin-bottom:10px">
+        <p id="viewProfileBio" style="margin:12px 0;font-size:14px"></p>
+        <div style="display:flex;gap:18px;font-size:13px;color:var(--muted);margin-bottom:12px">
           <span style="cursor:pointer" onclick="switchProfileTab('following')"><b id="countFollowing" style="color:var(--ink)">0</b> Seguindo</span>
           <span style="cursor:pointer" onclick="switchProfileTab('followers')"><b id="countFollowers" style="color:var(--ink)">0</b> Seguidores</span>
         </div>
@@ -390,13 +417,13 @@ textarea{min-height:85px;resize:vertical}
 <!-- MODAL: NOVA POSTAGEM -->
 <div id="floatingPostModal" class="modal-overlay hidden">
   <div class="modal-box">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
       <h3 style="margin:0">Criar publicação</h3>
-      <button class="ghost" onclick="closeFloatingPostModal()" style="padding:4px 8px">✕</button>
+      <button class="ghost" onclick="closeFloatingPostModal()" style="padding:4px 10px">✕</button>
     </div>
     <textarea id="modalPostContent" maxlength="2000" placeholder="O que você está pensando?"></textarea>
     
-    <div style="margin-top:10px">
+    <div style="margin-top:12px">
       <label class="tweet-media-btn">
         <i class="fa-regular fa-image"></i> Escolher Imagem
         <input type="file" id="modalPostImageInput" accept="image/*" class="hidden" onchange="previewFloatingPostImage()">
@@ -410,7 +437,7 @@ textarea{min-height:85px;resize:vertical}
       <button class="ghost" onclick="removeFloatingPostImage()" style="font-size:12px;color:var(--red)">Remover imagem</button>
     </div>
 
-    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px">
+    <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:18px">
       <button class="secondary" onclick="closeFloatingPostModal()">Cancelar</button>
       <button onclick="submitFloatingPost()">Publicar</button>
     </div>
@@ -418,15 +445,28 @@ textarea{min-height:85px;resize:vertical}
   </div>
 </div>
 
-<!-- POPUP DE EXCLUSÃO -->
+<!-- POPUP DE EXCLUSÃO DE POST -->
 <div id="deleteConfirmModal" class="modal-overlay hidden">
   <div class="modal-box" style="text-align:center;max-width:360px">
     <h3 style="margin-top:0;color:var(--red)"><i class="fa-solid fa-trash-can"></i> Excluir postagem</h3>
     <p class="muted">Tem certeza que deseja apagar esta publicação permanentemente?</p>
-    <div style="display:flex;gap:10px;margin-top:20px">
+    <div style="display:flex;gap:12px;margin-top:20px">
       <button class="secondary" onclick="closeDeleteConfirmModal()" style="flex:1">Cancelar</button>
       <button class="danger" onclick="confirmExecuteDelete()" style="flex:1">Excluir</button>
     </div>
+  </div>
+</div>
+
+<!-- POPUP DE EXCLUSÃO DE CONTA -->
+<div id="deleteAccountModal" class="modal-overlay hidden">
+  <div class="modal-box" style="text-align:center;max-width:380px">
+    <h3 style="margin-top:0;color:var(--red)"><i class="fa-solid fa-triangle-exclamation"></i> Excluir Conta Definitivamente</h3>
+    <p class="muted">Isso apagará permanentemente seu perfil, suas postagens e dados do diário. Essa ação não pode ser desfeita.</p>
+    <div style="display:flex;gap:12px;margin-top:20px">
+      <button class="secondary" onclick="closeDeleteAccountModal()" style="flex:1">Cancelar</button>
+      <button class="danger" onclick="executeDeleteAccount()" style="flex:1">Sim, Excluir</button>
+    </div>
+    <p id="deleteAccStatus" class="status" style="margin-top:10px"></p>
   </div>
 </div>
 
@@ -444,19 +484,19 @@ textarea{min-height:85px;resize:vertical}
         <option value="inappropriate">Conteúdo Inadequado</option>
       </select>
     </div>
-    <div style="display:flex;gap:10px;margin-top:16px">
+    <div style="display:flex;gap:12px;margin-top:18px">
       <button class="secondary" onclick="closeReportModal()" style="flex:1">Cancelar</button>
       <button class="danger" onclick="submitReport()" style="flex:1">Enviar Denúncia</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: CONFIGURAÇÕES & GALERIA DE MÚSICAS & BOTÃO SAIR -->
+<!-- MODAL: CONFIGURAÇÕES & GALERIA DE MÚSICAS & EXCLUIR CONTA -->
 <div id="settingsModal" class="modal-overlay hidden">
   <div class="modal-box">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
       <h3 style="margin:0"><i class="fa-solid fa-gear"></i> Configurações</h3>
-      <button class="ghost" onclick="closeSettingsModal()" style="padding:4px 8px">✕</button>
+      <button class="ghost" onclick="closeSettingsModal()" style="padding:4px 10px">✕</button>
     </div>
 
     <div class="field">
@@ -466,14 +506,10 @@ textarea{min-height:85px;resize:vertical}
         <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c3673f44.mp3">Piano Relaxante</option>
         <option value="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3">Acústico Calmo</option>
       </select>
-      <div style="display:flex;gap:6px;margin-top:6px">
+      <div style="display:flex;gap:8px;margin-top:8px">
         <input id="customMusicUrlInput" placeholder="Ou cole URL direta .mp3" style="margin:0">
         <button class="secondary" onclick="changeMusicUrl($('customMusicUrlInput').value)">Tocar</button>
       </div>
-      <div style="display:flex;justify-content:center;gap:10px;margin-top:8px">
-        <button class="secondary" onclick="toggleMusic()"><i id="musicIcon" class="fa-solid fa-play"></i> Tocar / Pausar Música</button>
-      </div>
-      <audio id="audioPlayer" loop src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"></audio>
     </div>
 
     <div class="field">
@@ -493,23 +529,26 @@ textarea{min-height:85px;resize:vertical}
       </select>
     </div>
 
-    <div class="field" style="display:flex;align-items:center;gap:10px;margin-top:15px">
+    <div class="field" style="display:flex;align-items:center;gap:12px;margin-top:16px">
       <input type="checkbox" id="settingsMsgFollowingOnly" style="width:20px;height:20px" onchange="saveMsgPrivacySetting(this.checked)">
       <label for="settingsMsgFollowingOnly" style="margin:0;cursor:pointer">Receber mensagens apenas de quem eu sigo 💌</label>
     </div>
 
-    <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+    <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
 
-    <div style="margin-bottom:16px">
+    <div style="margin-bottom:18px">
       <h4 style="margin:0 0 10px 0">Usuários Bloqueados</h4>
       <div id="blockedUsersList"><p class="muted">Carregando bloqueios...</p></div>
     </div>
 
-    <button class="danger" onclick="signOut()" style="width:100%"><i class="fa-solid fa-right-from-bracket"></i> Sair da Conta</button>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="secondary" onclick="signOut()"><i class="fa-solid fa-right-from-bracket"></i> Sair da Conta</button>
+      <button class="danger" onclick="openDeleteAccountModal()"><i class="fa-solid fa-user-xmark"></i> Excluir Minha Conta</button>
+    </div>
   </div>
 </div>
 
-<!-- MODAL: EDITAR PERFIL COM CORTADOR -->
+<!-- MODAL: EDITAR PERFIL -->
 <div id="editProfileModal" class="modal-overlay hidden">
   <div class="modal-box">
     <h3 style="margin-top:0">Editar Perfil</h3>
@@ -539,12 +578,12 @@ textarea{min-height:85px;resize:vertical}
       </div>
     </div>
 
-    <div class="field" style="display:flex;align-items:center;gap:10px;margin-top:15px">
+    <div class="field" style="display:flex;align-items:center;gap:12px;margin-top:16px">
       <input type="checkbox" id="profileIsPrivate" style="width:20px;height:20px">
       <label for="profileIsPrivate" style="margin:0;cursor:pointer">Perfil privado 🔒</label>
     </div>
 
-    <div style="display:flex;gap:10px;margin-top:16px">
+    <div style="display:flex;gap:12px;margin-top:18px">
       <button class="secondary" onclick="closeEditProfileModal()" style="flex:1">Cancelar</button>
       <button onclick="saveProfile()" style="flex:1">Salvar</button>
     </div>
@@ -583,6 +622,20 @@ function esc(s=''){
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
   }[c]));
 }
+
+/* DETECTAR IDIOMA DO SISTEMA AUTOMATICAMENTE NO CARREGAMENTO */
+window.addEventListener('DOMContentLoaded', () => {
+  let sysLang = navigator.language || navigator.userLanguage || 'pt-BR';
+  let langSelect = $('regLanguage');
+  if(langSelect){
+    for(let opt of langSelect.options){
+      if(sysLang.toLowerCase().includes(opt.value.toLowerCase().slice(0,2))){
+        langSelect.value = opt.value;
+        break;
+      }
+    }
+  }
+});
 
 /* MUSIC PLAYER */
 function toggleMusic(){
@@ -673,6 +726,33 @@ async function resetPassword(){
 async function signOut(){
   if(chatInterval) clearInterval(chatInterval);
   await db.auth.signOut();
+}
+
+/* EXCLUIR CONTA */
+function openDeleteAccountModal(){
+  $('settingsModal').classList.add('hidden');
+  $('deleteAccountModal').classList.remove('hidden');
+}
+function closeDeleteAccountModal(){
+  $('deleteAccountModal').classList.add('hidden');
+  status('deleteAccStatus','');
+}
+async function executeDeleteAccount(){
+  if(!user) return;
+  status('deleteAccStatus','Excluindo dados...');
+  try {
+    // Apaga dados do usuário nas tabelas principais antes de sair
+    await db.from('user_profiles').delete().eq('user_id', user.id);
+    await db.from('posts').delete().eq('user_id', user.id);
+    await db.from('diary_entries').delete().eq('user_id', user.id);
+    
+    // Faz logout e limpa intervalo
+    if(chatInterval) clearInterval(chatInterval);
+    await db.auth.signOut();
+    closeDeleteAccountModal();
+  } catch(err){
+    status('deleteAccStatus', 'Erro ao excluir dados. Tente novamente.');
+  }
 }
 
 db.auth.onAuthStateChange(async(_event,session)=>{
@@ -887,7 +967,7 @@ async function submitReport(){
   if(!postToReportId) return;
   let reason = $('reportReasonSelect').value;
   await db.from('post_reports').insert({post_id: postToReportId, reporter_id: user.id, reason: reason});
-  alert('Denúncia enviada! Nossa equipe revisará o conteúdo.');
+  alert('Denúncia enviada com sucesso! Nossa equipe revisará o conteúdo.');
   closeReportModal();
 }
 
@@ -1060,11 +1140,11 @@ function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false,
           <div><b>${name}</b><div class="muted">${handle} · ${new Date(p.created_at).toLocaleDateString('pt-BR')}</div></div>
         </div>
         <div>
-          ${isMine?`<button class="ghost" onclick="openDeleteConfirmModal('${p.id}')" style="color:var(--red);padding:4px 8px;font-size:12px"><i class="fa-solid fa-trash"></i></button>`:
-          `<button class="ghost" onclick="openReportModal('${p.id}')" style="color:var(--muted);padding:4px 8px;font-size:12px"><i class="fa-solid fa-triangle-exclamation"></i></button>`}
+          ${isMine?`<button class="ghost" onclick="openDeleteConfirmModal('${p.id}')" style="color:var(--red);padding:6px 12px;font-size:12px"><i class="fa-solid fa-trash"></i></button>`:
+          `<button class="ghost" onclick="openReportModal('${p.id}')" style="color:var(--muted);padding:6px 12px;font-size:12px"><i class="fa-solid fa-triangle-exclamation"></i></button>`}
         </div>
       </div>
-      <p style="margin:10px 0;line-height:1.4">${esc(p.content).replace(/\n/g,'<br>')}</p>
+      <p style="margin:12px 0;line-height:1.4">${esc(p.content).replace(/\n/g,'<br>')}</p>
       ${p.media_url?`<img src="${esc(p.media_url)}" class="post-media">`:''}
       ${interactive?`
         <div class="post-actions">
@@ -1080,9 +1160,9 @@ function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false,
         </div>
         <div id="comments-box-${p.id}" class="comments-section hidden">
           <div id="comments-list-${p.id}"></div>
-          <div class="row" style="margin-top:8px">
-            <input id="comment-input-${p.id}" placeholder="Escreva um comentário..." onkeydown="if(event.key==='Enter')addComment('${p.id}','${p.user_id}')">
-            <button onclick="addComment('${p.id}','${p.user_id}')" style="padding:8px 12px">Enviar</button>
+          <div class="row" style="margin-top:10px;display:flex;gap:8px">
+            <input id="comment-input-${p.id}" placeholder="Escreva um comentário..." onkeydown="if(event.key==='Enter')addComment('${p.id}','${p.user_id}')" style="margin:0">
+            <button onclick="addComment('${p.id}','${p.user_id}')" style="padding:8px 14px">Enviar</button>
           </div>
         </div>`:''}
     </article>
@@ -1169,11 +1249,11 @@ async function searchProfilesAndPosts(){
 
   let usersHtml = (users||[]).map(p=>`
     <div class="person">
-      <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="inspectProfile('${p.user_id}')">
+      <div style="display:flex;align-items:center;gap:12px;cursor:pointer" onclick="inspectProfile('${p.user_id}')">
         <div class="avatar" style="width:38px;height:38px">${p.avatar_url?`<img src="${p.avatar_url}">`:(p.full_name?p.full_name[0]:'?')}</div>
         <div><b>${esc(p.full_name||'')}</b><div class="muted">@${esc(p.username||'')}</div></div>
       </div>
-      <div style="display:flex;gap:6px">
+      <div style="display:flex;gap:8px">
         <button class="secondary" onclick="inspectProfile('${p.user_id}')">Ver Perfil</button>
         <button class="secondary" onclick="openChatFromExplore('${p.user_id}')"><i class="fa-solid fa-paper-plane"></i></button>
       </div>
@@ -1186,7 +1266,7 @@ async function searchProfilesAndPosts(){
 function renderRecentSearches(){
   let searches = JSON.parse(localStorage.getItem('recentSearches')||'[]');
   if(searches.length){
-    $('recentSearchesBox').innerHTML = 'Pesquisas recentes: ' + searches.map(s=>`<span style="cursor:pointer;text-decoration:underline;margin-right:8px" onclick="$('searchPeople').value='${s}';searchProfilesAndPosts()">${s}</span>`).join('');
+    $('recentSearchesBox').innerHTML = 'Pesquisas recentes: ' + searches.map(s=>`<span style="cursor:pointer;text-decoration:underline;margin-right:10px" onclick="$('searchPeople').value='${s}';searchProfilesAndPosts()">${s}</span>`).join('');
   } else {
     $('recentSearchesBox').innerHTML = '';
   }
@@ -1221,20 +1301,20 @@ async function inspectProfile(id){
   $('modalProfileContent').innerHTML=`
     <div style="text-align:center">
       <div class="profile-big-avatar" style="margin:0 auto;width:74px;height:74px">${u?.avatar_url?`<img src="${u.avatar_url}">`:(u?.full_name?u.full_name[0]:'?')}</div>
-      <h3 style="margin:8px 0 2px 0">${esc(u?.full_name||'Usuário')}</h3>
+      <h3 style="margin:10px 0 2px 0">${esc(u?.full_name||'Usuário')}</h3>
       <div class="muted">@${esc(u?.username||'')} ${u?.is_private?'🔒':''}</div>
-      <p style="font-size:14px;margin:10px 0">${esc(u?.bio||'')}</p>
-      <div style="display:flex;justify-content:center;gap:16px;font-size:13px;margin:12px 0">
+      <p style="font-size:14px;margin:12px 0">${esc(u?.bio||'')}</p>
+      <div style="display:flex;justify-content:center;gap:18px;font-size:13px;margin:14px 0">
         <span><b>${wCount||0}</b> Seguidores</span>
         <span><b>${fCount||0}</b> Seguindo</span>
       </div>
-      <div style="display:flex;gap:8px;justify-content:center;margin-top:14px">
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:16px">
         <button onclick="toggleFollowModal('${id}',${!!isF})">${isF?'Seguindo':'Seguir'}</button>
         <button class="secondary" onclick="closeUserModal();openChatFromExplore('${id}')">Mensagem</button>
         <button class="ghost" onclick="toggleBlockUser('${id}',${!!isB})" style="color:var(--red);border-color:var(--red)">${isB?'Desbloquear':'Bloquear'}</button>
       </div>
     </div>
-    <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+    <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
     <div>${isPrivateAndNotFollowing ? '<p class="muted" style="text-align:center">Este perfil é privado. Siga-o para ver as publicações.</p>' : (posts||[]).map(p=>renderPostHtml(p,u,false)).join('')||'<p class="muted">Sem publicações.</p>'}</div>
   `;
   $('userModal').classList.remove('hidden');
@@ -1270,8 +1350,8 @@ async function loadChats(){
   let {data:p}=await db.from('user_profiles').select('*').in('user_id',peers);
   chatProfiles={}; (p||[]).forEach(x=>chatProfiles[x.user_id]=x);
   $('chatList').innerHTML=peers.map(id=>`
-    <div class="chat-item" onclick="openChat('${id}')">
-      <div class="avatar" style="width:34px;height:34px">${chatProfiles[id]?.avatar_url?`<img src="${chatProfiles[id].avatar_url}">`:(chatProfiles[id]?.full_name?chatProfiles[id].full_name[0]:'?')}</div>
+    <div class="chat-item" onclick="openChat('${id}')" style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer">
+      <div class="avatar" style="width:40px;height:40px">${chatProfiles[id]?.avatar_url?`<img src="${chatProfiles[id].avatar_url}">`:(chatProfiles[id]?.full_name?chatProfiles[id].full_name[0]:'?')}</div>
       <div><b>${esc(chatProfiles[id]?.full_name||'Pessoa')}</b><div class="muted">@${esc(chatProfiles[id]?.username||'')}</div></div>
     </div>
   `).join('');
