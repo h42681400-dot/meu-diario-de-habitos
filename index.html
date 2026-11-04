@@ -2925,16 +2925,19 @@ async function checkNewNotifications(){
   if($('notifications').classList.contains('active')) await loadNotifications();
 }
 
-/* Ação direta de fixar publicação: o próprio botão chama esta função. */
-window.handlePinPostClick = function(event, postId){
+/* Handler global declarado antes de renderizar os posts, para o onclick inline. */
+function handlePinPostClick(event, postId){
   if(event){event.preventDefault();event.stopPropagation();}
   const button=event?.currentTarget;
   button?.closest('.post-options-menu')?.classList.add('hidden');
-  if(!postId){showToast('Não foi possível fixar','Não encontrei o ID desta publicação.');return false;}
-  if(typeof pinPost!=='function'){showToast('Não foi possível fixar','A função de fixação não foi carregada. Atualize a página.');return false;}
-  pinPost(postId);
+  if(!postId){window.alert('Não foi possível fixar: ID da publicação ausente.');return false;}
+  if(typeof pinPost!=='function'){window.alert('Não foi possível fixar: função pinPost não carregada.');return false;}
+  pinPost(postId).catch(error=>{
+    console.error('Falha ao fixar publicação:',error);
+    window.alert('Erro ao fixar publicação: '+(error?.message||String(error)));
+  });
   return false;
-};
+}
 </script>
 <script>
 window.handleLoginClick = function(event) {
