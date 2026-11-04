@@ -1079,7 +1079,7 @@ const SUPABASE_URL='https://qhveyeqpwguqbokfwlwf.supabase.co';
 const SUPABASE_KEY='sb_publishable_FWLt3OH6KIOwXZ-DqJGacw_vcoMg-eM';
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let user=null, selected=new Date(), entries={}, profile=null, activeChat=null, chatProfiles={};
+let user=null, selected=new Date(), entries={}, profile=null, activeChat=null, chatProfiles={}, inspectedProfileId=null;
 let currentFloatingPostImage=null, editAvatarFile=null, editBannerFile=null, postToDeleteId=null, postToReportId=null;
 let chatInterval=null, presenceTimer=null;
 let notificationPollTimer=null, notificationCursor=null;
@@ -1765,6 +1765,7 @@ async function saveRepost(withComment){
   if(postOwnerId!==user.id)await db.from('notifications').insert({user_id:postOwnerId,actor_id:user.id,type:'repost',post_id:postId});
   showToast('Repost publicado!',withComment&&comment?'Sua publicação foi compartilhada com comentário.':'Sua publicação foi compartilhada sem comentário.',{type:'repost'});
   await loadFeed('all');
+  if(inspectedProfileId&&$('userModal')&&!$('userModal').classList.contains('hidden'))await inspectProfile(inspectedProfileId);
 }
 
 async function toggleLike(postId,isLiked,postOwnerId){
@@ -1778,6 +1779,7 @@ async function toggleLike(postId,isLiked,postOwnerId){
   }
   await loadFeed('all');
   if($('profileTabContent'))await loadProfileDataTab('posts');
+  if(inspectedProfileId&&$('userModal')&&!$('userModal').classList.contains('hidden'))await inspectProfile(inspectedProfileId);
 }
 
 async function toggleRepost(postId,isReposted,postOwnerId){return isReposted?removeMyRepost(postId):openRepostComposer(postId,postOwnerId);}
@@ -1789,6 +1791,7 @@ async function removeMyRepost(postId){
   showToast('Repost removido','A publicação saiu da sua lista de reposts.',{type:'repost'});
   await loadFeed('all');
   if($('profileTabContent'))await loadProfileDataTab('reposts');
+  if(inspectedProfileId&&$('userModal')&&!$('userModal').classList.contains('hidden'))await inspectProfile(inspectedProfileId);
 }
 
 function postUiElement(postId,suffix){return document.querySelector('#userModal #'+suffix+'-'+postId)||$(''+suffix+'-'+postId);}
@@ -1990,7 +1993,9 @@ function clearRecentSearches(){
 }
 
 async function inspectProfile(id){
+  inspectedProfileId=id;
   let {data:u}=await db.from('user_profiles').select('*').eq('user_id',id).maybeSingle();
+  if(u)chatProfiles[id]=u;
   let {data:posts}=await db.from('posts').select('*').eq('user_id',id);
   let {count:fCount}=await db.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',id);
   let {count:wCount}=await db.from('follows').select('*',{count:'exact',head:true}).eq('following_id',id);
@@ -2116,7 +2121,7 @@ async function openChat(id, username=''){
 
   if(!p){
     let {data,error}=await db.from('user_profiles')
-      .select('username,full_name,avatar_url,last_seen_at')
+      .select('username,full_name,avatar_url')
       .eq('user_id',id)
       .maybeSingle();
 
@@ -2126,6 +2131,8 @@ async function openChat(id, username=''){
     }
 
     p=data||{};
+    const {data:presence}=await db.from('user_profiles').select('last_seen_at').eq('user_id',id).maybeSingle();
+    p.last_seen_at=presence?.last_seen_at||null;
   }
 
   $('chatTitle').innerHTML=esc(p.full_name||'Conversa')+verifiedBadge(p.username);
@@ -2194,6 +2201,7 @@ async function loadMessages(){
       else console.warn('Não foi possível marcar mensagens como lidas; confira a função mark_messages_read e a política de atualização:',fallbackError.message);
     }
   }
+  if(!data?.length){$('messageBox').innerHTML='<p class="muted" style="text-align:center">Ainda não há mensagens. Diga oi para começar! 👋</p>';checkUnreadBadges();return;}
   $('messageBox').innerHTML=(data||[]).map(m=>{
     const mine=m.sender_id===user.id;
     const time=new Date(m.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
