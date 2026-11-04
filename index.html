@@ -1832,13 +1832,13 @@ async function loadPostComments(postId){
     if(!likesError)(commentLikes||[]).forEach(x=>{likesByComment[x.comment_id]=(likesByComment[x.comment_id]||0)+1;if(x.user_id===user.id)myCommentLikes.add(x.comment_id);});
   }
   const childrenByParent={};rows.forEach(c=>{if(c.parent_comment_id)(childrenByParent[c.parent_comment_id]??=[]).push(c);});
-  const deleteButton=c=>(c.user_id===user.id||canModerate)?'<button class="ghost" style="padding:3px 7px;font-size:11px;margin-left:6px;color:var(--red)" onclick="deletePostComment(\\''+c.id+'\\',\\''+postId+'\\')"><i class="fa-solid fa-trash"></i> Apagar</button>':'';
+  const deleteButton=c=>(c.user_id===user.id||canModerate)?'<button class="ghost" style="padding:3px 7px;font-size:11px;margin-left:6px;color:var(--red)" onclick="deletePostComment(\''+c.id+'\',\''+postId+'\')"><i class="fa-solid fa-trash"></i> Apagar</button>':'';
   const depthLabel=depth=>depth?'<span class="muted" style="font-size:10px;margin-left:5px">↳ resposta</span>':'';
   const renderComment=(c,depth=0)=>{
     const a=authors[c.user_id]||{},name=a.full_name||'Usuário';
     const liked=myCommentLikes.has(c.id);
-    const likeButton='<button class="ghost comment-like-button '+(liked?'liked':'')+'" style="padding:3px 7px;font-size:11px;margin-left:6px" onclick="toggleCommentLike(\\''+c.id+'\\',\\''+postId+'\\','+liked+')" aria-label="Curtir comentário"><i class="'+(liked?'fa-solid':'fa-regular')+' fa-heart"></i> '+(likesByComment[c.id]||0)+'</button>';
-    const replyButton='<button class="ghost" style="padding:3px 7px;font-size:11px;margin-left:6px" data-name="'+esc(name)+'" onclick="replyToComment(\\''+postId+'\\',\\''+c.id+'\\',this.dataset.name)">Responder</button>';
+    const likeButton='<button class="ghost comment-like-button '+(liked?'liked':'')+'" style="padding:3px 7px;font-size:11px;margin-left:6px" onclick="toggleCommentLike(\''+c.id+'\',\''+postId+'\','+liked+')" aria-label="Curtir comentário"><i class="'+(liked?'fa-solid':'fa-regular')+' fa-heart"></i> '+(likesByComment[c.id]||0)+'</button>';
+    const replyButton='<button class="ghost" style="padding:3px 7px;font-size:11px;margin-left:6px" data-name="'+esc(name)+'" onclick="replyToComment(\''+postId+'\',\''+c.id+'\',this.dataset.name)">Responder</button>';
     const nested=(childrenByParent[c.id]||[]).map(x=>renderComment(x,depth+1)).join('');
     return '<div class="'+(depth?'comment-reply':'comment-item')+'" style="'+(depth>1?'margin-left:12px;':'')+'"><b>'+esc(name)+'</b> '+esc(c.content)+depthLabel(depth)+likeButton+deleteButton(c)+replyButton+nested+'</div>';
   };
