@@ -504,6 +504,8 @@ body.theme-dark .bubble-time{color:#b6c7c0}
 .nav .badge-red{top:1px;right:2px}
 @media(max-width:767px){.nav{gap:1px;padding:8px 3px calc(8px + env(safe-area-inset-bottom))}.nav button{padding:9px 2px;gap:3px}.nav button i{font-size:13px}.nav button span{font-size:8px}.wrap{padding-bottom:110px}}
 .profile-count-actions{display:flex;align-items:center;gap:8px;margin:10px 0 12px}
+.profile-website-link{display:inline-flex;align-items:center;gap:7px;color:var(--rose);font-size:13px;text-decoration:none;overflow-wrap:anywhere}
+.profile-website-link:hover{text-decoration:underline}
 .profile-count-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:20px;background:var(--bg);color:var(--muted);border:1px solid var(--line);font-size:12px;font-weight:500}
 .profile-count-btn b{color:var(--ink);font-size:13px}
 .profile-count-btn:hover{background:var(--line);color:var(--ink)}
@@ -896,6 +898,7 @@ body.theme-dark #messageBox .bubble.other{background:#303036;color:#f7eff2;borde
         <h2 id="viewProfileName" style="margin:0;font-size:20px">Nome</h2>
         <div id="viewProfileUsername" class="muted">@usuario</div>
         <p id="viewProfileBio" style="margin:12px 0;font-size:14px"></p>
+        <div id="viewProfileLink"></div>
         <div class="profile-count-actions">
           <button class="profile-count-btn" onclick="switchProfileTab('following')"><b id="countFollowing">0</b><span>Seguindo</span></button>
           <button class="profile-count-btn" onclick="switchProfileTab('followers')"><b id="countFollowers">0</b><span>Seguidores</span></button>
@@ -1054,6 +1057,7 @@ body.theme-dark #messageBox .bubble.other{background:#303036;color:#f7eff2;borde
       <label class="edit-field"><span>Nome</span><input id="profileName" placeholder="Como as pessoas te conhecem"></label>
       <label class="edit-field"><span>Nome de usuário</span><div class="edit-handle-input"><b>@</b><input id="profileUsername" placeholder="seuusuario"></div></label>
       <label class="edit-field"><span>Bio</span><textarea id="profileBio" maxlength="240" placeholder="Conte um pouquinho sobre você..."></textarea><small>Até 240 caracteres</small></label>
+      <label class="edit-field"><span>Link do perfil</span><input id="profileLink" type="url" placeholder="https://seusite.com ou instagram.com/seuuser"></label>
       <label class="edit-private-row"><span class="edit-private-icon"><i class="fa-solid fa-lock"></i></span><span><b>Perfil privado</b><small>Só seguidores aprovados poderão ver suas publicações</small></span><input type="checkbox" id="profileIsPrivate"></label>
     </div>
     <p id="profileStatus" class="status edit-profile-status"></p>
@@ -1087,6 +1091,7 @@ const pad=n=>String(n).padStart(2,'0');
 const dateKey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 
 function status(id,t){$(id).textContent=t||''}
+function normalizeProfileLink(value){let v=String(value||'').trim();if(v&&!/^https?:\/\//i.test(v))v='https://'+v;return /^https?:\/\//i.test(v)?v:'';}
 function verifiedBadge(username){
   const normalized=String(username||'').trim().toLowerCase().replace(/^@/,'');
   return normalized==='cottontail'?' <span class="verified-badge" title="Perfil oficial do Cottontail" aria-label="Perfil verificado"><i class="fa-solid fa-check"></i></span>':'';
@@ -1246,6 +1251,9 @@ db.auth.onAuthStateChange((_event,session)=>{
     presenceTimer=setInterval(updateMyPresence,30000);
     await Promise.all([loadMonth(),loadProfile(),loadFeed('all'),checkUnreadBadges()]);
       await startNotificationPolling();
+      let savedPage='feed';try{savedPage=localStorage.getItem('cottontailActivePage')||'feed';}catch(e){}
+      const validPages=['feed','diary','explore','messages','notifications','profile'];
+      showPage(validPages.includes(savedPage)?savedPage:'feed');
       showToast('Bem-vinda de volta!','Seu Cottontail está prontinho para você. 🐰',{type:'welcome'});
     }catch(err){
       console.error('Erro ao iniciar o Cottontail:',err);
@@ -1267,6 +1275,7 @@ function showPage(id){
   document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
   
   $('fabPostBtn').classList.toggle('hidden', !['diary','explore','notifications','profile'].includes(id));
+  if(user)try{localStorage.setItem('cottontailActivePage',id);}catch(e){}
 
   if(id==='explore')searchProfilesAndPosts();
   if(id==='messages'){ $('msgBadge').classList.add('hidden'); backToChatList(); markInboxMessagesRead(); }
@@ -1486,11 +1495,14 @@ async function loadProfile(){
   $('profileName').value=profile.full_name||'';
   $('profileUsername').value=profile.username||'';
   $('profileBio').value=profile.bio||'';
+  $('profileLink').value=profile.website_url||'';
   $('profileIsPrivate').checked=profile.is_private||false;
 
   $('viewProfileName').innerHTML=esc(profile.full_name||'Sem Nome')+verifiedBadge(profile.username);
   $('viewProfileUsername').textContent=profile.username?(profile.username.startsWith('@')?profile.username:'@'+profile.username):'@usuario';
   $('viewProfileBio').textContent=profile.bio||'';
+  const profileLink=normalizeProfileLink(profile.website_url||'');
+  $('viewProfileLink').innerHTML=profileLink?'<a href="'+esc(profileLink)+'" target="_blank" rel="noopener noreferrer" class="profile-website-link"><i class="fa-solid fa-link"></i> '+esc(profile.website_url)+'</a>':'';
   $('profilePrivacyBadge').textContent=profile.is_private?'🔒 Perfil Privado':'🔓 Perfil Público';
 
   if(profile.avatar_url){ $('profileBigAvatar').innerHTML=`<img src="${esc(profile.avatar_url)}">`; }
@@ -1549,6 +1561,9 @@ async function saveProfile(){
   let name=$('profileName').value.trim();
   let username=$('profileUsername').value.trim().toLowerCase().replace(/^@/,'');
   let bio=$('profileBio').value.trim();
+  let website_url=$('profileLink').value.trim();
+  if(website_url&&!/^https?:\/\//i.test(website_url))website_url='https://'+website_url;
+  if(website_url&&!/^https?:\/\//i.test(website_url))return status('profileStatus','Informe um link válido.');
   let is_private=$('profileIsPrivate').checked;
   let avatar_url=profile.avatar_url, banner_url=profile.banner_url;
 
@@ -1557,7 +1572,7 @@ async function saveProfile(){
     if(editBannerFile) banner_url=await uploadFile(editBannerFile, `banner_${user.id}_${Date.now()}`);
 
     let {error}=await db.from('user_profiles').upsert({
-      user_id:user.id,full_name:name,username,bio,avatar_url,banner_url,is_private,updated_at:new Date().toISOString()
+      user_id:user.id,full_name:name,username,bio,website_url,avatar_url,banner_url,is_private,updated_at:new Date().toISOString()
     },{onConflict:'user_id'});
     if(error) throw error;
     closeEditProfileModal();
@@ -1784,18 +1799,22 @@ async function toggleCommentsSection(postId){
 function closeCommentsSection(postId){$('comments-box-'+postId)?.classList.add('hidden');}
 
 async function loadPostComments(postId){
-  let {data,error}=await db.from('post_comments').select('*').eq('post_id',postId).order('created_at',{ascending:true});
-  if(error){$('comments-list-'+postId).innerHTML='<p class="muted">Não foi possível carregar comentários.</p>';return;}
+  const {data,error}=await db.from('post_comments').select('*').eq('post_id',postId).order('created_at',{ascending:true});
+  if(error){$('comments-list-'+postId).innerHTML='<p class="muted">Não foi possível carregar comentários: '+esc(error.message)+'</p>';return;}
   const {data:post}=await db.from('posts').select('user_id').eq('id',postId).maybeSingle();
-  const canModerate=post?.user_id===user.id;
-  let userIds=[...new Set((data||[]).map(c=>c.user_id))],authors={};
-  if(userIds.length){let {data:profiles}=await db.from('user_profiles').select('*').in('user_id',userIds);(profiles||[]).forEach(p=>authors[p.user_id]=p);}
-  const roots=(data||[]).filter(c=>!c.parent_comment_id),children=(data||[]).filter(c=>c.parent_comment_id);
-  const deleteButton=c=>(c.user_id===user.id||canModerate)?'<button class="ghost" style="padding:3px 7px;font-size:11px;margin-left:6px;color:var(--red)" onclick="deletePostComment(\''+c.id+'\',\''+postId+'\')"><i class="fa-solid fa-trash"></i> Apagar</button>':'';
-  $('comments-list-'+postId).innerHTML=roots.map(c=>{
-    const a=authors[c.user_id]||{},replies=children.filter(x=>x.parent_comment_id===c.id);
-    return '<div class="comment-item"><b>'+esc(a.full_name||'Usuário')+'</b> '+esc(c.content)+deleteButton(c)+'<button class="ghost" style="padding:3px 7px;font-size:11px;margin-left:6px" onclick="replyToComment(\''+postId+'\',\''+c.id+'\',\''+esc(a.full_name||'usuário')+'\')">Responder</button>'+replies.map(r=>{const ra=authors[r.user_id]||{};return '<div class="comment-reply"><b>'+esc(ra.full_name||'Usuário')+'</b> '+esc(r.content)+deleteButton(r)+'</div>';}).join('')+'</div>';
-  }).join('')||'<p class="muted" style="font-size:13px">Nenhum comentário ainda.</p>';
+  const canModerate=post?.user_id===user.id,rows=data||[],userIds=[...new Set(rows.map(c=>c.user_id))],authors={};
+  if(userIds.length){const {data:profiles}=await db.from('user_profiles').select('*').in('user_id',userIds);(profiles||[]).forEach(p=>authors[p.user_id]=p);}
+  const childrenByParent={};rows.forEach(c=>{if(c.parent_comment_id)(childrenByParent[c.parent_comment_id]??=[]).push(c);});
+  const deleteButton=c=>(c.user_id===user.id||canModerate)?'<button class="ghost" style="padding:3px 7px;font-size:11px;margin-left:6px;color:var(--red)" onclick="deletePostComment(\\''+c.id+'\\',\\''+postId+'\\')"><i class="fa-solid fa-trash"></i> Apagar</button>':'';
+  const depthLabel=depth=>depth?'<span class="muted" style="font-size:10px;margin-left:5px">↳ resposta</span>':'';
+  const renderComment=(c,depth=0)=>{
+    const a=authors[c.user_id]||{},name=a.full_name||'Usuário';
+    const replyButton='<button class="ghost" style="padding:3px 7px;font-size:11px;margin-left:6px" data-name="'+esc(name)+'" onclick="replyToComment(\\''+postId+'\\',\\''+c.id+'\\',this.dataset.name)">Responder</button>';
+    const nested=(childrenByParent[c.id]||[]).map(x=>renderComment(x,depth+1)).join('');
+    return '<div class="'+(depth?'comment-reply':'comment-item')+'" style="'+(depth>1?'margin-left:12px;':'')+'"><b>'+esc(name)+'</b> '+esc(c.content)+depthLabel(depth)+deleteButton(c)+replyButton+nested+'</div>';
+  };
+  const roots=rows.filter(c=>!c.parent_comment_id||!rows.some(p=>p.id===c.parent_comment_id));
+  $('comments-list-'+postId).innerHTML=roots.map(c=>renderComment(c)).join('')||'<p class="muted" style="font-size:13px">Nenhum comentário ainda.</p>';
 }
 async function deletePostComment(commentId,postId){
   if(!confirm('Apagar este comentário?'))return;
@@ -1815,7 +1834,9 @@ async function addComment(postId,postOwnerId){
   const {error}=await db.from('post_comments').insert(payload);
   if(error){showToast('Ops!','Não foi possível publicar. Confira se a atualização do banco foi aplicada.',{type:'comment'});return;}
   input.value='';delete input.dataset.parentCommentId;input.placeholder='Escreva um comentário...';
-  if(postOwnerId!==user.id)await db.from('notifications').insert({user_id:postOwnerId,actor_id:user.id,type:'comment',post_id:postId});
+  const {data:parentRow}=parent?await db.from('post_comments').select('user_id').eq('id',parent).maybeSingle():{data:null};
+  const notifyIds=[...new Set([postOwnerId,parentRow?.user_id].filter(id=>id&&id!==user.id))];
+  if(notifyIds.length)await db.from('notifications').insert(notifyIds.map(id=>({user_id:id,actor_id:user.id,type:'comment',post_id:postId})));
   showToast('Comentário enviado!','Seu comentário foi publicado. 💬',{type:'comment'});
   await loadPostComments(postId);await loadFeed('all');
 }
@@ -1977,12 +1998,24 @@ async function inspectProfile(id){
 
   let isPrivateAndNotFollowing = u?.is_private && !isF && id !== user.id;
 
+  const postIds=(posts||[]).map(p=>p.id);
+  const [likesRes,repostsRes,commentsRes]=await Promise.all([
+    postIds.length?db.from('post_likes').select('post_id,user_id').in('post_id',postIds):Promise.resolve({data:[]}),
+    postIds.length?db.from('post_reposts').select('post_id,user_id').in('post_id',postIds):Promise.resolve({data:[]}),
+    postIds.length?db.from('post_comments').select('post_id').in('post_id',postIds):Promise.resolve({data:[]})
+  ]);
+  const likes={},reposts={},comments={},mineLikes=new Set(),mineReposts=new Set();
+  (likesRes.data||[]).forEach(x=>{likes[x.post_id]=(likes[x.post_id]||0)+1;if(x.user_id===user.id)mineLikes.add(x.post_id);});
+  (repostsRes.data||[]).forEach(x=>{reposts[x.post_id]=(reposts[x.post_id]||0)+1;if(x.user_id===user.id)mineReposts.add(x.post_id);});
+  (commentsRes.data||[]).forEach(x=>{comments[x.post_id]=(comments[x.post_id]||0)+1;});
+
   $('modalProfileContent').innerHTML=`
     <div style="text-align:center">
       <div class="profile-big-avatar" style="margin:0 auto;width:74px;height:74px">${u?.avatar_url?`<img src="${u.avatar_url}">`:(u?.full_name?u.full_name[0]:'?')}</div>
       <h3 style="margin:10px 0 2px 0">${esc(u?.full_name||'Usuário')}${verifiedBadge(u?.username)}</h3>
       <div class="muted">${esc((u?.username||'').startsWith('@')?u.username:'@'+(u?.username||''))} ${u?.is_private?'🔒':''}</div>
       <p style="font-size:14px;margin:12px 0">${esc(u?.bio||'')}</p>
+      ${u?.website_url?'<p style="margin:8px 0"><a class="profile-website-link" href="'+esc(normalizeProfileLink(u.website_url))+'" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-link"></i> '+esc(u.website_url)+'</a></p>':''}
       <div class="friend-stats">
         <button onclick="loadUserConnections('${id}','followers')"><b>${wCount||0}</b><span>Seguidores</span></button>
         <button onclick="loadUserConnections('${id}','following')"><b>${fCount||0}</b><span>Seguindo</span></button>
@@ -1996,7 +2029,7 @@ async function inspectProfile(id){
       </div>
     </div>
     <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
-    <div>${isPrivateAndNotFollowing ? '<p class="muted" style="text-align:center">Este perfil é privado. Siga-o para ver as publicações.</p>' : (posts||[]).map(p=>renderPostHtml(p,u,false)).join('')||'<p class="muted">Sem publicações.</p>'}</div>
+    <div>${isPrivateAndNotFollowing ? '<p class="muted" style="text-align:center">Este perfil é privado. Siga-o para ver as publicações.</p>' : (posts||[]).map(p=>renderPostHtml(p,u,true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),comments[p.id]||0,reposts[p.id]||0)).join('')||'<p class="muted">Sem publicações.</p>'}</div>
   `;
   $('userModal').classList.remove('hidden');
 }
@@ -2072,9 +2105,11 @@ async function loadChats(){
 }
 
 async function openChat(id, username=''){
+  if(!user||!id||id===user.id)return;
   showPage('messages');
   $('msgBadge').classList.add('hidden');
   activeChat=id;
+  status('messageStatus','Abrindo conversa...');
 
   let p=chatProfiles[id];
 
@@ -2096,8 +2131,11 @@ async function openChat(id, username=''){
   $('chatHeaderAvatar').innerHTML=p.avatar_url?`<img src="${esc(p.avatar_url)}">`:esc((p.full_name||'?')[0]);
   updateChatPresence(p.last_seen_at);
 
+  chatProfiles[id]=p;
   $('chatListView').classList.add('hidden');
   $('chatRoomView').classList.remove('hidden');
+  $('messageBox').innerHTML='<p class="muted" style="text-align:center">Esta é sua primeira conversa com '+esc(p.full_name||username||'esta pessoa')+'. Envie um oi! 👋</p>';
+  status('messageStatus','');
 
   await loadMessages();
   
