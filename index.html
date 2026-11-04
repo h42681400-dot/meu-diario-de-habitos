@@ -775,19 +775,21 @@ html body .conversation-unread{
 }
 
 
-.app-action-overlay{position:fixed;inset:0;z-index:10050;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(35,25,31,.42);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.app-action-overlay{position:fixed;inset:0;z-index:10050;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(51,41,40,.34);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .app-action-overlay.hidden{display:none!important}
-.app-action-card{width:min(100%,390px);padding:26px 24px 22px;border:1px solid var(--line);border-radius:25px;background:var(--card-bg);color:var(--ink);box-shadow:0 22px 70px rgba(38,22,30,.22);text-align:center;animation:appActionIn .2s ease}
-.app-action-icon{width:52px;height:52px;margin:0 auto 13px;border-radius:18px;display:grid;place-items:center;background:rgba(236,171,194,.2);color:var(--rose);font-size:20px}
-.app-action-card h3{margin:0 0 8px;font-size:19px;letter-spacing:-.35px}
-.app-action-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.55}
-.app-action-input{width:100%;margin:18px 0 4px!important;padding:13px 15px!important;border:1px solid var(--line)!important;border-radius:14px!important;background:var(--bg)!important;color:var(--ink)!important;outline:none}
-.app-action-input:focus{border-color:var(--rose)!important;box-shadow:0 0 0 3px rgba(236,171,194,.17)}
-.app-action-actions{display:flex;gap:10px;margin-top:22px}
-.app-action-actions button{flex:1;min-height:44px;border-radius:14px!important}
-.app-action-cancel{background:var(--bg)!important;border:1px solid var(--line)!important;color:var(--ink)!important}
-.app-action-danger{background:#d96b88!important;color:white!important;border:0!important}
-@keyframes appActionIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.app-action-card{width:min(100%,380px);padding:28px 25px 23px;border:1px solid rgba(212,165,165,.28);border-radius:28px;background:var(--card-bg);color:var(--ink);box-shadow:0 24px 80px rgba(75,48,53,.2);text-align:center;animation:appActionIn .24s cubic-bezier(.2,.8,.2,1)}
+.app-action-icon{width:58px;height:58px;margin:0 auto 15px;border-radius:21px;display:grid;place-items:center;background:linear-gradient(145deg,rgba(212,165,165,.24),rgba(246,182,208,.16));color:var(--rose-hover);font-size:21px}
+.app-action-card h3{margin:0 0 9px;font-size:19px;letter-spacing:-.4px;font-weight:750}
+.app-action-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.65}
+.app-action-input{width:100%;margin:19px 0 3px!important;padding:13px 15px!important;border:1px solid var(--line)!important;border-radius:15px!important;background:var(--bg)!important;color:var(--ink)!important;outline:none}
+.app-action-input:focus{border-color:var(--rose)!important;box-shadow:0 0 0 4px rgba(212,165,165,.14)}
+.app-action-actions{display:flex;gap:10px;margin-top:23px}
+.app-action-actions button{flex:1;min-height:45px;border-radius:15px!important;font-size:13px;box-shadow:none}
+.app-action-cancel{background:var(--bg)!important;border:1px solid var(--line)!important;color:var(--muted)!important}
+.app-action-cancel:hover{background:var(--line)!important;color:var(--ink)!important}
+.app-action-danger{background:linear-gradient(135deg,#d98ca5,#c87994)!important;color:white!important;border:0!important;box-shadow:0 5px 14px rgba(201,121,148,.2)!important}
+.app-action-danger:hover{filter:brightness(.97)}
+@keyframes appActionIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(prefers-reduced-motion:reduce){.app-action-card{animation:none}}
 </style></head>
 <body>
@@ -2123,7 +2125,7 @@ async function toggleCommentLike(commentId,postId,isLiked){
 }
 
 async function deletePostComment(commentId,postId){
-  if(!confirm('Apagar este comentário?'))return;
+  const ok=await openAppActionModal({title:'Apagar comentário?',description:'Esse comentário será removido da publicação.',confirmText:'Apagar comentário',icon:'fa-regular fa-trash-can',danger:true});if(!ok)return;
   const {data,error}=await db.rpc('delete_post_comment',{p_comment_id:commentId});
   if(error){showToast('Ops!','Não foi possível apagar o comentário: '+error.message,{type:'comment'});return;}
   showToast('Comentário apagado','O comentário foi removido.',{type:'comment'});
@@ -2405,7 +2407,7 @@ async function toggleMuteConversation(){
   if(!activeChat)return;
   const {data:existing}=await db.from('direct_conversation_settings').select('*').eq('user_id',user.id).eq('peer_id',activeChat).maybeSingle();
   const {error}=await db.from('direct_conversation_settings').upsert({user_id:user.id,peer_id:activeChat,muted:!existing?.muted,hidden:false},{onConflict:'user_id,peer_id'});
-  if(error){alert('Não foi possível silenciar. Execute o SQL de configurações de conversa.');return;}
+  if(error){showToast('Não foi possível silenciar',error.message||'Confira as permissões das configurações de conversa.');return;}
   await loadChats();
 }
 async function deleteConversationForMe(){
@@ -2413,7 +2415,7 @@ async function deleteConversationForMe(){
   const ok=await openAppActionModal({title:'Apagar conversa?',description:'A conversa sairá da sua lista. As mensagens continuarão disponíveis para a outra pessoa.',confirmText:'Apagar conversa',icon:'fa-regular fa-comments',danger:true});
   if(!ok)return;
   const {error}=await db.from('direct_conversation_settings').upsert({user_id:user.id,peer_id:activeChat,hidden:true},{onConflict:'user_id,peer_id'});
-  if(error){alert('Não foi possível apagar a conversa. Execute o SQL de configurações de conversa.');return;}
+  if(error){showToast('Não foi possível apagar a conversa',error.message||'Confira as permissões das configurações de conversa.');return;}
   if(chatInterval){clearInterval(chatInterval);chatInterval=null;}
   activeChat=null;backToChatList();
 }
@@ -2600,14 +2602,14 @@ async function deleteMessageForMe(messageId){
   const ok=await openAppActionModal({title:'Apagar mensagem?',description:'Esta mensagem será removida somente da sua conversa. A outra pessoa continuará vendo.',confirmText:'Apagar mensagem',icon:'fa-regular fa-trash-can',danger:true});
   if(!ok)return;
   const {error}=await db.rpc('hide_direct_message_for_me',{p_message_id:messageId});
-  if(error){alert('Não foi possível apagar para você. Confira se executou o SQL de mensagens.');console.error(error);return;}
+  if(error){showToast('Não foi possível apagar a mensagem',error.message||'Confira as permissões de mensagens.');console.error(error);return;}
   await loadMessages();
 }
 async function deleteMessageForEveryone(messageId){
   const ok=await openAppActionModal({title:'Apagar para todos?',description:'A mensagem será removida da conversa para você e para a outra pessoa.',confirmText:'Apagar para todos',icon:'fa-solid fa-trash-can',danger:true});
   if(!ok)return;
   const {error}=await db.rpc('delete_direct_message_for_everyone',{p_message_id:messageId});
-  if(error){alert('Não foi possível apagar para todos. Confira se executou o SQL de mensagens.');console.error(error);return;}
+  if(error){showToast('Não foi possível apagar para todos',error.message||'Confira as permissões de mensagens.');console.error(error);return;}
   await loadMessages();
   await loadChats();
 }
