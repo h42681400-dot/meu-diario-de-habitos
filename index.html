@@ -193,7 +193,6 @@ textarea{min-height:85px;resize:vertical}
 .crop-preview-box{width:100%;background:#000;border-radius:12px;overflow:hidden;margin:12px 0;position:relative;display:flex;align-items:center;justify-content:center}
 .crop-preview-box img{max-width:100%;max-height:160px;object-fit:cover}
 
-/* POPUP TOAST DE NOTIFICAÇÃO (ESTILO SOFT) */
 #toastContainer{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px}
 .toast{background:var(--card-bg);color:var(--ink);border:1px solid var(--line);padding:14px 20px;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.1);font-size:14px;animation:slideIn 0.3s ease;display:flex;align-items:center;gap:10px;min-width:260px}
 @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
@@ -297,7 +296,7 @@ textarea{min-height:85px;resize:vertical}
     </div>
   </section>
 
-  <!-- EXPLORAR (Vazio inicialmente, busca na digitação) -->
+  <!-- EXPLORAR -->
   <section id="explore" class="page">
     <div class="card">
       <div style="display:flex;gap:8px">
@@ -670,6 +669,7 @@ async function deletePost(postId) {
     await db.from('posts').delete().eq('id', postId);
     showToast("Postagem excluída.");
     loadFeed();
+    loadUserProfile();
   }
 }
 
@@ -956,6 +956,7 @@ async function saveProfile() {
 
   if(error) {
     status('profileStatus', error.message);
+    showToast("Erro ao salvar perfil: " + error.message);
   } else {
     status('profileStatus', '');
     showToast("Perfil atualizado com sucesso ✨");
