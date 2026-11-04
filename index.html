@@ -2550,6 +2550,8 @@ async function sendMessage(){
     });
 
     if(error)throw error;
+    await db.from('direct_conversation_settings').upsert({user_id:user.id,peer_id:activeChat,hidden:false},{onConflict:'user_id,peer_id'});
+    await db.from('direct_conversation_settings').upsert({user_id:activeChat,peer_id:user.id,hidden:false},{onConflict:'user_id,peer_id'});
 
     const {error:notifError}=await db.from('notifications').insert({
       user_id:activeChat,
