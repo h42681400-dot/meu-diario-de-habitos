@@ -1690,7 +1690,7 @@ async function showPostPeople(postId,kind){
 function closePostPeople(){document.getElementById('postPeopleModal')?.classList.add('hidden');}
 
 let repostDraft={postId:null,postOwnerId:null};
-async function openRepostComposer(postId,postOwnerId){
+async async function openRepostComposer(postId,postOwnerId){
   repostDraft={postId,postOwnerId};
   const {data:post}=await db.from('posts').select('content,media_url').eq('id',postId).maybeSingle();
   if(!post){showToast('Ops!','Não foi possível encontrar esta publicação.',{type:'repost'});return;}
