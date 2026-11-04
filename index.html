@@ -1277,12 +1277,9 @@ async function signOut(){
     const app=$('app'),login=$('loginScreen');
     if(app)app.classList.add('hidden');
     if(login)login.classList.remove('hidden');
-    document.querySelectorAll('.modal-overlay').forEach(modal=>{
-      modal.classList.add('hidden');
-      modal.style.display='none';
-    });
+    document.querySelectorAll('.modal-overlay').forEach(modal=>modal.classList.add('hidden'));
     const settings=$('settingsModal');
-    if(settings){settings.classList.add('hidden');settings.style.display='none';}
+    if(settings)settings.classList.add('hidden');
     if(logoutButton){logoutButton.disabled=false;logoutButton.innerHTML='<i class="fa-solid fa-right-from-bracket"></i> Sair da Conta';}
   }catch(error){
     console.error('Erro ao sair da conta:',error);
@@ -1336,11 +1333,8 @@ db.auth.onAuthStateChange((_event,session)=>{
     chatInterval=null;
     activeChat=null;inspectedProfileId=null;chatProfiles={};profile=null;entries={};
     closeAllAppModals();
-    document.querySelectorAll('.modal-overlay').forEach(modal=>{
-      modal.classList.add('hidden');
-      modal.style.display='none';
-    });
-    if($('settingsModal')){$('settingsModal').classList.add('hidden');$('settingsModal').style.display='none';}
+    document.querySelectorAll('.modal-overlay').forEach(modal=>modal.classList.add('hidden'));
+    if($('settingsModal'))$('settingsModal').classList.add('hidden');
     clearSessionNavigation();
     notificationCursor=null;
     return;
