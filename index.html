@@ -1595,19 +1595,19 @@ async function loadProfileDataTab(tab){
     let {data:authors}=await db.from('user_profiles').select('*').in('user_id',authorIds);
     let authorMap={}; (authors||[]).forEach(a=>authorMap[a.user_id]=a);
     const postMap={};(posts||[]).forEach(p=>postMap[p.id]=p);
-    const [likesRes,repostsRes,commentsRes]=await Promise.all([
-      db.from('post_likes').select('post_id,user_id').in('post_id',postIds),
-      db.from('post_reposts').select('post_id,user_id').in('post_id',postIds),
-      db.from('post_comments').select('post_id').in('post_id',postIds)
-    ]);
-    const likes={},repostCounts={},commentCounts={},mineLikes=new Set(),mineReposts=new Set();
-    (likesRes.data||[]).forEach(x=>{likes[x.post_id]=(likes[x.post_id]||0)+1;if(x.user_id===user.id)mineLikes.add(x.post_id);});
-    (repostsRes.data||[]).forEach(x=>{repostCounts[x.post_id]=(repostCounts[x.post_id]||0)+1;if(x.user_id===user.id)mineReposts.add(x.post_id);});
-    (commentsRes.data||[]).forEach(x=>{commentCounts[x.post_id]=(commentCounts[x.post_id]||0)+1;});
+    const {data:interactionRows,error:interactionError}=await db.rpc('get_post_interaction_counts',{p_post_ids:postIds});
+    if(interactionError){
+      console.error('Erro ao carregar contadores dos reposts:',interactionError);
+      box.innerHTML='<p class="muted">Não foi possível carregar os contadores. Atualize a consulta do Supabase e tente novamente.</p>';
+      return;
+    }
+    const interactions={};
+    (interactionRows||[]).forEach(x=>interactions[x.post_id]=x);
     box.innerHTML=(reposts||[]).map(r=>{
       const p=postMap[r.post_id];if(!p)return '';
+      const counts=interactions[p.id]||{};
       const label=r.comment_text?'<div class="repost-comment"><i class="fa-solid fa-retweet"></i> Você repostou com comentário:<p>'+esc(r.comment_text)+'</p><button class="ghost" style="margin-top:8px;color:var(--red);padding:5px 9px" onclick="removeMyRepost(\''+p.id+'\')"><i class="fa-solid fa-trash"></i> Apagar meu repost com comentário</button></div>':'<div class="repost-label"><i class="fa-solid fa-retweet"></i> Você repostou <button class="ghost" style="color:var(--red);padding:4px 8px;margin-left:6px" onclick="removeMyRepost(\''+p.id+'\')">Desfazer</button></div>';
-      return label+renderPostHtml(p,authorMap[p.user_id]||{},true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),commentCounts[p.id]||0,repostCounts[p.id]||0);
+      return label+renderPostHtml(p,authorMap[p.user_id]||{},true,Number(counts.likes_count)||0,!!counts.viewer_liked,!!counts.viewer_reposted,Number(counts.comments_count)||0,Number(counts.reposts_count)||0);
     }).join('')||'<p class="muted">Nenhum repost encontrado.</p>';
   } else if(tab==='following'||tab==='followers'){
     let col=tab==='following'?'follower_id':'following_id';
