@@ -1203,13 +1203,25 @@ function showPage(id){
   $('fabPostBtn').classList.toggle('hidden', !['diary','explore','notifications','profile'].includes(id));
 
   if(id==='explore')searchProfilesAndPosts();
-  if(id==='messages'){ $('msgBadge').classList.add('hidden'); backToChatList(); }
+  if(id==='messages'){ $('msgBadge').classList.add('hidden'); backToChatList(); markInboxMessagesRead(); }
   if(id==='feed')loadFeed('all');
   if(id==='notifications'){ $('notifBadge').classList.add('hidden'); loadNotifications(); }
   if(id==='profile')loadProfileDataTab('posts');
   checkUnreadBadges();
 }
 
+async function markInboxMessagesRead(){
+  if(!user)return;
+  const {data,error}=await db.from('direct_messages').select('sender_id').eq('receiver_id',user.id).is('read_at',null);
+  if(error){console.warn('Não foi possível atualizar as mensagens não lidas:',error.message);return;}
+  const senders=[...new Set((data||[]).map(m=>m.sender_id).filter(Boolean))];
+  for(const senderId of senders){
+    const {error:readError}=await db.rpc('mark_messages_read',{p_sender_id:senderId});
+    if(readError)console.warn('Não foi possível marcar a conversa como lida:',readError.message);
+  }
+  $('msgBadge').classList.add('hidden');
+  checkUnreadBadges();
+}
 async function checkUnreadBadges(){
   if(!user) return;
   let {count:notifCount}=await db.from('notifications').select('*',{count:'exact',head:true}).eq('user_id',user.id).eq('read',false);
