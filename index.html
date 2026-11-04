@@ -1,7 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#d4a5a5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Cottontail">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icons/cottontail.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/cottontail.svg">
 <title>Cottontail 🐰</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -3013,6 +3021,41 @@ window.handleLoginClick = function(event) {
   if (button) { button.disabled = false; button.textContent = 'Entrar'; }
   window.signIn();
 };
+</script>
+
+<script>
+/* Instalação PWA do Cottontail: não intercepta chamadas do Supabase. */
+(function(){
+  if(!('serviceWorker' in navigator)) return;
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('/sw.js',{scope:'/'})
+      .catch(function(error){console.warn('PWA: não foi possível registrar o service worker.',error);});
+  });
+  let installPrompt=null;
+  window.addEventListener('beforeinstallprompt',function(event){
+    event.preventDefault();
+    installPrompt=event;
+    if(document.getElementById('cottontailInstallButton')) return;
+    const button=document.createElement('button');
+    button.id='cottontailInstallButton';
+    button.type='button';
+    button.textContent='＋ Instalar Cottontail';
+    button.setAttribute('aria-label','Instalar aplicativo Cottontail');
+    button.style.cssText='position:fixed;right:16px;bottom:145px;z-index:1200;border-radius:24px;padding:11px 16px;box-shadow:0 4px 18px rgba(0,0,0,.16);font-weight:700;';
+    button.addEventListener('click',async function(){
+      if(!installPrompt) return;
+      installPrompt.prompt();
+      await installPrompt.userChoice;
+      installPrompt=null;
+      button.remove();
+    });
+    document.body.appendChild(button);
+  });
+  window.addEventListener('appinstalled',function(){
+    document.getElementById('cottontailInstallButton')?.remove();
+    installPrompt=null;
+  });
+})();
 </script>
 </body>
 </html>
