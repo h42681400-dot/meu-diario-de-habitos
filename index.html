@@ -777,7 +777,9 @@ html body .conversation-unread{
 }
 
 
-.app-action-overlay{position:fixed;inset:0;z-index:10050;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(51,41,40,.34);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.app-action-overlay{position:fixed!important;inset:0!important;z-index:10050!important;display:flex;align-items:center!important;justify-content:center!important;padding:20px;background:rgba(51,41,40,.34);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.app-action-overlay:not(.hidden){place-items:center!important}
+.app-action-card{margin:auto!important;flex:0 1 380px}
 .app-action-overlay.hidden{display:none!important}
 .app-action-card{width:min(100%,380px);padding:28px 25px 23px;border:1px solid rgba(212,165,165,.28);border-radius:28px;background:var(--card-bg);color:var(--ink);box-shadow:0 24px 80px rgba(75,48,53,.2);text-align:center;animation:appActionIn .24s cubic-bezier(.2,.8,.2,1)}
 .app-action-icon{width:58px;height:58px;margin:0 auto 15px;border-radius:21px;display:grid;place-items:center;background:linear-gradient(145deg,rgba(212,165,165,.24),rgba(246,182,208,.16));color:var(--rose-hover);font-size:21px}
@@ -2507,7 +2509,13 @@ async function deleteConversationForMe(){
   const ok=await openAppActionModal({title:'Apagar conversa?',description:'A conversa sairá da sua lista. As mensagens continuarão disponíveis para a outra pessoa.',confirmText:'Apagar conversa',icon:'fa-regular fa-comments',danger:true});
   if(!ok||activeChat!==peerId)return;
   try{
-    // UPSERT cobre tanto a primeira exclusão quanto uma configuração já existente.
+    // Oculta individualmente todo o histórico para este usuário; mensagens futuras continuam aparecendo, sem restaurar o histórico antigo.
+    const {data:history,error:historyError}=await db.from('direct_messages').select('id').or(`and(sender_id.eq.${user.id},receiver_id.eq.${peerId}),and(sender_id.eq.${peerId},receiver_id.eq.${user.id})`);
+    if(historyError)throw historyError;
+    const hiddenResults=await Promise.all((history||[]).map(m=>db.rpc('hide_direct_message_for_me',{p_message_id:m.id})));
+    const hideFailure=hiddenResults.find(x=>x.error);
+    if(hideFailure?.error)throw hideFailure.error;
+    // UPSERT mantém a conversa oculta até uma nova mensagem iniciar uma conversa nova.
     const {data:saved,error}=await db.from('direct_conversation_settings')
       .upsert({user_id:user.id,peer_id:peerId,muted:false,hidden:true},{onConflict:'user_id,peer_id'})
       .select('peer_id,hidden').single();
@@ -2542,7 +2550,10 @@ async function loadChats(){
     return;
   }
   const allMessages=[...(sentResult.data||[]),...(receivedResult.data||[])];
-  const uniqueMessages=[...new Map(allMessages.map(m=>[m.id,m])).values()]
+  const {data:hiddenRows,error:hiddenError}=await db.from('direct_message_hidden').select('message_id').eq('user_id',user.id);
+  if(hiddenError)console.warn('Não foi possível filtrar mensagens ocultadas na lista:',hiddenError.message);
+  const hiddenIds=new Set((hiddenRows||[]).map(x=>x.message_id));
+  const uniqueMessages=[...new Map(allMessages.filter(m=>!hiddenIds.has(m.id)).map(m=>[m.id,m])).values()]
     .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
   const {data:settings,error:settingsError}=await db.from('direct_conversation_settings').select('*').eq('user_id',user.id);
   if(settingsError)console.warn('Configurações de conversa indisponíveis; exibindo as conversas normalmente:',settingsError.message);
@@ -2687,7 +2698,7 @@ async function loadMessages(){
     const mine=m.sender_id===user.id;
     const time=new Date(m.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     const receipt=mine?(m.read_at?'<span class="message-receipt read">✓✓ Lida</span>':'<span class="message-receipt">✓ Enviada</span>'):'';
-    return `<div class="bubble ${mine?'mine':'other'}" style="position:relative;padding-right:30px"><button type="button" class="message-options-btn" title="Opções da mensagem" aria-label="Opções da mensagem" onclick="toggleMessageMenu('${m.id}',this);event.stopPropagation()" style="position:absolute;right:5px;top:4px;border:0;background:transparent;color:inherit;opacity:.85;padding:2px 7px;cursor:pointer;z-index:3">⋯</button><div>${esc(m.content)}</div>${m.shared_post_id?`<button class="secondary" style="margin-top:7px;font-size:12px" onclick="openSharedPost('${m.shared_post_id}')"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver publicação compartilhada</button>`:''}<div class="bubble-time">${time} ${receipt}</div><div id="message-menu-${m.id}" class="message-options-menu hidden" style="position:absolute;right:5px;top:25px;z-index:20;background:var(--card,#fff);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:6px;box-shadow:0 5px 18px #0002;min-width:155px"><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" type="button" onclick="event.preventDefault();event.stopPropagation();deleteMessageForMe('${m.id}');return false">Apagar para mim</button>${mine?`<button class="danger" style="display:block;width:100%;text-align:left;margin:2px 0" type="button" onclick="event.preventDefault();event.stopPropagation();deleteMessageForEveryone('${m.id}');return false">Apagar para todos</button>`:''}</div></div>`;
+    return `<div class="bubble ${mine?'mine':'other'}" style="position:relative;padding-right:${mine?'30px':'12px'}">${mine?`<button type="button" class="message-options-btn" title="Opções da mensagem" aria-label="Opções da mensagem" onclick="toggleMessageMenu('${m.id}',this);event.stopPropagation()" style="position:absolute;right:5px;top:4px;border:0;background:transparent;color:inherit;opacity:.85;padding:2px 7px;cursor:pointer;z-index:3">⋯</button>`:''}<div>${esc(m.content)}</div>${m.shared_post_id?`<button class="secondary" style="margin-top:7px;font-size:12px" onclick="openSharedPost('${m.shared_post_id}')"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver publicação compartilhada</button>`:''}<div class="bubble-time">${time} ${receipt}</div>${mine?`<div id="message-menu-${m.id}" class="message-options-menu hidden" style="position:absolute;right:5px;top:25px;z-index:20;background:var(--card,#fff);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:6px;box-shadow:0 5px 18px #0002;min-width:155px"><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" type="button" onclick="event.preventDefault();event.stopPropagation();deleteMessageForMe('${m.id}');return false">Apagar para mim</button><button class="danger" style="display:block;width:100%;text-align:left;margin:2px 0" type="button" onclick="event.preventDefault();event.stopPropagation();deleteMessageForEveryone('${m.id}');return false">Apagar para todos</button></div>`:''}</div>`;
   }).join('');
   $('messageBox').scrollTop=$('messageBox').scrollHeight;
   checkUnreadBadges();
