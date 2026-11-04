@@ -605,6 +605,32 @@ body.theme-dark #messageBox .bubble.other{background:#303036;color:#f7eff2;borde
 #chatRoomView>div:nth-of-type(3) button{border:0;background:var(--bg);border-radius:50%;width:31px;height:31px;padding:0!important}
 #messageStatus{min-height:0;margin:4px 8px}
 @media(max-width:600px){#chatRoomView{padding:10px;border-radius:18px}#messageBox.messages{height:55vh;min-height:260px;padding:12px 9px}#messageBox .bubble{max-width:88%;font-size:13px}.feed-create-button{min-width:175px}}
+
+/* Editor de perfil inspirado no X */
+.edit-profile-box{max-width:560px!important;padding:0!important;border-radius:22px!important;overflow-y:auto!important}
+.edit-profile-topbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:13px;padding:14px 18px;background:var(--card-bg);border-bottom:1px solid var(--line)}
+.edit-profile-topbar>div{display:flex;flex-direction:column;flex:1;gap:2px}.edit-profile-topbar>div b{font-size:17px}.edit-profile-topbar small,.edit-field small,.edit-private-row small{font-size:11px;color:var(--muted)}
+.edit-profile-close{width:34px;height:34px;padding:0;border-radius:50%;background:transparent;color:var(--ink);font-size:18px}
+.edit-profile-save{padding:9px 19px;border-radius:22px;background:var(--ink);color:var(--card-bg);font-size:13px}
+.edit-profile-cover{height:150px;position:relative;background:linear-gradient(120deg,#ead8d5,#f7ece9 55%,#dfc4c0);overflow:hidden}
+.edit-cover-preview{position:absolute;inset:0}.edit-cover-preview.hidden{display:none!important}.edit-cover-preview img{width:100%;height:100%;object-fit:cover}
+.edit-cover-upload{position:absolute;right:14px;top:14px;display:flex;align-items:center;gap:7px;padding:9px 12px;border-radius:22px;background:#332928aa;color:white;font-size:12px;cursor:pointer}
+.edit-profile-avatar-row{display:flex;align-items:flex-end;justify-content:space-between;padding:0 20px;margin-top:-43px;position:relative;z-index:2}
+.edit-avatar-preview{width:100px;height:100px;border:4px solid var(--card-bg);border-radius:50%;background:var(--rose);color:white;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;font-size:34px;font-weight:700}
+.edit-avatar-preview>img,.edit-avatar-new img{width:100%;height:100%;object-fit:cover}.edit-avatar-new{position:absolute;inset:0;background:var(--card-bg)}
+.edit-avatar-upload{margin-bottom:9px;border:1px solid var(--line);padding:8px 13px;border-radius:22px;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink);background:var(--card-bg)}
+.edit-profile-fields{padding:18px 22px 8px}.edit-field{display:block;border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin:0 0 12px;background:var(--card-bg)}
+.edit-field>span{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:3px}.edit-field input,.edit-field textarea{border:0!important;background:transparent!important;padding:4px 0!important;margin:0!important;border-radius:0!important;box-shadow:none!important;font-size:15px}
+.edit-field textarea{min-height:66px}.edit-handle-input{display:flex;align-items:center;gap:3px}.edit-handle-input>b{color:var(--rose);font-size:15px}.edit-handle-input input{padding-left:0!important}
+.edit-private-row{display:flex;align-items:center;gap:11px;padding:13px;border:1px solid var(--line);border-radius:13px;margin-top:4px;cursor:pointer}
+.edit-private-icon{width:36px;height:36px;border-radius:50%;background:rgba(212,165,165,.16);color:var(--rose);display:flex;align-items:center;justify-content:center}
+.edit-private-row>span:nth-child(2){display:flex;flex:1;flex-direction:column;gap:3px}.edit-private-row input{width:19px;height:19px;margin:0;accent-color:var(--rose)}.edit-profile-status{padding:0 22px 12px}
+.friend-stats{display:flex;justify-content:center;gap:8px;margin:16px 0;flex-wrap:wrap}.friend-stats button{display:flex;flex-direction:column;gap:3px;align-items:center;min-width:92px;padding:10px 13px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:13px}
+.friend-stats button b{font-size:16px}.friend-stats button span{font-size:11px;color:var(--muted);font-weight:500}.friend-connections{margin:12px 0 2px;text-align:left}
+.friend-list-heading{font-size:13px;font-weight:700;padding:10px 2px;border-bottom:1px solid var(--line)}.friend-person{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line)}
+.friend-person-main{display:flex;align-items:center;gap:10px;min-width:0;cursor:pointer}.friend-person-main .avatar{width:40px;height:40px}.friend-person-main>div:last-child{min-width:0;overflow-wrap:anywhere}.friend-person>button{padding:7px 11px;font-size:11px;flex:none}
+@media(max-width:520px){.edit-profile-box{max-height:92vh!important;border-radius:20px!important}.edit-profile-cover{height:125px}.edit-profile-avatar-row{padding:0 16px}.edit-avatar-preview{width:88px;height:88px}.edit-profile-fields{padding:16px}.friend-stats{gap:5px}.friend-stats button{min-width:82px;padding:9px 8px}}
+
 </style></head>
 <body>
 
@@ -953,44 +979,27 @@ body.theme-dark #messageBox .bubble.other{background:#303036;color:#f7eff2;borde
 
 <!-- MODAL: EDITAR PERFIL -->
 <div id="editProfileModal" class="modal-overlay hidden">
-  <div class="modal-box">
-    <h3 style="margin-top:0">Editar Perfil</h3>
-    <div class="field"><label>Nome</label><input id="profileName" placeholder="Seu nome"></div>
-    <div class="field"><label>Nome de usuário (@)</label><input id="profileUsername" placeholder="ex: mariana"></div>
-    <div class="field"><label>Biografia</label><textarea id="profileBio" maxlength="240"></textarea></div>
-    
-    <div class="field">
-      <label>Foto de Perfil (Quadrada)</label>
-      <label class="tweet-media-btn" style="width:100%;justify-content:center">
-        <i class="fa-regular fa-image"></i> Escolher Foto
-        <input type="file" id="avatarFileInput" accept="image/*" class="hidden" onchange="previewEditImage(this, 'avatar')">
-      </label>
-      <div id="avatarCropBox" class="crop-preview-box hidden" style="border-radius:50%;width:90px;height:90px;margin:10px auto">
-        <img id="avatarCropImg">
-      </div>
+  <div class="modal-box edit-profile-box">
+    <div class="edit-profile-topbar">
+      <button class="edit-profile-close" onclick="closeEditProfileModal()" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+      <div><b>Editar perfil</b><small>Personalize seu cantinho</small></div>
+      <button class="edit-profile-save" onclick="saveProfile()">Salvar</button>
     </div>
-
-    <div class="field">
-      <label>Foto de Capa (Retângulo)</label>
-      <label class="tweet-media-btn" style="width:100%;justify-content:center">
-        <i class="fa-regular fa-image"></i> Escolher Capa
-        <input type="file" id="bannerFileInput" accept="image/*" class="hidden" onchange="previewEditImage(this, 'banner')">
-      </label>
-      <div id="bannerCropBox" class="crop-preview-box hidden" style="height:110px;margin:10px 0">
-        <img id="bannerCropImg" style="height:100%;width:100%;object-fit:cover">
-      </div>
+    <div class="edit-profile-cover">
+      <div id="bannerCropBox" class="edit-cover-preview hidden"><img id="bannerCropImg"></div>
+      <label class="edit-cover-upload"><i class="fa-solid fa-camera"></i><span>Adicionar capa</span><input type="file" id="bannerFileInput" accept="image/*" class="hidden" onchange="previewEditImage(this, 'banner')"></label>
     </div>
-
-    <div class="field" style="display:flex;align-items:center;gap:12px;margin-top:16px">
-      <input type="checkbox" id="profileIsPrivate" style="width:20px;height:20px">
-      <label for="profileIsPrivate" style="margin:0;cursor:pointer">Perfil privado 🔒</label>
+    <div class="edit-profile-avatar-row">
+      <div class="edit-avatar-preview"><img id="editAvatarCurrent" src="" alt="" class="hidden"><span id="editAvatarInitial">🐰</span><div id="avatarCropBox" class="edit-avatar-new hidden"><img id="avatarCropImg"></div></div>
+      <label class="edit-avatar-upload"><i class="fa-solid fa-camera"></i> Alterar foto<input type="file" id="avatarFileInput" accept="image/*" class="hidden" onchange="previewEditImage(this, 'avatar')"></label>
     </div>
-
-    <div style="display:flex;gap:12px;margin-top:18px">
-      <button class="secondary" onclick="closeEditProfileModal()" style="flex:1">Cancelar</button>
-      <button onclick="saveProfile()" style="flex:1">Salvar</button>
+    <div class="edit-profile-fields">
+      <label class="edit-field"><span>Nome</span><input id="profileName" placeholder="Como as pessoas te conhecem"></label>
+      <label class="edit-field"><span>Nome de usuário</span><div class="edit-handle-input"><b>@</b><input id="profileUsername" placeholder="seuusuario"></div></label>
+      <label class="edit-field"><span>Bio</span><textarea id="profileBio" maxlength="240" placeholder="Conte um pouquinho sobre você..."></textarea><small>Até 240 caracteres</small></label>
+      <label class="edit-private-row"><span class="edit-private-icon"><i class="fa-solid fa-lock"></i></span><span><b>Perfil privado</b><small>Só seguidores aprovados poderão ver suas publicações</small></span><input type="checkbox" id="profileIsPrivate"></label>
     </div>
-    <p id="profileStatus" class="status"></p>
+    <p id="profileStatus" class="status edit-profile-status"></p>
   </div>
 </div>
 
@@ -1223,12 +1232,13 @@ async function markInboxMessagesRead(){
   checkUnreadBadges();
 }
 async function checkUnreadBadges(){
-  if(!user) return;
-  let {count:notifCount}=await db.from('notifications').select('*',{count:'exact',head:true}).eq('user_id',user.id).eq('read',false);
-  $('notifBadge').classList.toggle('hidden', !notifCount || notifCount <= 0);
-
-  let {count:msgCount}=await db.from('direct_messages').select('*',{count:'exact',head:true}).eq('receiver_id',user.id).is('read_at',null);
-  $('msgBadge').classList.toggle('hidden', !msgCount || msgCount <= 0);
+  if(!user)return;
+  const notificationsOpen=$('notifications')?.classList.contains('active');
+  const messagesOpen=$('messages')?.classList.contains('active');
+  if(notificationsOpen)$('notifBadge').classList.add('hidden');
+  else{const {count:notifCount,error}=await db.from('notifications').select('*',{count:'exact',head:true}).eq('user_id',user.id).eq('read',false);if(!error)$('notifBadge').classList.toggle('hidden',!notifCount||notifCount<=0);}
+  if(messagesOpen)$('msgBadge').classList.add('hidden');
+  else{const {count:msgCount,error}=await db.from('direct_messages').select('*',{count:'exact',head:true}).eq('receiver_id',user.id).is('read_at',null);if(!error)$('msgBadge').classList.toggle('hidden',!msgCount||msgCount<=0);}
 }
 
 /* CALENDÁRIO */
@@ -1428,12 +1438,14 @@ async function loadProfile(){
   $('countFollowers').textContent=wCount||0;
 }
 
-function openEditProfileModal(){ 
-  editAvatarFile = null;
-  editBannerFile = null;
-  $('avatarCropBox').classList.add('hidden');
-  $('bannerCropBox').classList.add('hidden');
-  $('editProfileModal').classList.remove('hidden'); 
+function openEditProfileModal(){
+  editAvatarFile=null;editBannerFile=null;
+  $('avatarCropBox').classList.add('hidden');$('bannerCropBox').classList.add('hidden');$('profileStatus').textContent='';
+  $('editAvatarInitial').textContent=(profile?.full_name||'🐰').trim().charAt(0).toUpperCase()||'🐰';
+  if(profile?.avatar_url){$('editAvatarCurrent').src=profile.avatar_url;$('editAvatarCurrent').classList.remove('hidden');$('editAvatarInitial').classList.add('hidden');}
+  else{$('editAvatarCurrent').classList.add('hidden');$('editAvatarInitial').classList.remove('hidden');}
+  if(profile?.banner_url){$('bannerCropImg').src=profile.banner_url;$('bannerCropBox').classList.remove('hidden');}
+  $('editProfileModal').classList.remove('hidden');
 }
 function closeEditProfileModal(){ $('editProfileModal').classList.add('hidden'); }
 
@@ -1446,6 +1458,8 @@ function previewEditImage(input, type){
         editAvatarFile=file;
         $('avatarCropImg').src=e.target.result;
         $('avatarCropBox').classList.remove('hidden');
+        $('editAvatarCurrent').classList.add('hidden');
+        $('editAvatarInitial').classList.add('hidden');
       } else {
         editBannerFile=file;
         $('bannerCropImg').src=e.target.result;
@@ -1794,10 +1808,12 @@ async function inspectProfile(id){
       <h3 style="margin:10px 0 2px 0">${esc(u?.full_name||'Usuário')}${verifiedBadge(u?.username)}</h3>
       <div class="muted">${esc((u?.username||'').startsWith('@')?u.username:'@'+(u?.username||''))} ${u?.is_private?'🔒':''}</div>
       <p style="font-size:14px;margin:12px 0">${esc(u?.bio||'')}</p>
-      <div style="display:flex;justify-content:center;gap:18px;font-size:13px;margin:14px 0">
-        <span><b>${wCount||0}</b> Seguidores</span>
-        <span><b>${fCount||0}</b> Seguindo</span>
+      <div class="friend-stats">
+        <button onclick="loadUserConnections('${id}','followers')"><b>${wCount||0}</b><span>Seguidores</span></button>
+        <button onclick="loadUserConnections('${id}','following')"><b>${fCount||0}</b><span>Seguindo</span></button>
+        <button onclick="loadUserConnections('${id}','mutual')"><b>♡</b><span>Em comum</span></button>
       </div>
+      <div id="friendConnections" class="friend-connections"></div>
       <div style="display:flex;gap:10px;justify-content:center;margin-top:16px">
         <button onclick="toggleFollowModal('${id}',${!!isF})">${isF?'Seguindo':'Seguir'}</button>
         <button class="secondary" onclick="closeUserModal();openChat('${id}')">Mensagem</button>
@@ -1811,6 +1827,34 @@ async function inspectProfile(id){
 }
 
 function closeUserModal(){ $('userModal').classList.add('hidden'); }
+
+async function loadUserConnections(targetId,kind){
+  const box=$('friendConnections'),labels={followers:'Seguidores',following:'Seguindo',mutual:'Seguidores em comum'};
+  box.innerHTML='<p class="muted">Carregando pessoas...</p>';
+  let ids=[];
+  if(kind==='followers'||kind==='mutual'){
+    const {data,error}=await db.from('follows').select('follower_id').eq('following_id',targetId);
+    if(error){box.innerHTML='<p class="muted">Não foi possível carregar esta lista.</p>';return;}
+    ids=(data||[]).map(x=>x.follower_id);
+    if(kind==='mutual'){
+      const {data:mine,error:mineError}=await db.from('follows').select('follower_id').eq('following_id',user.id);
+      if(mineError){box.innerHTML='<p class="muted">Não foi possível carregar os seguidores em comum.</p>';return;}
+      const mineSet=new Set((mine||[]).map(x=>x.follower_id));ids=ids.filter(x=>mineSet.has(x));
+    }
+  }else{
+    const {data,error}=await db.from('follows').select('following_id').eq('follower_id',targetId);
+    if(error){box.innerHTML='<p class="muted">Não foi possível carregar esta lista.</p>';return;}
+    ids=(data||[]).map(x=>x.following_id);
+  }
+  ids=[...new Set(ids)];
+  if(!ids.length){box.innerHTML='<div class="friend-list-heading">'+labels[kind]+'</div><p class="muted">Ninguém por aqui ainda.</p>';return;}
+  const {data:people,error}=await db.from('user_profiles').select('*').in('user_id',ids);
+  if(error){box.innerHTML='<p class="muted">Não foi possível carregar os perfis.</p>';return;}
+  box.innerHTML='<div class="friend-list-heading">'+labels[kind]+' · '+(people||[]).length+'</div>'+(people||[]).map(p=>
+    '<div class="friend-person"><div class="friend-person-main" onclick="closeUserModal();inspectProfile(\''+p.user_id+'\')"><div class="avatar">'+(p.avatar_url?'<img src="'+esc(p.avatar_url)+'">':esc((p.full_name||'?')[0]))+'</div><div><b>'+esc(p.full_name||'Usuário')+verifiedBadge(p.username)+'</b><div class="muted">@'+esc((p.username||'').replace(/^@/,''))+'</div></div></div><button class="secondary" onclick="inspectProfile(\''+p.user_id+'\')">Ver perfil</button></div>'
+  ).join('');
+}
+
 
 async function toggleFollowModal(targetId,isFollowing){
   if(isFollowing){await db.from('follows').delete().eq('follower_id',user.id).eq('following_id',targetId);showToast('Tudo certo','Você deixou de seguir este perfil.',{type:'follow'});}
@@ -2028,7 +2072,7 @@ async function loadNotifications(){
     $('notifList').innerHTML='<p class="muted">Não foi possível carregar as notificações: '+esc(error.message)+'</p>';
     return;
   }
-  checkUnreadBadges();
+  await checkUnreadBadges();
   if(!data || !data.length){
     $('notifList').innerHTML='<p class="muted">Nenhuma notificação por enquanto.</p>';
     return;
