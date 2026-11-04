@@ -2029,15 +2029,37 @@ async function loadProfileDataTab(tab){
 
 /* FEED & POSTS */
 async function loadFeed(mode='all'){
-  const [blockedResult,postsResult,followingResult]=await Promise.all([
+  const [blockedResult,postsResult,followingResult,repostFeedResult]=await Promise.all([
     db.from('blocks').select('blocked_id').eq('blocker_id',user.id),
     db.from('posts').select('*').order('created_at',{ascending:false}).limit(50),
-    mode==='following'?db.from('follows').select('following_id').eq('follower_id',user.id):Promise.resolve({data:[]})
+    mode==='following'?db.from('follows').select('following_id').eq('follower_id',user.id):Promise.resolve({data:[]}),
+    db.from('post_reposts').select('post_id,user_id,comment_text,created_at').order('created_at',{ascending:false}).limit(50)
   ]);
   const blockedIds=(blockedResult.data||[]).map(b=>b.blocked_id);
+  const followedIds=(followingResult.data||[]).map(x=>x.following_id);
   let rows=(postsResult.data||[]).filter(p=>!blockedIds.includes(p.user_id));
-  if(mode==='following'){const ids=(followingResult.data||[]).map(x=>x.following_id);rows=rows.filter(p=>ids.includes(p.user_id)||p.user_id===user.id);}
-  const ids=[...new Set(rows.map(p=>p.user_id))],postIds=rows.map(p=>p.id);
+  if(mode==='following')rows=rows.filter(p=>followedIds.includes(p.user_id)||p.user_id===user.id);
+
+  // Cada repost é um item próprio do feed, associado à publicação original.
+  let repostEvents=(repostFeedResult.data||[]).filter(r=>!blockedIds.includes(r.user_id)&&(mode!=='following'||followedIds.includes(r.user_id)||r.user_id===user.id));
+  const repostPostIds=[...new Set(repostEvents.map(r=>r.post_id))];
+  const existingPostIds=new Set(rows.map(p=>p.id));
+  const missingPostIds=repostPostIds.filter(id=>!existingPostIds.has(id));
+  let repostPosts=[];
+  if(missingPostIds.length){
+    const {data,error}=await db.from('posts').select('*').in('id',missingPostIds);
+    if(error)console.warn('Não foi possível carregar publicações repostadas:',error.message);
+    repostPosts=data||[];
+  }
+  const postMap=new Map([...rows,...repostPosts].map(p=>[p.id,p]));
+  repostEvents=repostEvents.filter(r=>postMap.has(r.post_id));
+  const feedItems=[
+    ...rows.map(p=>({post:p,repost:null,sortAt:new Date(p.created_at).getTime()})),
+    ...repostEvents.map(r=>({post:postMap.get(r.post_id),repost:r,sortAt:new Date(r.created_at).getTime()}))
+  ].sort((a,b)=>b.sortAt-a.sortAt).slice(0,70);
+  const visiblePosts=[...new Map(feedItems.map(item=>[item.post.id,item.post])).values()];
+  const ids=[...new Set([...visiblePosts.map(p=>p.user_id),...repostEvents.map(r=>r.user_id)])];
+  const postIds=visiblePosts.map(p=>p.id);
   const [profilesResult,likesResult,repostsResult,commentsResult,pinsResult]=await Promise.all([
     ids.length?db.from('user_profiles').select('*').in('user_id',ids):Promise.resolve({data:[]}),
     postIds.length?db.from('post_likes').select('post_id,user_id').in('post_id',postIds):Promise.resolve({data:[]}),
@@ -2050,16 +2072,20 @@ async function loadFeed(mode='all'){
   (likesResult.data||[]).forEach(x=>{likes[x.post_id]=(likes[x.post_id]||0)+1;if(x.user_id===user.id)mineLikes.add(x.post_id);});
   (repostsResult.data||[]).forEach(x=>{reposts[x.post_id]=(reposts[x.post_id]||0)+1;if(x.user_id===user.id)mineReposts.add(x.post_id);});
   (commentsResult.data||[]).forEach(x=>{commentCounts[x.post_id]=(commentCounts[x.post_id]||0)+1;});
-  $('feedList').innerHTML=rows.length?rows.map(p=>renderPostHtml(p,profs[p.user_id]||{},true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),commentCounts[p.id]||0,reposts[p.id]||0,pinnedIds.has(p.id))).join(''):'<p class="muted">Nenhuma publicação por aqui.</p>';
+  $('feedList').innerHTML=feedItems.length?feedItems.map(item=>{
+    const p=item.post;
+    return renderPostHtml(p,profs[p.user_id]||{},true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),commentCounts[p.id]||0,reposts[p.id]||0,pinnedIds.has(p.id),item.repost?{...item.repost,profile:profs[item.repost.user_id]||{}}:null);
+  }).join(''):'<p class="muted">Nenhuma publicação por aqui.</p>';
 }
 
-function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false, isReposted=false, commentCount=0, repostCount=0, isPinned=false){
+function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false, isReposted=false, commentCount=0, repostCount=0, isPinned=false, repostMeta=null){
   let name=esc(author.full_name||'Pessoa')+verifiedBadge(author.username);
   let handle=author.username?(author.username.startsWith('@')?esc(author.username):'@'+esc(author.username)):'@usuario';
   let avatarHtml=author.avatar_url?'<img src="'+esc(author.avatar_url)+'">':name[0].toUpperCase();
   let isMine=p.user_id===user.id;
   return `
     <article class="post" id="post-${p.id}">
+      ${repostMeta?`<div class="post-label" style="margin:0 0 9px;color:var(--muted);font-size:12px"><i class="fa-solid fa-retweet"></i> <b>${esc(repostMeta.profile.full_name||repostMeta.profile.username||'Alguém')}</b> repostou</div>${repostMeta.comment_text?`<div class="repost-comment" style="margin:0 0 10px"><p>${esc(repostMeta.comment_text)}</p></div>`:''}`:''}
       ${isPinned?'<div class="post-pinned-label"><i class="fa-solid fa-thumbtack"></i> Publicação fixada</div>':''}
       <div class="post-head">
         <div class="post-user-info" onclick="inspectProfile('${p.user_id}')">
