@@ -576,6 +576,35 @@ body.theme-dark .bubble-time{color:#b6c7c0}
 .ranking-media{width:100%;max-height:220px;object-fit:cover;border-radius:12px;margin-top:9px;cursor:pointer}
 .ranking-stats{display:flex;gap:16px;font-size:11px;color:var(--muted);margin-top:9px}
 .ranking-stats i{margin-right:4px}
+
+/* Acabamento Cottontail — perfil oficial, composer e chat */
+.verified-badge{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:16px;height:16px;margin-left:5px;border-radius:50%;background:#3897f0;color:#fff;font-size:9px;box-shadow:0 1px 3px rgba(56,151,240,.25)}
+.feed-create-wrap{display:flex;justify-content:center;align-items:center;margin:0 0 16px}
+.feed-create-button{min-width:190px;display:inline-flex;align-items:center;justify-content:center;gap:9px;border-radius:24px;padding:11px 22px;box-shadow:0 5px 16px rgba(0,0,0,.08)}
+.fab-post.hidden{display:none!important}
+#chatRoomView{background:var(--card-bg);border:1px solid var(--line);border-radius:22px;padding:14px;box-shadow:0 8px 30px rgba(40,25,30,.06);overflow:hidden}
+.iphone-chat-header{position:relative;display:flex;align-items:center;gap:12px;padding:5px 2px 15px;margin-bottom:12px;border-bottom:1px solid var(--line)}
+.iphone-chat-header>button{width:36px;height:36px;min-width:36px;border-radius:50%;display:grid;place-items:center;padding:0;background:var(--bg);color:var(--rose)}
+.iphone-chat-person{display:flex;align-items:center;gap:11px;min-width:0;flex:1}
+#chatHeaderAvatar{width:43px!important;height:43px!important;border:2px solid rgba(212,165,165,.35);box-shadow:0 2px 8px rgba(0,0,0,.07)}
+#chatTitle{font-weight:700;letter-spacing:-.2px;display:flex;align-items:center;flex-wrap:wrap}
+.chat-presence{font-size:11px;letter-spacing:.1px;color:var(--muted);margin-top:4px}
+.chat-presence.online:before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:#35bd78;margin-right:5px;vertical-align:1px}
+#messageBox.messages{height:min(58vh,560px);min-height:300px;display:flex;flex-direction:column;gap:10px;padding:16px 12px;overflow-y:auto;background:linear-gradient(180deg,#fbf7f5 0%,#f4eeeb 100%);border:0;border-radius:18px;scroll-behavior:smooth}
+body.theme-dark #messageBox.messages{background:linear-gradient(180deg,#202024 0%,#19191d 100%)}
+#messageBox .bubble{position:relative;max-width:min(82%,420px);padding:10px 13px 7px;border-radius:18px;font-size:14px;line-height:1.45;box-shadow:0 2px 7px rgba(30,20,20,.055);overflow-wrap:anywhere}
+#messageBox .bubble.mine{align-self:flex-end;background:linear-gradient(135deg,#dcaeb8,#c98f9e);color:#fff;border-bottom-right-radius:5px}
+#messageBox .bubble.other{align-self:flex-start;background:#fff;color:#3b3032;border:1px solid rgba(120,90,90,.06);border-bottom-left-radius:5px}
+body.theme-dark #messageBox .bubble.other{background:#303036;color:#f7eff2;border-color:#414149}
+#messageBox .bubble-time{display:flex;justify-content:flex-end;align-items:center;gap:3px;font-size:9px;margin-top:5px;opacity:.78}
+#messageBox .message-receipt.read{color:#dff4ff;font-weight:700}
+#chatRoomView .row{align-items:center;background:var(--bg);padding:6px;border:1px solid var(--line);border-radius:28px;margin-top:8px}
+#chatRoomView #messageInput{border:0!important;box-shadow:none!important;background:transparent!important;min-width:0;padding:10px 12px!important}
+#chatRoomView .row button{width:40px;min-width:40px;height:40px;border-radius:50%;box-shadow:0 3px 9px rgba(190,120,140,.25)}
+#chatRoomView>div:nth-of-type(3){justify-content:center;gap:7px!important;margin:9px 0!important}
+#chatRoomView>div:nth-of-type(3) button{border:0;background:var(--bg);border-radius:50%;width:31px;height:31px;padding:0!important}
+#messageStatus{min-height:0;margin:4px 8px}
+@media(max-width:600px){#chatRoomView{padding:10px;border-radius:18px}#messageBox.messages{height:55vh;min-height:260px;padding:12px 9px}#messageBox .bubble{max-width:88%;font-size:13px}.feed-create-button{min-width:175px}}
 </style></head>
 <body>
 
@@ -671,7 +700,7 @@ body.theme-dark .bubble-time{color:#b6c7c0}
         <button class="secondary" onclick="loadFeed('all')">Todos</button>
         <button class="secondary" onclick="loadFeed('following')">Quem sigo</button>
       </div>
-      <div style="display:flex;justify-content:flex-end;margin:0 0 12px"><button onclick="openFloatingPostModal()"><i class="fa-solid fa-pen"></i> Criar publicação</button></div>
+      <div class="feed-create-wrap"><button class="feed-create-button" onclick="openFloatingPostModal()"><i class="fa-solid fa-pen"></i> Criar publicação</button></div>
       <div id="feedList"></div>
     </div>
   </section>
@@ -992,6 +1021,10 @@ const pad=n=>String(n).padStart(2,'0');
 const dateKey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 
 function status(id,t){$(id).textContent=t||''}
+function verifiedBadge(username){
+  const normalized=String(username||'').trim().toLowerCase().replace(/^@/,'');
+  return normalized==='cottontail'?' <span class="verified-badge" title="Perfil oficial do Cottontail" aria-label="Perfil verificado"><i class="fa-solid fa-check"></i></span>':'';
+}
 function esc(s=''){
   return String(s).replace(/[&<>"']/g,c=>({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
@@ -1167,12 +1200,12 @@ function showPage(id){
   document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));
   document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
   
-  $('fabPostBtn').classList.toggle('hidden', id!=='feed');
+  $('fabPostBtn').classList.toggle('hidden', !['diary','explore','notifications','profile'].includes(id));
 
   if(id==='explore')searchProfilesAndPosts();
-  if(id==='messages'){ backToChatList(); }
+  if(id==='messages'){ $('msgBadge').classList.add('hidden'); backToChatList(); }
   if(id==='feed')loadFeed('all');
-  if(id==='notifications')loadNotifications();
+  if(id==='notifications'){ $('notifBadge').classList.add('hidden'); loadNotifications(); }
   if(id==='profile')loadProfileDataTab('posts');
   checkUnreadBadges();
 }
@@ -1366,8 +1399,8 @@ async function loadProfile(){
   $('profileBio').value=profile.bio||'';
   $('profileIsPrivate').checked=profile.is_private||false;
 
-  $('viewProfileName').textContent=profile.full_name||'Sem Nome';
-  $('viewProfileUsername').textContent=profile.username?'@'+profile.username:'@usuario';
+  $('viewProfileName').innerHTML=esc(profile.full_name||'Sem Nome')+verifiedBadge(profile.username);
+  $('viewProfileUsername').textContent=profile.username?(profile.username.startsWith('@')?profile.username:'@'+profile.username):'@usuario';
   $('viewProfileBio').textContent=profile.bio||'';
   $('profilePrivacyBadge').textContent=profile.is_private?'🔒 Perfil Privado':'🔓 Perfil Público';
 
@@ -1504,8 +1537,8 @@ async function loadFeed(mode='all'){
 }
 
 function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false, isReposted=false, commentCount=0){
-  let name=esc(author.full_name||'Pessoa');
-  let handle=author.username?'@'+esc(author.username):'@usuario';
+  let name=esc(author.full_name||'Pessoa')+verifiedBadge(author.username);
+  let handle=author.username?(author.username.startsWith('@')?esc(author.username):'@'+esc(author.username)):'@usuario';
   let avatarHtml=author.avatar_url?`<img src="${esc(author.avatar_url)}">`:name[0].toUpperCase();
   let isMine=p.user_id===user.id;
 
@@ -1746,8 +1779,8 @@ async function inspectProfile(id){
   $('modalProfileContent').innerHTML=`
     <div style="text-align:center">
       <div class="profile-big-avatar" style="margin:0 auto;width:74px;height:74px">${u?.avatar_url?`<img src="${u.avatar_url}">`:(u?.full_name?u.full_name[0]:'?')}</div>
-      <h3 style="margin:10px 0 2px 0">${esc(u?.full_name||'Usuário')}</h3>
-      <div class="muted">@${esc(u?.username||'')} ${u?.is_private?'🔒':''}</div>
+      <h3 style="margin:10px 0 2px 0">${esc(u?.full_name||'Usuário')}${verifiedBadge(u?.username)}</h3>
+      <div class="muted">${esc((u?.username||'').startsWith('@')?u.username:'@'+(u?.username||''))} ${u?.is_private?'🔒':''}</div>
       <p style="font-size:14px;margin:12px 0">${esc(u?.bio||'')}</p>
       <div style="display:flex;justify-content:center;gap:18px;font-size:13px;margin:14px 0">
         <span><b>${wCount||0}</b> Seguidores</span>
@@ -1808,6 +1841,7 @@ async function loadChats(){
 
 async function openChat(id, username=''){
   showPage('messages');
+  $('msgBadge').classList.add('hidden');
   activeChat=id;
 
   let p=chatProfiles[id];
@@ -1826,7 +1860,7 @@ async function openChat(id, username=''){
     p=data||{};
   }
 
-  $('chatTitle').textContent=p.full_name||'Conversa';
+  $('chatTitle').innerHTML=esc(p.full_name||'Conversa')+verifiedBadge(p.username);
   $('chatHeaderAvatar').innerHTML=p.avatar_url?`<img src="${esc(p.avatar_url)}">`:esc((p.full_name||'?')[0]);
   updateChatPresence(p.last_seen_at);
 
@@ -1973,6 +2007,9 @@ async function openNotification(notificationId,actorId,type,postId){
   if(actorId) await inspectProfile(actorId);
 }
 async function loadNotifications(){
+  const {error:markError}=await db.from('notifications').update({read:true}).eq('user_id',user.id).eq('read',false);
+  if(markError)console.warn('Não foi possível marcar notificações como lidas:',markError.message);
+  $('notifBadge').classList.add('hidden');
   const {data,error}=await db.from('notifications').select('*')
     .eq('user_id',user.id).order('created_at',{ascending:false}).limit(30);
   if(error){
