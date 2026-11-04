@@ -1176,7 +1176,7 @@ const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 const $=id=>document.getElementById(id);
 
-/* POP-UPS DO COTTontail */
+/* POP-UPS DO Cottontail */
 function showToast(message, icon='fa-heart'){
   let container=$('appToastContainer');
 
@@ -1214,7 +1214,7 @@ const FORBIDDEN_WORDS = ['gore', 'mutilacao', 'suicidio', 'sangue', 'morte', 'es
 const pad=n=>String(n).padStart(2,'0');
 const dateKey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 
-function status(id,t){$(id).textContent=t||''}
+function status(id,t){if($(id))$(id).textContent=t||''}
 function esc(s=''){
   return String(s).replace(/[&<>"']/g,c=>({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
@@ -1320,9 +1320,23 @@ async function signUp(){
   }
 }
 
+/* CORREÇÃO DO LOGIN APLICADA AQUI */
 async function signIn(){
-  let {error}=await db.auth.signInWithPassword({ email:$('loginEmail').value.trim(), password:$('loginPassword').value });
-  if(error)status('loginStatus',error.message);
+  let email = $('loginEmail').value.trim();
+  let password = $('loginPassword').value;
+
+  if(!email || !password){
+    return status('loginStatus', 'Preencha o e-mail e a senha.');
+  }
+
+  status('loginStatus', 'Entrando...');
+  let {error} = await db.auth.signInWithPassword({ email, password });
+  
+  if(error){
+    status('loginStatus', error.message);
+  } else {
+    status('loginStatus', '');
+  }
 }
 
 async function resetPassword(){
@@ -1381,7 +1395,14 @@ db.auth.onAuthStateChange(async(_event,session)=>{
 async function ensureProfile(){
   let {data}=await db.from('user_profiles').select('user_id').eq('user_id',user.id).maybeSingle();
   if(!data){
-    await db.from('user_profiles').insert({user_id:user.id,full_name:'',username:null,bio:'',is_private:false});
+    let defaultUsername = 'user_' + user.id.substring(0,8);
+    await db.from('user_profiles').insert({
+      user_id:user.id,
+      full_name: user.email ? user.email.split('@')[0] : 'Usuário',
+      username: defaultUsername,
+      bio:'',
+      is_private:false
+    });
   }
 }
 
