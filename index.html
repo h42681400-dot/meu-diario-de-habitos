@@ -510,6 +510,266 @@ button:active{
   font-size:10px;
   background:linear-gradient(transparent,rgba(0,0,0,.6));
 }
+
+/* =====================================
+   COTTontail — MELHORIAS GERAIS
+===================================== */
+
+/* POP-UP / TOAST */
+#appToastContainer {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5000;
+  width: min(90%, 380px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.app-toast {
+  background: var(--card-bg);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px 18px;
+  box-shadow: 0 8px 28px rgba(0,0,0,.14);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  animation: toastIn .25s ease;
+}
+
+.app-toast i {
+  color: var(--rose);
+  font-size: 19px;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* NAVEGAÇÃO: SEM QUEBRAR EM DUAS LINHAS */
+.nav {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+  justify-content: space-between;
+  gap: 2px !important;
+  scrollbar-width: none;
+}
+
+.nav::-webkit-scrollbar {
+  display: none;
+}
+
+.nav button {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  white-space: nowrap;
+  flex-direction: column;
+  justify-content: center;
+  padding: 8px 2px !important;
+  gap: 5px;
+}
+
+.nav button span {
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.nav button i {
+  font-size: 19px;
+}
+
+@media(max-width: 380px) {
+  .nav button span { font-size: 8px; }
+  .nav button i { font-size: 17px; }
+}
+
+/* CHAT COM APARÊNCIA DE WHATSAPP */
+#chatRoomView .messages {
+  background-color: #efeae2;
+  background-image:
+    radial-gradient(rgba(120,100,80,.07) 1px, transparent 1px);
+  background-size: 18px 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px 14px;
+  gap: 8px;
+}
+
+#chatRoomView .bubble {
+  max-width: min(82%, 430px);
+  padding: 10px 13px 7px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.45;
+  box-shadow: 0 1px 1px rgba(0,0,0,.08);
+}
+
+#chatRoomView .bubble.mine {
+  background: #d9fdd3;
+  color: #26352b;
+  border-bottom-right-radius: 3px;
+}
+
+#chatRoomView .bubble.other {
+  background: #ffffff;
+  color: #292929;
+  border-bottom-left-radius: 3px;
+}
+
+#chatRoomView .bubble-time {
+  font-size: 10px;
+  opacity: .65;
+  margin-top: 4px;
+}
+
+#chatRoomView #messageInput {
+  background: var(--card-bg);
+  border-radius: 24px;
+  min-height: 46px;
+  padding: 0 17px;
+}
+
+#chatRoomView .row {
+  align-items: center;
+  gap: 9px;
+}
+
+#chatRoomView .row button {
+  width: 46px;
+  min-width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  padding: 0;
+}
+
+body.theme-dark #chatRoomView .messages {
+  background-color: #292624;
+  background-image: none;
+}
+
+body.theme-dark #chatRoomView .bubble.mine {
+  background: #365b43;
+  color: #fff;
+}
+
+body.theme-dark #chatRoomView .bubble.other {
+  background: #45413e;
+  color: #fff;
+}
+
+/* NOTIFICAÇÕES MAIS ESPAÇADAS */
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 15px 5px;
+  margin: 4px 0;
+  border-bottom: 1px solid var(--line);
+  line-height: 1.5;
+}
+
+.notif-item:last-child {
+  border-bottom: 0;
+}
+
+.notif-item .icon {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(212,165,165,.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--rose);
+}
+
+/* SEGUIDORES E SEGUINDO */
+#profile .profile-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+#profile .profile-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+#profile .profile-tab {
+  min-width: 0;
+  white-space: nowrap;
+  padding: 12px 8px;
+}
+
+#profileTabContent .person {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+#profileTabContent .person > div {
+  min-width: 0;
+}
+
+#profileTabContent .person button {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  font-size: 12px;
+}
+
+/* EXPLORAR */
+.explore-grid {
+  gap: 3px;
+  margin-top: 12px;
+}
+
+.explore-post-card {
+  border-radius: 4px;
+  transition: opacity .2s;
+}
+
+.explore-post-card:active {
+  opacity: .75;
+}
+
+#peopleList .person {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+#peopleList .person button {
+  flex: 0 0 auto;
+  padding: 8px 13px;
+  font-size: 12px;
+}
+
+/* IMAGENS E CARREGAMENTO */
+img {
+  content-visibility: auto;
+}
+
+.post-media,
+.explore-post-card img,
+.avatar img {
+  loading: lazy;
+}
 </style></head>
 <body>
 
@@ -641,7 +901,7 @@ button:active{
   <section id="explore" class="page">
     <div class="card">
       <div style="display:flex;gap:8px">
-        <input id="searchPeople" placeholder="🔍 Buscar @usuário, nome ou posts..." oninput="searchProfilesAndPosts()">
+        <input id="searchPeople" placeholder="🔍 Buscar @usuário, nome ou posts..." oninput="scheduleSearchProfilesAndPosts()">
         <button class="secondary" onclick="clearRecentSearches()"><i class="fa-solid fa-trash-can"></i></button>
       </div>
       <div id="recentSearchesBox" class="muted" style="font-size:12px;margin:8px 0"></div>
@@ -861,7 +1121,7 @@ button:active{
   <div class="modal-box">
     <h3 style="margin-top:0">Editar Perfil</h3>
     <div class="field"><label>Nome</label><input id="profileName" placeholder="Seu nome"></div>
-    <div class="field"><label>Nome de usuário (@)</label><input id="profileUsername" placeholder="ex: mariana"></div>
+    <div class="field"><label>Nome de usuário (@)</label><input id="profileUsername" placeholder="ex: @mariana.fit"></div>
     <div class="field"><label>Biografia</label><textarea id="profileBio" maxlength="240"></textarea></div>
     
     <div class="field">
@@ -914,13 +1174,43 @@ const SUPABASE_URL='https://qhveyeqpwguqbokfwlwf.supabase.co';
 const SUPABASE_KEY='sb_publishable_FWLt3OH6KIOwXZ-DqJGacw_vcoMg-eM';
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
+const $=id=>document.getElementById(id);
+
+/* POP-UPS DO COTTontail */
+function showToast(message, icon='fa-heart'){
+  let container=$('appToastContainer');
+
+  if(!container){
+    container=document.createElement('div');
+    container.id='appToastContainer';
+    document.body.appendChild(container);
+  }
+
+  const toast=document.createElement('div');
+  toast.className='app-toast';
+
+  const iconEl=document.createElement('i');
+  iconEl.className='fa-solid '+icon;
+
+  const textEl=document.createElement('span');
+  textEl.textContent=message;
+
+  toast.append(iconEl,textEl);
+  container.appendChild(toast);
+
+  setTimeout(()=>{
+    toast.style.opacity='0';
+    toast.style.transition='opacity .25s';
+    setTimeout(()=>toast.remove(),250);
+  },2800);
+}
+
 let user=null, selected=new Date(), entries={}, profile=null, activeChat=null, chatProfiles={};
 let currentFloatingPostImage=null, editAvatarFile=null, editBannerFile=null, postToDeleteId=null, postToReportId=null;
 let chatInterval=null;
 
 const FORBIDDEN_WORDS = ['gore', 'mutilacao', 'suicidio', 'sangue', 'morte', 'estupro', 'assidio', 'mutilação', 'suicídio'];
 
-const $=id=>document.getElementById(id);
 const pad=n=>String(n).padStart(2,'0');
 const dateKey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 
@@ -990,7 +1280,18 @@ function previewRegAvatar(input){
 
 async function signUp(){
   let name=$('regName').value.trim();
-  let username=$('regUsername').value.trim().toLowerCase().replace(/^@/,'');
+  let usernameInput=$('regUsername').value.trim().toLowerCase();
+
+  if(!usernameInput.startsWith('@')){
+    return status('loginStatus','Seu nome de usuário precisa começar com @. Exemplo: @mariana');
+  }
+
+  let username=usernameInput.substring(1);
+
+  if(!/^[a-z0-9._]{3,30}$/.test(username)){
+    return status('loginStatus','Use de 3 a 30 caracteres: letras, números, ponto ou underline.');
+  }
+
   let email=$('regEmail').value.trim();
   let password=$('regPassword').value;
   let language=$('regLanguage').value;
@@ -1049,12 +1350,10 @@ async function executeDeleteAccount(){
   if(!user) return;
   status('deleteAccStatus','Excluindo dados...');
   try {
-    // Apaga dados do usuário nas tabelas principais antes de sair
     await db.from('user_profiles').delete().eq('user_id', user.id);
     await db.from('posts').delete().eq('user_id', user.id);
     await db.from('diary_entries').delete().eq('user_id', user.id);
     
-    // Faz logout e limpa intervalo
     if(chatInterval) clearInterval(chatInterval);
     await db.auth.signOut();
     closeDeleteAccountModal();
@@ -1074,6 +1373,8 @@ db.auth.onAuthStateChange(async(_event,session)=>{
     await loadFeed('all');
     await loadChats();
     await checkUnreadBadges();
+
+    showToast('Bem-vinda de volta ao Cottontail! 🤍','fa-heart');
   }
 });
 
@@ -1284,7 +1585,7 @@ async function loadProfile(){
   let {data}=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
   profile=data||{};
   $('profileName').value=profile.full_name||'';
-  $('profileUsername').value=profile.username||'';
+  $('profileUsername').value=profile.username?'@'+profile.username:'';
   $('profileBio').value=profile.bio||'';
   $('profileIsPrivate').checked=profile.is_private||false;
 
@@ -1343,7 +1644,18 @@ async function uploadFile(file, path){
 async function saveProfile(){
   status('profileStatus','Salvando...');
   let name=$('profileName').value.trim();
-  let username=$('profileUsername').value.trim().toLowerCase().replace(/^@/,'');
+  let usernameInput=$('profileUsername').value.trim().toLowerCase();
+
+  if(!usernameInput.startsWith('@')){
+    return status('profileStatus','O nome de usuário precisa começar com @.');
+  }
+
+  let username=usernameInput.substring(1);
+
+  if(!/^[a-z0-9._]{3,30}$/.test(username)){
+    return status('profileStatus','Use de 3 a 30 caracteres: letras, números, ponto ou underline.');
+  }
+
   let bio=$('profileBio').value.trim();
   let is_private=$('profileIsPrivate').checked;
   let avatar_url=profile.avatar_url, banner_url=profile.banner_url;
@@ -1437,7 +1749,7 @@ async function loadFeed(mode='all'){
 function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false, isReposted=false, commentCount=0){
   let name=esc(author.full_name||'Pessoa');
   let handle=author.username?'@'+esc(author.username):'@usuario';
-  let avatarHtml=author.avatar_url?`<img src="${esc(author.avatar_url)}">`:name[0].toUpperCase();
+  let avatarHtml=author.avatar_url?`<img src="${esc(author.avatar_url)}" loading="lazy" decoding="async">`:name[0].toUpperCase();
   let isMine=p.user_id===user.id;
 
   return `
@@ -1453,7 +1765,7 @@ function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false,
         </div>
       </div>
       <p style="margin:12px 0;line-height:1.4">${esc(p.content).replace(/\n/g,'<br>')}</p>
-      ${p.media_url?`<img src="${esc(p.media_url)}" class="post-media">`:''}
+      ${p.media_url?`<img src="${esc(p.media_url)}" class="post-media" loading="lazy" decoding="async">`:''}
       ${interactive?`
         <div class="post-actions">
           <button class="${isLiked?'liked':''}" onclick="toggleLike('${p.id}',${isLiked},'${p.user_id}')">
@@ -1478,12 +1790,36 @@ function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false,
 }
 
 async function toggleLike(postId, isLiked, postOwnerId){
-  if(isLiked) await db.from('post_likes').delete().eq('post_id',postId).eq('user_id',user.id);
-  else {
-    await db.from('post_likes').insert({post_id:postId,user_id:user.id});
-    if(postOwnerId !== user.id) await db.from('notifications').insert({user_id:postOwnerId, actor_id:user.id, type:'like', post_id:postId});
+  if(isLiked){
+    const {error}=await db.from('post_likes')
+      .delete()
+      .eq('post_id',postId)
+      .eq('user_id',user.id);
+
+    if(error) return showToast('Não foi possível remover a curtida.','fa-circle-exclamation');
+
+    showToast('Curtida removida.','fa-heart');
+  } else {
+    const {error}=await db.from('post_likes').insert({
+      post_id:postId,
+      user_id:user.id
+    });
+
+    if(error) return showToast('Não foi possível curtir.','fa-circle-exclamation');
+
+    showToast('Você curtiu essa publicação!','fa-heart');
+
+    if(postOwnerId !== user.id){
+      await db.from('notifications').insert({
+        user_id:postOwnerId,
+        actor_id:user.id,
+        type:'like',
+        post_id:postId
+      });
+    }
   }
-  loadFeed('all');
+
+  await loadFeed('all');
 }
 
 async function toggleRepost(postId, isReposted, postOwnerId){
@@ -1516,158 +1852,93 @@ async function loadPostComments(postId){
 }
 
 async function addComment(postId, postOwnerId){
-  let input=$('comment-input-'+postId), content=input.value.trim();
+  let input=$('comment-input-'+postId);
+  let content=input.value.trim();
+
   if(!content)return;
-  await db.from('post_comments').insert({post_id:postId, user_id:user.id, content});
+
+  const {error}=await db.from('post_comments').insert({
+    post_id:postId,
+    user_id:user.id,
+    content
+  });
+
+  if(error){
+    showToast('Não foi possível enviar o comentário.','fa-circle-exclamation');
+    return;
+  }
+
   input.value='';
-  if(postOwnerId !== user.id) await db.from('notifications').insert({user_id:postOwnerId, actor_id:user.id, type:'comment', post_id:postId});
+
+  showToast('Comentário publicado!','fa-comment');
+
+  if(postOwnerId !== user.id){
+    await db.from('notifications').insert({
+      user_id:postOwnerId,
+      actor_id:user.id,
+      type:'comment',
+      post_id:postId
+    });
+  }
+
   await loadPostComments(postId);
   loadFeed('all');
 }
 
 /* EXPLORAR */
+let searchDebounce=null;
+
+function scheduleSearchProfilesAndPosts(){
+  clearTimeout(searchDebounce);
+
+  searchDebounce=setTimeout(()=>{
+    searchProfilesAndPosts();
+  },350);
+}
+
 async function searchProfilesAndPosts(){
   let q=$('searchPeople').value.trim().replace(/^@/,'').toLowerCase();
-
-  renderRecentSearches();
-
-  // SEM PESQUISA: mostrar publicações recentes em grade
-  if(!q){
-    let {data:posts,error}=await db
-      .from('posts')
-      .select('*')
-      .order('created_at',{ascending:false})
-      .limit(30);
-
-    if(error){
-      $('peopleList').innerHTML='<p class="muted">Erro ao carregar publicações.</p>';
-      return;
+  if(q){
+    let searches = JSON.parse(localStorage.getItem('recentSearches')||'[]');
+    if(!searches.includes(q)){
+      searches.unshift(q);
+      if(searches.length>5) searches.pop();
+      localStorage.setItem('recentSearches', JSON.stringify(searches));
     }
-
-    let ids=[...new Set((posts||[]).map(p=>p.user_id))];
-    let authors={};
-
-    if(ids.length){
-      let {data:profiles}=await db
-        .from('user_profiles')
-        .select('*')
-        .in('user_id',ids);
-
-      (profiles||[]).forEach(p=>authors[p.user_id]=p);
-    }
-
-    $('peopleList').innerHTML=`
-      <h3 style="font-size:15px;margin:14px 0">Descobrir publicações</h3>
-      <div class="explore-grid">
-        ${(posts||[]).map(p=>{
-          let author=authors[p.user_id]||{};
-          return `
-            <div class="explore-post-card"
-              onclick="inspectProfile('${p.user_id}')"
-              title="Ver perfil de ${esc(author.full_name||'usuário')}">
-
-              ${p.media_url
-                ? `<img src="${esc(p.media_url)}" loading="lazy">`
-                : `<div class="explore-text-post">${esc(p.content||'Publicação')}</div>`
-              }
-
-              <div class="explore-post-overlay">
-                <span><i class="fa-solid fa-user"></i> ${esc(author.username||'usuário')}</span>
-              </div>
-            </div>
-          `;
-        }).join('')}
-      </div>
-      ${(posts||[]).length===0
-        ? '<p class="muted">Ainda não há publicações para descobrir.</p>'
-        : ''}
-    `;
-
-    return;
   }
-
-  // PESQUISA: registrar pesquisa recente
-  let searches=JSON.parse(localStorage.getItem('recentSearches')||'[]');
-
-  searches=searches.filter(s=>s!==q);
-  searches.unshift(q);
-
-  if(searches.length>5) searches.pop();
-
-  localStorage.setItem('recentSearches',JSON.stringify(searches));
   renderRecentSearches();
 
-  // Buscar perfis
-  let userQuery=db
-    .from('user_profiles')
-    .select('*')
-    .neq('user_id',user.id)
-    .or(`username.ilike.%${q}%,full_name.ilike.%${q}%`)
-    .limit(20);
-
+  let userQuery=db.from('user_profiles').select('*').neq('user_id',user.id).limit(20);
+  if(q){
+    userQuery=userQuery.or(`username.ilike.${q}%,full_name.ilike.${q}%,username.ilike.%${q}%,full_name.ilike.%${q}%`);
+  }
   let {data:users}=await userQuery;
 
-  // Buscar publicações
-  let {data:matchingPosts}=await db
-    .from('posts')
-    .select('*')
-    .ilike('content',`%${q}%`)
-    .order('created_at',{ascending:false})
-    .limit(20);
-
-  let postsHtml='';
-
-  if(matchingPosts?.length){
-    let authorIds=[...new Set(matchingPosts.map(p=>p.user_id))];
-
-    let {data:authors}=await db
-      .from('user_profiles')
-      .select('*')
-      .in('user_id',authorIds);
-
-    let authorMap={};
-    (authors||[]).forEach(a=>authorMap[a.user_id]=a);
-
-    postsHtml=`
-      <h3 style="font-size:15px;margin:20px 0 10px">Publicações</h3>
-      ${matchingPosts.map(p=>
-        renderPostHtml(p,authorMap[p.user_id]||{},true)
-      ).join('')}
-    `;
+  let postsHtml = '';
+  if(q){
+    let {data:matchingPosts}=await db.from('posts').select('*').ilike('content', `%${q}%`).limit(10);
+    if(matchingPosts && matchingPosts.length){
+      let authorIds=[...new Set(matchingPosts.map(p=>p.user_id))];
+      let {data:authors}=await db.from('user_profiles').select('*').in('user_id',authorIds);
+      let authorMap={}; (authors||[]).forEach(a=>authorMap[a.user_id]=a);
+      postsHtml = `<h4>Postagens encontradas</h4>` + matchingPosts.map(p=>renderPostHtml(p, authorMap[p.user_id]||{}, true)).join('');
+    }
   }
 
-  let usersHtml=(users||[]).map(p=>`
-    <div class="person" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)">
-      <div style="display:flex;align-items:center;gap:12px;cursor:pointer;min-width:0"
-        onclick="inspectProfile('${p.user_id}')">
-
-        <div class="avatar" style="width:42px;height:42px">
-          ${p.avatar_url
-            ? `<img src="${esc(p.avatar_url)}">`
-            : esc((p.full_name||'?')[0])
-          }
-        </div>
-
-        <div style="min-width:0">
-          <b>${esc(p.full_name||'Usuário')}</b>
-          <div class="muted">@${esc(p.username||'')}</div>
-        </div>
+  let usersHtml = (users||[]).map(p=>`
+    <div class="person">
+      <div style="display:flex;align-items:center;gap:12px;cursor:pointer" onclick="inspectProfile('${p.user_id}')">
+        <div class="avatar" style="width:38px;height:38px">${p.avatar_url?`<img src="${p.avatar_url}" loading="lazy" decoding="async">`:(p.full_name?p.full_name[0]:'?')}</div>
+        <div><b>${esc(p.full_name||'')}</b><div class="muted">@${esc(p.username||'')}</div></div>
       </div>
-
-      <button class="secondary"
-        onclick="inspectProfile('${p.user_id}')">
-        Ver perfil
-      </button>
+      <div style="display:flex;gap:8px">
+        <button class="secondary" onclick="inspectProfile('${p.user_id}')">Ver Perfil</button>
+        <button class="secondary" onclick="openChatFromExplore('${p.user_id}')"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
     </div>
   `).join('');
 
-  $('peopleList').innerHTML=`
-    ${usersHtml
-      ? '<h3 style="font-size:15px;margin:14px 0 6px">Perfis</h3>'+usersHtml
-      : '<p class="muted">Nenhum perfil encontrado.</p>'
-    }
-    ${postsHtml}
-  `;
+  $('peopleList').innerHTML = usersHtml + (postsHtml ? `<hr style="border:0;border-top:1px solid var(--line);margin:16px 0">${postsHtml}` : '');
 }
 
 function renderRecentSearches(){
@@ -1683,6 +1954,18 @@ function clearRecentSearches(){
   renderRecentSearches();
 }
 
+async function openChatFromExplore(id){
+  let {data:targetProfile}=await db.from('user_profiles').select('*').eq('user_id',id).maybeSingle();
+  if(targetProfile && targetProfile.messages_from_following_only){
+    let {data:isF}=await db.from('follows').select('*').eq('follower_id',id).eq('following_id',user.id).maybeSingle();
+    if(!isF){
+      alert('Este usuário aceita mensagens apenas de quem ele segue.');
+      return;
+    }
+  }
+  openChat(id);
+}
+
 async function inspectProfile(id){
   let {data:u}=await db.from('user_profiles').select('*').eq('user_id',id).maybeSingle();
   let {data:posts}=await db.from('posts').select('*').eq('user_id',id);
@@ -1695,7 +1978,7 @@ async function inspectProfile(id){
 
   $('modalProfileContent').innerHTML=`
     <div style="text-align:center">
-      <div class="profile-big-avatar" style="margin:0 auto;width:74px;height:74px">${u?.avatar_url?`<img src="${u.avatar_url}">`:(u?.full_name?u.full_name[0]:'?')}</div>
+      <div class="profile-big-avatar" style="margin:0 auto;width:74px;height:74px">${u?.avatar_url?`<img src="${u.avatar_url}" loading="lazy" decoding="async">`:(u?.full_name?u.full_name[0]:'?')}</div>
       <h3 style="margin:10px 0 2px 0">${esc(u?.full_name||'Usuário')}</h3>
       <div class="muted">@${esc(u?.username||'')} ${u?.is_private?'🔒':''}</div>
       <p style="font-size:14px;margin:12px 0">${esc(u?.bio||'')}</p>
@@ -1705,7 +1988,7 @@ async function inspectProfile(id){
       </div>
       <div style="display:flex;gap:10px;justify-content:center;margin-top:16px">
         <button onclick="toggleFollowModal('${id}',${!!isF})">${isF?'Seguindo':'Seguir'}</button>
-        <button class="secondary" onclick="closeUserModal();openChat('${id}')">Mensagem</button>
+        <button class="secondary" onclick="closeUserModal();openChatFromExplore('${id}')">Mensagem</button>
         <button class="ghost" onclick="toggleBlockUser('${id}',${!!isB})" style="color:var(--red);border-color:var(--red)">${isB?'Desbloquear':'Bloquear'}</button>
       </div>
     </div>
@@ -1718,12 +2001,33 @@ async function inspectProfile(id){
 function closeUserModal(){ $('userModal').classList.add('hidden'); }
 
 async function toggleFollowModal(targetId, isFollowing){
-  if(isFollowing) await db.from('follows').delete().eq('follower_id',user.id).eq('following_id',targetId);
-  else {
-    await db.from('follows').insert({follower_id:user.id,following_id:targetId});
-    await db.from('notifications').insert({user_id:targetId, actor_id:user.id, type:'follow'});
+  if(isFollowing){
+    const {error}=await db.from('follows')
+      .delete()
+      .eq('follower_id',user.id)
+      .eq('following_id',targetId);
+
+    if(error) return showToast('Não foi possível deixar de seguir.','fa-circle-exclamation');
+
+    showToast('Você deixou de seguir esse perfil.','fa-user-minus');
+  } else {
+    const {error}=await db.from('follows').insert({
+      follower_id:user.id,
+      following_id:targetId
+    });
+
+    if(error) return showToast('Não foi possível seguir esse perfil.','fa-circle-exclamation');
+
+    showToast('Você começou a seguir alguém!','fa-user-plus');
+
+    await db.from('notifications').insert({
+      user_id:targetId,
+      actor_id:user.id,
+      type:'follow'
+    });
   }
-  inspectProfile(targetId);
+
+  await inspectProfile(targetId);
 }
 
 async function toggleBlockUser(targetId, isBlocked){
@@ -1746,7 +2050,7 @@ async function loadChats(){
   chatProfiles={}; (p||[]).forEach(x=>chatProfiles[x.user_id]=x);
   $('chatList').innerHTML=peers.map(id=>`
     <div class="chat-item" onclick="openChat('${id}')" style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer">
-      <div class="avatar" style="width:40px;height:40px">${chatProfiles[id]?.avatar_url?`<img src="${chatProfiles[id].avatar_url}">`:(chatProfiles[id]?.full_name?chatProfiles[id].full_name[0]:'?')}</div>
+      <div class="avatar" style="width:40px;height:40px">${chatProfiles[id]?.avatar_url?`<img src="${chatProfiles[id].avatar_url}" loading="lazy" decoding="async">`:(chatProfiles[id]?.full_name?chatProfiles[id].full_name[0]:'?')}</div>
       <div><b>${esc(chatProfiles[id]?.full_name||'Pessoa')}</b><div class="muted">@${esc(chatProfiles[id]?.username||'')}</div></div>
     </div>
   `).join('');
@@ -1898,6 +2202,34 @@ async function loadNotifications(){
     `;
   }).join('');
 }
+
+/* LIMPAR RESÍDUOS DE CITAÇÃO NA TELA */
+function removeCitationArtifact(){
+  const walker=document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT
+  );
+
+  let node;
+
+  while(node=walker.nextNode()){
+    if(node.nodeValue.includes('[cite:')){
+      node.nodeValue=node.nodeValue.replace(/\/gi,'');
+    }
+  }
+}
+
+removeCitationArtifact();
+
+const citationObserver=new MutationObserver(()=>{
+  removeCitationArtifact();
+});
+
+citationObserver.observe(document.body,{
+  childList:true,
+  subtree:true,
+  characterData:true
+});
 </script>
 </body>
 </html>
