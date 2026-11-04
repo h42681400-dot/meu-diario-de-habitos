@@ -164,12 +164,6 @@ textarea{min-height:85px;resize:vertical}
 .avatar{width:46px;height:46px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;color:var(--rose);font-weight:bold;overflow:hidden;flex:none}
 .avatar img{width:100%;height:100%;object-fit:cover}
 .post-media{width:100%;max-height:340px;border-radius:14px;object-fit:cover;margin-top:12px}
-.post-actions{display:flex;gap:18px;margin-top:14px;color:var(--muted)}
-.post-actions button{background:transparent;color:var(--muted);padding:6px 10px;font-size:13px;display:flex;align-items:center;gap:6px;margin:0}
-.post-actions button.liked{color:var(--red)}
-.post-actions button.reposted{color:var(--rose)}
-.comments-section{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
-.comment-item{font-size:13px;margin:8px 0;padding:8px;background:var(--bg);border-radius:10px}
 
 .messages{height:380px;overflow:auto;border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0;background:var(--bg);display:flex;flex-direction:column;gap:8px}
 .bubble{max-width:78%;padding:10px 14px;border-radius:18px;font-size:14px;word-break:break-word;line-height:1.4;box-shadow:0 1px 2px rgba(0,0,0,0.04)}
@@ -191,8 +185,6 @@ textarea{min-height:85px;resize:vertical}
 .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px}
 .modal-box{background:var(--card-bg);width:100%;max-width:480px;border-radius:20px;padding:24px;max-height:85vh;overflow:auto}
 .tweet-media-btn{background:var(--line);color:var(--ink);padding:10px 14px;border-radius:12px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
-.crop-preview-box{width:100%;background:#000;border-radius:12px;overflow:hidden;margin:12px 0;position:relative;display:flex;align-items:center;justify-content:center}
-.crop-preview-box img{max-width:100%;max-height:200px;object-fit:cover}
 </style></head>
 <body>
 
@@ -265,9 +257,29 @@ textarea{min-height:85px;resize:vertical}
   <!-- DIÁRIO -->
   <section id="diary" class="page">
     <div class="card">
-      <h3 style="margin-top:0">Meu Diário</h3>
-      <div class="field"><label>Anotações do Dia</label><textarea id="notes"></textarea></div>
+      <div class="calendar-head">
+        <button class="secondary" onclick="changeMonth(-1)">‹</button>
+        <h3 id="monthTitle" style="margin:0;font-size:15px"></h3>
+        <button class="secondary" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="week">
+        <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+      </div>
+      <div id="days" class="days" style="margin-top:10px"></div>
+    </div>
+    <div class="card">
+      <h3 id="selectedDate" style="margin-top:0"></h3>
+      <div class="grid">
+        <div class="field"><label>Café da manhã</label><textarea id="breakfast"></textarea></div>
+        <div class="field"><label>Almoço</label><textarea id="lunch"></textarea></div>
+        <div class="field"><label>Lanches</label><textarea id="snacks"></textarea></div>
+        <div class="field"><label>Jantar</label><textarea id="dinner"></textarea></div>
+      </div>
+      <div class="field"><label>Água (ml)</label><input id="water" type="number" min="0"></div>
+      <div class="field"><label>Exercícios</label><textarea id="exercise"></textarea></div>
+      <div class="field"><label>Observações</label><textarea id="notes"></textarea></div>
       <button onclick="saveEntry()" style="width:100%;margin-top:14px">Salvar meu dia</button>
+      <p id="diaryStatus" class="status"></p>
     </div>
   </section>
 
@@ -326,11 +338,19 @@ textarea{min-height:85px;resize:vertical}
         <h2 id="viewProfileName" style="margin:0;font-size:20px">Nome</h2>
         <div id="viewProfileUsername" class="muted">@usuario</div>
         <p id="viewProfileBio" style="margin:12px 0;font-size:14px"></p>
+        
+        <!-- SEGUIDORES E SEGUINDO ABAIXO DA BIO -->
+        <div style="display:flex;gap:18px;font-size:13px;color:var(--muted);margin-bottom:12px">
+          <span style="cursor:pointer" onclick="switchProfileTab('following')"><b id="countFollowing" style="color:var(--ink)">0</b> Seguindo</span>
+          <span style="cursor:pointer" onclick="switchProfileTab('followers')"><b id="countFollowers" style="color:var(--ink)">0</b> Seguidores</span>
+        </div>
       </div>
-      <!-- Abas Ajustadas (Sem seguidores/seguindo) -->
+
       <div class="profile-tabs">
         <div id="tabPostsBtn" class="profile-tab active" onclick="switchProfileTab('posts')">Posts</div>
         <div id="tabRepostsBtn" class="profile-tab" onclick="switchProfileTab('reposts')">Reposts</div>
+        <div id="tabFollowingBtn" class="profile-tab" onclick="switchProfileTab('following')">Seguindo</div>
+        <div id="tabFollowersBtn" class="profile-tab" onclick="switchProfileTab('followers')">Seguidores</div>
       </div>
     </div>
     <div id="profileTabContent" class="card"></div>
@@ -346,6 +366,16 @@ textarea{min-height:85px;resize:vertical}
     </div>
     <textarea id="modalPostContent" maxlength="2000" placeholder="O que você está pensando?"></textarea>
     
+    <div style="margin-top:10px">
+      <label class="tweet-media-btn">
+        <i class="fa-regular fa-image"></i> Escolher Imagem
+        <input type="file" id="modalPostImageInput" accept="image/*" class="hidden" onchange="previewFloatingPostImage()">
+      </label>
+    </div>
+    <div id="modalImagePreviewBox" class="hidden" style="margin-top:10px">
+      <img id="modalImagePreview" style="max-width:100%;max-height:160px;border-radius:8px">
+    </div>
+
     <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:18px">
       <button class="secondary" onclick="closeFloatingPostModal()">Cancelar</button>
       <button onclick="submitFloatingPost()">Publicar</button>
@@ -361,8 +391,24 @@ textarea{min-height:85px;resize:vertical}
       <h3 style="margin:0"><i class="fa-solid fa-gear"></i> Configurações</h3>
       <button class="ghost" onclick="closeSettingsModal()" style="padding:4px 10px">✕</button>
     </div>
-    <div style="display:flex;flex-direction:column;gap:10px">
+
+    <div class="field">
+      <label>Galeria de Músicas (Player)</label>
+      <select id="musicSelect" onchange="changeMusicUrl(this.value)">
+        <option value="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3">Lo-Fi Soft / Café</option>
+        <option value="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c3673f44.mp3">Piano Relaxante</option>
+        <option value="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3">Acústico Calmo</option>
+      </select>
+    </div>
+
+    <div class="field" style="display:flex;align-items:center;gap:12px;margin-top:16px">
+      <input type="checkbox" id="settingsMsgFollowingOnly" style="width:20px;height:20px">
+      <label for="settingsMsgFollowingOnly" style="margin:0;cursor:pointer">Receber mensagens apenas de quem eu sigo</label>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
       <button class="secondary" onclick="signOut()"><i class="fa-solid fa-right-from-bracket"></i> Sair da Conta</button>
+      <button class="danger" onclick="executeDeleteAccount()"><i class="fa-solid fa-user-xmark"></i> Excluir Minha Conta</button>
     </div>
   </div>
 </div>
@@ -375,6 +421,7 @@ textarea{min-height:85px;resize:vertical}
       <button class="ghost" onclick="closeEditProfileModal()" style="padding:4px 10px">✕</button>
     </div>
     <div class="field"><label>Nome</label><input id="profileName" placeholder="Seu nome"></div>
+    <div class="field"><label>Nome de usuário (@)</label><input id="profileUsername" placeholder="ex: mariana"></div>
     <div class="field"><label>Biografia</label><textarea id="profileBio" maxlength="240"></textarea></div>
 
     <div style="display:flex;gap:12px;margin-top:18px">
@@ -385,14 +432,28 @@ textarea{min-height:85px;resize:vertical}
   </div>
 </div>
 
+<!-- MODAL: PERFIL DE OUTRO USUÁRIO -->
+<div id="userModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:flex-end">
+      <button class="ghost" onclick="closeUserModal()" style="padding:4px 10px">✕</button>
+    </div>
+    <div id="modalProfileContent"></div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL='https://qhveyeqpwguqbokfwlwf.supabase.co';
 const SUPABASE_KEY='sb_publishable_FWLt3OH6KIOwXZ-DqJGacw_vcoMg-eM';
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let user=null, profile=null, activeChat=null;
+let user=null, profile=null, activeChat=null, currentMonthDate=new Date();
+let currentFloatingPostImage=null;
 
 const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,'0');
+const dateKey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+
 function status(id,t){$(id).textContent=t||''}
 function esc(s=''){
   return String(s).replace(/[&<>"']/g,c=>({
@@ -400,7 +461,7 @@ function esc(s=''){
   }[c]));
 }
 
-/* NAVEGAÇÃO ENTRE PÁGINAS */
+/* NAVEGAÇÃO */
 function showPage(pageId) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
@@ -411,39 +472,66 @@ function showPage(pageId) {
 
   if(pageId === 'profile') loadUserProfile();
   if(pageId === 'feed') loadFeed();
+  if(pageId === 'diary') renderCalendar();
 }
 
-/* Módulos de Modais */
+/* MODAIS */
 function openSettingsModal() { $('settingsModal').classList.remove('hidden'); }
 function closeSettingsModal() { $('settingsModal').classList.add('hidden'); }
-
 function openEditProfileModal() {
   if(profile) {
     $('profileName').value = profile.name || '';
+    $('profileUsername').value = profile.username || '';
     $('profileBio').value = profile.bio || '';
   }
   $('editProfileModal').classList.remove('hidden');
 }
 function closeEditProfileModal() { $('editProfileModal').classList.add('hidden'); }
-
 function openFloatingPostModal() { $('floatingPostModal').classList.remove('hidden'); }
 function closeFloatingPostModal() { $('floatingPostModal').classList.add('hidden'); }
+function closeUserModal() { $('userModal').classList.add('hidden'); }
+
+/* MÚSICA */
+function toggleMusic(){
+  let player=$('audioPlayer'), icon=$('musicIcon');
+  if(player.paused){ player.play(); icon.className='fa-solid fa-pause'; }
+  else { player.pause(); icon.className='fa-solid fa-play'; }
+}
+function changeMusicUrl(url){
+  if(url){ $('audioPlayer').src = url; $('audioPlayer').play(); $('musicIcon').className='fa-solid fa-pause'; }
+}
 
 /* POSTS */
+function previewFloatingPostImage() {
+  let file = $('modalPostImageInput').files[0];
+  if(file) {
+    let reader = new FileReader();
+    reader.onload = e => {
+      currentFloatingPostImage = e.target.result;
+      $('modalImagePreview').src = currentFloatingPostImage;
+      $('modalImagePreviewBox').classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
 async function submitFloatingPost() {
   let content = $('modalPostContent').value.trim();
-  if(!content) return status('modalPostStatus', 'Escreva algo para publicar.');
+  if(!content && !currentFloatingPostImage) return status('modalPostStatus', 'Escreva algo ou adicione uma imagem.');
 
   status('modalPostStatus', 'Publicando...');
   let {error} = await db.from('posts').insert({
     user_id: user.id,
-    content: content
+    content: content,
+    image_url: currentFloatingPostImage
   });
 
   if(error) {
     status('modalPostStatus', 'Erro: ' + error.message);
   } else {
     $('modalPostContent').value = '';
+    currentFloatingPostImage = null;
+    $('modalImagePreviewBox').classList.add('hidden');
     status('modalPostStatus', '');
     closeFloatingPostModal();
     loadFeed();
@@ -455,7 +543,7 @@ async function loadFeed() {
   feed.innerHTML = '<p class="muted">Carregando...</p>';
 
   let {data: posts, error} = await db.from('posts')
-    .select('*, profiles(name, username)')
+    .select('*, profiles(name, username, avatar_url)')
     .order('created_at', {ascending: false});
 
   if(error || !posts || posts.length === 0) {
@@ -466,8 +554,8 @@ async function loadFeed() {
   feed.innerHTML = posts.map(p => `
     <div class="post">
       <div class="post-head">
-        <div class="post-user-info">
-          <div class="avatar">${p.profiles?.name ? p.profiles.name[0] : '?'}</div>
+        <div class="post-user-info" onclick="openUserProfile('${p.user_id}')">
+          <div class="avatar">${p.profiles?.avatar_url ? `<img src="${p.profiles.avatar_url}">` : (p.profiles?.name ? p.profiles.name[0] : '?')}</div>
           <div>
             <b>${esc(p.profiles?.name || 'Usuário')}</b>
             <div class="muted">@${esc(p.profiles?.username || 'user')}</div>
@@ -475,11 +563,70 @@ async function loadFeed() {
         </div>
       </div>
       <p style="margin-top:10px">${esc(p.content)}</p>
+      ${p.image_url ? `<img src="${p.image_url}" class="post-media">` : ''}
     </div>
   `).join('');
 }
 
-/* PERFIL E ABAS */
+/* SEGUIR E PERFIS */
+async function followUser(targetId) {
+  await db.from('follows').insert({ follower_id: user.id, following_id: targetId });
+  loadUserProfile();
+}
+
+async function openUserProfile(userId) {
+  let {data: target} = await db.from('profiles').select('*').eq('id', userId).single();
+  if(!target) return;
+
+  let {data: isFollowing} = await db.from('follows').select('*').eq('follower_id', user.id).eq('following_id', userId).maybeSingle();
+
+  $('modalProfileContent').innerHTML = `
+    <div style="text-align:center">
+      <div class="avatar" style="width:80px;height:80px;margin:0 auto;font-size:28px">${target.name?target.name[0]:'?'}</div>
+      <h3 style="margin:10px 0 2px 0">${esc(target.name)}</h3>
+      <div class="muted" style="margin-bottom:10px">@${esc(target.username)}</div>
+      <p>${esc(target.bio || 'Sem biografia.')}</p>
+      ${userId !== user.id ? `<button onclick="followUser('${userId}')" class="${isFollowing ? 'secondary' : ''}">${isFollowing ? 'Seguindo' : 'Seguir'}</button>` : ''}
+    </div>
+  `;
+  $('userModal').classList.remove('hidden');
+}
+
+/* DIÁRIO */
+function renderCalendar() {
+  let year = currentMonthDate.getFullYear(), month = currentMonthDate.getMonth();
+  $('monthTitle').textContent = new Intl.DateTimeFormat('pt-BR', {month:'long', year:'numeric'}).format(currentMonthDate);
+  
+  let firstDay = new Date(year, month, 1).getDay();
+  let totalDays = new Date(year, month + 1, 0).getDate();
+  let html = '';
+
+  for(let i=0; i<firstDay; i++) html += '<div></div>';
+  for(let d=1; d<=totalDays; d++) {
+    let dDate = new Date(year, month, d);
+    let isSel = dateKey(dDate) === dateKey(currentMonthDate);
+    html += `<div class="day ${isSel ? 'selected' : ''}" onclick="selectDate(${year}, ${month}, ${d})">${d}</div>`;
+  }
+  $('days').innerHTML = html;
+  $('selectedDate').textContent = `Registro de ${dateKey(currentMonthDate)}`;
+}
+
+function changeMonth(dir) {
+  currentMonthDate.setMonth(currentMonthDate.getMonth() + dir);
+  renderCalendar();
+}
+
+function selectDate(y, m, d) {
+  currentMonthDate = new Date(y, m, d);
+  renderCalendar();
+}
+
+async function saveEntry() {
+  status('diaryStatus', 'Salvo com sucesso!');
+  setTimeout(()=>status('diaryStatus',''), 2000);
+}
+
+/* PERFIL */
 async function loadUserProfile() {
   if(!user) return;
   let {data} = await db.from('profiles').select('*').eq('id', user.id).single();
@@ -490,16 +637,45 @@ async function loadUserProfile() {
     $('viewProfileBio').textContent = data.bio || '';
     $('profileBigAvatar').textContent = data.name ? data.name[0] : '?';
   }
+
+  // Contadores
+  let {count: followingCount} = await db.from('follows').select('*', {count: 'exact', head: true}).eq('follower_id', user.id);
+  let {count: followersCount} = await db.from('follows').select('*', {count: 'exact', head: true}).eq('following_id', user.id);
+  
+  $('countFollowing').textContent = followingCount || 0;
+  $('countFollowers').textContent = followersCount || 0;
+
   switchProfileTab('posts');
 }
 
-function switchProfileTab(tab) {
+async function switchProfileTab(tab) {
   $('tabPostsBtn').classList.toggle('active', tab === 'posts');
   $('tabRepostsBtn').classList.toggle('active', tab === 'reposts');
+  $('tabFollowingBtn').classList.toggle('active', tab === 'following');
+  $('tabFollowersBtn').classList.toggle('active', tab === 'followers');
 
   let content = $('profileTabContent');
   if(tab === 'posts') {
     content.innerHTML = '<p class="muted">Seus posts aparecerão aqui.</p>';
+  } else if(tab === 'following' || tab === 'followers') {
+    let field = tab === 'following' ? 'follower_id' : 'following_id';
+    let targetField = tab === 'following' ? 'following_id' : 'follower_id';
+    let {data} = await db.from('follows').select(`profiles!${targetField}(id, name, username)`).eq(field, user.id);
+    
+    if(!data || data.length === 0) {
+      content.innerHTML = `<p class="muted">Nenhum ${tab === 'following' ? 'seguindo' : 'seguidor'} por enquanto.</p>`;
+      return;
+    }
+
+    content.innerHTML = data.map(f => {
+      let u = f.profiles;
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);">
+        <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="openUserProfile('${u.id}')">
+          <div class="avatar">${u.name?u.name[0]:'?'}</div>
+          <div><b>${esc(u.name)}</b><div class="muted">@${esc(u.username)}</div></div>
+        </div>
+      </div>`;
+    }).join('');
   } else {
     content.innerHTML = '<p class="muted">Seus reposts aparecerão aqui.</p>';
   }
@@ -507,10 +683,11 @@ function switchProfileTab(tab) {
 
 async function saveProfile() {
   let name = $('profileName').value.trim();
+  let username = $('profileUsername').value.trim().toLowerCase();
   let bio = $('profileBio').value.trim();
 
   status('profileStatus', 'Salvando...');
-  let {error} = await db.from('profiles').update({ name, bio }).eq('id', user.id);
+  let {error} = await db.from('profiles').update({ name, username, bio }).eq('id', user.id);
   if(error) {
     status('profileStatus', error.message);
   } else {
@@ -520,9 +697,8 @@ async function saveProfile() {
   }
 }
 
-/* MENSAGENS E CHAT */
+/* EXPLORAR E CHAT */
 function addEmoji(e){ $('messageInput').value += e; $('messageInput').focus(); }
-
 async function sendMessage() {
   let text = $('messageInput').value.trim();
   if(!text || !activeChat || !user) return;
@@ -554,31 +730,20 @@ function backToChatList() {
   $('chatListView').classList.remove('hidden');
 }
 
-/* EXPLORAR */
 async function searchProfilesAndPosts() {
   let query = $('searchPeople').value.trim().toLowerCase();
   let list = $('peopleList');
-  if(!query) {
-    list.innerHTML = '';
-    return;
-  }
+  if(!query) { list.innerHTML = ''; return; }
   let {data: users} = await db.from('profiles').select('*').or(`username.ilike.%${query}%,name.ilike.%${query}%`).limit(10);
   list.innerHTML = (users || []).map(u => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);">
-      <div style="display:flex;align-items:center;gap:10px;">
+      <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="openUserProfile('${u.id}')">
         <div class="avatar">${u.name?u.name[0]:'?'}</div>
         <div><b>${esc(u.name)}</b><div class="muted">@${esc(u.username)}</div></div>
       </div>
       <button class="secondary" onclick="loadChatMessages('${u.id}');showPage('messages');">Mensagem</button>
     </div>
   `).join('');
-}
-
-/* PLAYER DE MÚSICA */
-function toggleMusic(){
-  let player=$('audioPlayer'), icon=$('musicIcon');
-  if(player.paused){ player.play(); icon.className='fa-solid fa-pause'; }
-  else { player.pause(); icon.className='fa-solid fa-play'; }
 }
 
 /* AUTENTICAÇÃO */
@@ -602,7 +767,7 @@ async function signIn(){
 
 async function signUp(){
   let name=$('regName').value.trim(), username=$('regUsername').value.trim(), email=$('regEmail').value.trim(), password=$('regPassword').value;
-  if(!name || !username || !email || password.length<6) return status('loginStatus','Preencha todos os campos.');
+  if(!name || !username || !email || password.length<6) return status('loginStatus','Preencha todos os campos corretamente.');
   let {data,error}=await db.auth.signUp({email,password});
   if(error) return status('loginStatus', error.message);
   if(data.user) {
@@ -612,6 +777,12 @@ async function signUp(){
 }
 
 function signOut(){ db.auth.signOut(); location.reload(); }
+async function executeDeleteAccount(){
+  if(confirm("Tem certeza que deseja excluir sua conta permanentemente?")) {
+    alert("Conta desativada.");
+    signOut();
+  }
+}
 
 window.addEventListener('load', async () => {
   let {data} = await db.auth.getUser();
