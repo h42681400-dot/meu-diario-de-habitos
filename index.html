@@ -1260,15 +1260,33 @@ function clearSessionNavigation(){
   });
 }
 async function signOut(){
+  const logoutButton=document.querySelector('#settingsModal button[onclick="signOut()"]');
+  if(logoutButton){logoutButton.disabled=true;logoutButton.textContent='Saindo...';}
   closeAllAppModals();
+  document.body.classList.remove('settings-open');
   if(chatInterval){clearInterval(chatInterval);chatInterval=null;}
   if(presenceTimer){clearInterval(presenceTimer);presenceTimer=null;}
   if(notificationPollTimer){clearInterval(notificationPollTimer);notificationPollTimer=null;}
   activeChat=null;inspectedProfileId=null;chatProfiles={};profile=null;entries={};
   clearSessionNavigation();
-  const {error}=await db.auth.signOut();
-  if(error){
+  try{
+    const {error}=await db.auth.signOut({scope:'local'});
+    if(error)throw error;
+    user=null;
+    closeAllAppModals();
+    const app=$('app'),login=$('loginScreen');
+    if(app)app.classList.add('hidden');
+    if(login)login.classList.remove('hidden');
+    document.querySelectorAll('.modal-overlay').forEach(modal=>{
+      modal.classList.add('hidden');
+      modal.style.display='none';
+    });
+    const settings=$('settingsModal');
+    if(settings){settings.classList.add('hidden');settings.style.display='none';}
+    if(logoutButton){logoutButton.disabled=false;logoutButton.innerHTML='<i class="fa-solid fa-right-from-bracket"></i> Sair da Conta';}
+  }catch(error){
     console.error('Erro ao sair da conta:',error);
+    if(logoutButton){logoutButton.disabled=false;logoutButton.innerHTML='<i class="fa-solid fa-right-from-bracket"></i> Sair da Conta';}
     status('loginStatus','Não foi possível sair da conta: '+error.message);
   }
 }
@@ -1318,6 +1336,11 @@ db.auth.onAuthStateChange((_event,session)=>{
     chatInterval=null;
     activeChat=null;inspectedProfileId=null;chatProfiles={};profile=null;entries={};
     closeAllAppModals();
+    document.querySelectorAll('.modal-overlay').forEach(modal=>{
+      modal.classList.add('hidden');
+      modal.style.display='none';
+    });
+    if($('settingsModal')){$('settingsModal').classList.add('hidden');$('settingsModal').style.display='none';}
     clearSessionNavigation();
     notificationCursor=null;
     return;
