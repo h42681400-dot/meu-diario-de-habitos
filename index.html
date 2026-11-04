@@ -163,6 +163,10 @@ textarea{min-height:85px;resize:vertical}
 .avatar{width:46px;height:46px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;color:var(--rose);font-weight:bold;overflow:hidden;flex:none}
 .avatar img{width:100%;height:100%;object-fit:cover}
 .post-media{width:100%;max-height:340px;border-radius:14px;object-fit:cover;margin-top:12px}
+.post-actions{display:flex;gap:18px;margin-top:14px;color:var(--muted)}
+.post-actions button{background:transparent;color:var(--muted);padding:6px 10px;font-size:13px;display:flex;align-items:center;gap:6px;margin:0}
+.post-actions button.liked{color:var(--red)}
+.post-actions button.reposted{color:var(--rose)}
 
 .messages{height:380px;overflow:auto;border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0;background:var(--bg);display:flex;flex-direction:column;gap:8px}
 .bubble{max-width:78%;padding:10px 14px;border-radius:18px;font-size:14px;word-break:break-word;line-height:1.4;box-shadow:0 1px 2px rgba(0,0,0,0.04)}
@@ -495,6 +499,7 @@ function showPage(pageId) {
   if(pageId === 'profile') loadUserProfile();
   if(pageId === 'feed') loadFeed();
   if(pageId === 'diary') renderCalendar();
+  if(pageId === 'messages') loadChatList();
 }
 
 /* MODAIS */
@@ -550,7 +555,7 @@ function changeMusicUrl(url){
   if(url){ $('audioPlayer').src = url; $('audioPlayer').play(); $('musicIcon').className='fa-solid fa-pause'; }
 }
 
-/* POSTS */
+/* POSTS & INTERAÇÕES */
 function previewFloatingPostImage() {
   let file = $('modalPostImageInput').files[0];
   if(file) {
@@ -600,7 +605,6 @@ async function loadFeed() {
     return;
   }
 
-  // Buscar perfis separadamente para garantir compatibilidade total
   let userIds = [...new Set(posts.map(p => p.user_id))];
   let {data: profilesData} = await db.from('profiles').select('*').in('id', userIds);
   let profilesMap = {};
@@ -618,25 +622,77 @@ async function loadFeed() {
               <div class="muted">@${esc(author.username || 'user')}</div>
             </div>
           </div>
+          <div>
+            ${p.user_id === user.id ? `<button class="ghost" onclick="deletePost('${p.id}')" style="padding:4px 8px;font-size:12px;color:var(--red)"><i class="fa-solid fa-trash"></i></button>` : ''}
+          </div>
         </div>
         <p style="margin-top:10px">${esc(p.content)}</p>
         ${p.image_url ? `<img src="${p.image_url}" class="post-media">` : ''}
+        <div class="post-actions">
+          <button onclick="likePost('${p.id}')"><i class="fa-regular fa-heart"></i> Curtir</button>
+          <button onclick="repostPost('${p.id}')"><i class="fa-solid fa-retweet"></i> Repostar</button>
+          <button onclick="toggleComments('${p.id}')"><i class="fa-regular fa-comment"></i> Comentar</button>
+        </div>
+        <div id="comments-${p.id}" class="comments-section hidden">
+          <div id="commentList-${p.id}"></div>
+          <div style="display:flex;gap:6px;margin-top:8px">
+            <input id="commentInput-${p.id}" placeholder="Escreva um comentário..." style="margin:0;font-size:13px;padding:8px">
+            <button onclick="addComment('${p.id}')" style="padding:8px 12px;margin:0">Enviar</button>
+          </div>
+        </div>
       </div>
     `;
   }).join('');
 }
 
-/* SEGUIR E EXPLORAR */
+async function deletePost(postId) {
+  if(confirm("Deseja excluir esta postagem?")) {
+    await db.from('posts').delete().eq('id', postId);
+    loadFeed();
+  }
+}
+
+function likePost(postId) { alert("Post curtido!"); }
+function repostPost(postId) { alert("Post repostado no seu perfil!"); }
+
+function toggleComments(postId) {
+  let box = $(`comments-${postId}`);
+  box.classList.toggle('hidden');
+  if(!box.classList.contains('hidden')) {
+    loadComments(postId);
+  }
+}
+
+async function loadComments(postId) {
+  let list = $(`commentList-${postId}`);
+  let {data} = await db.from('comments').select('*, profiles:user_id(name, username)').eq('post_id', postId).order('created_at', {ascending: true});
+  if(!data || data.length === 0) {
+    list.innerHTML = '<div class="muted" style="font-size:12px">Nenhum comentário ainda.</div>';
+    return;
+  }
+  list.innerHTML = data.map(c => `
+    <div class="comment-item"><b>@${esc(c.profiles?.username || 'user')}:</b> ${esc(c.content)}</div>
+  `).join('');
+}
+
+async function addComment(postId) {
+  let input = $(`commentInput-${postId}`);
+  let text = input.value.trim();
+  if(!text) return;
+  await db.from('comments').insert({ post_id: postId, user_id: user.id, content: text });
+  input.value = '';
+  loadComments(postId);
+}
+
+/* SEGUIR, BLOQUEAR E PERFIS */
 async function followUser(targetId) {
   await db.from('follows').insert({ follower_id: user.id, following_id: targetId });
   openUserProfile(targetId);
-  loadUserProfile();
 }
 
 async function unfollowUser(targetId) {
   await db.from('follows').delete().eq('follower_id', user.id).eq('following_id', targetId);
   openUserProfile(targetId);
-  loadUserProfile();
 }
 
 async function blockUser(targetId) {
@@ -687,6 +743,7 @@ async function openUserProfile(userId) {
       ${userId !== user.id ? `
         <div style="display:flex;gap:10px;justify-content:center;margin-top:14px">
           <button onclick="${isFollowing ? `unfollowUser('${userId}')` : `followUser('${userId}')`}" class="${isFollowing ? 'secondary' : ''}">${isFollowing ? 'Seguindo' : 'Seguir'}</button>
+          <button class="secondary" onclick="closeUserModal();loadChatMessages('${userId}');showPage('messages');">Mensagem</button>
           <button onclick="blockUser('${userId}')" class="danger">Bloquear</button>
         </div>
       ` : ''}
@@ -729,7 +786,7 @@ async function saveEntry() {
   setTimeout(()=>status('diaryStatus',''), 2000);
 }
 
-/* PERFIL E LISTA DE SEGUIDORES/SEGUINDO */
+/* PERFIL E SEGUIDORES/SEGUINDO */
 async function loadUserProfile() {
   if(!user) return;
   let {data} = await db.from('profiles').select('*').eq('id', user.id).single();
@@ -770,7 +827,17 @@ async function switchProfileTab(tab) {
 
   let content = $('profileTabContent');
   if(tab === 'posts') {
-    content.innerHTML = '<p class="muted">Seus posts aparecerão aqui.</p>';
+    let {data: userPosts} = await db.from('posts').select('*').eq('user_id', user.id).order('created_at', {ascending: false});
+    if(!userPosts || userPosts.length === 0) {
+      content.innerHTML = '<p class="muted">Você ainda não fez publicações.</p>';
+      return;
+    }
+    content.innerHTML = userPosts.map(p => `
+      <div class="post" style="border-bottom:1px solid var(--line);padding:10px 0">
+        <p>${esc(p.content)}</p>
+        ${p.image_url ? `<img src="${p.image_url}" class="post-media">` : ''}
+      </div>
+    `).join('');
   } else if(tab === 'following' || tab === 'followers') {
     let field = tab === 'following' ? 'follower_id' : 'following_id';
     let targetField = tab === 'following' ? 'following_id' : 'follower_id';
@@ -823,6 +890,30 @@ async function saveProfile() {
 
 /* MENSAGENS E EXPLORAR */
 function addEmoji(e){ $('messageInput').value += e; $('messageInput').focus(); }
+
+async function loadChatList() {
+  let list = $('chatList');
+  let {data} = await db.from('messages').select('*').or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`).order('created_at', {ascending: false});
+  
+  if(!data || data.length === 0) {
+    list.innerHTML = '<p class="muted">Nenhuma conversa recente.</p>';
+    return;
+  }
+
+  let otherIds = [...new Set(data.map(m => m.sender_id === user.id ? m.receiver_id : m.sender_id))];
+  let {data: profilesData} = await db.from('profiles').select('*').in('id', otherIds);
+  
+  list.innerHTML = (profilesData || []).map(u => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer" onclick="loadChatMessages('${u.id}')">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="avatar">${u.avatar_url ? `<img src="${u.avatar_url}">` : (u.name?u.name[0]:'?')}</div>
+        <div><b>${esc(u.name)}</b><div class="muted">@${esc(u.username)}</div></div>
+      </div>
+      <button class="secondary" style="padding:6px 12px;font-size:12px">Abrir Chat</button>
+    </div>
+  `).join('');
+}
+
 async function sendMessage() {
   let text = $('messageInput').value.trim();
   if(!text || !activeChat || !user) return;
@@ -852,6 +943,7 @@ function backToChatList() {
   activeChat = null;
   $('chatRoomView').classList.add('hidden');
   $('chatListView').classList.remove('hidden');
+  loadChatList();
 }
 
 async function searchProfilesAndPosts() {
