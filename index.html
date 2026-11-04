@@ -1469,6 +1469,12 @@ function updateUnreadBadge(id,count){
   if(!badge)return;
   const total=Number(count)||0;
   badge.textContent=total>99?'99+':String(total);
+  badge.style.setProperty('background-color','#f6b6d0','important');
+  badge.style.setProperty('background','#f6b6d0','important');
+  badge.style.setProperty('background-image','none','important');
+  badge.style.setProperty('color','#9b4969','important');
+  badge.style.setProperty('border','2px solid #fff7fa','important');
+  badge.style.setProperty('box-shadow','0 2px 8px rgba(226,145,177,.25)','important');
   badge.classList.toggle('hidden',total<=0);
 }
 async function checkUnreadBadges(){
