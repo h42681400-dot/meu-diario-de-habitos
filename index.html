@@ -159,7 +159,7 @@ textarea{min-height:85px;resize:vertical}
 .post{border-bottom:1px solid var(--line);padding:18px 0}
 .post:last-child{border-bottom:0}
 .post-head{display:flex;align-items:center;justify-content:space-between}
-.post-user-info{display:flex;align-items:center;gap:12px;cursor:pointer}
+.post-user-info{display:flex;align-items:center;gap:12px;cursor:pointer;pointer-events:auto !important;z-index:10}
 .avatar{width:46px;height:46px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;color:var(--rose);font-weight:bold;overflow:hidden;flex:none}
 .avatar img{width:100%;height:100%;object-fit:cover}
 .post-media{width:100%;max-height:340px;border-radius:14px;object-fit:cover;margin-top:12px}
@@ -167,6 +167,8 @@ textarea{min-height:85px;resize:vertical}
 .post-actions button{background:transparent;color:var(--muted);padding:6px 10px;font-size:13px;display:flex;align-items:center;gap:6px;margin:0}
 .post-actions button.liked{color:var(--red)}
 .post-actions button.reposted{color:var(--rose)}
+.comments-section{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+.comment-item{font-size:13px;margin:8px 0;padding:8px;background:var(--bg);border-radius:10px}
 
 .messages{height:380px;overflow:auto;border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0;background:var(--bg);display:flex;flex-direction:column;gap:8px}
 .bubble{max-width:78%;padding:10px 14px;border-radius:18px;font-size:14px;word-break:break-word;line-height:1.4;box-shadow:0 1px 2px rgba(0,0,0,0.04)}
@@ -552,10 +554,10 @@ function toggleMusic(){
   else { player.pause(); icon.className='fa-solid fa-play'; }
 }
 function changeMusicUrl(url){
-  if(url){ $('audioPlayer').src = url; $('audioPlayer').play(); $('musicIcon').className='fa-solid fa-pause'; }
+  if(url){ $('audioPlayer').src = url; $('audioPlayer').play(); $('musicIcon').className='fa-solid fa-play'; }
 }
 
-/* POSTS & INTERAÇÕES */
+/* POSTS & INTERAÇÕES ESTILO TWITTER */
 function previewFloatingPostImage() {
   let file = $('modalPostImageInput').files[0];
   if(file) {
@@ -629,8 +631,8 @@ async function loadFeed() {
         <p style="margin-top:10px">${esc(p.content)}</p>
         ${p.image_url ? `<img src="${p.image_url}" class="post-media">` : ''}
         <div class="post-actions">
-          <button onclick="likePost('${p.id}')"><i class="fa-regular fa-heart"></i> Curtir</button>
-          <button onclick="repostPost('${p.id}')"><i class="fa-solid fa-retweet"></i> Repostar</button>
+          <button onclick="likePost('${p.id}')" id="like-btn-${p.id}"><i class="fa-regular fa-heart"></i> <span id="like-count-${p.id}">0</span></button>
+          <button onclick="repostPost('${p.id}')" id="repost-btn-${p.id}"><i class="fa-solid fa-retweet"></i> <span id="repost-count-${p.id}">0</span></button>
           <button onclick="toggleComments('${p.id}')"><i class="fa-regular fa-comment"></i> Comentar</button>
         </div>
         <div id="comments-${p.id}" class="comments-section hidden">
@@ -652,8 +654,31 @@ async function deletePost(postId) {
   }
 }
 
-function likePost(postId) { alert("Post curtido!"); }
-function repostPost(postId) { alert("Post repostado no seu perfil!"); }
+async function likePost(postId) {
+  let btn = $(`like-btn-${postId}`);
+  let countSpan = $(`like-count-${postId}`);
+  let current = parseInt(countSpan.textContent || '0');
+  if(btn.classList.contains('liked')) {
+    btn.classList.remove('liked');
+    countSpan.textContent = Math.max(0, current - 1);
+  } else {
+    btn.classList.add('liked');
+    countSpan.textContent = current + 1;
+  }
+}
+
+async function repostPost(postId) {
+  let btn = $(`repost-btn-${postId}`);
+  let countSpan = $(`repost-count-${postId}`);
+  let current = parseInt(countSpan.textContent || '0');
+  if(btn.classList.contains('reposted')) {
+    btn.classList.remove('reposted');
+    countSpan.textContent = Math.max(0, current - 1);
+  } else {
+    btn.classList.add('reposted');
+    countSpan.textContent = current + 1;
+  }
+}
 
 function toggleComments(postId) {
   let box = $(`comments-${postId}`);
@@ -665,14 +690,20 @@ function toggleComments(postId) {
 
 async function loadComments(postId) {
   let list = $(`commentList-${postId}`);
-  let {data} = await db.from('comments').select('*, profiles:user_id(name, username)').eq('post_id', postId).order('created_at', {ascending: true});
+  let {data} = await db.from('comments').select('*').eq('post_id', postId).order('created_at', {ascending: true});
   if(!data || data.length === 0) {
     list.innerHTML = '<div class="muted" style="font-size:12px">Nenhum comentário ainda.</div>';
     return;
   }
-  list.innerHTML = data.map(c => `
-    <div class="comment-item"><b>@${esc(c.profiles?.username || 'user')}:</b> ${esc(c.content)}</div>
-  `).join('');
+  let userIds = [...new Set(data.map(c => c.user_id))];
+  let {data: profilesData} = await db.from('profiles').select('*').in('id', userIds);
+  let pMap = {};
+  if(profilesData) profilesData.forEach(p => pMap[p.id] = p);
+
+  list.innerHTML = data.map(c => {
+    let author = pMap[c.user_id] || {};
+    return `<div class="comment-item"><b>@${esc(author.username || 'user')}:</b> ${esc(c.content)}</div>`;
+  }).join('');
 }
 
 async function addComment(postId) {
@@ -733,6 +764,14 @@ async function openUserProfile(userId) {
   if(!target) return;
 
   let {data: isFollowing} = await db.from('follows').select('*').eq('follower_id', user.id).eq('following_id', userId).maybeSingle();
+  let {data: userPosts} = await db.from('posts').select('*').eq('user_id', userId).order('created_at', {ascending: false});
+
+  let postsHtml = (userPosts || []).map(p => `
+    <div class="post" style="border-bottom:1px solid var(--line);padding:10px 0">
+      <p>${esc(p.content)}</p>
+      ${p.image_url ? `<img src="${p.image_url}" class="post-media">` : ''}
+    </div>
+  `).join('') || '<p class="muted">Nenhuma publicação.</p>';
 
   $('modalProfileContent').innerHTML = `
     <div style="text-align:center">
@@ -748,6 +787,9 @@ async function openUserProfile(userId) {
         </div>
       ` : ''}
     </div>
+    <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+    <h4 style="margin:0 0 10px 0">Publicações</h4>
+    <div>${postsHtml}</div>
   `;
   $('userModal').classList.remove('hidden');
 }
@@ -786,7 +828,7 @@ async function saveEntry() {
   setTimeout(()=>status('diaryStatus',''), 2000);
 }
 
-/* PERFIL E SEGUIDORES/SEGUINDO */
+/* PERFIL E SEGUIDORES/SEGUINDO ESTILO TWITTER */
 async function loadUserProfile() {
   if(!user) return;
   let {data} = await db.from('profiles').select('*').eq('id', user.id).single();
@@ -836,6 +878,9 @@ async function switchProfileTab(tab) {
       <div class="post" style="border-bottom:1px solid var(--line);padding:10px 0">
         <p>${esc(p.content)}</p>
         ${p.image_url ? `<img src="${p.image_url}" class="post-media">` : ''}
+        <div style="text-align:right;margin-top:6px">
+          <button class="ghost" onclick="deletePost('${p.id}')" style="padding:2px 8px;font-size:11px;color:var(--red)"><i class="fa-solid fa-trash"></i> Excluir</button>
+        </div>
       </div>
     `).join('');
   } else if(tab === 'following' || tab === 'followers') {
@@ -858,6 +903,7 @@ async function switchProfileTab(tab) {
           <div class="avatar">${u.avatar_url ? `<img src="${u.avatar_url}">` : (u.name?u.name[0]:'?')}</div>
           <div><b>${esc(u.name)}</b><div class="muted">@${esc(u.username)}</div></div>
         </div>
+        <button class="secondary" onclick="openUserProfile('${u.id}')" style="padding:6px 12px;font-size:12px">Ver Perfil</button>
       </div>
     `).join('');
   } else {
