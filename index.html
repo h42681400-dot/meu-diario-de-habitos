@@ -1226,10 +1226,14 @@ async function markInboxMessagesRead(){
   const senders=[...new Set((data||[]).map(m=>m.sender_id).filter(Boolean))];
   for(const senderId of senders){
     const {error:readError}=await db.rpc('mark_messages_read',{p_sender_id:senderId});
-    if(readError)console.warn('Não foi possível marcar a conversa como lida:',readError.message);
+    if(readError){
+      console.warn('RPC de leitura indisponível; tentando atualizar as mensagens diretamente:',readError.message);
+      const {error:fallbackError}=await db.from('direct_messages').update({read_at:new Date().toISOString()}).eq('sender_id',senderId).eq('receiver_id',user.id).is('read_at',null);
+      if(fallbackError)console.warn('A leitura precisa da permissão/RPC mark_messages_read:',fallbackError.message);
+    }
   }
   $('msgBadge').classList.add('hidden');
-  checkUnreadBadges();
+  await checkUnreadBadges();
 }
 async function checkUnreadBadges(){
   if(!user)return;
@@ -1970,9 +1974,14 @@ async function loadMessages(){
 
   const unread=(data||[]).filter(m=>m.sender_id===activeChat&&m.receiver_id===user.id&&!m.read_at);
   if(unread.length){
+    const readTime=new Date().toISOString();
     const {error:readError}=await db.rpc('mark_messages_read',{p_sender_id:activeChat});
-    if(!readError){const readTime=new Date().toISOString();unread.forEach(m=>m.read_at=readTime);}
-    else console.warn('Não foi possível marcar mensagens como lidas:',readError.message);
+    if(!readError)unread.forEach(m=>m.read_at=readTime);
+    else{
+      const {error:fallbackError}=await db.from('direct_messages').update({read_at:readTime}).eq('sender_id',activeChat).eq('receiver_id',user.id).is('read_at',null);
+      if(!fallbackError)unread.forEach(m=>m.read_at=readTime);
+      else console.warn('Não foi possível marcar mensagens como lidas; confira a função mark_messages_read e a política de atualização:',fallbackError.message);
+    }
   }
   $('messageBox').innerHTML=(data||[]).map(m=>{
     const mine=m.sender_id===user.id;
