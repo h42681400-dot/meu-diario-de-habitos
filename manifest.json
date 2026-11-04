@@ -13,15 +13,15 @@
   "theme_color": "#d4a5a5",
   "icons": [
     {
-      "src": "/icons/cottontail.svg",
+      "src": "/icons/WhatsApp%20Image%202026-11-04%20at%2010.41.26.jpeg",
       "sizes": "any",
-      "type": "image/svg+xml",
+      "type": "image/jpeg",
       "purpose": "any"
     },
     {
-      "src": "/icons/cottontail.svg",
+      "src": "/icons/WhatsApp%20Image%202026-11-04%20at%2010.41.26.jpeg",
       "sizes": "any",
-      "type": "image/svg+xml",
+      "type": "image/jpeg",
       "purpose": "maskable"
     }
   ]
