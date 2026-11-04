@@ -2365,17 +2365,36 @@ async function deleteConversationForMe(){
   activeChat=null;backToChatList();
 }
 async function loadChats(){
-  const {data,error}=await db.from('direct_messages').select('*').or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`).order('created_at',{ascending:false});
-  if(error){$('chatList').innerHTML='<p class="muted">Não foi possível carregar as conversas.</p>';return;}
-  const {data:settings}=await db.from('direct_conversation_settings').select('*').eq('user_id',user.id);
+  if(!user)return;
+  const [sentResult,receivedResult]=await Promise.all([
+    db.from('direct_messages').select('*').eq('sender_id',user.id).order('created_at',{ascending:false}),
+    db.from('direct_messages').select('*').eq('receiver_id',user.id).order('created_at',{ascending:false})
+  ]);
+  const queryError=sentResult.error||receivedResult.error;
+  if(queryError){
+    $('chatList').innerHTML='<p class="muted">Não foi possível carregar as conversas: '+esc(queryError.message)+'</p>';
+    console.error('Erro ao buscar conversas:',queryError);
+    return;
+  }
+  const allMessages=[...(sentResult.data||[]),...(receivedResult.data||[])];
+  const uniqueMessages=[...new Map(allMessages.map(m=>[m.id,m])).values()]
+    .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  const {data:settings,error:settingsError}=await db.from('direct_conversation_settings').select('*').eq('user_id',user.id);
+  if(settingsError)console.warn('Configurações de conversa indisponíveis; exibindo as conversas normalmente:',settingsError.message);
   const settingsMap={};(settings||[]).forEach(x=>settingsMap[x.peer_id]=x);
-  const peers=[...new Set((data||[]).map(m=>m.sender_id===user.id?m.receiver_id:m.sender_id))].filter(id=>!settingsMap[id]?.hidden);
-  if(!peers.length){$('chatList').innerHTML='<p class="muted">Nenhuma conversa recente.</p>';return;}
-  const {data:p}=await db.from('user_profiles').select('*').in('user_id',peers);
-  chatProfiles={};(p||[]).forEach(x=>chatProfiles[x.user_id]=x);
+  const peers=[...new Set(uniqueMessages.map(m=>m.sender_id===user.id?m.receiver_id:m.sender_id))]
+    .filter(id=>id&&id!==user.id&&(!settingsMap[id]?.hidden));
+  if(!peers.length){
+    $('chatList').innerHTML='<p class="muted">Nenhuma conversa recente.</p>';
+    chatProfiles={};
+    return;
+  }
+  const {data:profiles,error:profilesError}=await db.from('user_profiles').select('*').in('user_id',peers);
+  if(profilesError)console.warn('Não foi possível carregar os perfis das conversas:',profilesError.message);
+  chatProfiles={};(profiles||[]).forEach(x=>chatProfiles[x.user_id]=x);
   $('chatList').innerHTML=peers.map(id=>{
-    const last=(data||[]).find(m=>m.sender_id===id||m.receiver_id===id);
-    const unread=settingsMap[id]?.muted?0:(data||[]).filter(m=>m.sender_id===id&&m.receiver_id===user.id&&!m.read_at).length;
+    const last=uniqueMessages.find(m=>m.sender_id===id||m.receiver_id===id);
+    const unread=settingsMap[id]?.muted?0:uniqueMessages.filter(m=>m.sender_id===id&&m.receiver_id===user.id&&!m.read_at).length;
     const online=isUserOnline(chatProfiles[id]?.last_seen_at);
     const typing=chatProfiles[id]?.typing_to===user.id&&chatProfiles[id]?.typing_at&&(Date.now()-new Date(chatProfiles[id].typing_at).getTime()<6500);
     return `<div class="chat-item iphone-chat-list-item" onclick="openChat('${id}')"><div class="chat-list-avatar-wrap"><div class="avatar">${chatProfiles[id]?.avatar_url?`<img src="${esc(chatProfiles[id].avatar_url)}">`:esc((chatProfiles[id]?.full_name||'?')[0])}</div><span class="online-dot ${online?'is-online':''}"></span></div><div class="chat-list-copy"><b>${esc(chatProfiles[id]?.full_name||'Pessoa')}</b><div class="muted">@${esc(chatProfiles[id]?.username||'')}</div><div class="chat-list-preview">${typing?'<span class="typing-label">digitando'+typingDotsMarkup()+'</span>':`${last?.sender_id===user.id?'Você: ':''}${esc(last?.content||'Comece uma conversa')}`}</div></div><span class="chat-list-state">${settingsMap[id]?.muted?'<i class="fa-solid fa-bell-slash muted"></i>':unread?`<span class="conversation-unread" style="background:#f6b6d0!important;background-color:#f6b6d0!important;background-image:none!important;color:#9b4969!important;border:2px solid #fff7fa!important;box-shadow:0 2px 8px rgba(226,145,177,.25)!important">${unread>99?'99+':unread}</span>`:online?'online':''}</span></div>`;
