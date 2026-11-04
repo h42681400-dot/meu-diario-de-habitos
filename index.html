@@ -1640,12 +1640,43 @@ async function submitFloatingPost(){
     if(currentFloatingPostImage){
       media_url=await uploadFile(currentFloatingPostImage, `post_${user.id}_${Date.now()}`);
     }
-    await db.from('posts').insert({user_id:user.id,content,media_url});
+    const {data:newPost,error:insertError}=await db.from('posts').insert({user_id:user.id,content,media_url}).select('id').single();
+    if(insertError)throw insertError;
+    await invitePostCollaborators(newPost.id,content);
     closeFloatingPostModal();
     loadFeed('all');
   } catch(err){ status('modalPostStatus',err.message); }
 }
 
+function togglePostMenu(id){document.querySelectorAll('[id^="post-menu-"]').forEach(el=>{if(el.id!=='post-menu-'+id)el.classList.add('hidden');});const menu=$('post-menu-'+id);if(menu)menu.classList.toggle('hidden');}
+async function pinPost(postId){
+  const {data:existing}=await db.from('post_pins').select('post_id').eq('user_id',user.id).eq('post_id',postId).maybeSingle();
+  if(existing){const {error}=await db.from('post_pins').delete().eq('user_id',user.id).eq('post_id',postId);if(error){alert(error.message);return;}}
+  else{const {count}=await db.from('post_pins').select('*',{count:'exact',head:true}).eq('user_id',user.id);if((count||0)>=3){alert('Você pode fixar no máximo 3 publicações no perfil.');return;}const {error}=await db.from('post_pins').insert({user_id:user.id,post_id:postId});if(error){alert('Não foi possível fixar: '+error.message);return;}}
+  await loadFeed('all');if(!$('profile').classList.contains('hidden'))await loadProfileDataTab('posts');if(inspectedProfileId)await inspectProfile(inspectedProfileId);
+}
+async function sharePostByMessage(postId){
+  const handle=(prompt('Digite o @usuário para quem deseja enviar esta publicação:')||'').trim().replace(/^@/,'');if(!handle)return;
+  const {data:person}=await db.from('user_profiles').select('user_id,username').ilike('username',handle).maybeSingle();if(!person){alert('Não encontrei esse usuário. Confira o @ e tente novamente.');return;}if(person.user_id===user.id){alert('Escolha outra pessoa para compartilhar.');return;}
+  const {data:post}=await db.from('posts').select('content').eq('id',postId).maybeSingle();if(!post){alert('Publicação não encontrada.');return;}
+  const {error}=await db.from('direct_messages').insert({sender_id:user.id,receiver_id:person.user_id,content:'📎 Compartilhou uma publicação: '+(post.content||'Publicação com imagem').slice(0,160),shared_post_id:postId});
+  if(error){alert('Não foi possível compartilhar. Confira a coluna shared_post_id no Supabase.');console.error(error);return;}
+  showToast('Publicação enviada','Compartilhada por mensagem com @'+person.username+'.');
+}
+async function invitePostCollaborators(postId,content){
+  const handles=[...new Set((content.match(/@[a-zA-Z0-9_.]+/g)||[]).map(x=>x.slice(1).toLowerCase()))];
+  for(const handle of handles){const {data:person}=await db.from('user_profiles').select('user_id,username').ilike('username',handle).maybeSingle();if(!person||person.user_id===user.id)continue;
+    const {error}=await db.from('post_collaborators').insert({post_id:postId,inviter_id:user.id,invitee_id:person.user_id});if(error){console.warn('Convite não enviado para @'+handle,error.message);continue;}
+    await db.from('notifications').insert({user_id:person.user_id,actor_id:user.id,type:'post_collaboration',post_id:postId});
+  }
+}
+async function respondToCollaboration(postId,accept,notificationId){
+  const {error}=await db.from('post_collaborators').update({status:accept?'accepted':'rejected'}).eq('post_id',postId).eq('invitee_id',user.id).eq('status','pending');
+  if(error){alert('Não foi possível responder ao convite: '+error.message);return;}
+  await db.from('notifications').update({read:true}).eq('id',notificationId).eq('user_id',user.id);
+  alert(accept?'Convite aceito! A publicação aparecerá no seu perfil.':'Convite recusado.');
+  await loadNotifications();await loadProfileDataTab('posts');
+}
 function openDeleteConfirmModal(postId){
   postToDeleteId = postId;
   $('deleteConfirmModal').classList.remove('hidden');
@@ -1883,7 +1914,7 @@ function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false,
           <div class="avatar">${avatarHtml}</div>
           <div><b>${name}</b><div class="muted">${handle} · ${new Date(p.created_at).toLocaleDateString('pt-BR')}</div></div>
         </div>
-        <div>${isMine?`<button class="ghost" onclick="openDeleteConfirmModal('${p.id}')" style="color:var(--red);padding:6px 12px;font-size:12px"><i class="fa-solid fa-trash"></i></button>`:`<button class="ghost" onclick="openReportModal('${p.id}')" style="color:var(--muted);padding:6px 12px;font-size:12px"><i class="fa-solid fa-triangle-exclamation"></i></button>`}</div>
+        <div style="position:relative"><button class="ghost" onclick="togglePostMenu('${p.id}')" style="padding:6px 10px;font-size:18px">⋯</button><div id="post-menu-${p.id}" class="message-options-menu hidden" style="position:absolute;right:0;top:30px;z-index:25;background:var(--card,#fff);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:175px;box-shadow:0 5px 18px #0002">${isMine?`<button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="pinPost('${p.id}')"><i class="fa-solid fa-thumbtack"></i> Fixar/desafixar no perfil</button><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0;color:var(--red)" onclick="openDeleteConfirmModal('${p.id}')"><i class="fa-solid fa-trash"></i> Excluir publicação</button>`:`<button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="sharePostByMessage('${p.id}')"><i class="fa-solid fa-paper-plane"></i> Compartilhar por mensagem</button><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="openReportModal('${p.id}')"><i class="fa-solid fa-triangle-exclamation"></i> Denunciar</button>`}</div></div>
       </div>
       <p style="margin:12px 0;line-height:1.4">${esc(p.content).replace(/\n/g,'<br>')}</p>
       ${p.media_url?`<img src="${esc(p.media_url)}" class="post-media" loading="lazy" decoding="async">`:''}
@@ -1892,6 +1923,7 @@ function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false,
           <button class="post-heart-button post-count-button ${isLiked?'liked':''}" onclick="toggleLike('${p.id}',${isLiked},'${p.user_id}')" aria-label="Curtir ou retirar curtida"><i class="${isLiked?'fa-solid':'fa-regular'} fa-heart"></i> <b>${likeCount}</b></button>
           <button class="post-count-button ${isReposted?'reposted':''}" onclick="handleRepostClick('${p.id}',${isReposted},'${p.user_id}')" aria-label="Repostar ou desfazer repost"><i class="fa-solid fa-retweet"></i> <b>${repostCount}</b> <span>${isReposted?'Repostado':'Repostar'}</span></button>
           <button onclick="toggleCommentsSection('${p.id}')"><i class="fa-regular fa-comment"></i> <b>${commentCount}</b> comentários</button>
+          <button onclick="sharePostByMessage('${p.id}')" title="Compartilhar por mensagem"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
         <div id="comments-box-${p.id}" class="comments-section hidden">
           <div class="comments-section-heading"><b>Comentários</b><button class="comments-close" onclick="closeCommentsSection('${p.id}')" aria-label="Fechar comentários"><i class="fa-solid fa-xmark"></i></button></div>
