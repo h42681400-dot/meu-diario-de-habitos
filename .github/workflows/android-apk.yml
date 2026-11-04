@@ -8,6 +8,7 @@ on:
       - 'package.json'
       - 'capacitor.config.json'
       - 'www/**'
+      - 'icons/**'
       - '.github/workflows/android-apk.yml'
 
 permissions:
@@ -43,6 +44,12 @@ jobs:
 
       - name: Generate Android project
         run: npx cap add android
+
+      - name: Generate Cottontail app icon
+        run: |
+          mkdir -p assets
+          node -e "require('sharp')('icons/cottontail.svg').resize(1024,1024).png().toFile('assets/icon.png')"
+          npx capacitor-assets generate --android
 
       - name: Sync Capacitor
         run: npx cap sync android
