@@ -716,15 +716,16 @@ body.theme-dark #messageBox .bubble.other{background:#303036;color:#f7eff2;borde
 
 
 /* Contadores numéricos de mensagens e notificações não lidas */
-.nav .badge-red{
-  display:inline-flex;align-items:center;justify-content:center;
+.nav button .badge-red{
+  display:inline-flex!important;align-items:center;justify-content:center;
   width:auto;min-width:18px;height:18px;padding:0 5px;
   border:2px solid var(--card-bg);border-radius:999px;
   background:#e53945;color:#fff;font-size:10px;line-height:1;
   font-weight:800;font-variant-numeric:tabular-nums;
-  top:0;right:calc(50% - 24px);z-index:2;
+  position:absolute;top:0;right:2px;z-index:5;
   box-shadow:0 1px 4px rgba(0,0,0,.18);
 }
+.nav button .badge-red.hidden{display:none!important}
 @media(min-width:768px){.nav .badge-red{top:0;right:calc(50% - 25px)}}
 </style></head>
 <body>
@@ -1435,16 +1436,22 @@ async function checkUnreadBadges(){
   if(!user)return;
   const notificationsOpen=$('notifications')?.classList.contains('active');
   const messagesOpen=$('messages')?.classList.contains('active');
-  if(notificationsOpen)updateUnreadBadge('notifBadge',0);
-  else{
-    const {count:notifCount,error}=await db.from('notifications').select('*',{count:'exact',head:true}).eq('user_id',user.id).eq('read',false);
-    if(!error)updateUnreadBadge('notifBadge',notifCount);
-  }
-  if(messagesOpen)updateUnreadBadge('msgBadge',0);
-  else{
-    const {count:msgCount,error}=await db.from('direct_messages').select('*',{count:'exact',head:true}).eq('receiver_id',user.id).is('read_at',null);
-    if(!error)updateUnreadBadge('msgBadge',msgCount);
-  }
+  try{
+    if(notificationsOpen)updateUnreadBadge('notifBadge',0);
+    else{
+      const {data,error}=await db.from('notifications').select('id').eq('user_id',user.id).eq('read',false);
+      if(error)throw error;
+      updateUnreadBadge('notifBadge',(data||[]).length);
+    }
+  }catch(error){console.warn('Erro ao contar notificações não lidas:',error.message);}
+  try{
+    if(messagesOpen)updateUnreadBadge('msgBadge',0);
+    else{
+      const {data,error}=await db.from('direct_messages').select('id').eq('receiver_id',user.id).is('read_at',null);
+      if(error)throw error;
+      updateUnreadBadge('msgBadge',(data||[]).length);
+    }
+  }catch(error){console.warn('Erro ao contar mensagens não lidas:',error.message);}
 }
 
 /* CALENDÁRIO */
