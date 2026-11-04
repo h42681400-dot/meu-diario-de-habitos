@@ -1690,21 +1690,35 @@ function togglePostMenu(id,button){
   if(menu)menu.classList.toggle('hidden');
 }
 async function pinPost(postId){
+  if(!user||!postId){showToast('Não foi possível fixar','Entre na sua conta e tente novamente.');return;}
   try{
-    const {data:existing,error:checkError}=await db.from('post_pins').select('post_id').eq('user_id',user.id).eq('post_id',postId).maybeSingle();
+    const {data:existing,error:checkError}=await db.from('post_pins')
+      .select('post_id').eq('user_id',user.id).eq('post_id',postId).maybeSingle();
     if(checkError)throw checkError;
     if(existing){
-      const {error}=await db.from('post_pins').delete().eq('user_id',user.id).eq('post_id',postId);if(error)throw error;
+      const {data:removed,error}=await db.from('post_pins').delete()
+        .eq('user_id',user.id).eq('post_id',postId).select('post_id');
+      if(error)throw error;
+      if(!removed?.length)throw new Error('O Supabase não confirmou que a publicação foi desafixada. Verifique a política de exclusão da tabela post_pins.');
       showToast('Publicação desafixada','Ela não ficará mais no topo do seu perfil. ✨');
     }else{
-      const {count,error:countError}=await db.from('post_pins').select('*',{count:'exact',head:true}).eq('user_id',user.id);
+      const {count,error:countError}=await db.from('post_pins')
+        .select('post_id',{count:'exact',head:true}).eq('user_id',user.id);
       if(countError)throw countError;
       if((count||0)>=3){showToast('Limite de fixações','Você pode manter até 3 publicações fixadas no perfil.');return;}
-      const {error}=await db.from('post_pins').insert({user_id:user.id,post_id:postId});if(error)throw error;
+      const {data:created,error}=await db.from('post_pins')
+        .insert({user_id:user.id,post_id:postId}).select('post_id').single();
+      if(error)throw error;
+      if(!created?.post_id)throw new Error('O Supabase não confirmou a fixação. Verifique as permissões da tabela post_pins.');
       showToast('Publicação fixada!','Ela ficará no topo do seu perfil. 📌');
     }
-    await loadFeed('all');if($('profile')?.classList.contains('active'))await loadProfileDataTab('posts');if(inspectedProfileId)await inspectProfile(inspectedProfileId);
-  }catch(error){console.error('Erro ao fixar publicação:',error);showToast('Não foi possível fixar',error.message||'Confira a tabela post_pins e suas permissões no Supabase.');}
+    await loadFeed('all');
+    if($('profile')?.classList.contains('active'))await loadProfileDataTab('posts');
+    if(inspectedProfileId)await inspectProfile(inspectedProfileId);
+  }catch(error){
+    console.error('Erro ao fixar publicação:',error);
+    showToast('Não foi possível fixar',error.message||'Verifique se a tabela post_pins existe e permite alterações pelo usuário.');
+  }
 }
 async function chooseShareRecipient(id){
   if(!id)return;
@@ -2489,8 +2503,11 @@ async function deleteConversationForMe(){
   if(!ok||activeChat!==peerId)return;
   try{
     // UPSERT cobre tanto a primeira exclusão quanto uma configuração já existente.
-    const {error}=await db.from('direct_conversation_settings').upsert({user_id:user.id,peer_id:peerId,hidden:true,updated_at:new Date().toISOString()},{onConflict:'user_id,peer_id'});
+    const {data:saved,error}=await db.from('direct_conversation_settings')
+      .upsert({user_id:user.id,peer_id:peerId,muted:false,hidden:true},{onConflict:'user_id,peer_id'})
+      .select('peer_id,hidden').single();
     if(error)throw error;
+    if(!saved?.hidden)throw new Error('O Supabase não confirmou a exclusão. Verifique as permissões de INSERT e UPDATE da tabela direct_conversation_settings.');
     const {data:check,error:checkError}=await db.from('direct_conversation_settings').select('hidden').eq('user_id',user.id).eq('peer_id',peerId).maybeSingle();
     if(checkError)throw checkError;
     if(!check?.hidden)throw new Error('O Supabase não confirmou a exclusão da conversa. Confira as permissões da tabela direct_conversation_settings.');
