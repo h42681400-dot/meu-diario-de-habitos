@@ -1254,6 +1254,7 @@ db.auth.onAuthStateChange((_event,session)=>{
       let savedPage='feed';try{savedPage=localStorage.getItem('cottontailActivePage')||'feed';}catch(e){}
       const validPages=['feed','diary','explore','messages','notifications','profile'];
       showPage(validPages.includes(savedPage)?savedPage:'feed');
+      if(savedPage==='messages'){let savedChat=null;try{savedChat=localStorage.getItem('cottontailActiveChat');}catch(e){}if(savedChat)await openChat(savedChat);}
       showToast('Bem-vinda de volta!','Seu Cottontail está prontinho para você. 🐰',{type:'welcome'});
     }catch(err){
       console.error('Erro ao iniciar o Cottontail:',err);
@@ -2115,6 +2116,7 @@ async function openChat(id, username=''){
   showPage('messages');
   $('msgBadge').classList.add('hidden');
   activeChat=id;
+  try{localStorage.setItem('cottontailActiveChat',id);}catch(e){}
   status('messageStatus','Abrindo conversa...');
 
   let p=chatProfiles[id];
@@ -2154,6 +2156,7 @@ async function openChat(id, username=''){
 function backToChatList(){
   if(chatInterval){ clearInterval(chatInterval); chatInterval=null; }
   activeChat=null;
+  try{localStorage.removeItem('cottontailActiveChat');}catch(e){}
   $('chatRoomView').classList.add('hidden');
   $('chatListView').classList.remove('hidden');
   loadChats();
