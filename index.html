@@ -510,6 +510,22 @@ button:active{
   font-size:10px;
   background:linear-gradient(transparent,rgba(0,0,0,.6));
 }
+
+/* NOTIFICAÇÕES INTERATIVAS */
+.notif-item{display:flex;align-items:center;gap:12px;padding:14px 10px;border-bottom:1px solid var(--line);border-radius:12px;cursor:pointer;transition:background .2s}
+.notif-item:hover{background:var(--bg)}
+.notif-item.unread{background:rgba(212,165,165,.12)}
+.notif-item .icon{width:42px;height:42px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--rose);background:var(--bg);font-size:17px;overflow:hidden}
+.notif-content{flex:1;min-width:0}
+.notif-time{font-size:11px;color:var(--muted);margin-top:4px}
+.toast-container{position:fixed;top:18px;right:18px;z-index:5000;display:flex;flex-direction:column;gap:10px;width:min(360px,calc(100vw - 28px));pointer-events:none}
+.app-toast{display:flex;align-items:flex-start;gap:11px;padding:14px;background:var(--card-bg);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.16);pointer-events:auto;animation:toastIn .22s ease-out;cursor:pointer}
+.app-toast-icon{width:38px;height:38px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;background:var(--rose)}
+.app-toast-body{flex:1;min-width:0;font-size:13px;line-height:1.4}
+.app-toast-body b{display:block;margin-bottom:3px;font-size:14px}
+.app-toast-close{background:transparent!important;color:var(--muted)!important;padding:0 4px!important;font-size:18px;line-height:1}
+@keyframes toastIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:600px){.toast-container{top:10px;right:10px;width:calc(100vw - 20px)}}
 </style></head>
 <body>
 
@@ -596,6 +612,7 @@ button:active{
     </button>
     <button data-page="profile" onclick="showPage('profile')"><i class="fa-solid fa-user"></i><span>Perfil</span></button>
   </nav>
+  <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="false"></div>
 
   <!-- FEED -->
   <section id="feed" class="page active">
@@ -917,6 +934,7 @@ const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let user=null, selected=new Date(), entries={}, profile=null, activeChat=null, chatProfiles={};
 let currentFloatingPostImage=null, editAvatarFile=null, editBannerFile=null, postToDeleteId=null, postToReportId=null;
 let chatInterval=null;
+let notificationPollTimer=null, notificationCursor=null;
 
 const FORBIDDEN_WORDS = ['gore', 'mutilacao', 'suicidio', 'sangue', 'morte', 'estupro', 'assidio', 'mutilação', 'suicídio'];
 
@@ -1063,18 +1081,39 @@ async function executeDeleteAccount(){
   }
 }
 
-db.auth.onAuthStateChange(async(_event,session)=>{
-  user=session?.user||null;
+let initializedUserId=null;
+
+db.auth.onAuthStateChange((_event,session)=>{
+  const nextUser=session?.user||null;
+  user=nextUser;
   $('loginScreen').classList.toggle('hidden',!!user);
   $('app').classList.toggle('hidden',!user);
-  if(user){
-    await ensureProfile();
-    await loadMonth();
-    await loadProfile();
-    await loadFeed('all');
-    await loadChats();
-    await checkUnreadBadges();
+
+  if(!user){
+    initializedUserId=null;
+    if(notificationPollTimer) clearInterval(notificationPollTimer);
+    notificationPollTimer=null;
+    notificationCursor=null;
+    return;
   }
+  if(initializedUserId===user.id) return;
+  initializedUserId=user.id;
+
+  setTimeout(async()=>{
+    if(!user || user.id!==nextUser.id) return;
+    try{
+      await ensureProfile();
+      await loadMonth();
+      await loadProfile();
+      await loadFeed('all');
+      await loadChats();
+      await checkUnreadBadges();
+      await startNotificationPolling();
+    }catch(err){
+      console.error('Erro ao iniciar o Cottontail:',err);
+      status('loginStatus','Entrou, mas houve um erro ao carregar o aplicativo. Atualize a página.');
+    }
+  },0);
 });
 
 async function ensureProfile(){
@@ -1441,7 +1480,7 @@ function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false,
   let isMine=p.user_id===user.id;
 
   return `
-    <article class="post">
+    <article class="post" id="post-${p.id}">
       <div class="post-head">
         <div class="post-user-info" onclick="inspectProfile('${p.user_id}')">
           <div class="avatar">${avatarHtml}</div>
@@ -1851,6 +1890,13 @@ async function sendMessage(){
 
     if(error)throw error;
 
+    const {error:notifError}=await db.from('notifications').insert({
+      user_id:activeChat,
+      actor_id:user.id,
+      type:'message'
+    });
+    if(notifError) console.warn('Mensagem enviada, mas a notificação não foi registrada:',notifError.message);
+
     input.value='';
     status('messageStatus','');
 
@@ -1866,37 +1912,130 @@ async function sendMessage(){
 }
 
 /* NOTIFICAÇÕES */
-async function loadNotifications(){
-  $('notifBadge').classList.add('hidden');
-  await db.from('notifications').update({read:true}).eq('user_id',user.id);
+function notificationDescription(type){
+  if(type==='like') return 'curtiu sua publicação. 🤍';
+  if(type==='repost') return 'repostou sua publicação. 🔁';
+  if(type==='follow') return 'começou a seguir você. ✨';
+  if(type==='comment') return 'comentou na sua publicação. 💬';
+  if(type==='message') return 'enviou uma mensagem. 💌';
+  return 'interagiu com você.';
+}
+function notificationIcon(type){
+  if(type==='like') return 'fa-heart';
+  if(type==='repost') return 'fa-retweet';
+  if(type==='follow') return 'fa-user-plus';
+  if(type==='comment') return 'fa-comment';
+  if(type==='message') return 'fa-paper-plane';
+  return 'fa-bell';
+}
+async function openNotification(notificationId,actorId,type,postId){
+  await db.from('notifications').update({read:true}).eq('id',notificationId).eq('user_id',user.id);
   checkUnreadBadges();
-
-  let {data}=await db.from('notifications').select('*').eq('user_id',user.id).order('created_at',{ascending:false}).limit(30);
-  if(!data || !data.length){ $('notifList').innerHTML='<p class="muted">Nenhuma notificação por enquanto.</p>'; return; }
-  
-  let actorIds=[...new Set(data.map(n=>n.actor_id))];
-  let {data:actors}=await db.from('user_profiles').select('*').in('user_id',actorIds);
-  let actorMap={}; (actors||[]).forEach(a=>actorMap[a.user_id]=a);
-
+  if(type==='follow'){if(actorId) await inspectProfile(actorId);return;}
+  if(type==='message'){if(actorId) await openChat(actorId);return;}
+  if(postId){
+    showPage('feed');
+    await loadFeed('all');
+    setTimeout(()=>{
+      const post=$('post-'+postId);
+      if(post) post.scrollIntoView({behavior:'smooth',block:'center'});
+    },120);
+    return;
+  }
+  if(actorId) await inspectProfile(actorId);
+}
+async function loadNotifications(){
+  const {data,error}=await db.from('notifications').select('*')
+    .eq('user_id',user.id).order('created_at',{ascending:false}).limit(30);
+  if(error){
+    $('notifList').innerHTML='<p class="muted">Não foi possível carregar as notificações: '+esc(error.message)+'</p>';
+    return;
+  }
+  checkUnreadBadges();
+  if(!data || !data.length){
+    $('notifList').innerHTML='<p class="muted">Nenhuma notificação por enquanto.</p>';
+    return;
+  }
+  const actorIds=[...new Set(data.map(n=>n.actor_id).filter(Boolean))];
+  let actorMap={};
+  if(actorIds.length){
+    const {data:actors}=await db.from('user_profiles').select('*').in('user_id',actorIds);
+    (actors||[]).forEach(a=>actorMap[a.user_id]=a);
+  }
   $('notifList').innerHTML=data.map(n=>{
-    let actor=actorMap[n.actor_id]||{};
-    let name=esc(actor.full_name||'Alguém');
-    let text='';
-    if(n.type==='like') text='curtiu sua publicação. 🤍';
-    if(n.type==='repost') text='repostou sua publicação. 🔁';
-    if(n.type==='follow') text='começou a seguir você. ✨';
-    if(n.type==='comment') text='comentou na sua publicação. 💬';
-    
+    const actor=actorMap[n.actor_id]||{};
+    const name=esc(actor.full_name||actor.username||'Alguém');
+    const text=notificationDescription(n.type);
+    const date=new Date(n.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    const unread=!n.read;
+    const avatar=actor.avatar_url
+      ? '<img src="'+esc(actor.avatar_url)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'
+      : '<i class="fa-solid '+notificationIcon(n.type)+'"></i>';
     return `
-      <div class="notif-item">
-        <div class="icon"><i class="fa-solid fa-bell"></i></div>
-        <div>
-          <b>${name}</b> ${text}
-          <div class="muted" style="font-size:11px;margin-top:2px">${new Date(n.created_at).toLocaleDateString('pt-BR')}</div>
+      <div class="notif-item ${unread?'unread':''}" role="button" tabindex="0"
+        onclick="openNotification('${n.id}','${n.actor_id||''}','${n.type||''}','${n.post_id||''}')"
+        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openNotification('${n.id}','${n.actor_id||''}','${n.type||''}','${n.post_id||''}')}">
+        <div class="icon">${avatar}</div>
+        <div class="notif-content">
+          <div><b>${name}</b> ${text}</div>
+          <div class="notif-time">${date}</div>
+          ${unread?'<div class="muted" style="font-size:10px;margin-top:3px">Nova</div>':''}
         </div>
+        <i class="fa-solid fa-chevron-right muted" style="font-size:12px"></i>
       </div>
     `;
   }).join('');
+}
+function showToast(title,message,notification){
+  const container=$('toastContainer');
+  if(!container) return;
+  const toast=document.createElement('div');
+  toast.className='app-toast';
+  const icon=document.createElement('div');
+  icon.className='app-toast-icon';
+  icon.innerHTML='<i class="fa-solid '+notificationIcon(notification.type)+'"></i>';
+  const body=document.createElement('div');
+  body.className='app-toast-body';
+  const heading=document.createElement('b');
+  heading.textContent=title;
+  const description=document.createElement('span');
+  description.textContent=message;
+  body.append(heading,description);
+  const close=document.createElement('button');
+  close.className='app-toast-close';
+  close.type='button';
+  close.setAttribute('aria-label','Fechar aviso');
+  close.textContent='×';
+  close.onclick=(event)=>{event.stopPropagation();toast.remove();};
+  toast.append(icon,body,close);
+  toast.onclick=()=>openNotification(notification.id,notification.actor_id,notification.type,notification.post_id);
+  container.appendChild(toast);
+  setTimeout(()=>{if(toast.isConnected)toast.remove();},6500);
+}
+async function startNotificationPolling(){
+  if(notificationPollTimer) clearInterval(notificationPollTimer);
+  notificationCursor=new Date().toISOString();
+  notificationPollTimer=setInterval(checkNewNotifications,6000);
+}
+async function checkNewNotifications(){
+  if(!user || !notificationCursor) return;
+  const {data,error}=await db.from('notifications').select('*')
+    .eq('user_id',user.id).gt('created_at',notificationCursor)
+    .order('created_at',{ascending:true}).limit(50);
+  if(error){console.warn('Não foi possível verificar novas notificações:',error.message);return;}
+  if(!data || !data.length) return;
+  notificationCursor=data[data.length-1].created_at;
+  const actorIds=[...new Set(data.map(n=>n.actor_id).filter(Boolean))];
+  let actorMap={};
+  if(actorIds.length){
+    const {data:actors}=await db.from('user_profiles').select('*').in('user_id',actorIds);
+    (actors||[]).forEach(a=>actorMap[a.user_id]=a);
+  }
+  for(const n of data){
+    const actor=actorMap[n.actor_id]||{};
+    showToast(actor.full_name||actor.username||'Alguém',notificationDescription(n.type),n);
+  }
+  if($('notifications').classList.contains('active')) await loadNotifications();
 }
 </script>
 </body>
