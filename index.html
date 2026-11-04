@@ -2440,10 +2440,28 @@ async function loadMessages(){
     const mine=m.sender_id===user.id;
     const time=new Date(m.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     const receipt=mine?(m.read_at?'<span class="message-receipt read">✓✓ Lida</span>':'<span class="message-receipt">✓ Enviada</span>'):'';
-    return `<div class="bubble ${mine?'mine':'other'}">${esc(m.content)}<div class="bubble-time">${time} ${receipt}</div></div>`;
+    return `<div class="bubble ${mine?'mine':'other'}" style="position:relative;padding-right:30px"><button class="message-options-btn" title="Opções da mensagem" onclick="toggleMessageMenu('${m.id}')" style="position:absolute;right:5px;top:4px;border:0;background:transparent;color:inherit;opacity:.65;padding:2px 5px;cursor:pointer">⋯</button><div>${esc(m.content)}</div><div class="bubble-time">${time} ${receipt}</div><div id="message-menu-${m.id}" class="message-options-menu hidden" style="position:absolute;right:5px;top:25px;z-index:20;background:var(--card,#fff);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:6px;box-shadow:0 5px 18px #0002;min-width:155px"><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="deleteMessageForMe('${m.id}')">Apagar para mim</button>${mine?`<button class="danger" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="deleteMessageForEveryone('${m.id}')">Apagar para todos</button>`:''}</div></div>`;
   }).join('');
   $('messageBox').scrollTop=$('messageBox').scrollHeight;
   checkUnreadBadges();
+}
+
+function toggleMessageMenu(id){
+  document.querySelectorAll('.message-options-menu').forEach(el=>{if(el.id!=='message-menu-'+id)el.classList.add('hidden');});
+  const menu=$('message-menu-'+id);if(menu)menu.classList.toggle('hidden');
+}
+async function deleteMessageForMe(messageId){
+  if(!confirm('Apagar esta mensagem somente para você?'))return;
+  const {error}=await db.rpc('hide_direct_message_for_me',{p_message_id:messageId});
+  if(error){alert('Não foi possível apagar para você. Confira se executou o SQL de mensagens.');console.error(error);return;}
+  await loadMessages();
+}
+async function deleteMessageForEveryone(messageId){
+  if(!confirm('Apagar esta mensagem para você e para a outra pessoa?'))return;
+  const {error}=await db.rpc('delete_direct_message_for_everyone',{p_message_id:messageId});
+  if(error){alert('Não foi possível apagar para todos. Confira se executou o SQL de mensagens.');console.error(error);return;}
+  await loadMessages();
+  await loadChats();
 }
 
 async function sendMessage(){
