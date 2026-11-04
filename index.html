@@ -139,7 +139,6 @@ textarea{min-height:85px;resize:vertical}
 }
 .nav button span{font-size:10px;font-weight:500}
 .nav button.active{color:var(--rose);background:rgba(212,165,165,0.1)}
-.badge-red{background:var(--red);color:white;border-radius:50px;width:10px;height:10px;position:absolute;top:6px;right:16px}
 
 .page{display:none;opacity:0;transition:opacity 0.3s ease-in-out}
 .page.active{display:block;opacity:1}
@@ -185,6 +184,8 @@ textarea{min-height:85px;resize:vertical}
 .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px}
 .modal-box{background:var(--card-bg);width:100%;max-width:480px;border-radius:20px;padding:24px;max-height:85vh;overflow:auto}
 .tweet-media-btn{background:var(--line);color:var(--ink);padding:10px 14px;border-radius:12px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.crop-preview-box{width:100%;background:#000;border-radius:12px;overflow:hidden;margin:12px 0;position:relative;display:flex;align-items:center;justify-content:center}
+.crop-preview-box img{max-width:100%;max-height:160px;object-fit:cover}
 </style></head>
 <body>
 
@@ -339,7 +340,6 @@ textarea{min-height:85px;resize:vertical}
         <div id="viewProfileUsername" class="muted">@usuario</div>
         <p id="viewProfileBio" style="margin:12px 0;font-size:14px"></p>
         
-        <!-- SEGUIDORES E SEGUINDO ABAIXO DA BIO -->
         <div style="display:flex;gap:18px;font-size:13px;color:var(--muted);margin-bottom:12px">
           <span style="cursor:pointer" onclick="switchProfileTab('following')"><b id="countFollowing" style="color:var(--ink)">0</b> Seguindo</span>
           <span style="cursor:pointer" onclick="switchProfileTab('followers')"><b id="countFollowers" style="color:var(--ink)">0</b> Seguidores</span>
@@ -401,9 +401,9 @@ textarea{min-height:85px;resize:vertical}
       </select>
     </div>
 
-    <div class="field" style="display:flex;align-items:center;gap:12px;margin-top:16px">
-      <input type="checkbox" id="settingsMsgFollowingOnly" style="width:20px;height:20px">
-      <label for="settingsMsgFollowingOnly" style="margin:0;cursor:pointer">Receber mensagens apenas de quem eu sigo</label>
+    <div style="margin:16px 0">
+      <h4 style="margin:0 0 8px 0">Usuários Bloqueados</h4>
+      <div id="blockedUsersList"><p class="muted">Carregando bloqueios...</p></div>
     </div>
 
     <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
@@ -423,6 +423,28 @@ textarea{min-height:85px;resize:vertical}
     <div class="field"><label>Nome</label><input id="profileName" placeholder="Seu nome"></div>
     <div class="field"><label>Nome de usuário (@)</label><input id="profileUsername" placeholder="ex: mariana"></div>
     <div class="field"><label>Biografia</label><textarea id="profileBio" maxlength="240"></textarea></div>
+
+    <div class="field">
+      <label>Foto de Perfil</label>
+      <label class="tweet-media-btn" style="width:100%;justify-content:center">
+        <i class="fa-regular fa-image"></i> Escolher Foto
+        <input type="file" id="avatarFileInput" accept="image/*" class="hidden" onchange="previewEditImage(this, 'avatar')">
+      </label>
+      <div id="avatarCropBox" class="crop-preview-box hidden" style="border-radius:50%;width:70px;height:70px;margin:10px auto">
+        <img id="avatarCropImg">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Foto de Capa</label>
+      <label class="tweet-media-btn" style="width:100%;justify-content:center">
+        <i class="fa-regular fa-image"></i> Escolher Capa
+        <input type="file" id="bannerFileInput" accept="image/*" class="hidden" onchange="previewEditImage(this, 'banner')">
+      </label>
+      <div id="bannerCropBox" class="crop-preview-box hidden" style="height:100px;margin:10px 0">
+        <img id="bannerCropImg" style="height:100%;width:100%;object-fit:cover">
+      </div>
+    </div>
 
     <div style="display:flex;gap:12px;margin-top:18px">
       <button class="secondary" onclick="closeEditProfileModal()" style="flex:1">Cancelar</button>
@@ -448,7 +470,7 @@ const SUPABASE_KEY='sb_publishable_FWLt3OH6KIOwXZ-DqJGacw_vcoMg-eM';
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let user=null, profile=null, activeChat=null, currentMonthDate=new Date();
-let currentFloatingPostImage=null;
+let currentFloatingPostImage=null, editAvatarUrl=null, editBannerUrl=null;
 
 const $=id=>document.getElementById(id);
 const pad=n=>String(n).padStart(2,'0');
@@ -476,13 +498,20 @@ function showPage(pageId) {
 }
 
 /* MODAIS */
-function openSettingsModal() { $('settingsModal').classList.remove('hidden'); }
+function openSettingsModal() { 
+  loadBlockedUsers();
+  $('settingsModal').classList.remove('hidden'); 
+}
 function closeSettingsModal() { $('settingsModal').classList.add('hidden'); }
 function openEditProfileModal() {
   if(profile) {
     $('profileName').value = profile.name || '';
     $('profileUsername').value = profile.username || '';
     $('profileBio').value = profile.bio || '';
+    editAvatarUrl = profile.avatar_url || null;
+    editBannerUrl = profile.banner_url || null;
+    if(editAvatarUrl) { $('avatarCropImg').src = editAvatarUrl; $('avatarCropBox').classList.remove('hidden'); }
+    if(editBannerUrl) { $('bannerCropImg').src = editBannerUrl; $('bannerCropBox').classList.remove('hidden'); }
   }
   $('editProfileModal').classList.remove('hidden');
 }
@@ -490,6 +519,26 @@ function closeEditProfileModal() { $('editProfileModal').classList.add('hidden')
 function openFloatingPostModal() { $('floatingPostModal').classList.remove('hidden'); }
 function closeFloatingPostModal() { $('floatingPostModal').classList.add('hidden'); }
 function closeUserModal() { $('userModal').classList.add('hidden'); }
+
+/* PRÉ-VISUALIZAÇÃO DE IMAGENS */
+function previewEditImage(input, type) {
+  let file = input.files[0];
+  if(file) {
+    let reader = new FileReader();
+    reader.onload = e => {
+      if(type === 'avatar') {
+        editAvatarUrl = e.target.result;
+        $('avatarCropImg').src = editAvatarUrl;
+        $('avatarCropBox').classList.remove('hidden');
+      } else {
+        editBannerUrl = e.target.result;
+        $('bannerCropImg').src = editBannerUrl;
+        $('bannerCropBox').classList.remove('hidden');
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+}
 
 /* MÚSICA */
 function toggleMusic(){
@@ -543,7 +592,7 @@ async function loadFeed() {
   feed.innerHTML = '<p class="muted">Carregando...</p>';
 
   let {data: posts, error} = await db.from('posts')
-    .select('*, profiles(name, username, avatar_url)')
+    .select('*')
     .order('created_at', {ascending: false});
 
   if(error || !posts || posts.length === 0) {
@@ -551,27 +600,76 @@ async function loadFeed() {
     return;
   }
 
-  feed.innerHTML = posts.map(p => `
-    <div class="post">
-      <div class="post-head">
-        <div class="post-user-info" onclick="openUserProfile('${p.user_id}')">
-          <div class="avatar">${p.profiles?.avatar_url ? `<img src="${p.profiles.avatar_url}">` : (p.profiles?.name ? p.profiles.name[0] : '?')}</div>
-          <div>
-            <b>${esc(p.profiles?.name || 'Usuário')}</b>
-            <div class="muted">@${esc(p.profiles?.username || 'user')}</div>
+  // Buscar perfis separadamente para garantir compatibilidade total
+  let userIds = [...new Set(posts.map(p => p.user_id))];
+  let {data: profilesData} = await db.from('profiles').select('*').in('id', userIds);
+  let profilesMap = {};
+  if(profilesData) profilesData.forEach(p => profilesMap[p.id] = p);
+
+  feed.innerHTML = posts.map(p => {
+    let author = profilesMap[p.user_id] || {};
+    return `
+      <div class="post">
+        <div class="post-head">
+          <div class="post-user-info" onclick="openUserProfile('${p.user_id}')">
+            <div class="avatar">${author.avatar_url ? `<img src="${author.avatar_url}">` : (author.name ? author.name[0] : '?')}</div>
+            <div>
+              <b>${esc(author.name || 'Usuário')}</b>
+              <div class="muted">@${esc(author.username || 'user')}</div>
+            </div>
           </div>
         </div>
+        <p style="margin-top:10px">${esc(p.content)}</p>
+        ${p.image_url ? `<img src="${p.image_url}" class="post-media">` : ''}
       </div>
-      <p style="margin-top:10px">${esc(p.content)}</p>
-      ${p.image_url ? `<img src="${p.image_url}" class="post-media">` : ''}
+    `;
+  }).join('');
+}
+
+/* SEGUIR E EXPLORAR */
+async function followUser(targetId) {
+  await db.from('follows').insert({ follower_id: user.id, following_id: targetId });
+  openUserProfile(targetId);
+  loadUserProfile();
+}
+
+async function unfollowUser(targetId) {
+  await db.from('follows').delete().eq('follower_id', user.id).eq('following_id', targetId);
+  openUserProfile(targetId);
+  loadUserProfile();
+}
+
+async function blockUser(targetId) {
+  if(confirm("Deseja bloquear este usuário?")) {
+    await db.from('blocks').insert({ blocker_id: user.id, blocked_id: targetId });
+    closeUserModal();
+    loadFeed();
+  }
+}
+
+async function loadBlockedUsers() {
+  let box = $('blockedUsersList');
+  let {data} = await db.from('blocks').select('*').eq('blocker_id', user.id);
+  
+  if(!data || data.length === 0) {
+    box.innerHTML = '<p class="muted">Nenhum usuário bloqueado.</p>';
+    return;
+  }
+
+  let blockedIds = data.map(b => b.blocked_id);
+  let {data: profilesData} = await db.from('profiles').select('*').in('id', blockedIds);
+  
+  box.innerHTML = (profilesData || []).map(u => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0">
+      <span>@${esc(u.username)}</span>
+      <button class="secondary" style="padding:4px 10px;font-size:12px" onclick="unblockUser('${u.id}')">Desbloquear</button>
     </div>
   `).join('');
 }
 
-/* SEGUIR E PERFIS */
-async function followUser(targetId) {
-  await db.from('follows').insert({ follower_id: user.id, following_id: targetId });
-  loadUserProfile();
+async function unblockUser(blockedId) {
+  await db.from('blocks').delete().eq('blocker_id', user.id).eq('blocked_id', blockedId);
+  loadBlockedUsers();
 }
 
 async function openUserProfile(userId) {
@@ -582,11 +680,16 @@ async function openUserProfile(userId) {
 
   $('modalProfileContent').innerHTML = `
     <div style="text-align:center">
-      <div class="avatar" style="width:80px;height:80px;margin:0 auto;font-size:28px">${target.name?target.name[0]:'?'}</div>
+      <div class="avatar" style="width:80px;height:80px;margin:0 auto;font-size:28px">${target.avatar_url ? `<img src="${target.avatar_url}">` : (target.name?target.name[0]:'?')}</div>
       <h3 style="margin:10px 0 2px 0">${esc(target.name)}</h3>
       <div class="muted" style="margin-bottom:10px">@${esc(target.username)}</div>
       <p>${esc(target.bio || 'Sem biografia.')}</p>
-      ${userId !== user.id ? `<button onclick="followUser('${userId}')" class="${isFollowing ? 'secondary' : ''}">${isFollowing ? 'Seguindo' : 'Seguir'}</button>` : ''}
+      ${userId !== user.id ? `
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:14px">
+          <button onclick="${isFollowing ? `unfollowUser('${userId}')` : `followUser('${userId}')`}" class="${isFollowing ? 'secondary' : ''}">${isFollowing ? 'Seguindo' : 'Seguir'}</button>
+          <button onclick="blockUser('${userId}')" class="danger">Bloquear</button>
+        </div>
+      ` : ''}
     </div>
   `;
   $('userModal').classList.remove('hidden');
@@ -626,7 +729,7 @@ async function saveEntry() {
   setTimeout(()=>status('diaryStatus',''), 2000);
 }
 
-/* PERFIL */
+/* PERFIL E LISTA DE SEGUIDORES/SEGUINDO */
 async function loadUserProfile() {
   if(!user) return;
   let {data} = await db.from('profiles').select('*').eq('id', user.id).single();
@@ -635,10 +738,21 @@ async function loadUserProfile() {
     $('viewProfileName').textContent = data.name || 'Sem nome';
     $('viewProfileUsername').textContent = '@' + (data.username || 'usuario');
     $('viewProfileBio').textContent = data.bio || '';
-    $('profileBigAvatar').textContent = data.name ? data.name[0] : '?';
+    
+    if(data.avatar_url) {
+      $('profileBigAvatar').innerHTML = `<img src="${data.avatar_url}">`;
+    } else {
+      $('profileBigAvatar').textContent = data.name ? data.name[0] : '?';
+    }
+
+    if(data.banner_url) {
+      $('bannerImg').src = data.banner_url;
+      $('bannerImg').classList.remove('hidden');
+    } else {
+      $('bannerImg').classList.add('hidden');
+    }
   }
 
-  // Contadores
   let {count: followingCount} = await db.from('follows').select('*', {count: 'exact', head: true}).eq('follower_id', user.id);
   let {count: followersCount} = await db.from('follows').select('*', {count: 'exact', head: true}).eq('following_id', user.id);
   
@@ -660,22 +774,25 @@ async function switchProfileTab(tab) {
   } else if(tab === 'following' || tab === 'followers') {
     let field = tab === 'following' ? 'follower_id' : 'following_id';
     let targetField = tab === 'following' ? 'following_id' : 'follower_id';
-    let {data} = await db.from('follows').select(`profiles!${targetField}(id, name, username)`).eq(field, user.id);
     
-    if(!data || data.length === 0) {
+    let {data: followsData} = await db.from('follows').select('*').eq(field, user.id);
+    
+    if(!followsData || followsData.length === 0) {
       content.innerHTML = `<p class="muted">Nenhum ${tab === 'following' ? 'seguindo' : 'seguidor'} por enquanto.</p>`;
       return;
     }
 
-    content.innerHTML = data.map(f => {
-      let u = f.profiles;
-      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);">
+    let targetIds = followsData.map(f => f[targetField]);
+    let {data: profilesData} = await db.from('profiles').select('*').in('id', targetIds);
+
+    content.innerHTML = (profilesData || []).map(u => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);">
         <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="openUserProfile('${u.id}')">
-          <div class="avatar">${u.name?u.name[0]:'?'}</div>
+          <div class="avatar">${u.avatar_url ? `<img src="${u.avatar_url}">` : (u.name?u.name[0]:'?')}</div>
           <div><b>${esc(u.name)}</b><div class="muted">@${esc(u.username)}</div></div>
         </div>
-      </div>`;
-    }).join('');
+      </div>
+    `).join('');
   } else {
     content.innerHTML = '<p class="muted">Seus reposts aparecerão aqui.</p>';
   }
@@ -687,7 +804,14 @@ async function saveProfile() {
   let bio = $('profileBio').value.trim();
 
   status('profileStatus', 'Salvando...');
-  let {error} = await db.from('profiles').update({ name, username, bio }).eq('id', user.id);
+  let {error} = await db.from('profiles').update({ 
+    name, 
+    username, 
+    bio, 
+    avatar_url: editAvatarUrl, 
+    banner_url: editBannerUrl 
+  }).eq('id', user.id);
+
   if(error) {
     status('profileStatus', error.message);
   } else {
@@ -697,7 +821,7 @@ async function saveProfile() {
   }
 }
 
-/* EXPLORAR E CHAT */
+/* MENSAGENS E EXPLORAR */
 function addEmoji(e){ $('messageInput').value += e; $('messageInput').focus(); }
 async function sendMessage() {
   let text = $('messageInput').value.trim();
@@ -738,7 +862,7 @@ async function searchProfilesAndPosts() {
   list.innerHTML = (users || []).map(u => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);">
       <div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="openUserProfile('${u.id}')">
-        <div class="avatar">${u.name?u.name[0]:'?'}</div>
+        <div class="avatar">${u.avatar_url ? `<img src="${u.avatar_url}">` : (u.name?u.name[0]:'?')}</div>
         <div><b>${esc(u.name)}</b><div class="muted">@${esc(u.username)}</div></div>
       </div>
       <button class="secondary" onclick="loadChatMessages('${u.id}');showPage('messages');">Mensagem</button>
