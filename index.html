@@ -1595,7 +1595,20 @@ async function loadProfileDataTab(tab){
     let {data:authors}=await db.from('user_profiles').select('*').in('user_id',authorIds);
     let authorMap={}; (authors||[]).forEach(a=>authorMap[a.user_id]=a);
     const postMap={};(posts||[]).forEach(p=>postMap[p.id]=p);
-    box.innerHTML=(reposts||[]).map(r=>{const p=postMap[r.post_id];if(!p)return '';return (r.comment_text?'<div class="repost-comment"><i class="fa-solid fa-retweet"></i> Você repostou com comentário:<p>'+esc(r.comment_text)+'</p></div>':'<div class="repost-label"><i class="fa-solid fa-retweet"></i> Você repostou</div>')+renderPostHtml(p,authorMap[p.user_id]||{},true);}).join('')||'<p class="muted">Nenhum repost encontrado.</p>';
+    const [likesRes,repostsRes,commentsRes]=await Promise.all([
+      db.from('post_likes').select('post_id,user_id').in('post_id',postIds),
+      db.from('post_reposts').select('post_id,user_id').in('post_id',postIds),
+      db.from('post_comments').select('post_id').in('post_id',postIds)
+    ]);
+    const likes={},repostCounts={},commentCounts={},mineLikes=new Set(),mineReposts=new Set();
+    (likesRes.data||[]).forEach(x=>{likes[x.post_id]=(likes[x.post_id]||0)+1;if(x.user_id===user.id)mineLikes.add(x.post_id);});
+    (repostsRes.data||[]).forEach(x=>{repostCounts[x.post_id]=(repostCounts[x.post_id]||0)+1;if(x.user_id===user.id)mineReposts.add(x.post_id);});
+    (commentsRes.data||[]).forEach(x=>{commentCounts[x.post_id]=(commentCounts[x.post_id]||0)+1;});
+    box.innerHTML=(reposts||[]).map(r=>{
+      const p=postMap[r.post_id];if(!p)return '';
+      const label=r.comment_text?'<div class="repost-comment"><i class="fa-solid fa-retweet"></i> Você repostou com comentário:<p>'+esc(r.comment_text)+'</p><button class="ghost" style="margin-top:8px;color:var(--red);padding:5px 9px" onclick="removeMyRepost(\''+p.id+'\')"><i class="fa-solid fa-trash"></i> Apagar meu repost com comentário</button></div>':'<div class="repost-label"><i class="fa-solid fa-retweet"></i> Você repostou <button class="ghost" style="color:var(--red);padding:4px 8px;margin-left:6px" onclick="removeMyRepost(\''+p.id+'\')">Desfazer</button></div>';
+      return label+renderPostHtml(p,authorMap[p.user_id]||{},true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),commentCounts[p.id]||0,repostCounts[p.id]||0);
+    }).join('')||'<p class="muted">Nenhum repost encontrado.</p>';
   } else if(tab==='following'||tab==='followers'){
     let col=tab==='following'?'follower_id':'following_id';
     let targetCol=tab==='following'?'following_id':'follower_id';
@@ -1659,7 +1672,7 @@ function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false,
       ${interactive?`
         <div class="post-actions">
           <span class="post-like-control"><button class="post-heart-button ${isLiked?'liked':''}" onclick="toggleLike('${p.id}',${isLiked},'${p.user_id}')" aria-label="Curtir"><i class="${isLiked?'fa-solid':'fa-regular'} fa-heart"></i></button><button class="post-count-button" onclick="showPostPeople('${p.id}','likes')" aria-label="Ver quem curtiu">${likeCount}</button></span>
-          <button class="${isReposted?'reposted':''}" onclick="openRepostComposer('${p.id}','${p.user_id}')"><i class="fa-solid fa-retweet"></i> Repostar</button>
+          <button class="${isReposted?'reposted':''}" onclick="handleRepostClick('${p.id}',${isReposted},'${p.user_id}')"><i class="fa-solid fa-retweet"></i> ${isReposted?'Desfazer repost':'Repostar'}</button>
           <button onclick="showPostPeople('${p.id}','reposts')"><b>${repostCount}</b> reposts</button>
           <button onclick="toggleCommentsSection('${p.id}')"><i class="fa-regular fa-comment"></i> <b>${commentCount}</b> comentários</button>
         </div>
@@ -1735,16 +1748,28 @@ async function saveRepost(withComment){
 }
 
 async function toggleLike(postId,isLiked,postOwnerId){
-  if(isLiked){await db.from('post_likes').delete().eq('post_id',postId).eq('user_id',user.id);}
-  else{
+  if(isLiked){
+    const {error}=await db.from('post_likes').delete().eq('post_id',postId).eq('user_id',user.id);
+    if(error){showToast('Ops!','Não foi possível retirar a curtida: '+error.message,{type:'like'});return;}
+  }else{
     const {error}=await db.from('post_likes').insert({post_id:postId,user_id:user.id});
-    if(error){showToast('Ops!','Não foi possível curtir esta publicação.',{type:'like'});return;}
+    if(error){showToast('Ops!','Não foi possível curtir esta publicação: '+error.message,{type:'like'});return;}
     if(postOwnerId!==user.id)await db.from('notifications').insert({user_id:postOwnerId,actor_id:user.id,type:'like',post_id:postId});
   }
   await loadFeed('all');
+  if($('profileTabContent'))await loadProfileDataTab('posts');
 }
 
-async function toggleRepost(postId,isReposted,postOwnerId){return openRepostComposer(postId,postOwnerId);}
+async function toggleRepost(postId,isReposted,postOwnerId){return isReposted?removeMyRepost(postId):openRepostComposer(postId,postOwnerId);}
+async function handleRepostClick(postId,isReposted,postOwnerId){return isReposted?removeMyRepost(postId):openRepostComposer(postId,postOwnerId);}
+async function removeMyRepost(postId){
+  if(!user)return;
+  const {data,error}=await db.rpc('delete_my_repost',{p_post_id:postId});
+  if(error){showToast('Ops!','Não foi possível desfazer o repost: '+error.message,{type:'repost'});return;}
+  showToast('Repost removido','A publicação saiu da sua lista de reposts.',{type:'repost'});
+  await loadFeed('all');
+  if($('profileTabContent'))await loadProfileDataTab('reposts');
+}
 
 async function toggleCommentsSection(postId){
   let box=$('comments-box-'+postId);
@@ -1756,13 +1781,24 @@ function closeCommentsSection(postId){$('comments-box-'+postId)?.classList.add('
 async function loadPostComments(postId){
   let {data,error}=await db.from('post_comments').select('*').eq('post_id',postId).order('created_at',{ascending:true});
   if(error){$('comments-list-'+postId).innerHTML='<p class="muted">Não foi possível carregar comentários.</p>';return;}
+  const {data:post}=await db.from('posts').select('user_id').eq('id',postId).maybeSingle();
+  const canModerate=post?.user_id===user.id;
   let userIds=[...new Set((data||[]).map(c=>c.user_id))],authors={};
   if(userIds.length){let {data:profiles}=await db.from('user_profiles').select('*').in('user_id',userIds);(profiles||[]).forEach(p=>authors[p.user_id]=p);}
   const roots=(data||[]).filter(c=>!c.parent_comment_id),children=(data||[]).filter(c=>c.parent_comment_id);
+  const deleteButton=c=>(c.user_id===user.id||canModerate)?'<button class="ghost" style="padding:3px 7px;font-size:11px;margin-left:6px;color:var(--red)" onclick="deletePostComment(\''+c.id+'\',\''+postId+'\')"><i class="fa-solid fa-trash"></i> Apagar</button>':'';
   $('comments-list-'+postId).innerHTML=roots.map(c=>{
     const a=authors[c.user_id]||{},replies=children.filter(x=>x.parent_comment_id===c.id);
-    return '<div class="comment-item"><b>'+esc(a.full_name||'Usuário')+'</b> '+esc(c.content)+'<button class="ghost" style="padding:3px 7px;font-size:11px;margin-left:6px" onclick="replyToComment(\''+postId+'\',\''+c.id+'\',\''+esc(a.full_name||'usuário')+'\')">Responder</button>'+replies.map(r=>{const ra=authors[r.user_id]||{};return '<div class="comment-reply"><b>'+esc(ra.full_name||'Usuário')+'</b> '+esc(r.content)+'</div>';}).join('')+'</div>';
+    return '<div class="comment-item"><b>'+esc(a.full_name||'Usuário')+'</b> '+esc(c.content)+deleteButton(c)+'<button class="ghost" style="padding:3px 7px;font-size:11px;margin-left:6px" onclick="replyToComment(\''+postId+'\',\''+c.id+'\',\''+esc(a.full_name||'usuário')+'\')">Responder</button>'+replies.map(r=>{const ra=authors[r.user_id]||{};return '<div class="comment-reply"><b>'+esc(ra.full_name||'Usuário')+'</b> '+esc(r.content)+deleteButton(r)+'</div>';}).join('')+'</div>';
   }).join('')||'<p class="muted" style="font-size:13px">Nenhum comentário ainda.</p>';
+}
+async function deletePostComment(commentId,postId){
+  if(!confirm('Apagar este comentário?'))return;
+  const {data,error}=await db.rpc('delete_post_comment',{p_comment_id:commentId});
+  if(error){showToast('Ops!','Não foi possível apagar o comentário: '+error.message,{type:'comment'});return;}
+  showToast('Comentário apagado','O comentário foi removido.',{type:'comment'});
+  await loadPostComments(postId);
+  await loadFeed('all');
 }
 function replyToComment(postId,commentId,name){
   const input=$('comment-input-'+postId);input.dataset.parentCommentId=commentId;input.placeholder='Respondendo a '+name+'...';input.focus();
