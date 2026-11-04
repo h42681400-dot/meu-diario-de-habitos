@@ -906,8 +906,8 @@ body.theme-dark #messageBox .bubble.other{background:#303036;color:#f7eff2;borde
         <div id="profilePrivacyBadge" class="muted" style="font-size:12px">🔓 Perfil Público</div>
       </div>
       <div class="profile-tabs">
-        <div class="profile-tab active" onclick="switchProfileTab('posts')">Posts</div>
-        <div class="profile-tab" onclick="switchProfileTab('reposts')">Reposts</div>
+        <div class="profile-tab active" data-profile-tab="posts" onclick="switchProfileTab('posts')">Posts</div>
+        <div class="profile-tab" data-profile-tab="reposts" onclick="switchProfileTab('reposts')">Reposts</div>
       </div>
     </div>
     <div id="profileTabContent" class="card"></div>
@@ -1281,7 +1281,7 @@ function showPage(id){
   if(id==='messages'){ $('msgBadge').classList.add('hidden'); backToChatList(); markInboxMessagesRead(); }
   if(id==='feed')loadFeed('all');
   if(id==='notifications'){ $('notifBadge').classList.add('hidden'); loadNotifications(); }
-  if(id==='profile')loadProfileDataTab('posts');
+  if(id==='profile'){let tab='posts';try{tab=localStorage.getItem('cottontailProfileTab')||'posts';}catch(e){}loadProfileDataTab(tab==='reposts'?'reposts':'posts');}
   checkUnreadBadges();
 }
 
@@ -1581,8 +1581,8 @@ async function saveProfile(){
 }
 
 async function switchProfileTab(tab){
-  document.querySelectorAll('.profile-tab').forEach(el=>el.classList.remove('active'));
-  event.target.classList.add('active');
+  try{localStorage.setItem('cottontailProfileTab',tab);}catch(e){}
+  document.querySelectorAll('.profile-tab').forEach(el=>el.classList.toggle('active',el.dataset.profileTab===tab));
   await loadProfileDataTab(tab);
 }
 
