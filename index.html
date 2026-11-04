@@ -1819,7 +1819,13 @@ async function loadProfileDataTab(tab){
   let box=$('profileTabContent');
   if(tab==='posts'){
     let {data}=await db.from('posts').select('*').eq('user_id',user.id).order('created_at',{ascending:false});
-    const posts=data||[],ids=posts.map(p=>p.id);
+    const {data:collabRows}=await db.from('post_collaborators').select('post_id').eq('invitee_id',user.id).eq('status','accepted');
+    const collabIds=(collabRows||[]).map(x=>x.post_id);
+    if(collabIds.length){const {data:collabPosts}=await db.from('posts').select('*').in('id',collabIds);data=[...(data||[]),...(collabPosts||[])];}
+    const {data:pins}=await db.from('post_pins').select('post_id').eq('user_id',user.id);
+    const pinnedIds=new Set((pins||[]).map(x=>x.post_id));
+    const posts=data||[];posts.sort((a,b)=>(pinnedIds.has(b.id)?1:0)-(pinnedIds.has(a.id)?1:0));
+    const ids=posts.map(p=>p.id);
     const [likesRes,repostsRes,commentsRes]=await Promise.all([
       ids.length?db.from('post_likes').select('post_id,user_id').in('post_id',ids):Promise.resolve({data:[]}),
       ids.length?db.from('post_reposts').select('post_id,user_id').in('post_id',ids):Promise.resolve({data:[]}),
@@ -2242,6 +2248,11 @@ async function inspectProfile(id){
   let {data:u}=await db.from('user_profiles').select('*').eq('user_id',id).maybeSingle();
   if(u)chatProfiles[id]=u;
   let {data:posts}=await db.from('posts').select('*').eq('user_id',id);
+  const {data:collabRows}=await db.from('post_collaborators').select('post_id').eq('invitee_id',id).eq('status','accepted');
+  const collabIds=(collabRows||[]).map(x=>x.post_id);
+  if(collabIds.length){const {data:collabPosts}=await db.from('posts').select('*').in('id',collabIds);posts=[...(posts||[]),...(collabPosts||[])];}
+  const {data:pins}=await db.from('post_pins').select('post_id').eq('user_id',id);
+  const pinnedIds=new Set((pins||[]).map(x=>x.post_id));(posts||[]).sort((a,b)=>(pinnedIds.has(b.id)?1:0)-(pinnedIds.has(a.id)?1:0));
   let {count:fCount}=await db.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',id);
   let {count:wCount}=await db.from('follows').select('*',{count:'exact',head:true}).eq('following_id',id);
   let {data:isF}=await db.from('follows').select('*').eq('follower_id',user.id).eq('following_id',id).maybeSingle();
@@ -2569,6 +2580,7 @@ function notificationDescription(type){
   if(type==='follow') return 'começou a seguir você. ✨';
   if(type==='comment') return 'comentou na sua publicação. 💬';
   if(type==='message') return 'enviou uma mensagem. 💌';
+  if(type==='post_collaboration') return 'convidou você para colaborar em uma publicação. 🤝';
   return 'interagiu com você.';
 }
 function notificationIcon(type){
@@ -2596,7 +2608,7 @@ async function openNotification(notificationId,actorId,type,postId){
   if(actorId) await inspectProfile(actorId);
 }
 async function loadNotifications(){
-  const {error:markError}=await db.from('notifications').update({read:true}).eq('user_id',user.id).eq('read',false);
+  const {error:markError}=await db.from('notifications').update({read:true}).eq('user_id',user.id).eq('read',false).neq('type','post_collaboration');
   if(markError)console.warn('Não foi possível marcar notificações como lidas:',markError.message);
   $('notifBadge').classList.add('hidden');
   const {data,error}=await db.from('notifications').select('*')
@@ -2625,6 +2637,7 @@ async function loadNotifications(){
     const avatar=actor.avatar_url
       ? '<img src="'+esc(actor.avatar_url)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'
       : '<i class="fa-solid '+notificationIcon(n.type)+'"></i>';
+    const collaborationActions=n.type==='post_collaboration'?`<div style="display:flex;gap:8px;margin-top:8px"><button onclick="event.stopPropagation();respondToCollaboration('${n.post_id}',true,'${n.id}')">Aceitar</button><button class="secondary" onclick="event.stopPropagation();respondToCollaboration('${n.post_id}',false,'${n.id}')">Recusar</button></div>`:'';
     return `
       <div class="notif-item ${unread?'unread':''}" role="button" tabindex="0"
         onclick="openNotification('${n.id}','${n.actor_id||''}','${n.type||''}','${n.post_id||''}')"
@@ -2634,6 +2647,7 @@ async function loadNotifications(){
           <div><b>${name}</b> ${text}</div>
           <div class="notif-time">${date}</div>
           ${unread?'<div class="muted" style="font-size:10px;margin-top:3px">Nova</div>':''}
+          ${collaborationActions}
         </div>
         <i class="fa-solid fa-chevron-right muted" style="font-size:12px"></i>
       </div>
