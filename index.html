@@ -1439,7 +1439,7 @@ async function checkUnreadBadges(){
   try{
     if(notificationsOpen)updateUnreadBadge('notifBadge',0);
     else{
-      const {data,error}=await db.from('notifications').select('id').eq('user_id',user.id).eq('read',false);
+      const {data,error}=await db.from('notifications').select('id').eq('user_id',user.id).or('read.eq.false,read.is.null');
       if(error)throw error;
       updateUnreadBadge('notifBadge',(data||[]).length);
     }
@@ -2551,8 +2551,18 @@ async function checkNewNotifications(){
     const {data:actors}=await db.from('user_profiles').select('*').in('user_id',actorIds);
     (actors||[]).forEach(a=>actorMap[a.user_id]=a);
   }
+  if(!$('notifications').classList.contains('active')){
+    const badge=$('notifBadge');
+    const current=Math.max(0,parseInt(badge?.textContent,10)||0);
+    updateUnreadBadge('notifBadge',Math.max(current,data.length));
+  }
   for(const n of data){
     const actor=actorMap[n.actor_id]||{};
+    if(n.type==='message'&&!$('messages').classList.contains('active')){
+      const messageBadge=$('msgBadge');
+      const currentMessages=Math.max(0,parseInt(messageBadge?.textContent,10)||0);
+      updateUnreadBadge('msgBadge',Math.max(currentMessages,1));
+    }
     showToast(actor.full_name||actor.username||'Alguém',notificationDescription(n.type),n);
   }
   if($('notifications').classList.contains('active')) await loadNotifications();
