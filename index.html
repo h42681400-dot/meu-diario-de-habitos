@@ -2325,6 +2325,8 @@ async function loadChats(){
   const {data,error}=await db.from('direct_messages').select('*').or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`).order('created_at',{ascending:false});
   if(error){$('chatList').innerHTML='<p class="muted">Não foi possível carregar as conversas.</p>';return;}
   const {data:settings}=await db.from('direct_conversation_settings').select('*').eq('user_id',user.id);
+  const settingsMap={};(settings||[]).forEach(x=>settingsMap[x.peer_id]=x);
+  const peers=[...new Set((data||[]).map(m=>m.sender_id===user.id?m.receiver_id:m.sender_id))].filter(id=>!settingsMap[id]?.hidden);
   if(!peers.length){$('chatList').innerHTML='<p class="muted">Nenhuma conversa recente.</p>';return;}
   const {data:p}=await db.from('user_profiles').select('*').in('user_id',peers);
   chatProfiles={};(p||[]).forEach(x=>chatProfiles[x.user_id]=x);
