@@ -2554,6 +2554,7 @@ async function checkNewNotifications(){
     .eq('user_id',user.id).gt('created_at',notificationCursor)
     .order('created_at',{ascending:true}).limit(50);
   if(error){console.warn('Não foi possível verificar novas notificações:',error.message);return;}
+  if($('messages')?.classList.contains('active')&&!activeChat)await loadChats();
   if(!data || !data.length) return;
   notificationCursor=data[data.length-1].created_at;
   const actorIds=[...new Set(data.map(n=>n.actor_id).filter(Boolean))];
