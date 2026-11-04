@@ -1148,6 +1148,7 @@ function savePreferredLanguage(value){
   const allowed=['pt-BR','en','es','ko'];
   const language=allowed.includes(value)?value:'pt-BR';
   if(profile)profile.language=language;
+  document.documentElement.lang=language;
   db.from('user_profiles').update({language}).eq('user_id',user.id)
     .then(({error})=>{if(error)console.error('Não foi possível salvar o idioma:',error.message);});
 }
@@ -1358,7 +1359,7 @@ function persistCurrentPage(){
   if(active&&['feed','diary','explore','messages','notifications','profile'].includes(active.id)){
     try{localStorage.setItem('cottontailActivePage',active.id);}catch(e){}
   }
-  if(activeChat?.id){try{localStorage.setItem('cottontailActiveChat',activeChat.id);}catch(e){}}
+  if(activeChat){try{localStorage.setItem('cottontailActiveChat',activeChat);}catch(e){}}
 }
 window.addEventListener('pagehide',persistCurrentPage);
 window.addEventListener('beforeunload',persistCurrentPage);
@@ -1595,6 +1596,7 @@ async function loadProfile(){
     if(languageError)console.warn('Não foi possível salvar o idioma detectado:',languageError.message);
   }
   if($('settingsLanguage'))$('settingsLanguage').value=profile.language||detectPreferredLanguage();
+  document.documentElement.lang=profile.language||detectPreferredLanguage();
   $('profileName').value=profile.full_name||'';
   $('profileUsername').value=profile.username||'';
   $('profileBio').value=profile.bio||'';
