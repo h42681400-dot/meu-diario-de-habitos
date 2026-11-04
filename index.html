@@ -774,6 +774,21 @@ html body .conversation-unread{
   padding:0 6px!important;
 }
 
+
+.app-action-overlay{position:fixed;inset:0;z-index:10050;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(35,25,31,.42);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.app-action-overlay.hidden{display:none!important}
+.app-action-card{width:min(100%,390px);padding:26px 24px 22px;border:1px solid var(--line);border-radius:25px;background:var(--card-bg);color:var(--ink);box-shadow:0 22px 70px rgba(38,22,30,.22);text-align:center;animation:appActionIn .2s ease}
+.app-action-icon{width:52px;height:52px;margin:0 auto 13px;border-radius:18px;display:grid;place-items:center;background:rgba(236,171,194,.2);color:var(--rose);font-size:20px}
+.app-action-card h3{margin:0 0 8px;font-size:19px;letter-spacing:-.35px}
+.app-action-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.55}
+.app-action-input{width:100%;margin:18px 0 4px!important;padding:13px 15px!important;border:1px solid var(--line)!important;border-radius:14px!important;background:var(--bg)!important;color:var(--ink)!important;outline:none}
+.app-action-input:focus{border-color:var(--rose)!important;box-shadow:0 0 0 3px rgba(236,171,194,.17)}
+.app-action-actions{display:flex;gap:10px;margin-top:22px}
+.app-action-actions button{flex:1;min-height:44px;border-radius:14px!important}
+.app-action-cancel{background:var(--bg)!important;border:1px solid var(--line)!important;color:var(--ink)!important}
+.app-action-danger{background:#d96b88!important;color:white!important;border:0!important}
+@keyframes appActionIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.app-action-card{animation:none}}
 </style></head>
 <body>
 
@@ -1006,6 +1021,7 @@ html body .conversation-unread{
   </div>
 </div>
 
+<div id="appActionModal" class="app-action-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="appActionTitle" onclick="if(event.target===this)resolveAppAction(null)"><div class="app-action-card"><div class="app-action-icon"><i id="appActionIcon" class="fa-regular fa-heart"></i></div><h3 id="appActionTitle">Confirmar ação</h3><p id="appActionDescription"></p><input id="appActionInput" class="app-action-input hidden" autocomplete="off"><div class="app-action-actions"><button id="appActionCancel" class="app-action-cancel" onclick="resolveAppAction(null)">Cancelar</button><button id="appActionConfirm" onclick="submitAppAction()">Confirmar</button></div></div></div>
 <!-- POPUP DE EXCLUSÃO DE POST -->
 <div id="deleteConfirmModal" class="modal-overlay hidden">
   <div class="modal-box" style="text-align:center;max-width:360px">
@@ -1163,7 +1179,7 @@ const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let user=null, selected=new Date(), entries={}, profile=null, activeChat=null, chatProfiles={}, inspectedProfileId=null;
 let currentFloatingPostImage=null, editAvatarFile=null, editBannerFile=null, postToDeleteId=null, postToReportId=null;
 let chatInterval=null, presenceTimer=null, typingTimer=null;
-let notificationPollTimer=null, notificationCursor=null;
+let notificationPollTimer=null, notificationCursor=null, appActionResolver=null;
 
 const FORBIDDEN_WORDS = ['gore', 'mutilacao', 'suicidio', 'sangue', 'morte', 'estupro', 'assidio', 'mutilação', 'suicídio'];
 
@@ -1642,39 +1658,74 @@ async function submitFloatingPost(){
     }
     const {data:newPost,error:insertError}=await db.from('posts').insert({user_id:user.id,content,media_url}).select('id').single();
     if(insertError)throw insertError;
-    await invitePostCollaborators(newPost.id,content);
+    const collaborationResult=await invitePostCollaborators(newPost.id,content);
     closeFloatingPostModal();
-    loadFeed('all');
+    await loadFeed('all');
+    if(collaborationResult.invited.length)showToast('Convite enviado!','Aguardando '+collaborationResult.invited.join(', ')+' aceitar a colaboração. 🤝');
+    if(collaborationResult.failed.length)showToast('Alguns convites não foram enviados',collaborationResult.failed.join(' · '));
   } catch(err){ status('modalPostStatus',err.message); }
 }
 
 function togglePostMenu(id){document.querySelectorAll('[id^="post-menu-"]').forEach(el=>{if(el.id!=='post-menu-'+id)el.classList.add('hidden');});const menu=$('post-menu-'+id);if(menu)menu.classList.toggle('hidden');}
 async function pinPost(postId){
-  const {data:existing}=await db.from('post_pins').select('post_id').eq('user_id',user.id).eq('post_id',postId).maybeSingle();
-  if(existing){const {error}=await db.from('post_pins').delete().eq('user_id',user.id).eq('post_id',postId);if(error){alert(error.message);return;}}
-  else{const {count}=await db.from('post_pins').select('*',{count:'exact',head:true}).eq('user_id',user.id);if((count||0)>=3){alert('Você pode fixar no máximo 3 publicações no perfil.');return;}const {error}=await db.from('post_pins').insert({user_id:user.id,post_id:postId});if(error){alert('Não foi possível fixar: '+error.message);return;}}
-  await loadFeed('all');if(!$('profile').classList.contains('hidden'))await loadProfileDataTab('posts');if(inspectedProfileId)await inspectProfile(inspectedProfileId);
+  try{
+    const {data:existing,error:checkError}=await db.from('post_pins').select('post_id').eq('user_id',user.id).eq('post_id',postId).maybeSingle();
+    if(checkError)throw checkError;
+    if(existing){
+      const {error}=await db.from('post_pins').delete().eq('user_id',user.id).eq('post_id',postId);if(error)throw error;
+      showToast('Publicação desafixada','Ela não ficará mais no topo do seu perfil. ✨');
+    }else{
+      const {count,error:countError}=await db.from('post_pins').select('*',{count:'exact',head:true}).eq('user_id',user.id);
+      if(countError)throw countError;
+      if((count||0)>=3){showToast('Limite de fixações','Você pode manter até 3 publicações fixadas no perfil.');return;}
+      const {error}=await db.from('post_pins').insert({user_id:user.id,post_id:postId});if(error)throw error;
+      showToast('Publicação fixada!','Ela ficará no topo do seu perfil. 📌');
+    }
+    await loadFeed('all');if($('profile')?.classList.contains('active'))await loadProfileDataTab('posts');if(inspectedProfileId)await inspectProfile(inspectedProfileId);
+  }catch(error){console.error('Erro ao fixar publicação:',error);showToast('Não foi possível fixar',error.message||'Confira a tabela post_pins e suas permissões no Supabase.');}
 }
 async function sharePostByMessage(postId){
-  const handle=(prompt('Digite o @usuário para quem deseja enviar esta publicação:')||'').trim().replace(/^@/,'');if(!handle)return;
-  const {data:person}=await db.from('user_profiles').select('user_id,username').ilike('username',handle).maybeSingle();if(!person){alert('Não encontrei esse usuário. Confira o @ e tente novamente.');return;}if(person.user_id===user.id){alert('Escolha outra pessoa para compartilhar.');return;}
-  const {data:post}=await db.from('posts').select('content').eq('id',postId).maybeSingle();if(!post){alert('Publicação não encontrada.');return;}
-  const {error}=await db.from('direct_messages').insert({sender_id:user.id,receiver_id:person.user_id,content:'📎 Compartilhou uma publicação: '+(post.content||'Publicação com imagem').slice(0,160),shared_post_id:postId});
-  if(error){alert('Não foi possível compartilhar. Confira a coluna shared_post_id no Supabase.');console.error(error);return;}
-  showToast('Publicação enviada','Compartilhada por mensagem com @'+person.username+'.');
+  const entered=await openAppActionModal({title:'Enviar publicação',description:'Digite o @usuário da pessoa que vai receber esta publicação por mensagem.',confirmText:'Continuar',icon:'fa-regular fa-paper-plane',input:true,placeholder:'@nome de usuário'});
+  if(entered===null)return;
+  const handle=String(entered).trim().replace(/^@/,'').toLowerCase();
+  if(!/^[a-z0-9._]{3,20}$/.test(handle)){showToast('Usuário inválido','Digite um @usuário válido.');return;}
+  try{
+    const {data:person,error:personError}=await db.from('user_profiles').select('user_id,username').ilike('username',handle).maybeSingle();
+    if(personError)throw personError;
+    if(!person){showToast('Pessoa não encontrada','Confira o @usuário e tente novamente.');return;}
+    if(person.user_id===user.id){showToast('Ops!','Escolha outra pessoa para compartilhar.');return;}
+    const {data:post,error:postError}=await db.from('posts').select('content,media_url').eq('id',postId).maybeSingle();
+    if(postError)throw postError;if(!post)throw new Error('Publicação não encontrada ou sem permissão para acessá-la.');
+    const {error}=await db.from('direct_messages').insert({sender_id:user.id,receiver_id:person.user_id,content:'📎 Compartilhou uma publicação: '+(post.content||'Publicação com imagem').slice(0,160),shared_post_id:postId});
+    if(error)throw error;
+    showToast('Publicação enviada!','Compartilhada por mensagem com @'+String(person.username||handle).replace(/^@/,'')+'. 💌');
+  }catch(error){console.error('Erro ao compartilhar publicação:',error);showToast('Não foi possível compartilhar',error.message||'Confira shared_post_id e as permissões de mensagens no Supabase.');}
 }
 async function invitePostCollaborators(postId,content){
-  const handles=[...new Set((content.match(/@[a-zA-Z0-9_.]+/g)||[]).map(x=>x.slice(1).toLowerCase()))];
-  for(const handle of handles){const {data:person}=await db.from('user_profiles').select('user_id,username').ilike('username',handle).maybeSingle();if(!person||person.user_id===user.id)continue;
-    const {error}=await db.from('post_collaborators').insert({post_id:postId,inviter_id:user.id,invitee_id:person.user_id});if(error){console.warn('Convite não enviado para @'+handle,error.message);continue;}
-    await db.from('notifications').insert({user_id:person.user_id,actor_id:user.id,type:'post_collaboration',post_id:postId});
+  const handles=[...new Set((String(content||'').match(/@[a-zA-Z0-9_.]+/g)||[]).map(x=>x.slice(1).toLowerCase()))];
+  const result={invited:[],failed:[]};
+  for(const handle of handles){
+    if(handle.length<3||handle.length>20){result.failed.push('@'+handle+' (formato inválido)');continue;}
+    try{
+      const {data:person,error:personError}=await db.from('user_profiles').select('user_id,username').ilike('username',handle).maybeSingle();
+      if(personError)throw personError;
+      if(!person){result.failed.push('@'+handle+' (não encontrado)');continue;}
+      if(person.user_id===user.id){result.failed.push('@'+handle+' (seu próprio perfil)');continue;}
+      const {error:inviteError}=await db.from('post_collaborators').insert({post_id,inviter_id:user.id,invitee_id:person.user_id});
+      if(inviteError)throw inviteError;
+      const {error:notifError}=await db.from('notifications').insert({user_id:person.user_id,actor_id:user.id,type:'post_collaboration',post_id});
+      if(notifError)throw new Error('Convite criado, mas a notificação falhou: '+notifError.message);
+      result.invited.push('@'+String(person.username||handle).replace(/^@/,''));
+    }catch(error){console.error('Erro ao convidar @'+handle,error);result.failed.push('@'+handle+' ('+error.message+')');}
   }
+  return result;
 }
 async function respondToCollaboration(postId,accept,notificationId){
-  const {error}=await db.from('post_collaborators').update({status:accept?'accepted':'rejected'}).eq('post_id',postId).eq('invitee_id',user.id).eq('status','pending');
-  if(error){alert('Não foi possível responder ao convite: '+error.message);return;}
+  const {data:updated,error}=await db.from('post_collaborators').update({status:accept?'accepted':'rejected'}).eq('post_id',postId).eq('invitee_id',user.id).eq('status','pending').select('id').maybeSingle();
+  if(error){showToast('Não foi possível responder',error.message);return;}
+  if(!updated){showToast('Convite indisponível','Esse convite já foi respondido ou não pertence à sua conta.');return;}
   await db.from('notifications').update({read:true}).eq('id',notificationId).eq('user_id',user.id);
-  alert(accept?'Convite aceito! A publicação aparecerá no seu perfil.':'Convite recusado.');
+  showToast(accept?'Convite aceito!':'Convite recusado',accept?'A publicação agora aparece na área de publicações do seu perfil. 🤝':'A publicação não aparecerá no seu perfil.');
   await loadNotifications();await loadProfileDataTab('posts');
 }
 function openDeleteConfirmModal(postId){
@@ -1920,7 +1971,7 @@ function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false,
           <div class="avatar">${avatarHtml}</div>
           <div><b>${name}</b><div class="muted">${handle} · ${new Date(p.created_at).toLocaleDateString('pt-BR')}</div></div>
         </div>
-        <div style="position:relative"><button class="ghost" onclick="togglePostMenu('${p.id}')" style="padding:6px 10px;font-size:18px">⋯</button><div id="post-menu-${p.id}" class="message-options-menu hidden" style="position:absolute;right:0;top:30px;z-index:25;background:var(--card,#fff);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:175px;box-shadow:0 5px 18px #0002">${isMine?`<button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="pinPost('${p.id}')"><i class="fa-solid fa-thumbtack"></i> Fixar/desafixar no perfil</button><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0;color:var(--red)" onclick="openDeleteConfirmModal('${p.id}')"><i class="fa-solid fa-trash"></i> Excluir publicação</button>`:`<button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="sharePostByMessage('${p.id}')"><i class="fa-solid fa-paper-plane"></i> Compartilhar por mensagem</button><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="openReportModal('${p.id}')"><i class="fa-solid fa-triangle-exclamation"></i> Denunciar</button>`}</div></div>
+        <div style="position:relative"><button class="ghost" onclick="togglePostMenu('${p.id}')" style="padding:6px 10px;font-size:18px">⋯</button><div id="post-menu-${p.id}" class="message-options-menu hidden" style="position:absolute;right:0;top:30px;z-index:25;background:var(--card,#fff);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:175px;box-shadow:0 5px 18px #0002">${isMine?`<button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="pinPost('${p.id}')"><i class="fa-solid fa-thumbtack"></i> Fixar/desafixar no perfil</button><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="sharePostByMessage('${p.id}')"><i class="fa-solid fa-paper-plane"></i> Compartilhar por mensagem</button><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0;color:var(--red)" onclick="openDeleteConfirmModal('${p.id}')"><i class="fa-solid fa-trash"></i> Excluir publicação</button>`:`<button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="sharePostByMessage('${p.id}')"><i class="fa-solid fa-paper-plane"></i> Compartilhar por mensagem</button><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="openReportModal('${p.id}')"><i class="fa-solid fa-triangle-exclamation"></i> Denunciar</button>`}</div></div>
       </div>
       <p style="margin:12px 0;line-height:1.4">${esc(p.content).replace(/\n/g,'<br>')}</p>
       ${p.media_url?`<img src="${esc(p.media_url)}" class="post-media" loading="lazy" decoding="async">`:''}
@@ -2358,7 +2409,9 @@ async function toggleMuteConversation(){
   await loadChats();
 }
 async function deleteConversationForMe(){
-  if(!activeChat||!confirm('Apagar esta conversa somente para você? A outra pessoa continuará vendo as mensagens.'))return;
+  if(!activeChat)return;
+  const ok=await openAppActionModal({title:'Apagar conversa?',description:'A conversa sairá da sua lista. As mensagens continuarão disponíveis para a outra pessoa.',confirmText:'Apagar conversa',icon:'fa-regular fa-comments',danger:true});
+  if(!ok)return;
   const {error}=await db.from('direct_conversation_settings').upsert({user_id:user.id,peer_id:activeChat,hidden:true},{onConflict:'user_id,peer_id'});
   if(error){alert('Não foi possível apagar a conversa. Execute o SQL de configurações de conversa.');return;}
   if(chatInterval){clearInterval(chatInterval);chatInterval=null;}
@@ -2533,14 +2586,26 @@ function toggleMessageMenu(id){
   document.querySelectorAll('.message-options-menu').forEach(el=>{if(el.id!=='message-menu-'+id)el.classList.add('hidden');});
   const menu=$('message-menu-'+id);if(menu)menu.classList.toggle('hidden');
 }
+function openAppActionModal({title,description,confirmText='Confirmar',cancelText='Cancelar',icon='fa-regular fa-heart',danger=false,input=false,placeholder=''}){
+  if(appActionResolver)appActionResolver(null);
+  $('appActionTitle').textContent=title;$('appActionDescription').textContent=description;$('appActionIcon').className=icon;
+  $('appActionConfirm').textContent=confirmText;$('appActionCancel').textContent=cancelText;$('appActionConfirm').className=danger?'app-action-danger':'';
+  $('appActionInput').classList.toggle('hidden',!input);$('appActionInput').placeholder=placeholder;$('appActionInput').value='';
+  $('appActionModal').classList.remove('hidden');if(input)setTimeout(()=>$('appActionInput').focus(),80);
+  return new Promise(resolve=>{appActionResolver=resolve;});
+}
+function resolveAppAction(value){$('appActionModal').classList.add('hidden');const resolve=appActionResolver;appActionResolver=null;if(resolve)resolve(value);}
+function submitAppAction(){const input=$('appActionInput');resolveAppAction(input.classList.contains('hidden')?true:input.value.trim());}
 async function deleteMessageForMe(messageId){
-  if(!confirm('Apagar esta mensagem somente para você?'))return;
+  const ok=await openAppActionModal({title:'Apagar mensagem?',description:'Esta mensagem será removida somente da sua conversa. A outra pessoa continuará vendo.',confirmText:'Apagar mensagem',icon:'fa-regular fa-trash-can',danger:true});
+  if(!ok)return;
   const {error}=await db.rpc('hide_direct_message_for_me',{p_message_id:messageId});
   if(error){alert('Não foi possível apagar para você. Confira se executou o SQL de mensagens.');console.error(error);return;}
   await loadMessages();
 }
 async function deleteMessageForEveryone(messageId){
-  if(!confirm('Apagar esta mensagem para você e para a outra pessoa?'))return;
+  const ok=await openAppActionModal({title:'Apagar para todos?',description:'A mensagem será removida da conversa para você e para a outra pessoa.',confirmText:'Apagar para todos',icon:'fa-solid fa-trash-can',danger:true});
+  if(!ok)return;
   const {error}=await db.rpc('delete_direct_message_for_everyone',{p_message_id:messageId});
   if(error){alert('Não foi possível apagar para todos. Confira se executou o SQL de mensagens.');console.error(error);return;}
   await loadMessages();
