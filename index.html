@@ -924,7 +924,7 @@ html body .conversation-unread{
       <div id="chatRoomView" class="hidden">
         <div class="iphone-chat-header">
           <button class="secondary" onclick="backToChatList()" style="padding:6px 12px"><i class="fa-solid fa-chevron-left"></i></button>
-          <div class="iphone-chat-person"><div id="chatHeaderAvatar" class="avatar" style="width:38px;height:38px">?</div><div><h3 id="chatTitle" style="margin:0;font-size:15px">Conversa</h3><div id="chatPresence" class="chat-presence">offline</div></div></div><span class="chat-header-spacer"></span>
+          <div class="iphone-chat-person"><div id="chatHeaderAvatar" class="avatar" style="width:38px;height:38px">?</div><div><h3 id="chatTitle" style="margin:0;font-size:15px">Conversa</h3><div id="chatPresence" class="chat-presence">offline</div></div></div><span class="chat-header-spacer"></span><button class="secondary" title="Silenciar conversa" onclick="toggleMuteConversation()" style="padding:6px 9px"><i class="fa-solid fa-bell-slash"></i></button><button class="secondary" title="Apagar conversa para mim" onclick="deleteConversationForMe()" style="padding:6px 9px"><i class="fa-solid fa-trash"></i></button>
         </div>
         <div id="messageBox" class="messages"></div>
         <div style="display:flex;gap:6px;margin-bottom:8px">
@@ -2307,19 +2307,33 @@ async function toggleBlockUser(targetId, isBlocked){
 }
 
 /* CHAT ESTILO IPHONE */
+async function toggleMuteConversation(){
+  if(!activeChat)return;
+  const {data:existing}=await db.from('direct_conversation_settings').select('*').eq('user_id',user.id).eq('peer_id',activeChat).maybeSingle();
+  const {error}=await db.from('direct_conversation_settings').upsert({user_id:user.id,peer_id:activeChat,muted:!existing?.muted,hidden:false},{onConflict:'user_id,peer_id'});
+  if(error){alert('Não foi possível silenciar. Execute o SQL de configurações de conversa.');return;}
+  await loadChats();
+}
+async function deleteConversationForMe(){
+  if(!activeChat||!confirm('Apagar esta conversa somente para você? A outra pessoa continuará vendo as mensagens.'))return;
+  const {error}=await db.from('direct_conversation_settings').upsert({user_id:user.id,peer_id:activeChat,hidden:true},{onConflict:'user_id,peer_id'});
+  if(error){alert('Não foi possível apagar a conversa. Execute o SQL de configurações de conversa.');return;}
+  if(chatInterval){clearInterval(chatInterval);chatInterval=null;}
+  activeChat=null;backToChatList();
+}
 async function loadChats(){
   const {data,error}=await db.from('direct_messages').select('*').or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`).order('created_at',{ascending:false});
   if(error){$('chatList').innerHTML='<p class="muted">Não foi possível carregar as conversas.</p>';return;}
-  const peers=[...new Set((data||[]).map(m=>m.sender_id===user.id?m.receiver_id:m.sender_id))];
+  const {data:settings}=await db.from('direct_conversation_settings').select('*').eq('user_id',user.id);
   if(!peers.length){$('chatList').innerHTML='<p class="muted">Nenhuma conversa recente.</p>';return;}
   const {data:p}=await db.from('user_profiles').select('*').in('user_id',peers);
   chatProfiles={};(p||[]).forEach(x=>chatProfiles[x.user_id]=x);
   $('chatList').innerHTML=peers.map(id=>{
     const last=(data||[]).find(m=>m.sender_id===id||m.receiver_id===id);
-    const unread=(data||[]).filter(m=>m.sender_id===id&&m.receiver_id===user.id&&!m.read_at).length;
+    const unread=settingsMap[id]?.muted?0:(data||[]).filter(m=>m.sender_id===id&&m.receiver_id===user.id&&!m.read_at).length;
     const online=isUserOnline(chatProfiles[id]?.last_seen_at);
     const typing=chatProfiles[id]?.typing_to===user.id&&chatProfiles[id]?.typing_at&&(Date.now()-new Date(chatProfiles[id].typing_at).getTime()<6500);
-    return `<div class="chat-item iphone-chat-list-item" onclick="openChat('${id}')"><div class="chat-list-avatar-wrap"><div class="avatar">${chatProfiles[id]?.avatar_url?`<img src="${esc(chatProfiles[id].avatar_url)}">`:esc((chatProfiles[id]?.full_name||'?')[0])}</div><span class="online-dot ${online?'is-online':''}"></span></div><div class="chat-list-copy"><b>${esc(chatProfiles[id]?.full_name||'Pessoa')}</b><div class="muted">@${esc(chatProfiles[id]?.username||'')}</div><div class="chat-list-preview">${typing?'<span class="typing-label">digitando'+typingDotsMarkup()+'</span>':`${last?.sender_id===user.id?'Você: ':''}${esc(last?.content||'Comece uma conversa')}`}</div></div><span class="chat-list-state">${unread?`<span class="conversation-unread" style="background:#f6b6d0!important;background-color:#f6b6d0!important;background-image:none!important;color:#9b4969!important;border:2px solid #fff7fa!important;box-shadow:0 2px 8px rgba(226,145,177,.25)!important">${unread>99?'99+':unread}</span>`:online?'online':''}</span></div>`;
+    return `<div class="chat-item iphone-chat-list-item" onclick="openChat('${id}')"><div class="chat-list-avatar-wrap"><div class="avatar">${chatProfiles[id]?.avatar_url?`<img src="${esc(chatProfiles[id].avatar_url)}">`:esc((chatProfiles[id]?.full_name||'?')[0])}</div><span class="online-dot ${online?'is-online':''}"></span></div><div class="chat-list-copy"><b>${esc(chatProfiles[id]?.full_name||'Pessoa')}</b><div class="muted">@${esc(chatProfiles[id]?.username||'')}</div><div class="chat-list-preview">${typing?'<span class="typing-label">digitando'+typingDotsMarkup()+'</span>':`${last?.sender_id===user.id?'Você: ':''}${esc(last?.content||'Comece uma conversa')}`}</div></div><span class="chat-list-state">${settingsMap[id]?.muted?'<i class="fa-solid fa-bell-slash muted"></i>':unread?`<span class="conversation-unread" style="background:#f6b6d0!important;background-color:#f6b6d0!important;background-image:none!important;color:#9b4969!important;border:2px solid #fff7fa!important;box-shadow:0 2px 8px rgba(226,145,177,.25)!important">${unread>99?'99+':unread}</span>`:online?'online':''}</span></div>`;
   }).join('');
 }
 async function openChat(id, username=''){
