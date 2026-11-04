@@ -1645,7 +1645,7 @@ async function loadProfileDataTab(tab){
     (commentsResult.data||[]).forEach(x=>{commentCounts[x.post_id]=(commentCounts[x.post_id]||0)+1;});
     box.innerHTML=(myReposts||[]).map(r=>{
       const p=postMap[r.post_id];if(!p)return '';
-      const label=r.comment_text?'<div class="repost-comment"><i class="fa-solid fa-retweet"></i> Você repostou com comentário:<p>'+esc(r.comment_text)+'</p><button class="ghost" style="margin-top:8px;color:var(--red);padding:5px 9px" onclick="removeMyRepost(\\''+p.id+'\\')"><i class="fa-solid fa-trash"></i> Apagar meu repost com comentário</button></div>':'<div class="repost-label"><i class="fa-solid fa-retweet"></i> Você repostou <button class="ghost" style="color:var(--red);padding:4px 8px;margin-left:6px" onclick="removeMyRepost(\\''+p.id+'\\')">Desfazer</button></div>';
+      const label=r.comment_text?'<div class="repost-comment"><i class="fa-solid fa-retweet"></i> Você repostou com comentário:<p>'+esc(r.comment_text)+'</p><button class="ghost" style="margin-top:8px;color:var(--red);padding:5px 9px" onclick="removeMyRepost(\''+p.id+'\')"><i class="fa-solid fa-trash"></i> Apagar meu repost com comentário</button></div>':'<div class="repost-label"><i class="fa-solid fa-retweet"></i> Você repostou <button class="ghost" style="color:var(--red);padding:4px 8px;margin-left:6px" onclick="removeMyRepost(\''+p.id+'\')">Desfazer</button></div>';
       return label+renderPostHtml(p,authorMap[p.user_id]||{},true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),commentCounts[p.id]||0,repostCounts[p.id]||0);
     }).join('')||'<p class="muted">Nenhum repost encontrado.</p>';
   } else if(tab==='following'||tab==='followers'){
