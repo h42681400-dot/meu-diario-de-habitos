@@ -551,7 +551,7 @@ button:active{
 
     <div id="signUpForm" class="hidden">
       <div class="field"><label>Nome Completo</label><input id="regName" placeholder="Ex: Mariana Silva"></div>
-      <div class="field"><label>Nome de usuário (@)</label><input id="regUsername" placeholder="ex: mariana.fit"></div>
+      <div class="field"><label>Nome de usuário (@)</label><input id="regUsername" placeholder="@mariana.fit" autocomplete="username"><small class="muted">Obrigatório começar com @. Esse será seu identificador no Cottontail.</small></div>
       <div class="field"><label>E-mail</label><input id="regEmail" type="email" placeholder="seuemail@exemplo.com"></div>
       <div class="field"><label>Senha</label><input id="regPassword" type="password" placeholder="Mínimo 6 caracteres"></div>
       <div class="field">
@@ -658,7 +658,7 @@ button:active{
   <section id="explore" class="page">
     <div class="card">
       <div style="display:flex;gap:8px">
-        <input id="searchPeople" placeholder="🔍 Buscar @usuário, nome ou posts..." oninput="searchProfilesAndPosts()">
+        <input id="searchPeople" placeholder="🔍 Buscar @usuário, nome ou posts..." oninput="queueExploreSearch()">
         <button class="secondary" onclick="clearRecentSearches()"><i class="fa-solid fa-trash-can"></i></button>
       </div>
       <div id="recentSearchesBox" class="muted" style="font-size:12px;margin:8px 0"></div>
@@ -1007,33 +1007,23 @@ function previewRegAvatar(input){
 }
 
 async function signUp(){
-  let name=$('regName').value.trim();
-  let username=$('regUsername').value.trim().toLowerCase().replace(/^@/,'');
-  let email=$('regEmail').value.trim();
-  let password=$('regPassword').value;
-  let language=$('regLanguage').value;
-
-  if(!name || !username || !email || password.length<6){
-    return status('loginStatus','Preencha nome, @usuário, e-mail e senha (mín. 6 caracteres).');
-  }
-
+  const name=$('regName').value.trim(),rawUsername=$('regUsername').value.trim().toLowerCase(),username=rawUsername.replace(/^@/,'');
+  const email=$('regEmail').value.trim(),password=$('regPassword').value,language=$('regLanguage').value;
+  if(!name||!rawUsername||!email||password.length<6)return status('loginStatus','Preencha nome, @usuário, e-mail e senha (mín. 6 caracteres).');
+  if(!/^@[a-z0-9._]{3,20}$/.test(rawUsername))return status('loginStatus','Seu nome de usuário precisa começar com @ e ter de 3 a 20 caracteres (letras, números, ponto ou _).');
+  status('loginStatus','Verificando disponibilidade do @...');
+  const {data:existing,error:checkError}=await db.from('user_profiles').select('user_id').ilike('username',username).maybeSingle();
+  if(checkError)return status('loginStatus','Não consegui verificar esse @ agora. Tente novamente.');
+  if(existing)return status('loginStatus','Esse @ já está em uso. Escolha outro.');
   status('loginStatus','Criando conta e perfil...');
-  let {data,error}=await db.auth.signUp({email,password});
-  if(error) return status('loginStatus', error.message);
-
-  let newUser = data.user;
+  const {data,error}=await db.auth.signUp({email,password});if(error)return status('loginStatus',error.message);
+  const newUser=data.user;
   if(newUser){
-    let avatar_url = null;
-    let avatarFile = $('regAvatarInput').files[0];
-    if(avatarFile){
-      try { avatar_url = await uploadFile(avatarFile, `avatar_${newUser.id}_${Date.now()}`); } catch(e){}
-    }
-
-    await db.from('user_profiles').upsert({
-      user_id:newUser.id, full_name:name, username:username, language:language, avatar_url:avatar_url, updated_at:new Date().toISOString()
-    },{onConflict:'user_id'});
-
-    status('loginStatus', data.session?'Perfil criado com sucesso!':'Conta criada! Confirme seu e-mail.');
+    let avatar_url=null;const avatarFile=$('regAvatarInput').files[0];
+    if(avatarFile){try{avatar_url=await uploadFile(avatarFile,`avatar_${newUser.id}_${Date.now()}`);}catch(e){}}
+    const {error:profileError}=await db.from('user_profiles').upsert({user_id:newUser.id,full_name:name,username,language,avatar_url,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+    if(profileError)return status('loginStatus','Conta criada, mas não consegui salvar o @: '+profileError.message);
+    status('loginStatus',data.session?'Perfil criado com sucesso!':'Conta criada! Confirme seu e-mail.');
   }
 }
 
@@ -1103,12 +1093,9 @@ db.auth.onAuthStateChange((_event,session)=>{
     if(!user || user.id!==nextUser.id) return;
     try{
       await ensureProfile();
-      await loadMonth();
-      await loadProfile();
-      await loadFeed('all');
-      await loadChats();
-      await checkUnreadBadges();
+      await Promise.all([loadMonth(),loadProfile(),loadFeed('all'),checkUnreadBadges()]);
       await startNotificationPolling();
+      showToast('Bem-vinda de volta!','Seu Cottontail está prontinho para você. 🐰',{type:'welcome'});
     }catch(err){
       console.error('Erro ao iniciar o Cottontail:',err);
       status('loginStatus','Entrou, mas houve um erro ao carregar o aplicativo. Atualize a página.');
@@ -1131,7 +1118,7 @@ function showPage(id){
   $('fabPostBtn').classList.toggle('hidden', id==='messages');
 
   if(id==='explore')searchProfilesAndPosts();
-  if(id==='messages'){ loadChats(); backToChatList(); }
+  if(id==='messages'){ backToChatList(); }
   if(id==='feed')loadFeed('all');
   if(id==='notifications')loadNotifications();
   if(id==='profile')loadProfileDataTab('posts');
@@ -1441,36 +1428,27 @@ async function loadProfileDataTab(tab){
 
 /* FEED & POSTS */
 async function loadFeed(mode='all'){
-  let {data:blocked}=await db.from('blocks').select('blocked_id').eq('blocker_id',user.id);
-  let blockedIds=(blocked||[]).map(b=>b.blocked_id);
-
-  let {data:posts}=await db.from('posts').select('*').order('created_at',{ascending:false}).limit(50);
-  let rows=(posts||[]).filter(p=>!blockedIds.includes(p.user_id));
-
-  if(mode==='following'){
-    let {data:f}=await db.from('follows').select('following_id').eq('follower_id',user.id);
-    let ids=(f||[]).map(x=>x.following_id);
-    rows=rows.filter(p=>ids.includes(p.user_id)||p.user_id===user.id);
-  }
-  let ids=[...new Set(rows.map(p=>p.user_id))];
-  let profs={};
-  if(ids.length){
-    let {data}=await db.from('user_profiles').select('*').in('user_id',ids);
-    (data||[]).forEach(p=>profs[p.user_id]=p);
-  }
-
-  let postIds=rows.map(p=>p.id);
-  let likes={}, mineLikes=new Set(), mineReposts=new Set(), commentCounts={};
-  if(postIds.length){
-    let {data:l}=await db.from('post_likes').select('post_id,user_id').in('post_id',postIds);
-    (l||[]).forEach(x=>{ likes[x.post_id]=(likes[x.post_id]||0)+1; if(x.user_id===user.id) mineLikes.add(x.post_id); });
-    let {data:r}=await db.from('post_reposts').select('post_id,user_id').in('post_id',postIds);
-    (r||[]).forEach(x=>{ if(x.user_id===user.id) mineReposts.add(x.post_id); });
-    let {data:c}=await db.from('post_comments').select('post_id').in('post_id',postIds);
-    (c||[]).forEach(x=>{ commentCounts[x.post_id]=(commentCounts[x.post_id]||0)+1; });
-  }
-
-  $('feedList').innerHTML=rows.length?rows.map(p=>renderPostHtml(p, profs[p.user_id]||{}, true, likes[p.id]||0, mineLikes.has(p.id), mineReposts.has(p.id), commentCounts[p.id]||0)).join(''):'<p class="muted">Nenhuma publicação por aqui.</p>';
+  const [blockedResult,postsResult,followingResult]=await Promise.all([
+    db.from('blocks').select('blocked_id').eq('blocker_id',user.id),
+    db.from('posts').select('*').order('created_at',{ascending:false}).limit(50),
+    mode==='following'?db.from('follows').select('following_id').eq('follower_id',user.id):Promise.resolve({data:[]})
+  ]);
+  const blockedIds=(blockedResult.data||[]).map(b=>b.blocked_id);
+  let rows=(postsResult.data||[]).filter(p=>!blockedIds.includes(p.user_id));
+  if(mode==='following'){const ids=(followingResult.data||[]).map(x=>x.following_id);rows=rows.filter(p=>ids.includes(p.user_id)||p.user_id===user.id);}
+  const ids=[...new Set(rows.map(p=>p.user_id))],postIds=rows.map(p=>p.id);
+  const [profilesResult,likesResult,repostsResult,commentsResult]=await Promise.all([
+    ids.length?db.from('user_profiles').select('*').in('user_id',ids):Promise.resolve({data:[]}),
+    postIds.length?db.from('post_likes').select('post_id,user_id').in('post_id',postIds):Promise.resolve({data:[]}),
+    postIds.length?db.from('post_reposts').select('post_id,user_id').in('post_id',postIds):Promise.resolve({data:[]}),
+    postIds.length?db.from('post_comments').select('post_id').in('post_id',postIds):Promise.resolve({data:[]})
+  ]);
+  const profs={},likes={},mineLikes=new Set(),mineReposts=new Set(),commentCounts={};
+  (profilesResult.data||[]).forEach(p=>profs[p.user_id]=p);
+  (likesResult.data||[]).forEach(x=>{likes[x.post_id]=(likes[x.post_id]||0)+1;if(x.user_id===user.id)mineLikes.add(x.post_id);});
+  (repostsResult.data||[]).forEach(x=>{if(x.user_id===user.id)mineReposts.add(x.post_id);});
+  (commentsResult.data||[]).forEach(x=>{commentCounts[x.post_id]=(commentCounts[x.post_id]||0)+1;});
+  $('feedList').innerHTML=rows.length?rows.map(p=>renderPostHtml(p,profs[p.user_id]||{},true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),commentCounts[p.id]||0)).join(''):'<p class="muted">Nenhuma publicação por aqui.</p>';
 }
 
 function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false, isReposted=false, commentCount=0){
@@ -1516,13 +1494,15 @@ function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false,
   `;
 }
 
-async function toggleLike(postId, isLiked, postOwnerId){
-  if(isLiked) await db.from('post_likes').delete().eq('post_id',postId).eq('user_id',user.id);
-  else {
-    await db.from('post_likes').insert({post_id:postId,user_id:user.id});
-    if(postOwnerId !== user.id) await db.from('notifications').insert({user_id:postOwnerId, actor_id:user.id, type:'like', post_id:postId});
+async function toggleLike(postId,isLiked,postOwnerId){
+  if(isLiked){await db.from('post_likes').delete().eq('post_id',postId).eq('user_id',user.id);showToast('Curtida removida','Você removeu sua curtida.',{type:'like'});}
+  else{
+    const {error}=await db.from('post_likes').insert({post_id:postId,user_id:user.id});
+    if(error){showToast('Ops!','Não foi possível curtir esta publicação.',{type:'like'});return;}
+    if(postOwnerId!==user.id)await db.from('notifications').insert({user_id:postOwnerId,actor_id:user.id,type:'like',post_id:postId});
+    showToast('Curtido!','Você curtiu uma publicação. 🤍',{type:'like'});
   }
-  loadFeed('all');
+  await loadFeed('all');
 }
 
 async function toggleRepost(postId, isReposted, postOwnerId){
@@ -1554,14 +1534,14 @@ async function loadPostComments(postId){
   }).join('')||'<p class="muted" style="font-size:13px">Nenhum comentário ainda.</p>';
 }
 
-async function addComment(postId, postOwnerId){
-  let input=$('comment-input-'+postId), content=input.value.trim();
-  if(!content)return;
-  await db.from('post_comments').insert({post_id:postId, user_id:user.id, content});
+async function addComment(postId,postOwnerId){
+  let input=$('comment-input-'+postId),content=input.value.trim();if(!content)return;
+  const {error}=await db.from('post_comments').insert({post_id:postId,user_id:user.id,content});
+  if(error){showToast('Ops!','Não foi possível publicar seu comentário.',{type:'comment'});return;}
   input.value='';
-  if(postOwnerId !== user.id) await db.from('notifications').insert({user_id:postOwnerId, actor_id:user.id, type:'comment', post_id:postId});
-  await loadPostComments(postId);
-  loadFeed('all');
+  if(postOwnerId!==user.id)await db.from('notifications').insert({user_id:postOwnerId,actor_id:user.id,type:'comment',post_id:postId});
+  showToast('Comentário enviado!','Seu comentário foi publicado. 💬',{type:'comment'});
+  await loadPostComments(postId);await loadFeed('all');
 }
 
 /* EXPLORAR */
@@ -1709,6 +1689,20 @@ async function searchProfilesAndPosts(){
   `;
 }
 
+async function toggleFollowFromExplore(targetId){
+  const {data:existing}=await db.from('follows').select('follower_id').eq('follower_id',user.id).eq('following_id',targetId).maybeSingle();
+  if(existing){await db.from('follows').delete().eq('follower_id',user.id).eq('following_id',targetId);showToast('Tudo certo','Você deixou de seguir este perfil.',{type:'follow'});}
+  else{
+    const {error}=await db.from('follows').insert({follower_id:user.id,following_id:targetId});
+    if(error){showToast('Ops!','Não foi possível seguir este perfil.',{type:'follow'});return;}
+    await db.from('notifications').insert({user_id:targetId,actor_id:user.id,type:'follow'});
+    showToast('Novo seguindo!','Você começou a seguir um perfil. ✨',{type:'follow'});
+  }
+  await searchProfilesAndPosts();
+}
+let exploreSearchTimer=null;
+function queueExploreSearch(){clearTimeout(exploreSearchTimer);exploreSearchTimer=setTimeout(searchProfilesAndPosts,280);}
+
 function renderRecentSearches(){
   let searches = JSON.parse(localStorage.getItem('recentSearches')||'[]');
   if(searches.length){
@@ -1756,13 +1750,15 @@ async function inspectProfile(id){
 
 function closeUserModal(){ $('userModal').classList.add('hidden'); }
 
-async function toggleFollowModal(targetId, isFollowing){
-  if(isFollowing) await db.from('follows').delete().eq('follower_id',user.id).eq('following_id',targetId);
-  else {
-    await db.from('follows').insert({follower_id:user.id,following_id:targetId});
-    await db.from('notifications').insert({user_id:targetId, actor_id:user.id, type:'follow'});
+async function toggleFollowModal(targetId,isFollowing){
+  if(isFollowing){await db.from('follows').delete().eq('follower_id',user.id).eq('following_id',targetId);showToast('Tudo certo','Você deixou de seguir este perfil.',{type:'follow'});}
+  else{
+    const {error}=await db.from('follows').insert({follower_id:user.id,following_id:targetId});
+    if(error){showToast('Ops!','Não foi possível seguir este perfil.',{type:'follow'});return;}
+    await db.from('notifications').insert({user_id:targetId,actor_id:user.id,type:'follow'});
+    showToast('Novo seguindo!','Você começou a seguir um perfil. ✨',{type:'follow'});
   }
-  inspectProfile(targetId);
+  await inspectProfile(targetId);
 }
 
 async function toggleBlockUser(targetId, isBlocked){
@@ -1990,7 +1986,7 @@ function showToast(title,message,notification){
   const container=$('toastContainer');
   if(!container) return;
   const toast=document.createElement('div');
-  toast.className='app-toast';
+  toast.className='app-toast'+(notification?.id?' has-action':'');
   const icon=document.createElement('div');
   icon.className='app-toast-icon';
   icon.innerHTML='<i class="fa-solid '+notificationIcon(notification.type)+'"></i>';
@@ -2008,7 +2004,7 @@ function showToast(title,message,notification){
   close.textContent='×';
   close.onclick=(event)=>{event.stopPropagation();toast.remove();};
   toast.append(icon,body,close);
-  toast.onclick=()=>openNotification(notification.id,notification.actor_id,notification.type,notification.post_id);
+  if(notification?.id)toast.onclick=()=>openNotification(notification.id,notification.actor_id,notification.type,notification.post_id);
   container.appendChild(toast);
   setTimeout(()=>{if(toast.isConnected)toast.remove();},6500);
 }
@@ -2040,4 +2036,3 @@ async function checkNewNotifications(){
 </script>
 </body>
 </html>
-```[cite: 1]
