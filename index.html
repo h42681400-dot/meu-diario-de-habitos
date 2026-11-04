@@ -1587,29 +1587,29 @@ async function loadProfileDataTab(tab){
     (commentsRes.data||[]).forEach(x=>comments[x.post_id]=(comments[x.post_id]||0)+1);
     box.innerHTML=posts.map(p=>renderPostHtml(p,profile,true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),comments[p.id]||0,reposts[p.id]||0)).join('')||'<p class="muted">Você ainda não publicou nada.</p>';
   } else if(tab==='reposts'){
-    let {data:reposts}=await db.from('post_reposts').select('*').eq('user_id',user.id).order('created_at',{ascending:false});
-    let postIds=(reposts||[]).map(r=>r.post_id);
-    if(!postIds.length){box.innerHTML=`<p class="muted">Nenhum repost ainda.</p>`;return;}
-    let {data:posts}=await db.from('posts').select('*').in('id',postIds);
-    let authorIds=[...new Set((posts||[]).map(p=>p.user_id))];
-    let {data:authors}=await db.from('user_profiles').select('*').in('user_id',authorIds);
-    let authorMap={}; (authors||[]).forEach(a=>authorMap[a.user_id]=a);
-    const postMap={};(posts||[]).forEach(p=>postMap[p.id]=p);
-    const [likesResult,repostsResult,commentsResult]=await Promise.all([
+    const {data:myReposts,error:myRepostsError}=await db.from('post_reposts').select('post_id,comment_text,created_at').eq('user_id',user.id).order('created_at',{ascending:false});
+    if(myRepostsError){console.error('Erro ao buscar meus reposts:',myRepostsError);box.innerHTML='<p class="muted">Não foi possível carregar seus reposts.</p>';return;}
+    const postIds=[...new Set((myReposts||[]).map(r=>r.post_id))];
+    if(!postIds.length){box.innerHTML='<p class="muted">Nenhum repost ainda.</p>';return;}
+    const [postsResult,likesResult,repostsResult,commentsResult]=await Promise.all([
+      db.from('posts').select('*').in('id',postIds),
       db.from('post_likes').select('post_id,user_id').in('post_id',postIds),
       db.from('post_reposts').select('post_id,user_id').in('post_id',postIds),
       db.from('post_comments').select('post_id').in('post_id',postIds)
     ]);
-    if(likesResult.error||repostsResult.error||commentsResult.error){
-      console.error('Erro ao carregar interações dos reposts:',likesResult.error||repostsResult.error||commentsResult.error);
-      box.innerHTML='<p class="muted">Não foi possível carregar os números das interações.</p>';
-      return;
-    }
+    const queryError=postsResult.error||likesResult.error||repostsResult.error||commentsResult.error;
+    if(queryError){console.error('Erro ao carregar dados dos reposts:',queryError);box.innerHTML='<p class="muted">Não foi possível carregar os números das interações.</p>';return;}
+    const posts=postsResult.data||[];
+    const postMap={};posts.forEach(p=>postMap[p.id]=p);
+    const authorIds=[...new Set(posts.map(p=>p.user_id))];
+    const {data:authors,error:authorsError}=await db.from('user_profiles').select('*').in('user_id',authorIds);
+    if(authorsError){console.error('Erro ao carregar autores dos reposts:',authorsError);}
+    const authorMap={};(authors||[]).forEach(a=>authorMap[a.user_id]=a);
     const likes={},repostCounts={},commentCounts={},mineLikes=new Set(),mineReposts=new Set();
     (likesResult.data||[]).forEach(x=>{likes[x.post_id]=(likes[x.post_id]||0)+1;if(x.user_id===user.id)mineLikes.add(x.post_id);});
     (repostsResult.data||[]).forEach(x=>{repostCounts[x.post_id]=(repostCounts[x.post_id]||0)+1;if(x.user_id===user.id)mineReposts.add(x.post_id);});
     (commentsResult.data||[]).forEach(x=>{commentCounts[x.post_id]=(commentCounts[x.post_id]||0)+1;});
-    box.innerHTML=(reposts||[]).map(r=>{
+    box.innerHTML=(myReposts||[]).map(r=>{
       const p=postMap[r.post_id];if(!p)return '';
       const label=r.comment_text?'<div class="repost-comment"><i class="fa-solid fa-retweet"></i> Você repostou com comentário:<p>'+esc(r.comment_text)+'</p><button class="ghost" style="margin-top:8px;color:var(--red);padding:5px 9px" onclick="removeMyRepost(\\''+p.id+'\\')"><i class="fa-solid fa-trash"></i> Apagar meu repost com comentário</button></div>':'<div class="repost-label"><i class="fa-solid fa-retweet"></i> Você repostou <button class="ghost" style="color:var(--red);padding:4px 8px;margin-left:6px" onclick="removeMyRepost(\\''+p.id+'\\')">Desfazer</button></div>';
       return label+renderPostHtml(p,authorMap[p.user_id]||{},true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),commentCounts[p.id]||0,repostCounts[p.id]||0);
