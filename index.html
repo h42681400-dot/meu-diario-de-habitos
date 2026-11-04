@@ -609,7 +609,7 @@ body.theme-dark .bubble-time{color:#b6c7c0}
 .chat-list-copy{min-width:0;flex:1}
 .chat-list-preview{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
 .chat-list-state{font-size:10px;color:#2eaa70;display:flex;align-items:center;justify-content:flex-end;min-width:20px}
-.conversation-unread{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#e53945;color:#fff;font-size:10px;font-weight:800;line-height:1}
+.conversation-unread{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;padding:0 6px;border:2px solid var(--card-bg);border-radius:999px;background:linear-gradient(135deg,#f7a8c4,#e985ad);color:#fff;font-size:10px;font-weight:800;line-height:1;box-shadow:0 2px 7px rgba(224,132,169,.28)}
 .message-receipt{font-size:9px;white-space:nowrap;margin-left:4px;color:rgba(255,255,255,.75)}
 .message-receipt.read{color:#d7f0ff}
 .bubble.other .message-receipt{color:var(--muted)}
@@ -728,6 +728,21 @@ body.theme-dark #messageBox .bubble.other{background:#303036;color:#f7eff2;borde
 }
 .nav button .badge-red.hidden{display:none!important}
 @media(min-width:768px){.nav .badge-red{top:0;right:calc(50% - 25px)}}
+
+/* Bolinhas de mensagens e notificações: rosa delicado */
+.nav button .badge-red{
+  background:linear-gradient(135deg,#f7a8c4,#e985ad)!important;
+  color:#fff!important;
+  border:2px solid var(--card-bg)!important;
+  box-shadow:0 2px 7px rgba(224,132,169,.28)!important;
+}
+.conversation-unread{
+  background:linear-gradient(135deg,#f7a8c4,#e985ad)!important;
+  color:#fff!important;
+  border-color:var(--card-bg)!important;
+  box-shadow:0 2px 7px rgba(224,132,169,.28)!important;
+}
+
 </style></head>
 <body>
 
