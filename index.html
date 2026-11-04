@@ -1632,12 +1632,12 @@ async function loadFeed(mode='all'){
     postIds.length?db.from('post_reposts').select('post_id,user_id').in('post_id',postIds):Promise.resolve({data:[]}),
     postIds.length?db.from('post_comments').select('post_id').in('post_id',postIds):Promise.resolve({data:[]})
   ]);
-  const profs={},likes={},mineLikes=new Set(),mineReposts=new Set(),commentCounts={};
+  const profs={},likes={},reposts={},mineLikes=new Set(),mineReposts=new Set(),commentCounts={};
   (profilesResult.data||[]).forEach(p=>profs[p.user_id]=p);
   (likesResult.data||[]).forEach(x=>{likes[x.post_id]=(likes[x.post_id]||0)+1;if(x.user_id===user.id)mineLikes.add(x.post_id);});
-  (repostsResult.data||[]).forEach(x=>{if(x.user_id===user.id)mineReposts.add(x.post_id);});
+  (repostsResult.data||[]).forEach(x=>{reposts[x.post_id]=(reposts[x.post_id]||0)+1;if(x.user_id===user.id)mineReposts.add(x.post_id);});
   (commentsResult.data||[]).forEach(x=>{commentCounts[x.post_id]=(commentCounts[x.post_id]||0)+1;});
-  $('feedList').innerHTML=rows.length?rows.map(p=>renderPostHtml(p,profs[p.user_id]||{},true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),commentCounts[p.id]||0)).join(''):'<p class="muted">Nenhuma publicação por aqui.</p>';
+  $('feedList').innerHTML=rows.length?rows.map(p=>renderPostHtml(p,profs[p.user_id]||{},true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),commentCounts[p.id]||0,reposts[p.id]||0)).join(''):'<p class="muted">Nenhuma publicação por aqui.</p>';
 }
 
 function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false, isReposted=false, commentCount=0, repostCount=0){
@@ -1697,7 +1697,7 @@ async function openRepostComposer(postId,postOwnerId){
   let modal=document.getElementById('repostComposerModal');
   if(!modal){
     modal=document.createElement('div');modal.id='repostComposerModal';modal.className='modal-overlay hidden';
-    modal.innerHTML='<div class="modal-box repost-composer-box"><div class="repost-composer-heading"><h3>Compartilhar publicação</h3><button class="ghost repost-close" onclick="closeRepostComposer()" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></div><div class="repost-original-preview"><div class="repost-preview-label"><i class="fa-solid fa-retweet"></i> Publicação original</div><p id="repostOriginalText"></p><img id="repostOriginalImage" class="hidden"></div><div class="repost-choice-label">Como você quer compartilhar?</div><button class="repost-normal-button" id="confirmSimpleRepostButton" onclick="submitRepost(false)"><i class="fa-solid fa-retweet"></i> Repostar</button><div class="repost-comment-option"><textarea id="repostCommentInput" rows="3" placeholder="Escreva um comentário..."></textarea><button id="confirmCommentRepostButton" onclick="submitRepost(true)"><i class="fa-regular fa-comment"></i> Repostar com comentário</button></div><div class="repost-composer-actions"><button class="secondary" onclick="closeRepostComposer()">Cancelar</button></div></div>';
+    modal.innerHTML='<div class="modal-box repost-composer-box"><div class="repost-composer-heading"><h3>Compartilhar publicação</h3><button class="ghost repost-close" onclick="closeRepostComposer()" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></div><div class="repost-original-preview"><div class="repost-preview-label"><i class="fa-solid fa-retweet"></i> Publicação original</div><p id="repostOriginalText"></p><img id="repostOriginalImage" class="hidden"></div><div class="repost-choice-label">Como você quer compartilhar?</div><button class="repost-normal-button" id="confirmSimpleRepostButton" onclick="submitSimpleRepost()"><i class="fa-solid fa-retweet"></i> Repostar</button><div class="repost-comment-option"><textarea id="repostCommentInput" rows="3" placeholder="Escreva um comentário..."></textarea><button id="confirmCommentRepostButton" onclick="submitCommentRepost()"><i class="fa-regular fa-comment"></i> Repostar com comentário</button></div><div class="repost-composer-actions"><button class="secondary" onclick="closeRepostComposer()">Cancelar</button></div></div>';
     document.body.appendChild(modal);
     modal.addEventListener('click',e=>{if(e.target===modal)closeRepostComposer();});
   }
@@ -1708,20 +1708,29 @@ async function openRepostComposer(postId,postOwnerId){
   modal.classList.remove('hidden');
 }
 function closeRepostComposer(){document.getElementById('repostComposerModal')?.classList.add('hidden');repostDraft={postId:null,postOwnerId:null};}
-async function submitRepost(withComment=false){
-  if(!repostDraft.postId)return;
+async function submitSimpleRepost(){return saveRepost(false);}
+async function submitCommentRepost(){return saveRepost(true);}
+async function submitRepost(withComment=false){return saveRepost(!!withComment);}
+async function saveRepost(withComment){
+  if(!repostDraft.postId||!user)return;
   const button=document.getElementById(withComment?'confirmCommentRepostButton':'confirmSimpleRepostButton');
   if(!button)return;
-  button.disabled=true;button.textContent='Publicando...';
+  const originalLabel=withComment?'Repostar com comentário':'Repostar';
+  button.disabled=true;
+  button.textContent='Publicando...';
   const postId=repostDraft.postId,postOwnerId=repostDraft.postOwnerId;
-  const comment=withComment?document.getElementById('repostCommentInput').value.trim():'';
-  const {error}=await db.from('post_reposts').upsert({post_id:postId,user_id:user.id,comment_text:comment},{onConflict:'post_id,user_id'});
-  button.disabled=false;
-  button.innerHTML=withComment?'<i class="fa-regular fa-comment"></i> Repostar com comentário':'<i class="fa-solid fa-retweet"></i> Repostar';
-  if(error){showToast('Ops!','Não foi possível repostar. Confira se a atualização do banco foi aplicada.',{type:'repost'});return;}
+  const comment=withComment?(document.getElementById('repostCommentInput')?.value||'').trim():'';
+  const payload={post_id:postId,user_id:user.id,comment_text:comment};
+  const {error}=await db.from('post_reposts').upsert(payload,{onConflict:'post_id,user_id'});
+  if(error){
+    button.disabled=false;
+    button.innerHTML=withComment?'<i class="fa-regular fa-comment"></i> Repostar com comentário':'<i class="fa-solid fa-retweet"></i> Repostar';
+    showToast('Ops!','Não foi possível repostar: '+error.message,{type:'repost'});
+    return;
+  }
   closeRepostComposer();
   if(postOwnerId!==user.id)await db.from('notifications').insert({user_id:postOwnerId,actor_id:user.id,type:'repost',post_id:postId});
-  showToast('Repost publicado!',withComment&&comment?'Sua publicação foi compartilhada com comentário.':'Sua publicação foi compartilhada.',{type:'repost'});
+  showToast('Repost publicado!',withComment&&comment?'Sua publicação foi compartilhada com comentário.':'Sua publicação foi compartilhada sem comentário.',{type:'repost'});
   await loadFeed('all');
 }
 
@@ -1848,10 +1857,20 @@ async function searchProfilesAndPosts(){
     let authorMap={};
     (authors||[]).forEach(a=>authorMap[a.user_id]=a);
 
+    const matchingIds=matchingPosts.map(p=>p.id);
+    const [likesRes,repostsRes,commentsRes]=await Promise.all([
+      db.from('post_likes').select('post_id,user_id').in('post_id',matchingIds),
+      db.from('post_reposts').select('post_id,user_id').in('post_id',matchingIds),
+      db.from('post_comments').select('post_id').in('post_id',matchingIds)
+    ]);
+    const likes={},reposts={},comments={},mineLikes=new Set(),mineReposts=new Set();
+    (likesRes.data||[]).forEach(x=>{likes[x.post_id]=(likes[x.post_id]||0)+1;if(x.user_id===user.id)mineLikes.add(x.post_id);});
+    (repostsRes.data||[]).forEach(x=>{reposts[x.post_id]=(reposts[x.post_id]||0)+1;if(x.user_id===user.id)mineReposts.add(x.post_id);});
+    (commentsRes.data||[]).forEach(x=>{comments[x.post_id]=(comments[x.post_id]||0)+1;});
     postsHtml=`
       <h3 style="font-size:15px;margin:20px 0 10px">Publicações</h3>
       ${matchingPosts.map(p=>
-        renderPostHtml(p,authorMap[p.user_id]||{},true)
+        renderPostHtml(p,authorMap[p.user_id]||{},true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),comments[p.id]||0,reposts[p.id]||0)
       ).join('')}
     `;
   }
