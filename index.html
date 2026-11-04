@@ -2925,19 +2925,27 @@ async function checkNewNotifications(){
   if($('notifications').classList.contains('active')) await loadNotifications();
 }
 
-/* Handler global declarado antes de renderizar os posts, para o onclick inline. */
-function handlePinPostClick(event, postId){
+/* Handler global explicitamente exposto para o onclick dos menus de publicação. */
+window.handlePinPostClick = async function(event, postId){
   if(event){event.preventDefault();event.stopPropagation();}
   const button=event?.currentTarget;
   button?.closest('.post-options-menu')?.classList.add('hidden');
-  if(!postId){window.alert('Não foi possível fixar: ID da publicação ausente.');return false;}
-  if(typeof pinPost!=='function'){window.alert('Não foi possível fixar: função pinPost não carregada.');return false;}
-  pinPost(postId).catch(error=>{
+  if(!postId){
+    window.alert('Não foi possível fixar: ID da publicação ausente.');
+    return false;
+  }
+  if(typeof pinPost!=='function'){
+    window.alert('Não foi possível fixar: função pinPost não carregada. Atualize a página.');
+    return false;
+  }
+  try{
+    await pinPost(postId);
+  }catch(error){
     console.error('Falha ao fixar publicação:',error);
     window.alert('Erro ao fixar publicação: '+(error?.message||String(error)));
-  });
+  }
   return false;
-}
+};
 </script>
 <script>
 window.handleLoginClick = function(event) {
