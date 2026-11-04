@@ -1,0 +1,13 @@
+{
+  "appId": "com.cottontail.app",
+  "appName": "Cottontail",
+  "webDir": "www",
+  "server": {
+    "url": "https://meu-diario-de-habitos-yji4-k2u7j9bcg-project-me13.vercel.app/",
+    "cleartext": false,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
