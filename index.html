@@ -1181,8 +1181,25 @@ async function signUp(){
 }
 
 async function signIn(){
-  let {error}=await db.auth.signInWithPassword({ email:$('loginEmail').value.trim(), password:$('loginPassword').value });
-  if(error)status('loginStatus',error.message);
+  const email=$('loginEmail').value.trim(),password=$('loginPassword').value;
+  const button=document.querySelector('#loginForm .login-actions button');
+  if(!email||!password){status('loginStatus','Digite seu e-mail e sua senha para entrar.');return;}
+  if(button){button.disabled=true;button.textContent='Entrando...';}
+  status('loginStatus','Conectando à sua conta...');
+  try{
+    const {data,error}=await db.auth.signInWithPassword({email,password});
+    if(error)throw error;
+    if(!data?.session)throw new Error('A autenticação não retornou uma sessão. Confira se o e-mail foi confirmado.');
+    user=data.user;
+    $('loginScreen').classList.add('hidden');
+    $('app').classList.remove('hidden');
+    status('loginStatus','Login realizado! Carregando seu Cottontail...');
+  }catch(error){
+    console.error('Erro no login:',error);
+    status('loginStatus',error.message||'Não foi possível entrar. Confira seu e-mail e sua senha.');
+  }finally{
+    if(button){button.disabled=false;button.textContent='Entrar';}
+  }
 }
 
 async function resetPassword(){
@@ -1692,9 +1709,8 @@ function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false,
       ${p.media_url?`<img src="${esc(p.media_url)}" class="post-media" loading="lazy" decoding="async">`:''}
       ${interactive?`
         <div class="post-actions">
-          <span class="post-like-control"><button class="post-heart-button ${isLiked?'liked':''}" onclick="toggleLike('${p.id}',${isLiked},'${p.user_id}')" aria-label="Curtir"><i class="${isLiked?'fa-solid':'fa-regular'} fa-heart"></i></button><button class="post-count-button" onclick="showPostPeople('${p.id}','likes')" aria-label="Ver quem curtiu">${likeCount}</button></span>
-          <button class="${isReposted?'reposted':''}" onclick="handleRepostClick('${p.id}',${isReposted},'${p.user_id}')"><i class="fa-solid fa-retweet"></i> ${isReposted?'Desfazer repost':'Repostar'}</button>
-          <button onclick="showPostPeople('${p.id}','reposts')"><b>${repostCount}</b> reposts</button>
+          <button class="post-heart-button post-count-button ${isLiked?'liked':''}" onclick="toggleLike('${p.id}',${isLiked},'${p.user_id}')" aria-label="Curtir ou retirar curtida"><i class="${isLiked?'fa-solid':'fa-regular'} fa-heart"></i> <b>${likeCount}</b></button>
+          <button class="post-count-button ${isReposted?'reposted':''}" onclick="handleRepostClick('${p.id}',${isReposted},'${p.user_id}')" aria-label="Repostar ou desfazer repost"><i class="fa-solid fa-retweet"></i> <b>${repostCount}</b> <span>${isReposted?'Repostado':'Repostar'}</span></button>
           <button onclick="toggleCommentsSection('${p.id}')"><i class="fa-regular fa-comment"></i> <b>${commentCount}</b> comentários</button>
         </div>
         <div id="comments-box-${p.id}" class="comments-section hidden">
@@ -1809,18 +1825,34 @@ async function loadPostComments(postId){
   const {data:post}=await db.from('posts').select('user_id').eq('id',postId).maybeSingle();
   const canModerate=post?.user_id===user.id,rows=data||[],userIds=[...new Set(rows.map(c=>c.user_id))],authors={};
   if(userIds.length){const {data:profiles}=await db.from('user_profiles').select('*').in('user_id',userIds);(profiles||[]).forEach(p=>authors[p.user_id]=p);}
+  const commentIds=rows.map(c=>c.id),likesByComment={},myCommentLikes=new Set();
+  if(commentIds.length){
+    const {data:commentLikes,error:likesError}=await db.from('comment_likes').select('comment_id,user_id').in('comment_id',commentIds);
+    if(!likesError)(commentLikes||[]).forEach(x=>{likesByComment[x.comment_id]=(likesByComment[x.comment_id]||0)+1;if(x.user_id===user.id)myCommentLikes.add(x.comment_id);});
+  }
   const childrenByParent={};rows.forEach(c=>{if(c.parent_comment_id)(childrenByParent[c.parent_comment_id]??=[]).push(c);});
   const deleteButton=c=>(c.user_id===user.id||canModerate)?'<button class="ghost" style="padding:3px 7px;font-size:11px;margin-left:6px;color:var(--red)" onclick="deletePostComment(\\''+c.id+'\\',\\''+postId+'\\')"><i class="fa-solid fa-trash"></i> Apagar</button>':'';
   const depthLabel=depth=>depth?'<span class="muted" style="font-size:10px;margin-left:5px">↳ resposta</span>':'';
   const renderComment=(c,depth=0)=>{
     const a=authors[c.user_id]||{},name=a.full_name||'Usuário';
+    const liked=myCommentLikes.has(c.id);
+    const likeButton='<button class="ghost comment-like-button '+(liked?'liked':'')+'" style="padding:3px 7px;font-size:11px;margin-left:6px" onclick="toggleCommentLike(\\''+c.id+'\\',\\''+postId+'\\','+liked+')" aria-label="Curtir comentário"><i class="'+(liked?'fa-solid':'fa-regular')+' fa-heart"></i> '+(likesByComment[c.id]||0)+'</button>';
     const replyButton='<button class="ghost" style="padding:3px 7px;font-size:11px;margin-left:6px" data-name="'+esc(name)+'" onclick="replyToComment(\\''+postId+'\\',\\''+c.id+'\\',this.dataset.name)">Responder</button>';
     const nested=(childrenByParent[c.id]||[]).map(x=>renderComment(x,depth+1)).join('');
-    return '<div class="'+(depth?'comment-reply':'comment-item')+'" style="'+(depth>1?'margin-left:12px;':'')+'"><b>'+esc(name)+'</b> '+esc(c.content)+depthLabel(depth)+deleteButton(c)+replyButton+nested+'</div>';
+    return '<div class="'+(depth?'comment-reply':'comment-item')+'" style="'+(depth>1?'margin-left:12px;':'')+'"><b>'+esc(name)+'</b> '+esc(c.content)+depthLabel(depth)+likeButton+deleteButton(c)+replyButton+nested+'</div>';
   };
   const roots=rows.filter(c=>!c.parent_comment_id||!rows.some(p=>p.id===c.parent_comment_id));
   postUiElement(postId,'comments-list').innerHTML=roots.map(c=>renderComment(c)).join('')||'<p class="muted" style="font-size:13px">Nenhum comentário ainda.</p>';
 }
+async function toggleCommentLike(commentId,postId,isLiked){
+  if(!user)return;
+  const result=isLiked
+    ?await db.from('comment_likes').delete().eq('comment_id',commentId).eq('user_id',user.id)
+    :await db.from('comment_likes').insert({comment_id:commentId,user_id:user.id});
+  if(result.error){showToast('Ops!','Não foi possível curtir o comentário. Confira a configuração no banco de dados.',{type:'comment'});return;}
+  await loadPostComments(postId);
+}
+
 async function deletePostComment(commentId,postId){
   if(!confirm('Apagar este comentário?'))return;
   const {data,error}=await db.rpc('delete_post_comment',{p_comment_id:commentId});
