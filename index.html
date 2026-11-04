@@ -167,6 +167,8 @@ textarea{min-height:85px;resize:vertical}
 
 /* Posts */
 .post{border-bottom:1px solid var(--line);padding:18px 0}
+.post-pinned-label{display:inline-flex;align-items:center;gap:7px;margin:0 0 10px;padding:5px 10px;border-radius:20px;background:rgba(212,165,165,.15);color:var(--rose);font-size:11px;font-weight:700;letter-spacing:.2px}
+.post-pinned-label i{font-size:11px}
 .post:last-child{border-bottom:0}
 .post-head{display:flex;align-items:center;justify-content:space-between}
 .post-user-info{display:flex;align-items:center;gap:12px;cursor:pointer}
@@ -1975,7 +1977,7 @@ async function loadProfileDataTab(tab){
     (likesRes.data||[]).forEach(x=>{likes[x.post_id]=(likes[x.post_id]||0)+1;if(x.user_id===user.id)mineLikes.add(x.post_id);});
     (repostsRes.data||[]).forEach(x=>{reposts[x.post_id]=(reposts[x.post_id]||0)+1;if(x.user_id===user.id)mineReposts.add(x.post_id);});
     (commentsRes.data||[]).forEach(x=>comments[x.post_id]=(comments[x.post_id]||0)+1);
-    box.innerHTML=posts.map(p=>renderPostHtml(p,profile,true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),comments[p.id]||0,reposts[p.id]||0)).join('')||'<p class="muted">Você ainda não publicou nada.</p>';
+    box.innerHTML=posts.map(p=>renderPostHtml(p,profile,true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),comments[p.id]||0,reposts[p.id]||0,pinnedIds.has(p.id))).join('')||'<p class="muted">Você ainda não publicou nada.</p>';
   } else if(tab==='reposts'){
     const {data:myReposts,error:myRepostsError}=await db.from('post_reposts').select('post_id,comment_text,created_at').eq('user_id',user.id).order('created_at',{ascending:false});
     if(myRepostsError){console.error('Erro ao buscar meus reposts:',myRepostsError);box.innerHTML='<p class="muted">Não foi possível carregar seus reposts.</p>';return;}
@@ -2034,27 +2036,29 @@ async function loadFeed(mode='all'){
   let rows=(postsResult.data||[]).filter(p=>!blockedIds.includes(p.user_id));
   if(mode==='following'){const ids=(followingResult.data||[]).map(x=>x.following_id);rows=rows.filter(p=>ids.includes(p.user_id)||p.user_id===user.id);}
   const ids=[...new Set(rows.map(p=>p.user_id))],postIds=rows.map(p=>p.id);
-  const [profilesResult,likesResult,repostsResult,commentsResult]=await Promise.all([
+  const [profilesResult,likesResult,repostsResult,commentsResult,pinsResult]=await Promise.all([
     ids.length?db.from('user_profiles').select('*').in('user_id',ids):Promise.resolve({data:[]}),
     postIds.length?db.from('post_likes').select('post_id,user_id').in('post_id',postIds):Promise.resolve({data:[]}),
     postIds.length?db.from('post_reposts').select('post_id,user_id').in('post_id',postIds):Promise.resolve({data:[]}),
-    postIds.length?db.from('post_comments').select('post_id').in('post_id',postIds):Promise.resolve({data:[]})
+    postIds.length?db.from('post_comments').select('post_id').in('post_id',postIds):Promise.resolve({data:[]}),
+    db.from('post_pins').select('post_id').eq('user_id',user.id)
   ]);
-  const profs={},likes={},reposts={},mineLikes=new Set(),mineReposts=new Set(),commentCounts={};
+  const profs={},likes={},reposts={},mineLikes=new Set(),mineReposts=new Set(),commentCounts={},pinnedIds=new Set((pinsResult.data||[]).map(x=>x.post_id));
   (profilesResult.data||[]).forEach(p=>profs[p.user_id]=p);
   (likesResult.data||[]).forEach(x=>{likes[x.post_id]=(likes[x.post_id]||0)+1;if(x.user_id===user.id)mineLikes.add(x.post_id);});
   (repostsResult.data||[]).forEach(x=>{reposts[x.post_id]=(reposts[x.post_id]||0)+1;if(x.user_id===user.id)mineReposts.add(x.post_id);});
   (commentsResult.data||[]).forEach(x=>{commentCounts[x.post_id]=(commentCounts[x.post_id]||0)+1;});
-  $('feedList').innerHTML=rows.length?rows.map(p=>renderPostHtml(p,profs[p.user_id]||{},true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),commentCounts[p.id]||0,reposts[p.id]||0)).join(''):'<p class="muted">Nenhuma publicação por aqui.</p>';
+  $('feedList').innerHTML=rows.length?rows.map(p=>renderPostHtml(p,profs[p.user_id]||{},true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),commentCounts[p.id]||0,reposts[p.id]||0,pinnedIds.has(p.id))).join(''):'<p class="muted">Nenhuma publicação por aqui.</p>';
 }
 
-function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false, isReposted=false, commentCount=0, repostCount=0){
+function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false, isReposted=false, commentCount=0, repostCount=0, isPinned=false){
   let name=esc(author.full_name||'Pessoa')+verifiedBadge(author.username);
   let handle=author.username?(author.username.startsWith('@')?esc(author.username):'@'+esc(author.username)):'@usuario';
   let avatarHtml=author.avatar_url?'<img src="'+esc(author.avatar_url)+'">':name[0].toUpperCase();
   let isMine=p.user_id===user.id;
   return `
     <article class="post" id="post-${p.id}">
+      ${isPinned?'<div class="post-pinned-label"><i class="fa-solid fa-thumbtack"></i> Publicação fixada</div>':''}
       <div class="post-head">
         <div class="post-user-info" onclick="inspectProfile('${p.user_id}')">
           <div class="avatar">${avatarHtml}</div>
@@ -2431,7 +2435,7 @@ async function inspectProfile(id){
       </div>
     </div>
     <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
-    <div>${isPrivateAndNotFollowing ? '<p class="muted" style="text-align:center">Este perfil é privado. Siga-o para ver as publicações.</p>' : (posts||[]).map(p=>renderPostHtml(p,u,true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),comments[p.id]||0,reposts[p.id]||0)).join('')||'<p class="muted">Sem publicações.</p>'}</div>
+    <div>${isPrivateAndNotFollowing ? '<p class="muted" style="text-align:center">Este perfil é privado. Siga-o para ver as publicações.</p>' : (posts||[]).map(p=>renderPostHtml(p,u,true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),comments[p.id]||0,reposts[p.id]||0,pinnedIds.has(p.id))).join('')||'<p class="muted">Sem publicações.</p>'}</div>
   `;
   $('userModal').classList.remove('hidden');
 }
