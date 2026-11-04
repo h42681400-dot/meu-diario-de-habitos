@@ -523,6 +523,14 @@ body.theme-dark .bubble-time{color:#b6c7c0}
 .app-toast{cursor:default}
 .app-toast.has-action{cursor:pointer}
 @media(max-width:420px){.explore-user-actions{gap:4px}.explore-user-actions button{padding:7px 8px;font-size:10px}}
+/* Interações sociais: contagens, respostas e repost com comentário */
+.post-actions{align-items:center;flex-wrap:wrap;gap:7px 12px}
+.post-actions button{padding:6px 4px;font-size:12px}
+.post-actions button b{color:var(--ink);font-weight:700}
+.comment-reply{margin:9px 0 2px 18px;padding:9px 11px;border-left:2px solid var(--rose);background:var(--card-bg);border-radius:0 9px 9px 0}
+.repost-comment{padding:12px 14px;margin:14px 0 0;background:rgba(212,165,165,.12);border-radius:12px;color:var(--muted);font-size:12px}
+.repost-comment p{margin:6px 0 0;color:var(--ink);font-size:14px}
+.repost-label{margin:12px 0 -8px;color:var(--muted);font-size:12px}
 /* NOTIFICAÇÕES INTERATIVAS */
 .notif-item{display:flex;align-items:center;gap:12px;padding:14px 10px;border-bottom:1px solid var(--line);border-radius:12px;cursor:pointer;transition:background .2s}
 .notif-item:hover{background:var(--bg)}
@@ -1555,14 +1563,15 @@ async function loadProfileDataTab(tab){
     (commentsRes.data||[]).forEach(x=>comments[x.post_id]=(comments[x.post_id]||0)+1);
     box.innerHTML=posts.map(p=>renderPostHtml(p,profile,true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),comments[p.id]||0,reposts[p.id]||0)).join('')||'<p class="muted">Você ainda não publicou nada.</p>';
   } else if(tab==='reposts'){
-    let {data:reposts}=await db.from('post_reposts').select('post_id').eq('user_id',user.id);
+    let {data:reposts}=await db.from('post_reposts').select('*').eq('user_id',user.id).order('created_at',{ascending:false});
     let postIds=(reposts||[]).map(r=>r.post_id);
     if(!postIds.length){box.innerHTML=`<p class="muted">Nenhum repost ainda.</p>`;return;}
-    let {data:posts}=await db.from('posts').select('*').in('id',postIds).order('created_at',{ascending:false});
+    let {data:posts}=await db.from('posts').select('*').in('id',postIds);
     let authorIds=[...new Set((posts||[]).map(p=>p.user_id))];
     let {data:authors}=await db.from('user_profiles').select('*').in('user_id',authorIds);
     let authorMap={}; (authors||[]).forEach(a=>authorMap[a.user_id]=a);
-    box.innerHTML=(posts||[]).map(p=>renderPostHtml(p, authorMap[p.user_id]||{}, true)).join('')||'<p class="muted">Nenhum repost encontrado.</p>';
+    const postMap={};(posts||[]).forEach(p=>postMap[p.id]=p);
+    box.innerHTML=(reposts||[]).map(r=>{const p=postMap[r.post_id];if(!p)return '';return (r.comment_text?'<div class="repost-comment"><i class="fa-solid fa-retweet"></i> Você repostou com comentário:<p>'+esc(r.comment_text)+'</p></div>':'<div class="repost-label"><i class="fa-solid fa-retweet"></i> Você repostou</div>')+renderPostHtml(p,authorMap[p.user_id]||{},true);}).join('')||'<p class="muted">Nenhum repost encontrado.</p>';
   } else if(tab==='following'||tab==='followers'){
     let col=tab==='following'?'follower_id':'following_id';
     let targetCol=tab==='following'?'following_id':'follower_id';
