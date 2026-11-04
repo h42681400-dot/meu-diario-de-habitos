@@ -2423,6 +2423,10 @@ async function loadMessages(){
     status('messageStatus','Erro ao carregar mensagens: '+error.message);
     return;
   }
+  const {data:hiddenRows,error:hiddenError}=await db.from('direct_message_hidden').select('message_id').eq('user_id',user.id);
+  if(hiddenError){console.warn('Não foi possível carregar mensagens ocultadas:',hiddenError.message);}
+  const hiddenIds=new Set((hiddenRows||[]).map(x=>x.message_id));
+  data=(data||[]).filter(m=>!hiddenIds.has(m.id));
 
   const unread=(data||[]).filter(m=>m.sender_id===activeChat&&m.receiver_id===user.id&&!m.read_at);
   if(unread.length){
