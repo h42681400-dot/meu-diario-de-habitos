@@ -1543,7 +1543,17 @@ async function loadProfileDataTab(tab){
   let box=$('profileTabContent');
   if(tab==='posts'){
     let {data}=await db.from('posts').select('*').eq('user_id',user.id).order('created_at',{ascending:false});
-    box.innerHTML=(data||[]).map(p=>renderPostHtml(p, profile, false)).join('')||'<p class="muted">Você ainda não publicou nada.</p>';
+    const posts=data||[],ids=posts.map(p=>p.id);
+    const [likesRes,repostsRes,commentsRes]=await Promise.all([
+      ids.length?db.from('post_likes').select('post_id,user_id').in('post_id',ids):Promise.resolve({data:[]}),
+      ids.length?db.from('post_reposts').select('post_id,user_id').in('post_id',ids):Promise.resolve({data:[]}),
+      ids.length?db.from('post_comments').select('post_id').in('post_id',ids):Promise.resolve({data:[]})
+    ]);
+    const likes={},reposts={},comments={},mineLikes=new Set(),mineReposts=new Set();
+    (likesRes.data||[]).forEach(x=>{likes[x.post_id]=(likes[x.post_id]||0)+1;if(x.user_id===user.id)mineLikes.add(x.post_id);});
+    (repostsRes.data||[]).forEach(x=>{reposts[x.post_id]=(reposts[x.post_id]||0)+1;if(x.user_id===user.id)mineReposts.add(x.post_id);});
+    (commentsRes.data||[]).forEach(x=>comments[x.post_id]=(comments[x.post_id]||0)+1);
+    box.innerHTML=posts.map(p=>renderPostHtml(p,profile,true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),comments[p.id]||0,reposts[p.id]||0)).join('')||'<p class="muted">Você ainda não publicou nada.</p>';
   } else if(tab==='reposts'){
     let {data:reposts}=await db.from('post_reposts').select('post_id').eq('user_id',user.id);
     let postIds=(reposts||[]).map(r=>r.post_id);
@@ -1597,12 +1607,11 @@ async function loadFeed(mode='all'){
   $('feedList').innerHTML=rows.length?rows.map(p=>renderPostHtml(p,profs[p.user_id]||{},true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),commentCounts[p.id]||0)).join(''):'<p class="muted">Nenhuma publicação por aqui.</p>';
 }
 
-function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false, isReposted=false, commentCount=0){
+function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false, isReposted=false, commentCount=0, repostCount=0){
   let name=esc(author.full_name||'Pessoa')+verifiedBadge(author.username);
   let handle=author.username?(author.username.startsWith('@')?esc(author.username):'@'+esc(author.username)):'@usuario';
-  let avatarHtml=author.avatar_url?`<img src="${esc(author.avatar_url)}">`:name[0].toUpperCase();
+  let avatarHtml=author.avatar_url?'<img src="'+esc(author.avatar_url)+'">':name[0].toUpperCase();
   let isMine=p.user_id===user.id;
-
   return `
     <article class="post" id="post-${p.id}">
       <div class="post-head">
@@ -1610,24 +1619,17 @@ function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false,
           <div class="avatar">${avatarHtml}</div>
           <div><b>${name}</b><div class="muted">${handle} · ${new Date(p.created_at).toLocaleDateString('pt-BR')}</div></div>
         </div>
-        <div>
-          ${isMine?`<button class="ghost" onclick="openDeleteConfirmModal('${p.id}')" style="color:var(--red);padding:6px 12px;font-size:12px"><i class="fa-solid fa-trash"></i></button>`:
-          `<button class="ghost" onclick="openReportModal('${p.id}')" style="color:var(--muted);padding:6px 12px;font-size:12px"><i class="fa-solid fa-triangle-exclamation"></i></button>`}
-        </div>
+        <div>${isMine?`<button class="ghost" onclick="openDeleteConfirmModal('${p.id}')" style="color:var(--red);padding:6px 12px;font-size:12px"><i class="fa-solid fa-trash"></i></button>`:`<button class="ghost" onclick="openReportModal('${p.id}')" style="color:var(--muted);padding:6px 12px;font-size:12px"><i class="fa-solid fa-triangle-exclamation"></i></button>`}</div>
       </div>
       <p style="margin:12px 0;line-height:1.4">${esc(p.content).replace(/\n/g,'<br>')}</p>
       ${p.media_url?`<img src="${esc(p.media_url)}" class="post-media" loading="lazy" decoding="async">`:''}
       ${interactive?`
         <div class="post-actions">
-          <button class="${isLiked?'liked':''}" onclick="toggleLike('${p.id}',${isLiked},'${p.user_id}')">
-            <i class="${isLiked?'fa-solid':'fa-regular'} fa-heart"></i> ${likeCount}
-          </button>
-          <button class="${isReposted?'reposted':''}" onclick="toggleRepost('${p.id}',${isReposted},'${p.user_id}')">
-            <i class="fa-solid fa-retweet"></i> Repostar
-          </button>
-          <button onclick="toggleCommentsSection('${p.id}')">
-            <i class="fa-regular fa-comment"></i> ${commentCount} Comentar
-          </button>
+          <button class="${isLiked?'liked':''}" onclick="toggleLike('${p.id}',${isLiked},'${p.user_id}')"><i class="${isLiked?'fa-solid':'fa-regular'} fa-heart"></i> Curtir</button>
+          <button onclick="showPostPeople('${p.id}','likes')"><b>${likeCount}</b> curtidas</button>
+          <button class="${isReposted?'reposted':''}" onclick="openRepostComposer('${p.id}','${p.user_id}')"><i class="fa-solid fa-retweet"></i> Repostar</button>
+          <button onclick="showPostPeople('${p.id}','reposts')"><b>${repostCount}</b> reposts</button>
+          <button onclick="toggleCommentsSection('${p.id}')"><i class="fa-regular fa-comment"></i> <b>${commentCount}</b> comentários</button>
         </div>
         <div id="comments-box-${p.id}" class="comments-section hidden">
           <div id="comments-list-${p.id}"></div>
@@ -1636,55 +1638,73 @@ function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false,
             <button onclick="addComment('${p.id}','${p.user_id}')" style="padding:8px 14px">Enviar</button>
           </div>
         </div>`:''}
-    </article>
-  `;
+    </article>`;
+}
+
+async function showPostPeople(postId,kind){
+  const table=kind==='likes'?'post_likes':'post_reposts',label=kind==='likes'?'Curtiram':'Repostaram';
+  const {data,error}=await db.from(table).select('user_id').eq('post_id',postId);
+  if(error){showToast('Ops!','Não foi possível carregar esta lista.',{type:kind==='likes'?'like':'repost'});return;}
+  const ids=[...new Set((data||[]).map(x=>x.user_id))];
+  let people=[];
+  if(ids.length){const {data:p}=await db.from('user_profiles').select('*').in('user_id',ids);people=p||[];}
+  let modal=document.getElementById('postPeopleModal');
+  if(!modal){modal=document.createElement('div');modal.id='postPeopleModal';modal.className='modal-overlay';modal.innerHTML='<div class="modal-box"><div style="display:flex;justify-content:space-between;align-items:center"><h3 id="postPeopleTitle"></h3><button class="ghost" onclick="closePostPeople()" aria-label="Fechar">×</button></div><div id="postPeopleList"></div></div>';document.body.appendChild(modal);}
+  document.getElementById('postPeopleTitle').textContent=label+' · '+people.length;
+  document.getElementById('postPeopleList').innerHTML=people.map(p=>'<div class="friend-person"><div class="friend-person-main" onclick="closePostPeople();inspectProfile(\''+p.user_id+'\')"><div class="avatar">'+(p.avatar_url?'<img src="'+esc(p.avatar_url)+'">':esc((p.full_name||'?')[0]))+'</div><div><b>'+esc(p.full_name||'Usuário')+verifiedBadge(p.username)+'</b><div class="muted">@'+esc((p.username||'').replace(/^@/,''))+'</div></div></div><button class="secondary" onclick="closePostPeople();inspectProfile(\''+p.user_id+'\')">Ver perfil</button></div>').join('')||'<p class="muted">Ninguém por aqui ainda.</p>';
+  modal.classList.remove('hidden');
+}
+function closePostPeople(){document.getElementById('postPeopleModal')?.classList.add('hidden');}
+
+async function openRepostComposer(postId,postOwnerId){
+  const comment=prompt('Adicione um comentário ao repost (ou deixe em branco):','');
+  if(comment===null)return;
+  const {error}=await db.from('post_reposts').upsert({post_id:postId,user_id:user.id,comment_text:comment.trim()},{onConflict:'post_id,user_id'});
+  if(error){showToast('Ops!','Não foi possível repostar. Confira se a atualização do banco foi aplicada.',{type:'repost'});return;}
+  if(postOwnerId!==user.id)await db.from('notifications').insert({user_id:postOwnerId,actor_id:user.id,type:'repost',post_id:postId});
+  showToast('Repost publicado!','Sua publicação foi compartilhada.',{type:'repost'});
+  await loadFeed('all');
 }
 
 async function toggleLike(postId,isLiked,postOwnerId){
-  if(isLiked){await db.from('post_likes').delete().eq('post_id',postId).eq('user_id',user.id);showToast('Curtida removida','Você removeu sua curtida.',{type:'like'});}
+  if(isLiked){await db.from('post_likes').delete().eq('post_id',postId).eq('user_id',user.id);}
   else{
     const {error}=await db.from('post_likes').insert({post_id:postId,user_id:user.id});
     if(error){showToast('Ops!','Não foi possível curtir esta publicação.',{type:'like'});return;}
     if(postOwnerId!==user.id)await db.from('notifications').insert({user_id:postOwnerId,actor_id:user.id,type:'like',post_id:postId});
-    showToast('Curtido!','Você curtiu uma publicação. 🤍',{type:'like'});
   }
   await loadFeed('all');
 }
 
-async function toggleRepost(postId, isReposted, postOwnerId){
-  if(isReposted) await db.from('post_reposts').delete().eq('post_id',postId).eq('user_id',user.id);
-  else {
-    await db.from('post_reposts').insert({post_id:postId, user_id:user.id});
-    if(postOwnerId !== user.id) await db.from('notifications').insert({user_id:postOwnerId, actor_id:user.id, type:'repost', post_id:postId});
-  }
-  loadFeed('all');
-}
+async function toggleRepost(postId,isReposted,postOwnerId){return openRepostComposer(postId,postOwnerId);}
 
 async function toggleCommentsSection(postId){
   let box=$('comments-box-'+postId);
   box.classList.toggle('hidden');
-  if(!box.classList.contains('hidden')) await loadPostComments(postId);
+  if(!box.classList.contains('hidden'))await loadPostComments(postId);
 }
 
 async function loadPostComments(postId){
-  let {data}=await db.from('post_comments').select('*').eq('post_id',postId).order('created_at',{ascending:true});
-  let userIds=[...new Set((data||[]).map(c=>c.user_id))];
-  let authors={};
-  if(userIds.length){
-    let {data:profiles}=await db.from('user_profiles').select('*').in('user_id',userIds);
-    (profiles||[]).forEach(p=>authors[p.user_id]=p);
-  }
-  $('comments-list-'+postId).innerHTML=(data||[]).map(c=>{
-    let author=authors[c.user_id]||{};
-    return `<div class="comment-item"><b>${esc(author.full_name||'Usuário')}:</b> ${esc(c.content)}</div>`;
+  let {data,error}=await db.from('post_comments').select('*').eq('post_id',postId).order('created_at',{ascending:true});
+  if(error){$('comments-list-'+postId).innerHTML='<p class="muted">Não foi possível carregar comentários.</p>';return;}
+  let userIds=[...new Set((data||[]).map(c=>c.user_id))],authors={};
+  if(userIds.length){let {data:profiles}=await db.from('user_profiles').select('*').in('user_id',userIds);(profiles||[]).forEach(p=>authors[p.user_id]=p);}
+  const roots=(data||[]).filter(c=>!c.parent_comment_id),children=(data||[]).filter(c=>c.parent_comment_id);
+  $('comments-list-'+postId).innerHTML=roots.map(c=>{
+    const a=authors[c.user_id]||{},replies=children.filter(x=>x.parent_comment_id===c.id);
+    return '<div class="comment-item"><b>'+esc(a.full_name||'Usuário')+'</b> '+esc(c.content)+'<button class="ghost" style="padding:3px 7px;font-size:11px;margin-left:6px" onclick="replyToComment(\''+postId+'\',\''+c.id+'\',\''+esc(a.full_name||'usuário')+'\')">Responder</button>'+replies.map(r=>{const ra=authors[r.user_id]||{};return '<div class="comment-reply"><b>'+esc(ra.full_name||'Usuário')+'</b> '+esc(r.content)+'</div>';}).join('')+'</div>';
   }).join('')||'<p class="muted" style="font-size:13px">Nenhum comentário ainda.</p>';
 }
-
+function replyToComment(postId,commentId,name){
+  const input=$('comment-input-'+postId);input.dataset.parentCommentId=commentId;input.placeholder='Respondendo a '+name+'...';input.focus();
+}
 async function addComment(postId,postOwnerId){
   let input=$('comment-input-'+postId),content=input.value.trim();if(!content)return;
-  const {error}=await db.from('post_comments').insert({post_id:postId,user_id:user.id,content});
-  if(error){showToast('Ops!','Não foi possível publicar seu comentário.',{type:'comment'});return;}
-  input.value='';
+  const parent=input.dataset.parentCommentId||null;
+  const payload={post_id:postId,user_id:user.id,content};if(parent)payload.parent_comment_id=parent;
+  const {error}=await db.from('post_comments').insert(payload);
+  if(error){showToast('Ops!','Não foi possível publicar. Confira se a atualização do banco foi aplicada.',{type:'comment'});return;}
+  input.value='';delete input.dataset.parentCommentId;input.placeholder='Escreva um comentário...';
   if(postOwnerId!==user.id)await db.from('notifications').insert({user_id:postOwnerId,actor_id:user.id,type:'comment',post_id:postId});
   showToast('Comentário enviado!','Seu comentário foi publicado. 💬',{type:'comment'});
   await loadPostComments(postId);await loadFeed('all');
