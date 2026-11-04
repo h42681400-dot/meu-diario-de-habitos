@@ -608,7 +608,8 @@ body.theme-dark .bubble-time{color:#b6c7c0}
 .online-dot.is-online{background:#2eaa70}
 .chat-list-copy{min-width:0;flex:1}
 .chat-list-preview{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
-.chat-list-state{font-size:10px;color:#2eaa70}
+.chat-list-state{font-size:10px;color:#2eaa70;display:flex;align-items:center;justify-content:flex-end;min-width:20px}
+.conversation-unread{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#e53945;color:#fff;font-size:10px;font-weight:800;line-height:1}
 .message-receipt{font-size:9px;white-space:nowrap;margin-left:4px;color:rgba(255,255,255,.75)}
 .message-receipt.read{color:#d7f0ff}
 .bubble.other .message-receipt{color:var(--muted)}
@@ -805,7 +806,6 @@ body.theme-dark #messageBox .bubble.other{background:#303036;color:#f7eff2;borde
     <button data-page="explore" onclick="showPage('explore')"><i class="fa-solid fa-compass"></i><span>Explorar</span></button>
     <button data-page="messages" onclick="showPage('messages')">
       <i class="fa-solid fa-paper-plane"></i><span>Mensagens</span>
-      <span id="msgBadge" class="badge-red hidden"></span>
     </button>
     <button data-page="notifications" onclick="showPage('notifications')">
       <i class="fa-solid fa-heart"></i><span>Notificações</span>
@@ -889,7 +889,7 @@ body.theme-dark #messageBox .bubble.other{background:#303036;color:#f7eff2;borde
           <button class="secondary" style="padding:6px 10px;font-size:14px" onclick="addEmoji('☕')">☕</button>
         </div>
         <div class="row" style="display:flex;gap:8px">
-          <input id="messageInput" placeholder="Escreva uma mensagem..." onkeydown="if(event.key==='Enter')sendMessage()" style="margin:0">
+          <input id="messageInput" placeholder="Escreva uma mensagem..." oninput="handleTyping()" onkeydown="if(event.key==='Enter')sendMessage()" style="margin:0">
           <button onclick="sendMessage()" style="padding:10px 16px"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
         <p id="messageStatus" class="status"></p>
@@ -1116,7 +1116,7 @@ const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let user=null, selected=new Date(), entries={}, profile=null, activeChat=null, chatProfiles={}, inspectedProfileId=null;
 let currentFloatingPostImage=null, editAvatarFile=null, editBannerFile=null, postToDeleteId=null, postToReportId=null;
-let chatInterval=null, presenceTimer=null;
+let chatInterval=null, presenceTimer=null, typingTimer=null;
 let notificationPollTimer=null, notificationCursor=null;
 
 const FORBIDDEN_WORDS = ['gore', 'mutilacao', 'suicidio', 'sangue', 'morte', 'estupro', 'assidio', 'mutilação', 'suicídio'];
@@ -1402,7 +1402,7 @@ function showPage(id){
   if(user)try{localStorage.setItem('cottontailActivePage',id);}catch(e){}
 
   if(id==='explore')searchProfilesAndPosts();
-  if(id==='messages'){ $('msgBadge').classList.add('hidden'); backToChatList(); markInboxMessagesRead(); }
+  if(id==='messages'){ backToChatList(); }
   if(id==='feed')loadFeed('all');
   if(id==='notifications'){ $('notifBadge').classList.add('hidden'); loadNotifications(); }
   if(id==='profile'){let tab='posts';try{tab=localStorage.getItem('cottontailProfileTab')||'posts';}catch(e){}loadProfileDataTab(tab==='reposts'?'reposts':'posts');}
@@ -1422,7 +1422,7 @@ async function markInboxMessagesRead(){
       if(fallbackError)console.warn('A leitura precisa da permissão/RPC mark_messages_read:',fallbackError.message);
     }
   }
-  $('msgBadge').classList.add('hidden');
+  await loadChats();
   await checkUnreadBadges();
 }
 function updateUnreadBadge(id,count){
@@ -1444,14 +1444,7 @@ async function checkUnreadBadges(){
       updateUnreadBadge('notifBadge',(data||[]).length);
     }
   }catch(error){console.warn('Erro ao contar notificações não lidas:',error.message);}
-  try{
-    if(messagesOpen)updateUnreadBadge('msgBadge',0);
-    else{
-      const {data,error}=await db.from('direct_messages').select('id').eq('receiver_id',user.id).is('read_at',null);
-      if(error)throw error;
-      updateUnreadBadge('msgBadge',(data||[]).length);
-    }
-  }catch(error){console.warn('Erro ao contar mensagens não lidas:',error.message);}
+
 }
 
 /* CALENDÁRIO */
@@ -2263,25 +2256,23 @@ async function toggleBlockUser(targetId, isBlocked){
 
 /* CHAT ESTILO IPHONE */
 async function loadChats(){
-  const {data}=await db.from('direct_messages').select('*').or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`).order('created_at',{ascending:false});
+  const {data,error}=await db.from('direct_messages').select('*').or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`).order('created_at',{ascending:false});
+  if(error){$('chatList').innerHTML='<p class="muted">Não foi possível carregar as conversas.</p>';return;}
   const peers=[...new Set((data||[]).map(m=>m.sender_id===user.id?m.receiver_id:m.sender_id))];
   if(!peers.length){$('chatList').innerHTML='<p class="muted">Nenhuma conversa recente.</p>';return;}
   const {data:p}=await db.from('user_profiles').select('*').in('user_id',peers);
   chatProfiles={};(p||[]).forEach(x=>chatProfiles[x.user_id]=x);
   $('chatList').innerHTML=peers.map(id=>{
     const last=(data||[]).find(m=>m.sender_id===id||m.receiver_id===id);
+    const unread=(data||[]).filter(m=>m.sender_id===id&&m.receiver_id===user.id&&!m.read_at).length;
     const online=isUserOnline(chatProfiles[id]?.last_seen_at);
-    return `<div class="chat-item iphone-chat-list-item" onclick="openChat('${id}')">
-      <div class="chat-list-avatar-wrap"><div class="avatar">${chatProfiles[id]?.avatar_url?`<img src="${esc(chatProfiles[id].avatar_url)}">`:esc((chatProfiles[id]?.full_name||'?')[0])}</div><span class="online-dot ${online?'is-online':''}"></span></div>
-      <div class="chat-list-copy"><b>${esc(chatProfiles[id]?.full_name||'Pessoa')}</b><div class="muted">@${esc(chatProfiles[id]?.username||'')}</div><div class="chat-list-preview">${last?.sender_id===user.id?'Você: ':''}${esc(last?.content||'Comece uma conversa')}</div></div><span class="chat-list-state">${online?'online':''}</span>
-    </div>`;
+    const typing=chatProfiles[id]?.typing_to===user.id&&chatProfiles[id]?.typing_at&&(Date.now()-new Date(chatProfiles[id].typing_at).getTime()<7000);
+    return `<div class="chat-item iphone-chat-list-item" onclick="openChat('${id}')"><div class="chat-list-avatar-wrap"><div class="avatar">${chatProfiles[id]?.avatar_url?`<img src="${esc(chatProfiles[id].avatar_url)}">`:esc((chatProfiles[id]?.full_name||'?')[0])}</div><span class="online-dot ${online?'is-online':''}"></span></div><div class="chat-list-copy"><b>${esc(chatProfiles[id]?.full_name||'Pessoa')}</b><div class="muted">@${esc(chatProfiles[id]?.username||'')}</div><div class="chat-list-preview">${typing?'<span style="color:#2eaa70">digitando...</span>':`${last?.sender_id===user.id?'Você: ':''}${esc(last?.content||'Comece uma conversa')}`}</div></div><span class="chat-list-state">${unread?`<span class="conversation-unread">${unread>99?'99+':unread}</span>`:online?'online':''}</span></div>`;
   }).join('');
 }
-
 async function openChat(id, username=''){
   if(!user||!id||id===user.id)return;
   showPage('messages');
-  $('msgBadge').classList.add('hidden');
   activeChat=id;
   try{localStorage.setItem('cottontailActiveChat',id);}catch(e){}
   status('messageStatus','Abrindo conversa...');
@@ -2306,7 +2297,7 @@ async function openChat(id, username=''){
 
   $('chatTitle').innerHTML=esc(p.full_name||'Conversa')+verifiedBadge(p.username);
   $('chatHeaderAvatar').innerHTML=p.avatar_url?`<img src="${esc(p.avatar_url)}">`:esc((p.full_name||'?')[0]);
-  updateChatPresence(p.last_seen_at);
+  updateChatPresence(p);
 
   chatProfiles[id]=p;
   $('chatListView').classList.add('hidden');
@@ -2318,10 +2309,12 @@ async function openChat(id, username=''){
   
   if(chatInterval) clearInterval(chatInterval);
   chatInterval = setInterval(async()=>{await loadMessages();await refreshChatPresence();},3000);
+  await clearMyTypingState();
 }
 
 function backToChatList(){
   if(chatInterval){ clearInterval(chatInterval); chatInterval=null; }
+  clearMyTypingState();
   activeChat=null;
   try{localStorage.removeItem('cottontailActiveChat');}catch(e){}
   $('chatRoomView').classList.add('hidden');
@@ -2331,14 +2324,31 @@ function backToChatList(){
 }
 
 function isUserOnline(lastSeen){return !!lastSeen&&(Date.now()-new Date(lastSeen).getTime()<120000);}
-function updateChatPresence(lastSeen){
-  const online=isUserOnline(lastSeen),el=$('chatPresence');
-  if(el){el.textContent=online?'online':'visto por último '+(lastSeen?new Date(lastSeen).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'há algum tempo');el.classList.toggle('online',online);}
+function updateChatPresence(p={}){
+  const el=$('chatPresence');if(!el)return;
+  const typing=p.typing_to===user?.id&&p.typing_at&&(Date.now()-new Date(p.typing_at).getTime()<7000);
+  const online=isUserOnline(p.last_seen_at);
+  if(typing){el.textContent='digitando...';el.classList.add('online');return;}
+  el.textContent=online?'online':'visto por último '+(p.last_seen_at?new Date(p.last_seen_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'há algum tempo');
+  el.classList.toggle('online',online);
 }
 async function refreshChatPresence(){
   if(!activeChat)return;
-  const {data}=await db.from('user_profiles').select('last_seen_at').eq('user_id',activeChat).maybeSingle();
-  updateChatPresence(data?.last_seen_at);
+  const {data,error}=await db.from('user_profiles').select('last_seen_at,typing_to,typing_at').eq('user_id',activeChat).maybeSingle();
+  if(!error&&data){chatProfiles[activeChat]={...(chatProfiles[activeChat]||{}),...data};updateChatPresence(data);}
+}
+async function handleTyping(){
+  if(!user||!activeChat)return;
+  if(typingTimer)clearTimeout(typingTimer);
+  const {error}=await db.from('user_profiles').update({typing_to:activeChat,typing_at:new Date().toISOString()}).eq('user_id',user.id);
+  if(error)console.warn('Indicador de digitação indisponível; aplique a atualização SQL do Cottontail:',error.message);
+  typingTimer=setTimeout(clearMyTypingState,3500);
+}
+async function clearMyTypingState(){
+  if(typingTimer){clearTimeout(typingTimer);typingTimer=null;}
+  if(!user)return;
+  const {error}=await db.from('user_profiles').update({typing_to:null,typing_at:null}).eq('user_id',user.id);
+  if(error)console.warn('Não foi possível limpar o indicador de digitação:',error.message);
 }
 async function updateMyPresence(){
   if(!user)return;
@@ -2414,6 +2424,7 @@ async function sendMessage(){
     if(notifError) console.warn('Mensagem enviada, mas a notificação não foi registrada:',notifError.message);
 
     input.value='';
+    await clearMyTypingState();
     status('messageStatus','');
 
     await loadMessages();
@@ -2552,19 +2563,10 @@ async function checkNewNotifications(){
     (actors||[]).forEach(a=>actorMap[a.user_id]=a);
   }
   if(!$('notifications').classList.contains('active')){
-    const badge=$('notifBadge');
-    const current=Math.max(0,parseInt(badge?.textContent,10)||0);
-    updateUnreadBadge('notifBadge',Math.max(current,data.length));
+    const badge=$('notifBadge');const current=Math.max(0,parseInt(badge?.textContent,10)||0);
+    updateUnreadBadge('notifBadge',Math.max(current,data.filter(n=>n.type!=='message').length));
   }
-  for(const n of data){
-    const actor=actorMap[n.actor_id]||{};
-    if(n.type==='message'&&!$('messages').classList.contains('active')){
-      const messageBadge=$('msgBadge');
-      const currentMessages=Math.max(0,parseInt(messageBadge?.textContent,10)||0);
-      updateUnreadBadge('msgBadge',Math.max(currentMessages,1));
-    }
-    showToast(actor.full_name||actor.username||'Alguém',notificationDescription(n.type),n);
-  }
+  for(const n of data){const actor=actorMap[n.actor_id]||{};showToast(actor.full_name||actor.username||'Alguém',notificationDescription(n.type),n);}
   if($('notifications').classList.contains('active')) await loadNotifications();
 }
 </script>
