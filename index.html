@@ -428,29 +428,18 @@ button:active{
   }
 }
 
-/* Chat com aparência de iMessage */
-.messages{
-  background:var(--bg);
-  padding:16px;
-  gap:10px;
-  scroll-behavior:smooth;
-}
-
-.bubble{
-  max-width:min(78%,420px);
-  padding:11px 15px;
-  border-radius:20px;
-  font-size:15px;
-  line-height:1.4;
-}
-
-.bubble.mine{
-  border-bottom-right-radius:5px;
-}
-
-.bubble.other{
-  border-bottom-left-radius:5px;
-}
+/* Chat com aparência de WhatsApp, mantendo a paleta Cottontail */
+.messages{background:#efe9e2;padding:18px 14px;gap:8px;border:1px solid #e5ddd5;border-radius:14px;scroll-behavior:smooth}
+body.theme-dark .messages{background:#171f22;border-color:#303b3e}
+.bubble{max-width:min(80%,430px);padding:9px 12px 7px;border-radius:9px;font-size:14px;line-height:1.42;box-shadow:0 1px 1px rgba(0,0,0,.08)}
+.bubble.mine{background:#d9fdd3;color:#243329;border-bottom-right-radius:2px}
+.bubble.other{background:#fff;color:#332928;border-bottom-left-radius:2px}
+body.theme-dark .bubble.mine{background:#075e54;color:#effaf5}
+body.theme-dark .bubble.other{background:#263238;color:#f5ecea}
+.bubble-time{font-size:10px;color:#66756c;opacity:1}
+body.theme-dark .bubble-time{color:#b6c7c0}
+#messageInput{background:var(--card-bg);border-radius:22px}
+#chatRoomView .row button{background:var(--rose);color:white}
 
 #messageInput{
   border-radius:24px;
@@ -511,6 +500,35 @@ button:active{
   background:linear-gradient(transparent,rgba(0,0,0,.6));
 }
 
+/* REFINAMENTOS VISUAIS */
+.nav{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;white-space:nowrap}
+.nav::-webkit-scrollbar{display:none}
+.nav button{flex:1 1 0;min-width:0;flex-direction:row;justify-content:center;align-items:center;gap:4px;padding:9px 4px;font-size:14px;white-space:nowrap}
+.nav button i{font-size:15px}
+.nav button span{font-size:9px;white-space:nowrap}
+.nav button.active{background:rgba(212,165,165,.14);color:var(--rose)}
+.nav .badge-red{top:1px;right:2px}
+@media(max-width:767px){.nav{gap:1px;padding:8px 3px calc(8px + env(safe-area-inset-bottom))}.nav button{padding:9px 2px;gap:3px}.nav button i{font-size:13px}.nav button span{font-size:8px}.wrap{padding-bottom:110px}}
+.profile-count-actions{display:flex;align-items:center;gap:8px;margin:10px 0 12px}
+.profile-count-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:20px;background:var(--bg);color:var(--muted);border:1px solid var(--line);font-size:12px;font-weight:500}
+.profile-count-btn b{color:var(--ink);font-size:13px}
+.profile-count-btn:hover{background:var(--line);color:var(--ink)}
+.notif-item{padding:16px 12px;gap:15px}
+.notif-content>div:first-child{line-height:1.55;word-break:break-word}
+.notif-content b{margin-right:5px}
+.notif-time{margin-top:7px}
+.explore-user{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}
+.explore-user-main{display:flex;align-items:center;gap:11px;min-width:0;cursor:pointer;flex:1}
+.explore-user-name{min-width:0;overflow-wrap:anywhere}
+.explore-user-actions{display:flex;align-items:center;gap:6px}
+.explore-user-actions button{padding:7px 10px;font-size:11px;white-space:nowrap}
+.explore-grid{gap:3px}
+.explore-post-card{border-radius:2px}
+.explore-post-card img{transition:transform .25s}
+.explore-post-card:hover img{transform:scale(1.035)}
+.app-toast{cursor:default}
+.app-toast.has-action{cursor:pointer}
+@media(max-width:420px){.explore-user-actions{gap:4px}.explore-user-actions button{padding:7px 8px;font-size:10px}}
 /* NOTIFICAÇÕES INTERATIVAS */
 .notif-item{display:flex;align-items:center;gap:12px;padding:14px 10px;border-bottom:1px solid var(--line);border-radius:12px;cursor:pointer;transition:background .2s}
 .notif-item:hover{background:var(--bg)}
@@ -722,17 +740,15 @@ button:active{
         <h2 id="viewProfileName" style="margin:0;font-size:20px">Nome</h2>
         <div id="viewProfileUsername" class="muted">@usuario</div>
         <p id="viewProfileBio" style="margin:12px 0;font-size:14px"></p>
-        <div style="display:flex;gap:18px;font-size:13px;color:var(--muted);margin-bottom:12px">
-          <span style="cursor:pointer" onclick="switchProfileTab('following')"><b id="countFollowing" style="color:var(--ink)">0</b> Seguindo</span>
-          <span style="cursor:pointer" onclick="switchProfileTab('followers')"><b id="countFollowers" style="color:var(--ink)">0</b> Seguidores</span>
+        <div class="profile-count-actions">
+          <button class="profile-count-btn" onclick="switchProfileTab('following')"><b id="countFollowing">0</b><span>Seguindo</span></button>
+          <button class="profile-count-btn" onclick="switchProfileTab('followers')"><b id="countFollowers">0</b><span>Seguidores</span></button>
         </div>
         <div id="profilePrivacyBadge" class="muted" style="font-size:12px">🔓 Perfil Público</div>
       </div>
       <div class="profile-tabs">
         <div class="profile-tab active" onclick="switchProfileTab('posts')">Posts</div>
         <div class="profile-tab" onclick="switchProfileTab('reposts')">Reposts</div>
-        <div class="profile-tab" onclick="switchProfileTab('following')">Seguindo</div>
-        <div class="profile-tab" onclick="switchProfileTab('followers')">Seguidores</div>
       </div>
     </div>
     <div id="profileTabContent" class="card"></div>
@@ -1470,7 +1486,7 @@ function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false,
         </div>
       </div>
       <p style="margin:12px 0;line-height:1.4">${esc(p.content).replace(/\n/g,'<br>')}</p>
-      ${p.media_url?`<img src="${esc(p.media_url)}" class="post-media">`:''}
+      ${p.media_url?`<img src="${esc(p.media_url)}" class="post-media" loading="lazy" decoding="async">`:''}
       ${interactive?`
         <div class="post-actions">
           <button class="${isLiked?'liked':''}" onclick="toggleLike('${p.id}',${isLiked},'${p.user_id}')">
@@ -1656,27 +1672,17 @@ async function searchProfilesAndPosts(){
   }
 
   let usersHtml=(users||[]).map(p=>`
-    <div class="person" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)">
-      <div style="display:flex;align-items:center;gap:12px;cursor:pointer;min-width:0"
-        onclick="inspectProfile('${p.user_id}')">
-
-        <div class="avatar" style="width:42px;height:42px">
-          ${p.avatar_url
-            ? `<img src="${esc(p.avatar_url)}">`
-            : esc((p.full_name||'?')[0])
-          }
+    <div class="explore-user">
+      <div class="explore-user-main" onclick="inspectProfile('${p.user_id}')">
+        <div class="avatar" style="width:46px;height:46px">
+          ${p.avatar_url?`<img src="${esc(p.avatar_url)}" loading="lazy">`:esc((p.full_name||'?')[0])}
         </div>
-
-        <div style="min-width:0">
-          <b>${esc(p.full_name||'Usuário')}</b>
-          <div class="muted">@${esc(p.username||'')}</div>
-        </div>
+        <div class="explore-user-name"><b>${esc(p.full_name||'Usuário')}</b><div class="muted">@${esc(p.username||'')}</div></div>
       </div>
-
-      <button class="secondary"
-        onclick="inspectProfile('${p.user_id}')">
-        Ver perfil
-      </button>
+      <div class="explore-user-actions">
+        <button class="secondary" onclick="inspectProfile('${p.user_id}')">Ver perfil</button>
+        <button onclick="toggleFollowFromExplore('${p.user_id}')">Seguir</button>
+      </div>
     </div>
   `).join('');
 
@@ -2036,3 +2042,4 @@ async function checkNewNotifications(){
 </script>
 </body>
 </html>
+
