@@ -1031,6 +1031,15 @@ body.theme-dark #messageBox .bubble.other{background:#303036;color:#f7eff2;borde
         <option value="monospace">Monospaçada / Diário Digital (Courier)</option>
       </select>
     </div>
+    <div class="field">
+      <label>Idioma preferido</label>
+      <select id="settingsLanguage" onchange="savePreferredLanguage(this.value)">
+        <option value="pt-BR">🇧🇷 Português (Brasil)</option>
+        <option value="en">🇺🇸 English</option>
+        <option value="es">🇪🇸 Español</option>
+        <option value="ko">🇰🇷 한국어</option>
+      </select>
+    </div>
 
     <div class="field" style="display:flex;align-items:center;gap:12px;margin-top:16px">
       <input type="checkbox" id="settingsMsgFollowingOnly" style="width:20px;height:20px" onchange="saveMsgPrivacySetting(this.checked)">
@@ -1116,19 +1125,32 @@ function esc(s=''){
   }[c]));
 }
 
-/* DETECTAR IDIOMA DO SISTEMA AUTOMATICAMENTE NO CARREGAMENTO */
-window.addEventListener('DOMContentLoaded', () => {
-  let sysLang = navigator.language || navigator.userLanguage || 'pt-BR';
-  let langSelect = $('regLanguage');
-  if(langSelect){
-    for(let opt of langSelect.options){
-      if(sysLang.toLowerCase().includes(opt.value.toLowerCase().slice(0,2))){
-        langSelect.value = opt.value;
-        break;
-      }
-    }
+/* IDIOMA PREFERIDO: usa as preferências de idioma do navegador */
+function detectPreferredLanguage(){
+  const preferences=Array.isArray(navigator.languages)&&navigator.languages.length
+    ?navigator.languages
+    :[navigator.language||navigator.userLanguage||'pt-BR'];
+  for(const raw of preferences){
+    const lang=String(raw||'').toLowerCase();
+    if(lang.startsWith('pt'))return 'pt-BR';
+    if(lang.startsWith('en'))return 'en';
+    if(lang.startsWith('es'))return 'es';
+    if(lang.startsWith('ko'))return 'ko';
   }
+  return 'pt-BR';
+}
+window.addEventListener('DOMContentLoaded',()=>{
+  const langSelect=$('regLanguage');
+  if(langSelect&&!langSelect.dataset.userChosen)langSelect.value=detectPreferredLanguage();
 });
+function savePreferredLanguage(value){
+  if(!user)return;
+  const allowed=['pt-BR','en','es','ko'];
+  const language=allowed.includes(value)?value:'pt-BR';
+  if(profile)profile.language=language;
+  db.from('user_profiles').update({language}).eq('user_id',user.id)
+    .then(({error})=>{if(error)console.error('Não foi possível salvar o idioma:',error.message);});
+}
 
 /* MUSIC PLAYER */
 function toggleMusic(){
@@ -1225,9 +1247,29 @@ async function resetPassword(){
   status('loginStatus',error?error.message:'Link enviado para o seu e-mail.');
 }
 
+function closeAllAppModals(){
+  document.querySelectorAll('.modal-overlay').forEach(modal=>modal.classList.add('hidden'));
+  ['floatingPostModal','deleteConfirmModal','deleteAccountModal','reportModal','settingsModal','editProfileModal','userModal'].forEach(id=>{
+    if($(id))$(id).classList.add('hidden');
+  });
+}
+function clearSessionNavigation(){
+  ['cottontailActivePage','cottontailActiveChat','cottontailProfileTab'].forEach(key=>{
+    try{localStorage.removeItem(key);}catch(e){}
+  });
+}
 async function signOut(){
-  if(chatInterval) clearInterval(chatInterval);
-  await db.auth.signOut();
+  closeAllAppModals();
+  if(chatInterval){clearInterval(chatInterval);chatInterval=null;}
+  if(presenceTimer){clearInterval(presenceTimer);presenceTimer=null;}
+  if(notificationPollTimer){clearInterval(notificationPollTimer);notificationPollTimer=null;}
+  activeChat=null;inspectedProfileId=null;chatProfiles={};profile=null;entries={};
+  clearSessionNavigation();
+  const {error}=await db.auth.signOut();
+  if(error){
+    console.error('Erro ao sair da conta:',error);
+    status('loginStatus','Não foi possível sair da conta: '+error.message);
+  }
 }
 
 /* EXCLUIR CONTA */
@@ -1267,8 +1309,15 @@ db.auth.onAuthStateChange((_event,session)=>{
 
   if(!user){
     initializedUserId=null;
-    if(notificationPollTimer) clearInterval(notificationPollTimer);
+    if(notificationPollTimer)clearInterval(notificationPollTimer);
     notificationPollTimer=null;
+    if(presenceTimer)clearInterval(presenceTimer);
+    presenceTimer=null;
+    if(chatInterval)clearInterval(chatInterval);
+    chatInterval=null;
+    activeChat=null;inspectedProfileId=null;chatProfiles={};profile=null;entries={};
+    closeAllAppModals();
+    clearSessionNavigation();
     notificationCursor=null;
     return;
   }
@@ -1302,6 +1351,17 @@ async function ensureProfile(){
     await db.from('user_profiles').insert({user_id:user.id,full_name:'',username:null,bio:'',is_private:false});
   }
 }
+
+function persistCurrentPage(){
+  if(!user)return;
+  const active=document.querySelector('.page.active');
+  if(active&&['feed','diary','explore','messages','notifications','profile'].includes(active.id)){
+    try{localStorage.setItem('cottontailActivePage',active.id);}catch(e){}
+  }
+  if(activeChat?.id){try{localStorage.setItem('cottontailActiveChat',activeChat.id);}catch(e){}}
+}
+window.addEventListener('pagehide',persistCurrentPage);
+window.addEventListener('beforeunload',persistCurrentPage);
 
 function showPage(id){
   if(chatInterval){ clearInterval(chatInterval); chatInterval=null; }
@@ -1407,9 +1467,12 @@ if(localStorage.getItem('userTheme')==='dark'){ changeTheme('dark'); $('themeSel
 if(localStorage.getItem('userFont')){ changeFont(localStorage.getItem('userFont')); $('fontSelect').value=localStorage.getItem('userFont'); }
 
 function openSettingsModal(){ 
+  if(!user)return;
   $('settingsModal').classList.remove('hidden'); 
   loadBlockedUsers(); 
-  $('settingsMsgFollowingOnly').checked = profile.messages_from_following_only || false;
+  $('settingsMsgFollowingOnly').checked = profile?.messages_from_following_only || false;
+  const languageSelect=$('settingsLanguage');
+  if(languageSelect)languageSelect.value=profile?.language||detectPreferredLanguage();
 }
 function closeSettingsModal(){ $('settingsModal').classList.add('hidden'); }
 
@@ -1526,6 +1589,12 @@ async function submitReport(){
 async function loadProfile(){
   let {data}=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
   profile=data||{};
+  if(!profile.language){
+    profile.language=detectPreferredLanguage();
+    const {error:languageError}=await db.from('user_profiles').update({language:profile.language}).eq('user_id',user.id);
+    if(languageError)console.warn('Não foi possível salvar o idioma detectado:',languageError.message);
+  }
+  if($('settingsLanguage'))$('settingsLanguage').value=profile.language||detectPreferredLanguage();
   $('profileName').value=profile.full_name||'';
   $('profileUsername').value=profile.username||'';
   $('profileBio').value=profile.bio||'';
