@@ -2414,7 +2414,7 @@ function addEmoji(emoji){ $('messageInput').value += emoji; }
 async function loadMessages(){
   if(!activeChat || !user)return;
 
-  const {data,error}=await db.from('direct_messages')
+  let {data,error}=await db.from('direct_messages')
     .select('*')
     .or(`and(sender_id.eq.${user.id},receiver_id.eq.${activeChat}),and(sender_id.eq.${activeChat},receiver_id.eq.${user.id})`)
     .order('created_at',{ascending:true});
