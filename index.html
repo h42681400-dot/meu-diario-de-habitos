@@ -523,6 +523,23 @@ body.theme-dark .bubble-time{color:#b6c7c0}
 .app-toast{cursor:default}
 .app-toast.has-action{cursor:pointer}
 @media(max-width:420px){.explore-user-actions{gap:4px}.explore-user-actions button{padding:7px 8px;font-size:10px}}
+/* Ajustes de interação nas publicações */
+.post-like-control{display:inline-flex;align-items:center;gap:2px}
+.post-actions .post-heart-button,.post-actions .post-count-button{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:6px 3px;min-width:0}
+.post-actions .post-heart-button{font-size:15px}
+.post-actions .post-heart-button.liked{color:var(--rose)}
+.post-actions .post-count-button{font-size:12px;color:var(--muted)}
+.comments-section-heading,.repost-composer-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.comments-close,.repost-close{width:32px;height:32px;padding:0;border-radius:50%;display:grid;place-items:center;background:var(--line);color:var(--ink)}
+.repost-composer-box{max-width:500px}
+.repost-composer-heading h3{margin:0}
+#repostCommentInput{width:100%;min-height:92px;resize:vertical;margin:12px 0;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);padding:13px;font:inherit}
+#repostCommentInput:focus{outline:none;border-color:var(--rose)}
+.repost-original-preview{border:1px solid var(--line);border-radius:14px;padding:13px;background:var(--bg);margin:4px 0 16px}
+.repost-preview-label{font-size:11px;color:var(--muted);margin-bottom:8px}
+.repost-original-preview p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}
+.repost-original-preview img{display:block;max-width:100%;max-height:190px;object-fit:contain;border-radius:10px;margin-top:10px}
+.repost-composer-actions{display:flex;justify-content:flex-end;gap:9px}
 /* Interações sociais: contagens, respostas e repost com comentário */
 .post-actions{align-items:center;flex-wrap:wrap;gap:7px 12px}
 .post-actions button{padding:6px 4px;font-size:12px}
@@ -1634,13 +1651,13 @@ function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false,
       ${p.media_url?`<img src="${esc(p.media_url)}" class="post-media" loading="lazy" decoding="async">`:''}
       ${interactive?`
         <div class="post-actions">
-          <button class="${isLiked?'liked':''}" onclick="toggleLike('${p.id}',${isLiked},'${p.user_id}')"><i class="${isLiked?'fa-solid':'fa-regular'} fa-heart"></i> Curtir</button>
-          <button onclick="showPostPeople('${p.id}','likes')"><b>${likeCount}</b> curtidas</button>
+          <span class="post-like-control"><button class="post-heart-button ${isLiked?'liked':''}" onclick="toggleLike('${p.id}',${isLiked},'${p.user_id}')" aria-label="Curtir"><i class="${isLiked?'fa-solid':'fa-regular'} fa-heart"></i></button><button class="post-count-button" onclick="showPostPeople('${p.id}','likes')" aria-label="Ver quem curtiu">${likeCount}</button></span>
           <button class="${isReposted?'reposted':''}" onclick="openRepostComposer('${p.id}','${p.user_id}')"><i class="fa-solid fa-retweet"></i> Repostar</button>
           <button onclick="showPostPeople('${p.id}','reposts')"><b>${repostCount}</b> reposts</button>
           <button onclick="toggleCommentsSection('${p.id}')"><i class="fa-regular fa-comment"></i> <b>${commentCount}</b> comentários</button>
         </div>
         <div id="comments-box-${p.id}" class="comments-section hidden">
+          <div class="comments-section-heading"><b>Comentários</b><button class="comments-close" onclick="closeCommentsSection('${p.id}')" aria-label="Fechar comentários"><i class="fa-solid fa-xmark"></i></button></div>
           <div id="comments-list-${p.id}"></div>
           <div class="row" style="margin-top:10px;display:flex;gap:8px">
             <input id="comment-input-${p.id}" placeholder="Escreva um comentário..." onkeydown="if(event.key==='Enter')addComment('${p.id}','${p.user_id}')" style="margin:0">
@@ -1665,11 +1682,34 @@ async function showPostPeople(postId,kind){
 }
 function closePostPeople(){document.getElementById('postPeopleModal')?.classList.add('hidden');}
 
+let repostDraft={postId:null,postOwnerId:null};
 async function openRepostComposer(postId,postOwnerId){
-  const comment=prompt('Adicione um comentário ao repost (ou deixe em branco):','');
-  if(comment===null)return;
-  const {error}=await db.from('post_reposts').upsert({post_id:postId,user_id:user.id,comment_text:comment.trim()},{onConflict:'post_id,user_id'});
+  repostDraft={postId,postOwnerId};
+  const {data:post}=await db.from('posts').select('content,media_url').eq('id',postId).maybeSingle();
+  if(!post){showToast('Ops!','Não foi possível encontrar esta publicação.',{type:'repost'});return;}
+  let modal=document.getElementById('repostComposerModal');
+  if(!modal){
+    modal=document.createElement('div');modal.id='repostComposerModal';modal.className='modal-overlay hidden';
+    modal.innerHTML='<div class="modal-box repost-composer-box"><div class="repost-composer-heading"><h3>Repostar publicação</h3><button class="ghost repost-close" onclick="closeRepostComposer()" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></div><textarea id="repostCommentInput" rows="3" placeholder="Adicione um comentário..."></textarea><div class="repost-original-preview"><div class="repost-preview-label"><i class="fa-solid fa-retweet"></i> Publicação original</div><p id="repostOriginalText"></p><img id="repostOriginalImage" class="hidden"></div><div class="repost-composer-actions"><button class="secondary" onclick="closeRepostComposer()">Cancelar</button><button id="confirmRepostButton" onclick="submitRepost()">Repostar</button></div></div>';
+    document.body.appendChild(modal);
+    modal.addEventListener('click',e=>{if(e.target===modal)closeRepostComposer();});
+  }
+  document.getElementById('repostCommentInput').value='';
+  document.getElementById('repostOriginalText').textContent=post.content||'Publicação com imagem';
+  const img=document.getElementById('repostOriginalImage');
+  if(post.media_url){img.src=post.media_url;img.classList.remove('hidden');}else{img.removeAttribute('src');img.classList.add('hidden');}
+  modal.classList.remove('hidden');
+}
+function closeRepostComposer(){document.getElementById('repostComposerModal')?.classList.add('hidden');repostDraft={postId:null,postOwnerId:null};}
+async function submitRepost(){
+  if(!repostDraft.postId)return;
+  const button=document.getElementById('confirmRepostButton');button.disabled=true;button.textContent='Publicando...';
+  const postId=repostDraft.postId,postOwnerId=repostDraft.postOwnerId;
+  const comment=document.getElementById('repostCommentInput').value.trim();
+  const {error}=await db.from('post_reposts').upsert({post_id:postId,user_id:user.id,comment_text:comment},{onConflict:'post_id,user_id'});
+  button.disabled=false;button.textContent='Repostar';
   if(error){showToast('Ops!','Não foi possível repostar. Confira se a atualização do banco foi aplicada.',{type:'repost'});return;}
+  closeRepostComposer();
   if(postOwnerId!==user.id)await db.from('notifications').insert({user_id:postOwnerId,actor_id:user.id,type:'repost',post_id:postId});
   showToast('Repost publicado!','Sua publicação foi compartilhada.',{type:'repost'});
   await loadFeed('all');
@@ -1692,6 +1732,7 @@ async function toggleCommentsSection(postId){
   box.classList.toggle('hidden');
   if(!box.classList.contains('hidden'))await loadPostComments(postId);
 }
+function closeCommentsSection(postId){$('comments-box-'+postId)?.classList.add('hidden');}
 
 async function loadPostComments(postId){
   let {data,error}=await db.from('post_comments').select('*').eq('post_id',postId).order('created_at',{ascending:true});
