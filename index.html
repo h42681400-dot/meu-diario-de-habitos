@@ -110,15 +110,6 @@ textarea{min-height:85px;resize:vertical}
     border-radius: 0 0 20px 20px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.04);
   }
-  .nav button {
-    flex-direction: row !important;
-    gap: 8px !important;
-    padding: 10px 16px !important;
-  }
-  .nav button span {
-    font-size: 13px !important;
-    font-weight: 600 !important;
-  }
   .fab-post {
     bottom: 30px !important;
     right: calc(50vw - 360px) !important;
@@ -140,7 +131,7 @@ textarea{min-height:85px;resize:vertical}
 }
 .nav button span{font-size:10px;font-weight:500}
 .nav button.active{color:var(--rose);background:rgba(212,165,165,0.1)}
-.badge-red{background:var(--red);color:white;border-radius:50px;width:10px;height:10px;position:absolute;top:6px;right:16px}
+.badge-red{background:var(--red);color:white;border-radius:50px;width:10px;height:10px;position:absolute;top:3px;right:calc(50% - 20px)}
 
 /* Transição Suave */
 .page{display:none;opacity:0;transition:opacity 0.3s ease-in-out}
@@ -176,13 +167,6 @@ textarea{min-height:85px;resize:vertical}
 .comments-section{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
 .comment-item{font-size:13px;margin:8px 0;padding:8px;background:var(--bg);border-radius:10px}
 
-/* Mensagens Estilo iPhone */
-.messages{height:380px;overflow:auto;border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0;background:var(--bg);display:flex;flex-direction:column;gap:8px}
-.bubble{max-width:78%;padding:10px 14px;border-radius:18px;font-size:14px;word-break:break-word;line-height:1.4;box-shadow:0 1px 2px rgba(0,0,0,0.04)}
-.bubble.other{background:var(--bubble-other);color:var(--bubble-other-text);align-self:flex-start;border-bottom-left-radius:4px}
-.bubble.mine{background:var(--bubble-me);color:var(--bubble-me-text);align-self:flex-end;border-bottom-right-radius:4px}
-.bubble-status{font-size:10px;text-align:right;margin-top:3px;opacity:0.8}
-
 /* Perfil */
 .profile-card{padding:0;overflow:hidden}
 .profile-banner{height:140px;background:var(--line);position:relative}
@@ -202,6 +186,330 @@ textarea{min-height:85px;resize:vertical}
 .tweet-media-btn{background:var(--line);color:var(--ink);padding:10px 14px;border-radius:12px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
 .crop-preview-box{width:100%;background:#000;border-radius:12px;overflow:hidden;margin:12px 0;position:relative;display:flex;align-items:center;justify-content:center}
 .crop-preview-box img{max-width:100%;max-height:200px;object-fit:cover}
+
+/* NAVEGAÇÃO */
+.nav{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin:16px 0;
+  padding:8px;
+}
+
+.nav button{
+  flex:1;
+  min-width:100px;
+  padding:12px 10px;
+  border-radius:13px;
+  transition:.2s;
+}
+
+.nav button.active{
+  background:#765a56;
+}
+
+/* BOTÕES E ESPAÇAMENTO */
+button{
+  transition:background .2s, transform .2s;
+}
+
+button:active{
+  transform:scale(.97);
+}
+
+.row{
+  gap:12px;
+}
+
+/* CHAT */
+.messages{
+  height:420px;
+  min-height:300px;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  padding:18px 14px;
+  margin:14px 0;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:var(--bg);
+  scroll-behavior:smooth;
+}
+
+/* BALÕES */
+.bubble{
+  width:fit-content;
+  max-width:78%;
+  padding:11px 15px;
+  border-radius:20px;
+  margin:3px 0;
+  line-height:1.45;
+  overflow-wrap:anywhere;
+  box-shadow:0 1px 3px #0000000a;
+}
+
+.bubble.mine{
+  align-self:flex-end;
+  background:var(--rose);
+  color:white;
+  border-bottom-right-radius:5px;
+  margin-left:auto;
+}
+
+.bubble.other{
+  align-self:flex-start;
+  background:#eee4e0;
+  color:var(--ink);
+  border-bottom-left-radius:5px;
+  margin-right:auto;
+}
+
+.bubble-time{
+  font-size:10px;
+  opacity:.7;
+  text-align:right;
+  margin-top:5px;
+}
+
+/* CAMPO DE DIGITAÇÃO */
+#messageInput{
+  flex:1;
+  min-width:0;
+  height:48px;
+  border-radius:25px;
+  padding:0 17px;
+  margin:0;
+  background:white;
+  border:1px solid var(--line);
+  outline:none;
+}
+
+#messageInput:focus{
+  border-color:var(--rose);
+}
+
+#messageInput + button{
+  flex:0 0 52px;
+  width:52px;
+  height:48px;
+  padding:0;
+  border-radius:50%;
+  font-size:18px;
+}
+
+/* ÁREA DE CONVERSA */
+#messages .grid{
+  gap:18px;
+}
+
+#chatTitle{
+  margin-bottom:12px;
+}
+
+.chat-list{
+  max-height:420px;
+  overflow-y:auto;
+  border-radius:12px;
+}
+
+.chat-item{
+  padding:14px;
+  border-bottom:1px solid var(--line);
+  border-radius:10px;
+}
+
+/* CELULAR */
+@media(max-width:650px){
+  .nav{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:7px;
+  }
+
+  .nav button{
+    min-width:0;
+    padding:11px 5px;
+    font-size:12px;
+  }
+
+  #messages .grid{
+    gap:12px;
+  }
+
+  .messages{
+    height:55vh;
+    min-height:320px;
+    border-radius:18px;
+    padding:14px 10px;
+  }
+
+  .bubble{
+    max-width:85%;
+  }
+
+  .row{
+    gap:8px;
+  }
+}
+
+/* Ajustes de navegação para celular e computador */
+.nav{
+  gap:6px;
+  padding:10px 12px;
+}
+
+.nav button{
+  flex:1;
+  min-width:0;
+  justify-content:center;
+  padding:8px 6px;
+  gap:5px;
+}
+
+.nav button i{
+  font-size:20px;
+  line-height:1;
+}
+
+.nav button span{
+  white-space:nowrap;
+}
+
+.badge-red{
+  top:3px;
+  right:calc(50% - 20px);
+}
+
+@media(max-width:767px){
+  .nav{
+    padding:8px 5px calc(8px + env(safe-area-inset-bottom));
+    gap:2px;
+  }
+
+  .nav button{
+    padding:8px 2px;
+    border-radius:12px;
+  }
+
+  .nav button i{
+    font-size:19px;
+  }
+
+  .nav button span{
+    font-size:9px;
+  }
+
+  .wrap{
+    padding-bottom:110px;
+  }
+
+  .messages{
+    height:55vh;
+    min-height:300px;
+    border-radius:18px;
+  }
+}
+
+@media(min-width:768px){
+  .nav{
+    gap:12px;
+    padding:12px 18px;
+  }
+
+  .nav button{
+    flex-direction:row;
+    gap:9px;
+    padding:10px 12px;
+  }
+
+  .nav button i{
+    font-size:17px;
+  }
+}
+
+/* Chat com aparência de iMessage */
+.messages{
+  background:var(--bg);
+  padding:16px;
+  gap:10px;
+  scroll-behavior:smooth;
+}
+
+.bubble{
+  max-width:min(78%,420px);
+  padding:11px 15px;
+  border-radius:20px;
+  font-size:15px;
+  line-height:1.4;
+}
+
+.bubble.mine{
+  border-bottom-right-radius:5px;
+}
+
+.bubble.other{
+  border-bottom-left-radius:5px;
+}
+
+#messageInput{
+  border-radius:24px;
+  padding:12px 16px;
+  background:var(--card-bg);
+}
+
+#chatRoomView .row button{
+  width:46px;
+  min-width:46px;
+  height:46px;
+  border-radius:50%;
+  padding:0;
+}
+
+/* Grade de descoberta estilo Instagram */
+.explore-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:3px;
+}
+
+.explore-post-card{
+  position:relative;
+  aspect-ratio:1/1;
+  overflow:hidden;
+  background:var(--line);
+  cursor:pointer;
+}
+
+.explore-post-card img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.explore-text-post{
+  width:100%;
+  height:100%;
+  padding:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  font-size:12px;
+  overflow:hidden;
+  word-break:break-word;
+  background:var(--card-bg);
+}
+
+.explore-post-overlay{
+  position:absolute;
+  inset:auto 0 0;
+  padding:18px 5px 6px;
+  color:white;
+  font-size:10px;
+  background:linear-gradient(transparent,rgba(0,0,0,.6));
+}
 </style></head>
 <body>
 
@@ -1220,47 +1528,146 @@ async function addComment(postId, postOwnerId){
 /* EXPLORAR */
 async function searchProfilesAndPosts(){
   let q=$('searchPeople').value.trim().replace(/^@/,'').toLowerCase();
-  if(q){
-    let searches = JSON.parse(localStorage.getItem('recentSearches')||'[]');
-    if(!searches.includes(q)){
-      searches.unshift(q);
-      if(searches.length>5) searches.pop();
-      localStorage.setItem('recentSearches', JSON.stringify(searches));
-    }
-  }
+
   renderRecentSearches();
 
-  let userQuery=db.from('user_profiles').select('*').neq('user_id',user.id).limit(20);
-  if(q){
-    userQuery=userQuery.or(`username.ilike.${q}%,full_name.ilike.${q}%,username.ilike.%${q}%,full_name.ilike.%${q}%`);
+  // SEM PESQUISA: mostrar publicações recentes em grade
+  if(!q){
+    let {data:posts,error}=await db
+      .from('posts')
+      .select('*')
+      .order('created_at',{ascending:false})
+      .limit(30);
+
+    if(error){
+      $('peopleList').innerHTML='<p class="muted">Erro ao carregar publicações.</p>';
+      return;
+    }
+
+    let ids=[...new Set((posts||[]).map(p=>p.user_id))];
+    let authors={};
+
+    if(ids.length){
+      let {data:profiles}=await db
+        .from('user_profiles')
+        .select('*')
+        .in('user_id',ids);
+
+      (profiles||[]).forEach(p=>authors[p.user_id]=p);
+    }
+
+    $('peopleList').innerHTML=`
+      <h3 style="font-size:15px;margin:14px 0">Descobrir publicações</h3>
+      <div class="explore-grid">
+        ${(posts||[]).map(p=>{
+          let author=authors[p.user_id]||{};
+          return `
+            <div class="explore-post-card"
+              onclick="inspectProfile('${p.user_id}')"
+              title="Ver perfil de ${esc(author.full_name||'usuário')}">
+
+              ${p.media_url
+                ? `<img src="${esc(p.media_url)}" loading="lazy">`
+                : `<div class="explore-text-post">${esc(p.content||'Publicação')}</div>`
+              }
+
+              <div class="explore-post-overlay">
+                <span><i class="fa-solid fa-user"></i> ${esc(author.username||'usuário')}</span>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+      ${(posts||[]).length===0
+        ? '<p class="muted">Ainda não há publicações para descobrir.</p>'
+        : ''}
+    `;
+
+    return;
   }
+
+  // PESQUISA: registrar pesquisa recente
+  let searches=JSON.parse(localStorage.getItem('recentSearches')||'[]');
+
+  searches=searches.filter(s=>s!==q);
+  searches.unshift(q);
+
+  if(searches.length>5) searches.pop();
+
+  localStorage.setItem('recentSearches',JSON.stringify(searches));
+  renderRecentSearches();
+
+  // Buscar perfis
+  let userQuery=db
+    .from('user_profiles')
+    .select('*')
+    .neq('user_id',user.id)
+    .or(`username.ilike.%${q}%,full_name.ilike.%${q}%`)
+    .limit(20);
+
   let {data:users}=await userQuery;
 
-  let postsHtml = '';
-  if(q){
-    let {data:matchingPosts}=await db.from('posts').select('*').ilike('content', `%${q}%`).limit(10);
-    if(matchingPosts && matchingPosts.length){
-      let authorIds=[...new Set(matchingPosts.map(p=>p.user_id))];
-      let {data:authors}=await db.from('user_profiles').select('*').in('user_id',authorIds);
-      let authorMap={}; (authors||[]).forEach(a=>authorMap[a.user_id]=a);
-      postsHtml = `<h4>Postagens encontradas</h4>` + matchingPosts.map(p=>renderPostHtml(p, authorMap[p.user_id]||{}, true)).join('');
-    }
+  // Buscar publicações
+  let {data:matchingPosts}=await db
+    .from('posts')
+    .select('*')
+    .ilike('content',`%${q}%`)
+    .order('created_at',{ascending:false})
+    .limit(20);
+
+  let postsHtml='';
+
+  if(matchingPosts?.length){
+    let authorIds=[...new Set(matchingPosts.map(p=>p.user_id))];
+
+    let {data:authors}=await db
+      .from('user_profiles')
+      .select('*')
+      .in('user_id',authorIds);
+
+    let authorMap={};
+    (authors||[]).forEach(a=>authorMap[a.user_id]=a);
+
+    postsHtml=`
+      <h3 style="font-size:15px;margin:20px 0 10px">Publicações</h3>
+      ${matchingPosts.map(p=>
+        renderPostHtml(p,authorMap[p.user_id]||{},true)
+      ).join('')}
+    `;
   }
 
-  let usersHtml = (users||[]).map(p=>`
-    <div class="person">
-      <div style="display:flex;align-items:center;gap:12px;cursor:pointer" onclick="inspectProfile('${p.user_id}')">
-        <div class="avatar" style="width:38px;height:38px">${p.avatar_url?`<img src="${p.avatar_url}">`:(p.full_name?p.full_name[0]:'?')}</div>
-        <div><b>${esc(p.full_name||'')}</b><div class="muted">@${esc(p.username||'')}</div></div>
+  let usersHtml=(users||[]).map(p=>`
+    <div class="person" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)">
+      <div style="display:flex;align-items:center;gap:12px;cursor:pointer;min-width:0"
+        onclick="inspectProfile('${p.user_id}')">
+
+        <div class="avatar" style="width:42px;height:42px">
+          ${p.avatar_url
+            ? `<img src="${esc(p.avatar_url)}">`
+            : esc((p.full_name||'?')[0])
+          }
+        </div>
+
+        <div style="min-width:0">
+          <b>${esc(p.full_name||'Usuário')}</b>
+          <div class="muted">@${esc(p.username||'')}</div>
+        </div>
       </div>
-      <div style="display:flex;gap:8px">
-        <button class="secondary" onclick="inspectProfile('${p.user_id}')">Ver Perfil</button>
-        <button class="secondary" onclick="openChatFromExplore('${p.user_id}')"><i class="fa-solid fa-paper-plane"></i></button>
-      </div>
+
+      <button class="secondary"
+        onclick="inspectProfile('${p.user_id}')">
+        Ver perfil
+      </button>
     </div>
   `).join('');
 
-  $('peopleList').innerHTML = usersHtml + (postsHtml ? `<hr style="border:0;border-top:1px solid var(--line);margin:16px 0">${postsHtml}` : '');
+  $('peopleList').innerHTML=`
+    ${usersHtml
+      ? '<h3 style="font-size:15px;margin:14px 0 6px">Perfis</h3>'+usersHtml
+      : '<p class="muted">Nenhum perfil encontrado.</p>'
+    }
+    ${postsHtml}
+  `;
 }
 
 function renderRecentSearches(){
@@ -1274,18 +1681,6 @@ function renderRecentSearches(){
 function clearRecentSearches(){
   localStorage.removeItem('recentSearches');
   renderRecentSearches();
-}
-
-async function openChatFromExplore(id){
-  let {data:targetProfile}=await db.from('user_profiles').select('*').eq('user_id',id).maybeSingle();
-  if(targetProfile && targetProfile.messages_from_following_only){
-    let {data:isF}=await db.from('follows').select('*').eq('follower_id',id).eq('following_id',user.id).maybeSingle();
-    if(!isF){
-      alert('Este usuário aceita mensagens apenas de quem ele segue.');
-      return;
-    }
-  }
-  openChat(id);
 }
 
 async function inspectProfile(id){
@@ -1310,7 +1705,7 @@ async function inspectProfile(id){
       </div>
       <div style="display:flex;gap:10px;justify-content:center;margin-top:16px">
         <button onclick="toggleFollowModal('${id}',${!!isF})">${isF?'Seguindo':'Seguir'}</button>
-        <button class="secondary" onclick="closeUserModal();openChatFromExplore('${id}')">Mensagem</button>
+        <button class="secondary" onclick="closeUserModal();openChat('${id}')">Mensagem</button>
         <button class="ghost" onclick="toggleBlockUser('${id}',${!!isB})" style="color:var(--red);border-color:var(--red)">${isB?'Desbloquear':'Bloquear'}</button>
       </div>
     </div>
@@ -1357,17 +1752,32 @@ async function loadChats(){
   `).join('');
 }
 
-async function openChat(id){
-  activeChat=id;
+async function openChat(id, username=''){
   showPage('messages');
+  activeChat=id;
+
   let p=chatProfiles[id];
+
   if(!p){
-    let {data}=await db.from('user_profiles').select('*').eq('user_id',id).maybeSingle();
-    p=data||{}; chatProfiles[id]=p;
+    let {data,error}=await db.from('user_profiles')
+      .select('username,full_name')
+      .eq('user_id',id)
+      .maybeSingle();
+
+    if(error){
+      status('messageStatus','Erro ao abrir conversa: '+error.message);
+      return;
+    }
+
+    p=data||{};
   }
-  $('chatTitle').textContent=(p.full_name||'Conversa')+' · @'+(p.username||'');
+
+  $('chatTitle').textContent=
+    (p.full_name||'Conversa')+' · @'+(p.username||username||'usuario');
+
   $('chatListView').classList.add('hidden');
   $('chatRoomView').classList.remove('hidden');
+
   await loadMessages();
   
   if(chatInterval) clearInterval(chatInterval);
@@ -1386,45 +1796,73 @@ function backToChatList(){
 function addEmoji(emoji){ $('messageInput').value += emoji; }
 
 async function loadMessages(){
-  if(!activeChat)return;
-  let {data}=await db.from('direct_messages').select('*').or(`and(sender_id.eq.${user.id},receiver_id.eq.${activeChat}),and(sender_id.eq.${activeChat},receiver_id.eq.${user.id})`).order('created_at');
-  
-  let unread=(data||[]).filter(m=>m.receiver_id===user.id && !m.read_at).map(m=>m.id);
-  if(unread.length){
-    await db.from('direct_messages').update({read_at:new Date().toISOString()}).in('id',unread);
-    checkUnreadBadges();
+  if(!activeChat || !user)return;
+
+  const {data,error}=await db.from('direct_messages')
+    .select('*')
+    .or(`and(sender_id.eq.${user.id},receiver_id.eq.${activeChat}),and(sender_id.eq.${activeChat},receiver_id.eq.${user.id})`)
+    .order('created_at',{ascending:true});
+
+  if(error){
+    status('messageStatus','Erro ao carregar mensagens: '+error.message);
+    return;
   }
 
   $('messageBox').innerHTML=(data||[]).map(m=>{
-    let isMine=m.sender_id===user.id;
-    let statusText=m.read_at?'✓✓ lido':(m.created_at?'✓ enviado':'enviando...');
+    const mine=m.sender_id===user.id;
+
     return `
-      <div class="bubble ${isMine?'mine':'other'}">
+      <div class="bubble ${mine?'mine':'other'}">
         ${esc(m.content)}
-        <div class="bubble-status">${statusText}</div>
+        <div class="bubble-time">
+          ${new Date(m.created_at).toLocaleTimeString('pt-BR',{
+            hour:'2-digit',
+            minute:'2-digit'
+          })}
+        </div>
       </div>
     `;
   }).join('');
+
   $('messageBox').scrollTop=$('messageBox').scrollHeight;
 }
 
 async function sendMessage(){
-  if(!activeChat)return;
-  let content=$('messageInput').value.trim();
-  if(!content)return;
-  
-  let {data:targetProfile}=await db.from('user_profiles').select('*').eq('user_id',activeChat).maybeSingle();
-  if(targetProfile && targetProfile.messages_from_following_only){
-    let {data:isF}=await db.from('follows').select('*').eq('follower_id',activeChat).eq('following_id',user.id).maybeSingle();
-    if(!isF){
-      alert('Este usuário aceita mensagens apenas de quem ele segue.');
-      return;
-    }
+  if(!activeChat){
+    status('messageStatus','Escolha uma conversa primeiro.');
+    return;
   }
 
-  await db.from('direct_messages').insert({sender_id:user.id,receiver_id:activeChat,content});
-  $('messageInput').value='';
-  await loadMessages();
+  const input=$('messageInput');
+  const content=input.value.trim();
+
+  if(!content)return;
+
+  const button=input.parentElement.querySelector('button');
+  button.disabled=true;
+  status('messageStatus','Enviando...');
+
+  try{
+    const {error}=await db.from('direct_messages').insert({
+      sender_id:user.id,
+      receiver_id:activeChat,
+      content
+    });
+
+    if(error)throw error;
+
+    input.value='';
+    status('messageStatus','');
+
+    await loadMessages();
+    await loadChats();
+
+  }catch(error){
+    status('messageStatus','Erro ao enviar: '+error.message);
+  }finally{
+    button.disabled=false;
+    input.focus();
+  }
 }
 
 /* NOTIFICAÇÕES */
@@ -1463,3 +1901,4 @@ async function loadNotifications(){
 </script>
 </body>
 </html>
+```[cite: 1]
