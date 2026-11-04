@@ -4,6 +4,19 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Cottontail 🐰</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+if(!window.supabase){
+  document.write('<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"><\\/script>');
+}
+</script>
+<script>
+if(!window.supabase){
+  document.addEventListener('DOMContentLoaded',()=>{
+    const message=document.getElementById('loginStatus');
+    if(message) message.textContent='Não foi possível carregar o serviço de login. Verifique sua conexão e atualize a página.';
+  });
+}
+</script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 :root{
@@ -1202,6 +1215,8 @@ async function signIn(){
     if(button){button.disabled=false;button.textContent='Entrar';}
   }
 }
+
+window.signIn=signIn;
 
 async function resetPassword(){
   let email=$('loginEmail').value.trim();
