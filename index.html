@@ -2503,12 +2503,13 @@ async function loadMessages(){
     const mine=m.sender_id===user.id;
     const time=new Date(m.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     const receipt=mine?(m.read_at?'<span class="message-receipt read">✓✓ Lida</span>':'<span class="message-receipt">✓ Enviada</span>'):'';
-    return `<div class="bubble ${mine?'mine':'other'}" style="position:relative;padding-right:30px"><button class="message-options-btn" title="Opções da mensagem" onclick="toggleMessageMenu('${m.id}')" style="position:absolute;right:5px;top:4px;border:0;background:transparent;color:inherit;opacity:.65;padding:2px 5px;cursor:pointer">⋯</button><div>${esc(m.content)}</div><div class="bubble-time">${time} ${receipt}</div><div id="message-menu-${m.id}" class="message-options-menu hidden" style="position:absolute;right:5px;top:25px;z-index:20;background:var(--card,#fff);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:6px;box-shadow:0 5px 18px #0002;min-width:155px"><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="deleteMessageForMe('${m.id}')">Apagar para mim</button>${mine?`<button class="danger" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="deleteMessageForEveryone('${m.id}')">Apagar para todos</button>`:''}</div></div>`;
+    return `<div class="bubble ${mine?'mine':'other'}" style="position:relative;padding-right:30px"><button class="message-options-btn" title="Opções da mensagem" onclick="toggleMessageMenu('${m.id}')" style="position:absolute;right:5px;top:4px;border:0;background:transparent;color:inherit;opacity:.65;padding:2px 5px;cursor:pointer">⋯</button><div>${esc(m.content)}</div>${m.shared_post_id?`<button class="secondary" style="margin-top:7px;font-size:12px" onclick="openSharedPost('${m.shared_post_id}')"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver publicação compartilhada</button>`:''}<div class="bubble-time">${time} ${receipt}</div><div id="message-menu-${m.id}" class="message-options-menu hidden" style="position:absolute;right:5px;top:25px;z-index:20;background:var(--card,#fff);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:6px;box-shadow:0 5px 18px #0002;min-width:155px"><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="deleteMessageForMe('${m.id}')">Apagar para mim</button>${mine?`<button class="danger" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="deleteMessageForEveryone('${m.id}')">Apagar para todos</button>`:''}</div></div>`;
   }).join('');
   $('messageBox').scrollTop=$('messageBox').scrollHeight;
   checkUnreadBadges();
 }
 
+function openSharedPost(postId){showPage('feed');loadFeed('all').then(()=>setTimeout(()=>{const el=$('post-'+postId);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150));}
 function toggleMessageMenu(id){
   document.querySelectorAll('.message-options-menu').forEach(el=>{if(el.id!=='message-menu-'+id)el.classList.add('hidden');});
   const menu=$('message-menu-'+id);if(menu)menu.classList.toggle('hidden');
@@ -2553,12 +2554,11 @@ async function sendMessage(){
     await db.from('direct_conversation_settings').upsert({user_id:user.id,peer_id:activeChat,hidden:false},{onConflict:'user_id,peer_id'});
     await db.from('direct_conversation_settings').upsert({user_id:activeChat,peer_id:user.id,hidden:false},{onConflict:'user_id,peer_id'});
 
-    const {error:notifError}=await db.from('notifications').insert({
-      user_id:activeChat,
-      actor_id:user.id,
-      type:'message'
-    });
-    if(notifError) console.warn('Mensagem enviada, mas a notificação não foi registrada:',notifError.message);
+    const {data:recipientSettings}=await db.from('direct_conversation_settings').select('muted').eq('user_id',activeChat).eq('peer_id',user.id).maybeSingle();
+    if(!recipientSettings?.muted){
+      const {error:notifError}=await db.from('notifications').insert({user_id:activeChat,actor_id:user.id,type:'message'});
+      if(notifError) console.warn('Mensagem enviada, mas a notificação não foi registrada:',notifError.message);
+    }
 
     input.value='';
     await clearMyTypingState();
