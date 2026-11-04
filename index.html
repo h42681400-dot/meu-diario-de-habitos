@@ -1878,11 +1878,11 @@ async function loadMessages(){
     return;
   }
 
-  const unread=(data||[]).filter(m=>m.sender_id===activeChat&&m.receiver_id===user.id&&!m.read_at).map(m=>m.id);
+  const unread=(data||[]).filter(m=>m.sender_id===activeChat&&m.receiver_id===user.id&&!m.read_at);
   if(unread.length){
-    const readTime=new Date().toISOString();
-    await db.from('direct_messages').update({read_at:readTime}).in('id',unread);
-    unread.forEach(id=>{const m=data.find(x=>x.id===id);if(m)m.read_at=readTime;});
+    const {error:readError}=await db.rpc('mark_messages_read',{p_sender_id:activeChat});
+    if(!readError){const readTime=new Date().toISOString();unread.forEach(m=>m.read_at=readTime);}
+    else console.warn('Não foi possível marcar mensagens como lidas:',readError.message);
   }
   $('messageBox').innerHTML=(data||[]).map(m=>{
     const mine=m.sender_id===user.id;
