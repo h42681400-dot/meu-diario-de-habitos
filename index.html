@@ -159,7 +159,7 @@ textarea{min-height:85px;resize:vertical}
 .post{border-bottom:1px solid var(--line);padding:18px 0}
 .post:last-child{border-bottom:0}
 .post-head{display:flex;align-items:center;justify-content:space-between}
-.post-user-info{display:flex;align-items:center;gap:12px;cursor:pointer;pointer-events:auto !important;z-index:10}
+.post-user-info{display:flex;align-items:center;gap:12px;cursor:pointer}
 .avatar{width:46px;height:46px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;color:var(--rose);font-weight:bold;overflow:hidden;flex:none}
 .avatar img{width:100%;height:100%;object-fit:cover}
 .post-media{width:100%;max-height:340px;border-radius:14px;object-fit:cover;margin-top:12px}
@@ -192,8 +192,15 @@ textarea{min-height:85px;resize:vertical}
 .tweet-media-btn{background:var(--line);color:var(--ink);padding:10px 14px;border-radius:12px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
 .crop-preview-box{width:100%;background:#000;border-radius:12px;overflow:hidden;margin:12px 0;position:relative;display:flex;align-items:center;justify-content:center}
 .crop-preview-box img{max-width:100%;max-height:160px;object-fit:cover}
+
+/* POPUP TOAST DE NOTIFICAÇÃO (ESTILO SOFT) */
+#toastContainer{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px}
+.toast{background:var(--card-bg);color:var(--ink);border:1px solid var(--line);padding:14px 20px;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,0.1);font-size:14px;animation:slideIn 0.3s ease;display:flex;align-items:center;gap:10px;min-width:260px}
+@keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
 </style></head>
 <body>
+
+<div id="toastContainer"></div>
 
 <!-- LOGIN -->
 <div id="loginScreen" class="wrap login">
@@ -290,11 +297,11 @@ textarea{min-height:85px;resize:vertical}
     </div>
   </section>
 
-  <!-- EXPLORAR -->
+  <!-- EXPLORAR (Vazio inicialmente, busca na digitação) -->
   <section id="explore" class="page">
     <div class="card">
       <div style="display:flex;gap:8px">
-        <input id="searchPeople" placeholder="Buscar @usuário ou nome..." oninput="searchProfilesAndPosts()">
+        <input id="searchPeople" placeholder="Pesquisar @usuário ou nome..." oninput="searchProfilesAndPosts()">
       </div>
       <div id="peopleList" style="margin-top:14px"></div>
     </div>
@@ -489,6 +496,19 @@ function esc(s=''){
   }[c]));
 }
 
+/* SISTEMA DE NOTIFICAÇÕES POP-UP (TOAST) */
+function showToast(message) {
+  let container = $('toastContainer');
+  let toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `<i class="fa-solid fa-bell" style="color:var(--rose)"></i> <span>${esc(message)}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
 /* NAVEGAÇÃO */
 function showPage(pageId) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -505,10 +525,7 @@ function showPage(pageId) {
 }
 
 /* MODAIS */
-function openSettingsModal() { 
-  loadBlockedUsers();
-  $('settingsModal').classList.remove('hidden'); 
-}
+function openSettingsModal() { loadBlockedUsers(); $('settingsModal').classList.remove('hidden'); }
 function closeSettingsModal() { $('settingsModal').classList.add('hidden'); }
 function openEditProfileModal() {
   if(profile) {
@@ -554,10 +571,10 @@ function toggleMusic(){
   else { player.pause(); icon.className='fa-solid fa-play'; }
 }
 function changeMusicUrl(url){
-  if(url){ $('audioPlayer').src = url; $('audioPlayer').play(); $('musicIcon').className='fa-solid fa-play'; }
+  if(url){ $('audioPlayer').src = url; $('audioPlayer').play(); $('musicIcon').className='fa-solid fa-pause'; }
 }
 
-/* POSTS & INTERAÇÕES ESTILO TWITTER */
+/* POSTS & INTERAÇÕES */
 function previewFloatingPostImage() {
   let file = $('modalPostImageInput').files[0];
   if(file) {
@@ -590,6 +607,7 @@ async function submitFloatingPost() {
     $('modalImagePreviewBox').classList.add('hidden');
     status('modalPostStatus', '');
     closeFloatingPostModal();
+    showToast("Publicação realizada com sucesso!");
     loadFeed();
   }
 }
@@ -625,7 +643,7 @@ async function loadFeed() {
             </div>
           </div>
           <div>
-            ${p.user_id === user.id ? `<button class="ghost" onclick="deletePost('${p.id}')" style="padding:4px 8px;font-size:12px;color:var(--red)"><i class="fa-solid fa-trash"></i></button>` : ''}
+            ${p.user_id === user.id ? `<button class="ghost" onclick="deletePost('${p.id}')" style="padding:4px 8px;font-size:12px;color:var(--red)"><i class="fa-solid fa-trash"></i> Excluir</button>` : ''}
           </div>
         </div>
         <p style="margin-top:10px">${esc(p.content)}</p>
@@ -650,6 +668,7 @@ async function loadFeed() {
 async function deletePost(postId) {
   if(confirm("Deseja excluir esta postagem?")) {
     await db.from('posts').delete().eq('id', postId);
+    showToast("Postagem excluída.");
     loadFeed();
   }
 }
@@ -664,6 +683,7 @@ async function likePost(postId) {
   } else {
     btn.classList.add('liked');
     countSpan.textContent = current + 1;
+    showToast("Você curtiu uma publicação ❤️");
   }
 }
 
@@ -677,6 +697,7 @@ async function repostPost(postId) {
   } else {
     btn.classList.add('reposted');
     countSpan.textContent = current + 1;
+    showToast("Publicação repostada no seu perfil 🔄");
   }
 }
 
@@ -712,23 +733,29 @@ async function addComment(postId) {
   if(!text) return;
   await db.from('comments').insert({ post_id: postId, user_id: user.id, content: text });
   input.value = '';
+  showToast("Comentário enviado 💬");
   loadComments(postId);
 }
 
 /* SEGUIR, BLOQUEAR E PERFIS */
 async function followUser(targetId) {
   await db.from('follows').insert({ follower_id: user.id, following_id: targetId });
+  showToast("Você começou a seguir este usuário ✨");
   openUserProfile(targetId);
+  loadUserProfile();
 }
 
 async function unfollowUser(targetId) {
   await db.from('follows').delete().eq('follower_id', user.id).eq('following_id', targetId);
+  showToast("Você deixou de seguir este usuário.");
   openUserProfile(targetId);
+  loadUserProfile();
 }
 
 async function blockUser(targetId) {
   if(confirm("Deseja bloquear este usuário?")) {
     await db.from('blocks').insert({ blocker_id: user.id, blocked_id: targetId });
+    showToast("Usuário bloqueado com sucesso.");
     closeUserModal();
     loadFeed();
   }
@@ -756,6 +783,7 @@ async function loadBlockedUsers() {
 
 async function unblockUser(blockedId) {
   await db.from('blocks').delete().eq('blocker_id', user.id).eq('blocked_id', blockedId);
+  showToast("Usuário desbloqueado.");
   loadBlockedUsers();
 }
 
@@ -824,11 +852,12 @@ function selectDate(y, m, d) {
 }
 
 async function saveEntry() {
+  showToast("Registro do diário salvo com sucesso 📖");
   status('diaryStatus', 'Salvo com sucesso!');
   setTimeout(()=>status('diaryStatus',''), 2000);
 }
 
-/* PERFIL E SEGUIDORES/SEGUINDO ESTILO TWITTER */
+/* PERFIL E SEGUIDORES/SEGUINDO */
 async function loadUserProfile() {
   if(!user) return;
   let {data} = await db.from('profiles').select('*').eq('id', user.id).single();
@@ -929,6 +958,7 @@ async function saveProfile() {
     status('profileStatus', error.message);
   } else {
     status('profileStatus', '');
+    showToast("Perfil atualizado com sucesso ✨");
     closeEditProfileModal();
     loadUserProfile();
   }
@@ -1024,6 +1054,7 @@ async function signIn(){
   user = data.user;
   $('loginScreen').classList.add('hidden');
   $('app').classList.remove('hidden');
+  showToast("Bem-vindo de volta! 🌸");
   showPage('feed');
 }
 
@@ -1041,7 +1072,7 @@ async function signUp(){
 function signOut(){ db.auth.signOut(); location.reload(); }
 async function executeDeleteAccount(){
   if(confirm("Tem certeza que deseja excluir sua conta permanentemente?")) {
-    alert("Conta desativada.");
+    showToast("Conta desativada.");
     signOut();
   }
 }
