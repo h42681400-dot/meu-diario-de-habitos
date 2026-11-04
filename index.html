@@ -631,6 +631,42 @@ body.theme-dark #messageBox .bubble.other{background:#303036;color:#f7eff2;borde
 .friend-person-main{display:flex;align-items:center;gap:10px;min-width:0;cursor:pointer}.friend-person-main .avatar{width:40px;height:40px}.friend-person-main>div:last-child{min-width:0;overflow-wrap:anywhere}.friend-person>button{padding:7px 11px;font-size:11px;flex:none}
 @media(max-width:520px){.edit-profile-box{max-height:92vh!important;border-radius:20px!important}.edit-profile-cover{height:125px}.edit-profile-avatar-row{padding:0 16px}.edit-avatar-preview{width:88px;height:88px}.edit-profile-fields{padding:16px}.friend-stats{gap:5px}.friend-stats button{min-width:82px;padding:9px 8px}}
 
+
+/* Remover permanentemente os indicadores vermelhos da navegação */
+.nav .badge-red,#msgBadge,#notifBadge{display:none!important}
+/* Listas de conexões compactas, com fechamento simples */
+.friend-stats{gap:6px!important;margin:12px 0!important}
+.friend-stats button{min-width:76px!important;padding:7px 10px!important;border-radius:20px!important;gap:2px!important}
+.friend-stats button b{font-size:14px!important}.friend-stats button span{font-size:10px!important}
+.friend-list-heading,.own-connections-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;font-weight:700;padding:8px 2px;border-bottom:1px solid var(--line)}
+.friend-list-close,.own-connections-heading button{width:29px;height:29px;min-width:29px;padding:0;border-radius:50%;display:grid;place-items:center;background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.friend-person{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;padding:9px 2px!important}
+.friend-person-main{flex:1;min-width:0}.friend-person>button{width:auto!important;margin:0!important;align-self:center!important;padding:6px 11px!important;border-radius:18px!important}
+.own-follower-row{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;padding:10px 2px!important;border-bottom:1px solid var(--line)}
+.own-follower-main{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.own-follower-label{min-width:0;overflow-wrap:anywhere}.own-view-profile{flex:0 0 auto!important;width:auto!important;margin:0!important;padding:6px 12px!important;border-radius:18px!important;font-size:11px!important;align-self:center!important}
+#profileTabContent .person{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#profileTabContent .person>button{flex:none;width:auto;margin:0;align-self:center}
+/* Composer de publicação inspirado no X */
+.tweet-composer-modal{max-width:590px!important;width:min(590px,94vw)!important;padding:0!important;border-radius:20px!important;overflow:hidden}
+.tweet-composer-head{display:flex;align-items:center;justify-content:space-between;padding:15px 19px;border-bottom:1px solid var(--line)}
+.tweet-composer-head>b{font-size:16px;letter-spacing:-.2px}.tweet-composer-head>button{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--bg);color:var(--ink);padding:0}
+.tweet-composer-body{display:flex;gap:13px;padding:18px 19px 12px}
+.tweet-composer-avatar{width:44px;height:44px;flex:0 0 44px;border-radius:50%;overflow:hidden;background:var(--rose);color:white;display:grid;place-items:center;font-size:18px;font-weight:700}
+.tweet-composer-avatar img{width:100%;height:100%;object-fit:cover}
+.tweet-composer-main{flex:1;min-width:0}
+.tweet-composer-main textarea{width:100%;min-height:125px;resize:vertical;border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;padding:8px 0!important;margin:0!important;font-size:18px!important;line-height:1.5!important;color:var(--ink)}
+.tweet-composer-main textarea::placeholder{color:var(--muted)}
+.tweet-composer-footer{display:flex;align-items:center;gap:10px;padding-top:12px;margin-top:8px;border-top:1px solid var(--line)}
+.tweet-composer-photo{display:inline-flex;align-items:center;gap:7px;color:var(--rose);font-size:13px;font-weight:600;padding:8px 11px;border-radius:20px;cursor:pointer}
+.tweet-composer-photo:hover{background:rgba(212,165,165,.13)}.tweet-composer-spacer{flex:1}
+.tweet-publish-button{padding:9px 19px!important;border-radius:22px!important;font-size:13px!important;font-weight:700!important}
+.tweet-image-preview{position:relative;margin:8px 0 12px;border:1px solid var(--line);border-radius:15px;overflow:hidden;max-height:280px}
+.tweet-image-preview img{display:block;width:100%;max-height:280px;object-fit:contain;background:var(--bg)}
+.tweet-image-preview>button{position:absolute;top:9px;right:9px;width:29px;height:29px;border-radius:50%;padding:0;background:#252126bb;color:white;display:grid;place-items:center}
+#modalPostStatus{padding:0 20px 12px;margin:0}
+@media(max-width:520px){.tweet-composer-modal{width:96vw!important;border-radius:17px!important}.tweet-composer-body{padding:14px 13px;gap:10px}.tweet-composer-avatar{width:38px;height:38px;flex-basis:38px}.tweet-composer-main textarea{font-size:16px!important;min-height:115px}.friend-person>button{padding:6px 9px!important}}
+
 </style></head>
 <body>
 
@@ -845,30 +881,19 @@ body.theme-dark #messageBox .bubble.other{background:#303036;color:#f7eff2;borde
 
 <!-- MODAL: NOVA POSTAGEM -->
 <div id="floatingPostModal" class="modal-overlay hidden">
-  <div class="modal-box">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <h3 style="margin:0">Criar publicação</h3>
-      <button class="ghost" onclick="closeFloatingPostModal()" style="padding:4px 10px">✕</button>
-    </div>
-    <textarea id="modalPostContent" maxlength="2000" placeholder="O que você está pensando?"></textarea>
-    
-    <div style="margin-top:12px">
-      <label class="tweet-media-btn">
-        <i class="fa-regular fa-image"></i> Escolher Imagem
-        <input type="file" id="modalPostImageInput" accept="image/*" class="hidden" onchange="previewFloatingPostImage()">
-      </label>
-    </div>
-
-    <div id="modalImagePreviewBox" class="hidden">
-      <div class="crop-preview-box">
-        <img id="modalImagePreview">
+  <div class="modal-box tweet-composer-modal">
+    <div class="tweet-composer-head"><b>Nova publicação</b><button onclick="closeFloatingPostModal()" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="tweet-composer-body">
+      <div class="tweet-composer-avatar" id="composerAvatar"></div>
+      <div class="tweet-composer-main">
+        <textarea id="modalPostContent" maxlength="2000" placeholder="O que está acontecendo?" aria-label="Texto da publicação"></textarea>
+        <div id="modalImagePreviewBox" class="tweet-image-preview hidden"><img id="modalImagePreview"><button onclick="removeFloatingPostImage()" aria-label="Remover imagem"><i class="fa-solid fa-xmark"></i></button></div>
+        <div class="tweet-composer-footer">
+          <label class="tweet-composer-photo" title="Adicionar imagem"><i class="fa-regular fa-image"></i><span>Foto</span><input type="file" id="modalPostImageInput" accept="image/*" class="hidden" onchange="previewFloatingPostImage()"></label>
+          <span class="tweet-composer-spacer"></span>
+          <button class="tweet-publish-button" onclick="submitFloatingPost()">Publicar</button>
+        </div>
       </div>
-      <button class="ghost" onclick="removeFloatingPostImage()" style="font-size:12px;color:var(--red)">Remover imagem</button>
-    </div>
-
-    <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:18px">
-      <button class="secondary" onclick="closeFloatingPostModal()">Cancelar</button>
-      <button onclick="submitFloatingPost()">Publicar</button>
     </div>
     <p id="modalPostStatus" class="status"></p>
   </div>
@@ -1338,7 +1363,13 @@ async function unblockUser(id){
 }
 
 /* POSTAGENS */
-function openFloatingPostModal(){ $('floatingPostModal').classList.remove('hidden'); }
+function openFloatingPostModal(){
+  const avatar=$('composerAvatar');
+  if(avatar){avatar.innerHTML=profile?.avatar_url?'<img src="'+esc(profile.avatar_url)+'">':esc((profile?.full_name||'🐰').trim().charAt(0).toUpperCase()||'🐰');}
+  $('modalPostStatus').textContent='';
+  $('floatingPostModal').classList.remove('hidden');
+  setTimeout(()=>$('modalPostContent').focus(),80);
+}
 function closeFloatingPostModal(){ 
   $('floatingPostModal').classList.add('hidden'); 
   $('modalPostContent').value='';
@@ -1529,13 +1560,13 @@ async function loadProfileDataTab(tab){
     let ids=(f||[]).map(x=>x[targetCol]);
     if(!ids.length){box.innerHTML=`<p class="muted">Nenhum registro.</p>`;return;}
     let {data:users}=await db.from('user_profiles').select('*').in('user_id',ids);
-    box.innerHTML=(users||[]).map(u=>`
-      <div class="person">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div class="avatar" style="width:36px;height:36px">${u.avatar_url?`<img src="${u.avatar_url}">`:(u.full_name?u.full_name[0]:'?')}</div>
-          <div><b>${esc(u.full_name||'')}</b><div class="muted">@${esc(u.username||'')}</div></div>
+    box.innerHTML='<div class="own-connections-heading"><b>'+(tab==='followers'?'Seguidores':'Seguindo')+'</b><button onclick="switchProfileTab(\'posts\')" aria-label="Fechar lista"><i class="fa-solid fa-xmark"></i></button></div>'+(users||[]).map(u=>`
+      <div class="person own-follower-row">
+        <div class="own-follower-main">
+          <div class="avatar" style="width:38px;height:38px">${u.avatar_url?`<img src="${u.avatar_url}">`:(u.full_name?esc(u.full_name[0]):'?')}</div>
+          <div class="own-follower-label"><b>${esc(u.full_name||'')}</b><div class="muted">@${esc((u.username||'').replace(/^@/,''))}</div></div>
         </div>
-        <button class="secondary" onclick="inspectProfile('${u.user_id}')">Ver Perfil</button>
+        <button class="secondary own-view-profile" onclick="inspectProfile('${u.user_id}')">Ver perfil</button>
       </div>
     `).join('');
   }
@@ -1831,6 +1862,7 @@ async function inspectProfile(id){
 }
 
 function closeUserModal(){ $('userModal').classList.add('hidden'); }
+function closeFriendConnections(){const box=$('friendConnections');if(box)box.innerHTML='';}
 
 async function loadUserConnections(targetId,kind){
   const box=$('friendConnections'),labels={followers:'Seguidores',following:'Seguindo',mutual:'Seguidores em comum'};
@@ -1854,7 +1886,7 @@ async function loadUserConnections(targetId,kind){
   if(!ids.length){box.innerHTML='<div class="friend-list-heading">'+labels[kind]+'</div><p class="muted">Ninguém por aqui ainda.</p>';return;}
   const {data:people,error}=await db.from('user_profiles').select('*').in('user_id',ids);
   if(error){box.innerHTML='<p class="muted">Não foi possível carregar os perfis.</p>';return;}
-  box.innerHTML='<div class="friend-list-heading">'+labels[kind]+' · '+(people||[]).length+'</div>'+(people||[]).map(p=>
+  box.innerHTML='<div class="friend-list-heading"><span>'+labels[kind]+' · '+(people||[]).length+'</span><button class="friend-list-close" onclick="closeFriendConnections()" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></div>'+(people||[]).map(p=>
     '<div class="friend-person"><div class="friend-person-main" onclick="closeUserModal();inspectProfile(\''+p.user_id+'\')"><div class="avatar">'+(p.avatar_url?'<img src="'+esc(p.avatar_url)+'">':esc((p.full_name||'?')[0]))+'</div><div><b>'+esc(p.full_name||'Usuário')+verifiedBadge(p.username)+'</b><div class="muted">@'+esc((p.username||'').replace(/^@/,''))+'</div></div></div><button class="secondary" onclick="inspectProfile(\''+p.user_id+'\')">Ver perfil</button></div>'
   ).join('');
 }
