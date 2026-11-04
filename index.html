@@ -733,7 +733,7 @@ body.theme-dark #messageBox .bubble.other{background:#303036;color:#f7eff2;borde
       <div class="field"><label>E-mail</label><input id="loginEmail" type="email" placeholder="seuemail@exemplo.com"></div>
       <div class="field"><label>Senha</label><input id="loginPassword" type="password" placeholder="Sua senha"></div>
       <div class="login-actions">
-        <button onclick="signIn()" style="width:100%">Entrar</button>
+        <button id="loginSubmitButton" type="button" onclick="handleLoginClick(event)" style="width:100%">Entrar</button>
         <button class="ghost" onclick="resetPassword()" style="width:100%">Esqueci minha senha</button>
       </div>
     </div>
@@ -2437,6 +2437,21 @@ async function checkNewNotifications(){
   }
   if($('notifications').classList.contains('active')) await loadNotifications();
 }
+</script>
+<script>
+window.handleLoginClick = function(event) {
+  if (event) { event.preventDefault(); event.stopPropagation(); }
+  const button = document.getElementById('loginSubmitButton');
+  const message = document.getElementById('loginStatus');
+  if (button) { button.disabled = true; button.textContent = 'Verificando...'; }
+  if (typeof window.signIn !== 'function') {
+    if (message) message.textContent = 'O código de login não foi carregado corretamente. Atualize a página (Ctrl + F5) e tente novamente.';
+    if (button) { button.disabled = false; button.textContent = 'Entrar'; }
+    return;
+  }
+  if (button) { button.disabled = false; button.textContent = 'Entrar'; }
+  window.signIn();
+};
 </script>
 </body>
 </html>
