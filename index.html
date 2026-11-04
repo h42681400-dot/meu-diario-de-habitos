@@ -1642,15 +1642,26 @@ function closeFloatingPostModal(){
   removeFloatingPostImage();
 }
 function previewFloatingPostImage(){
-  let file=$('modalPostImageInput').files[0];
-  if(file){
-    let reader=new FileReader();
-    reader.onload=e=>{
-      $('modalImagePreview').src=e.target.result;
-      $('modalImagePreviewBox').classList.remove('hidden');
-    };
-    reader.readAsDataURL(file);
+  const file=$('modalPostImageInput').files[0];
+  if(!file)return;
+  if(!file.type.startsWith('image/')){
+    status('modalPostStatus','Escolha um arquivo de imagem válido.');
+    $('modalPostImageInput').value='';
+    currentFloatingPostImage=null;
+    return;
   }
+  currentFloatingPostImage=file;
+  $('modalPostStatus').textContent='';
+  const reader=new FileReader();
+  reader.onload=e=>{
+    $('modalImagePreview').src=e.target.result;
+    $('modalImagePreviewBox').classList.remove('hidden');
+  };
+  reader.onerror=()=>{
+    currentFloatingPostImage=null;
+    status('modalPostStatus','Não foi possível carregar essa imagem. Tente novamente.');
+  };
+  reader.readAsDataURL(file);
 }
 function removeFloatingPostImage(){
   currentFloatingPostImage=null;
