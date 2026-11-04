@@ -599,6 +599,13 @@ body.theme-dark .bubble-time{color:#b6c7c0}
 .iphone-chat-header{display:flex;align-items:center;gap:10px;padding:4px 0 14px;border-bottom:1px solid var(--line);margin-bottom:10px}
 .iphone-chat-person{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
 .chat-presence{font-size:11px;color:var(--muted);margin-top:3px}
+.typing-dots{display:inline-flex;align-items:center;gap:3px;margin-left:3px;vertical-align:middle;height:12px}
+.typing-dots span{width:4px;height:4px;border-radius:50%;background:currentColor;display:inline-block;animation:typingBounce 1s infinite ease-in-out}
+.typing-dots span:nth-child(2){animation-delay:.15s}
+.typing-dots span:nth-child(3){animation-delay:.3s}
+@keyframes typingBounce{0%,60%,100%{transform:translateY(0);opacity:.45}30%{transform:translateY(-4px);opacity:1}}
+.chat-presence.typing{color:#d985a8;font-weight:600}
+.chat-list-preview .typing-label{color:#d985a8;font-weight:600}
 .chat-presence.online{color:#2eaa70}
 .chat-header-spacer{width:28px}
 .iphone-chat-list-item{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line);cursor:pointer}
@@ -2311,8 +2318,8 @@ async function loadChats(){
     const last=(data||[]).find(m=>m.sender_id===id||m.receiver_id===id);
     const unread=(data||[]).filter(m=>m.sender_id===id&&m.receiver_id===user.id&&!m.read_at).length;
     const online=isUserOnline(chatProfiles[id]?.last_seen_at);
-    const typing=chatProfiles[id]?.typing_to===user.id&&chatProfiles[id]?.typing_at&&(Date.now()-new Date(chatProfiles[id].typing_at).getTime()<7000);
-    return `<div class="chat-item iphone-chat-list-item" onclick="openChat('${id}')"><div class="chat-list-avatar-wrap"><div class="avatar">${chatProfiles[id]?.avatar_url?`<img src="${esc(chatProfiles[id].avatar_url)}">`:esc((chatProfiles[id]?.full_name||'?')[0])}</div><span class="online-dot ${online?'is-online':''}"></span></div><div class="chat-list-copy"><b>${esc(chatProfiles[id]?.full_name||'Pessoa')}</b><div class="muted">@${esc(chatProfiles[id]?.username||'')}</div><div class="chat-list-preview">${typing?'<span style="color:#2eaa70">digitando...</span>':`${last?.sender_id===user.id?'Você: ':''}${esc(last?.content||'Comece uma conversa')}`}</div></div><span class="chat-list-state">${unread?`<span class="conversation-unread" style="background:#f6b6d0!important;background-color:#f6b6d0!important;background-image:none!important;color:#9b4969!important;border:2px solid #fff7fa!important;box-shadow:0 2px 8px rgba(226,145,177,.25)!important">${unread>99?'99+':unread}</span>`:online?'online':''}</span></div>`;
+    const typing=chatProfiles[id]?.typing_to===user.id&&chatProfiles[id]?.typing_at&&(Date.now()-new Date(chatProfiles[id].typing_at).getTime()<6500);
+    return `<div class="chat-item iphone-chat-list-item" onclick="openChat('${id}')"><div class="chat-list-avatar-wrap"><div class="avatar">${chatProfiles[id]?.avatar_url?`<img src="${esc(chatProfiles[id].avatar_url)}">`:esc((chatProfiles[id]?.full_name||'?')[0])}</div><span class="online-dot ${online?'is-online':''}"></span></div><div class="chat-list-copy"><b>${esc(chatProfiles[id]?.full_name||'Pessoa')}</b><div class="muted">@${esc(chatProfiles[id]?.username||'')}</div><div class="chat-list-preview">${typing?'<span class="typing-label">digitando'+typingDotsMarkup()+'</span>':`${last?.sender_id===user.id?'Você: ':''}${esc(last?.content||'Comece uma conversa')}`}</div></div><span class="chat-list-state">${unread?`<span class="conversation-unread" style="background:#f6b6d0!important;background-color:#f6b6d0!important;background-image:none!important;color:#9b4969!important;border:2px solid #fff7fa!important;box-shadow:0 2px 8px rgba(226,145,177,.25)!important">${unread>99?'99+':unread}</span>`:online?'online':''}</span></div>`;
   }).join('');
 }
 async function openChat(id, username=''){
@@ -2369,13 +2376,15 @@ function backToChatList(){
 }
 
 function isUserOnline(lastSeen){return !!lastSeen&&(Date.now()-new Date(lastSeen).getTime()<120000);}
+function typingDotsMarkup(){return '<span class="typing-dots" aria-label="digitando"><span></span><span></span><span></span></span>';}
 function updateChatPresence(p={}){
   const el=$('chatPresence');if(!el)return;
-  const typing=p.typing_to===user?.id&&p.typing_at&&(Date.now()-new Date(p.typing_at).getTime()<7000);
+  const typing=p.typing_to===user?.id&&p.typing_at&&(Date.now()-new Date(p.typing_at).getTime()<6500);
   const online=isUserOnline(p.last_seen_at);
-  if(typing){el.textContent='digitando...';el.classList.add('online');return;}
+  el.classList.toggle('typing',!!typing);
+  el.classList.toggle('online',!typing&&online);
+  if(typing){el.innerHTML='digitando'+typingDotsMarkup();return;}
   el.textContent=online?'online':'visto por último '+(p.last_seen_at?new Date(p.last_seen_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'há algum tempo');
-  el.classList.toggle('online',online);
 }
 async function refreshChatPresence(){
   if(!activeChat)return;
@@ -2387,7 +2396,7 @@ async function handleTyping(){
   if(typingTimer)clearTimeout(typingTimer);
   const {error}=await db.from('user_profiles').update({typing_to:activeChat,typing_at:new Date().toISOString()}).eq('user_id',user.id);
   if(error)console.warn('Indicador de digitação indisponível; aplique a atualização SQL do Cottontail:',error.message);
-  typingTimer=setTimeout(clearMyTypingState,3500);
+  typingTimer=setTimeout(clearMyTypingState,5000);
 }
 async function clearMyTypingState(){
   if(typingTimer){clearTimeout(typingTimer);typingTimer=null;}
