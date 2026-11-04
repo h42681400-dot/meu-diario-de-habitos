@@ -321,17 +321,11 @@ button:active{
 
 /* CELULAR */
 @media(max-width:650px){
-  .nav{
-    display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:7px;
-  }
-
-  .nav button{
-    min-width:0;
-    padding:11px 5px;
-    font-size:12px;
-  }
+  .nav{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto;gap:2px!important;margin:0!important;scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav button{flex:1 1 0!important;min-width:0!important;width:0;padding:8px 1px!important;font-size:11px!important;white-space:nowrap;flex-direction:column!important;gap:4px!important}
+  .nav button i{font-size:17px!important}
+  .nav button span{font-size:8px!important;letter-spacing:-.2px}
 
   #messages .grid{
     gap:12px;
@@ -544,6 +538,44 @@ body.theme-dark .bubble-time{color:#b6c7c0}
 .app-toast-close{background:transparent!important;color:var(--muted)!important;padding:0 4px!important;font-size:18px;line-height:1}
 @keyframes toastIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:600px){.toast-container{top:10px;right:10px;width:calc(100vw - 20px)}}
+
+/* Cottontail: mobile nav, ranking e chat estilo iPhone */
+@media(max-width:767px){
+.nav{position:fixed!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;justify-content:space-around!important;gap:1px!important;margin:0!important;padding:7px 3px calc(7px + env(safe-area-inset-bottom))!important;background:var(--card-bg);z-index:1200}
+.nav::-webkit-scrollbar{display:none}
+.nav button{flex:1 1 0!important;min-width:0!important;width:auto!important;max-width:none!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;padding:7px 0!important;gap:3px!important;border-radius:9px!important}
+.nav button i{font-size:17px!important;line-height:1!important}
+.nav button span{display:block!important;font-size:8px!important;line-height:1.1!important;white-space:nowrap!important}
+.wrap{padding-bottom:105px!important}
+}
+.iphone-chat-header{display:flex;align-items:center;gap:10px;padding:4px 0 14px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.iphone-chat-person{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.chat-presence{font-size:11px;color:var(--muted);margin-top:3px}
+.chat-presence.online{color:#2eaa70}
+.chat-header-spacer{width:28px}
+.iphone-chat-list-item{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.chat-list-avatar-wrap{position:relative;flex:none}
+.chat-list-avatar-wrap .avatar{width:48px;height:48px}
+.online-dot{position:absolute;right:0;bottom:1px;width:12px;height:12px;border-radius:50%;background:#aaa;border:2px solid var(--card-bg)}
+.online-dot.is-online{background:#2eaa70}
+.chat-list-copy{min-width:0;flex:1}
+.chat-list-preview{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
+.chat-list-state{font-size:10px;color:#2eaa70}
+.message-receipt{font-size:9px;white-space:nowrap;margin-left:4px;color:rgba(255,255,255,.75)}
+.message-receipt.read{color:#d7f0ff}
+.bubble.other .message-receipt{color:var(--muted)}
+.explore-ranking-heading{display:flex;justify-content:space-between;align-items:center;margin:16px 0 12px}
+.explore-ranking-heading h3{font-size:16px;margin:0}
+.explore-ranking-heading p{font-size:11px;margin:4px 0 0}
+.ranking-pill{font-size:10px;padding:5px 9px;border-radius:20px;background:rgba(212,165,165,.16);color:var(--rose)}
+.ranking-post{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.ranking-position{font-size:18px;font-weight:800;color:var(--rose);width:22px;flex:none;padding-top:2px}
+.ranking-post-content{min-width:0;flex:1}
+.ranking-author{display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer}
+.ranking-text{font-size:13px;line-height:1.4;margin-top:7px;cursor:pointer;overflow-wrap:anywhere}
+.ranking-media{width:100%;max-height:220px;object-fit:cover;border-radius:12px;margin-top:9px;cursor:pointer}
+.ranking-stats{display:flex;gap:16px;font-size:11px;color:var(--muted);margin-top:9px}
+.ranking-stats i{margin-right:4px}
 </style></head>
 <body>
 
@@ -639,6 +671,7 @@ body.theme-dark .bubble-time{color:#b6c7c0}
         <button class="secondary" onclick="loadFeed('all')">Todos</button>
         <button class="secondary" onclick="loadFeed('following')">Quem sigo</button>
       </div>
+      <div style="display:flex;justify-content:flex-end;margin:0 0 12px"><button onclick="openFloatingPostModal()"><i class="fa-solid fa-pen"></i> Criar publicação</button></div>
       <div id="feedList"></div>
     </div>
   </section>
@@ -692,9 +725,9 @@ body.theme-dark .bubble-time{color:#b6c7c0}
         <div id="chatList" class="chat-list"></div>
       </div>
       <div id="chatRoomView" class="hidden">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-          <button class="secondary" onclick="backToChatList()" style="padding:6px 14px"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
-          <h3 id="chatTitle" style="margin:0;font-size:15px">Conversa</h3>
+        <div class="iphone-chat-header">
+          <button class="secondary" onclick="backToChatList()" style="padding:6px 12px"><i class="fa-solid fa-chevron-left"></i></button>
+          <div class="iphone-chat-person"><div id="chatHeaderAvatar" class="avatar" style="width:38px;height:38px">?</div><div><h3 id="chatTitle" style="margin:0;font-size:15px">Conversa</h3><div id="chatPresence" class="chat-presence">offline</div></div></div><span class="chat-header-spacer"></span>
         </div>
         <div id="messageBox" class="messages"></div>
         <div style="display:flex;gap:6px;margin-bottom:8px">
@@ -949,7 +982,7 @@ const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let user=null, selected=new Date(), entries={}, profile=null, activeChat=null, chatProfiles={};
 let currentFloatingPostImage=null, editAvatarFile=null, editBannerFile=null, postToDeleteId=null, postToReportId=null;
-let chatInterval=null;
+let chatInterval=null, presenceTimer=null;
 let notificationPollTimer=null, notificationCursor=null;
 
 const FORBIDDEN_WORDS = ['gore', 'mutilacao', 'suicidio', 'sangue', 'morte', 'estupro', 'assidio', 'mutilação', 'suicídio'];
@@ -1109,7 +1142,10 @@ db.auth.onAuthStateChange((_event,session)=>{
     if(!user || user.id!==nextUser.id) return;
     try{
       await ensureProfile();
-      await Promise.all([loadMonth(),loadProfile(),loadFeed('all'),checkUnreadBadges()]);
+    updateMyPresence();
+    if(presenceTimer)clearInterval(presenceTimer);
+    presenceTimer=setInterval(updateMyPresence,30000);
+    await Promise.all([loadMonth(),loadProfile(),loadFeed('all'),checkUnreadBadges()]);
       await startNotificationPolling();
       showToast('Bem-vinda de volta!','Seu Cottontail está prontinho para você. 🐰',{type:'welcome'});
     }catch(err){
@@ -1131,7 +1167,7 @@ function showPage(id){
   document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));
   document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
   
-  $('fabPostBtn').classList.toggle('hidden', id==='messages');
+  $('fabPostBtn').classList.toggle('hidden', id!=='feed');
 
   if(id==='explore')searchProfilesAndPosts();
   if(id==='messages'){ backToChatList(); }
@@ -1566,58 +1602,33 @@ async function searchProfilesAndPosts(){
 
   renderRecentSearches();
 
-  // SEM PESQUISA: mostrar publicações recentes em grade
+  // SEM PESQUISA: ranking de publicações por engajamento
   if(!q){
-    let {data:posts,error}=await db
-      .from('posts')
-      .select('*')
-      .order('created_at',{ascending:false})
-      .limit(30);
-
-    if(error){
-      $('peopleList').innerHTML='<p class="muted">Erro ao carregar publicações.</p>';
-      return;
-    }
-
-    let ids=[...new Set((posts||[]).map(p=>p.user_id))];
-    let authors={};
-
-    if(ids.length){
-      let {data:profiles}=await db
-        .from('user_profiles')
-        .select('*')
-        .in('user_id',ids);
-
-      (profiles||[]).forEach(p=>authors[p.user_id]=p);
-    }
-
+    const {data:posts,error}=await db.from('posts').select('*').order('created_at',{ascending:false}).limit(60);
+    if(error){$('peopleList').innerHTML='<p class="muted">Erro ao carregar publicações.</p>';return;}
+    const ids=[...new Set((posts||[]).map(p=>p.user_id))],postIds=(posts||[]).map(p=>p.id);
+    const [profilesRes,likesRes,commentsRes,repostsRes]=await Promise.all([
+      ids.length?db.from('user_profiles').select('*').in('user_id',ids):Promise.resolve({data:[]}),
+      postIds.length?db.from('post_likes').select('post_id').in('post_id',postIds):Promise.resolve({data:[]}),
+      postIds.length?db.from('post_comments').select('post_id').in('post_id',postIds):Promise.resolve({data:[]}),
+      postIds.length?db.from('post_reposts').select('post_id').in('post_id',postIds):Promise.resolve({data:[]})
+    ]);
+    const authors={},likes={},comments={},reposts={};
+    (profilesRes.data||[]).forEach(p=>authors[p.user_id]=p);
+    (likesRes.data||[]).forEach(x=>likes[x.post_id]=(likes[x.post_id]||0)+1);
+    (commentsRes.data||[]).forEach(x=>comments[x.post_id]=(comments[x.post_id]||0)+1);
+    (repostsRes.data||[]).forEach(x=>reposts[x.post_id]=(reposts[x.post_id]||0)+1);
+    const ranked=(posts||[]).slice().sort((a,b)=>((likes[b.id]||0)+2*(comments[b.id]||0)+3*(reposts[b.id]||0))-((likes[a.id]||0)+2*(comments[a.id]||0)+3*(reposts[a.id]||0)));
     $('peopleList').innerHTML=`
-      <h3 style="font-size:15px;margin:14px 0">Descobrir publicações</h3>
-      <div class="explore-grid">
-        ${(posts||[]).map(p=>{
-          let author=authors[p.user_id]||{};
-          return `
-            <div class="explore-post-card"
-              onclick="inspectProfile('${p.user_id}')"
-              title="Ver perfil de ${esc(author.full_name||'usuário')}">
-
-              ${p.media_url
-                ? `<img src="${esc(p.media_url)}" loading="lazy">`
-                : `<div class="explore-text-post">${esc(p.content||'Publicação')}</div>`
-              }
-
-              <div class="explore-post-overlay">
-                <span><i class="fa-solid fa-user"></i> ${esc(author.username||'usuário')}</span>
-              </div>
-            </div>
-          `;
-        }).join('')}
-      </div>
-      ${(posts||[]).length===0
-        ? '<p class="muted">Ainda não há publicações para descobrir.</p>'
-        : ''}
+      <div class="explore-ranking-heading"><div><h3>Em alta no Cottontail ✨</h3><p class="muted">Publicações com mais curtidas, comentários e reposts</p></div><span class="ranking-pill">TOP ${ranked.length}</span></div>
+      ${ranked.map((p,index)=>`
+        <article class="ranking-post"><div class="ranking-position">${index+1}</div><div class="ranking-post-content">
+          <div class="ranking-author" onclick="inspectProfile('${p.user_id}')"><b>${esc(authors[p.user_id]?.full_name||'Pessoa')}</b><span class="muted">@${esc((authors[p.user_id]?.username||'usuario').replace(/^@/,''))}</span></div>
+          <div class="ranking-text" onclick="inspectProfile('${p.user_id}')">${esc(p.content||'Publicação com imagem')}</div>
+          ${p.media_url?`<img class="ranking-media" src="${esc(p.media_url)}" loading="lazy" onclick="inspectProfile('${p.user_id}')">`:''}
+          <div class="ranking-stats"><span><i class="fa-solid fa-heart"></i> ${likes[p.id]||0}</span><span><i class="fa-solid fa-comment"></i> ${comments[p.id]||0}</span><span><i class="fa-solid fa-retweet"></i> ${reposts[p.id]||0}</span></div>
+        </div></article>`).join('')||'<p class="muted">Ainda não há publicações para ranquear.</p>'}
     `;
-
     return;
   }
 
@@ -1780,17 +1791,19 @@ async function toggleBlockUser(targetId, isBlocked){
 
 /* CHAT ESTILO IPHONE */
 async function loadChats(){
-  let {data}=await db.from('direct_messages').select('*').or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`).order('created_at',{ascending:false});
-  let peers=[...new Set((data||[]).map(m=>m.sender_id===user.id?m.receiver_id:m.sender_id))];
+  const {data}=await db.from('direct_messages').select('*').or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`).order('created_at',{ascending:false});
+  const peers=[...new Set((data||[]).map(m=>m.sender_id===user.id?m.receiver_id:m.sender_id))];
   if(!peers.length){$('chatList').innerHTML='<p class="muted">Nenhuma conversa recente.</p>';return;}
-  let {data:p}=await db.from('user_profiles').select('*').in('user_id',peers);
-  chatProfiles={}; (p||[]).forEach(x=>chatProfiles[x.user_id]=x);
-  $('chatList').innerHTML=peers.map(id=>`
-    <div class="chat-item" onclick="openChat('${id}')" style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer">
-      <div class="avatar" style="width:40px;height:40px">${chatProfiles[id]?.avatar_url?`<img src="${chatProfiles[id].avatar_url}">`:(chatProfiles[id]?.full_name?chatProfiles[id].full_name[0]:'?')}</div>
-      <div><b>${esc(chatProfiles[id]?.full_name||'Pessoa')}</b><div class="muted">@${esc(chatProfiles[id]?.username||'')}</div></div>
-    </div>
-  `).join('');
+  const {data:p}=await db.from('user_profiles').select('*').in('user_id',peers);
+  chatProfiles={};(p||[]).forEach(x=>chatProfiles[x.user_id]=x);
+  $('chatList').innerHTML=peers.map(id=>{
+    const last=(data||[]).find(m=>m.sender_id===id||m.receiver_id===id);
+    const online=isUserOnline(chatProfiles[id]?.last_seen_at);
+    return `<div class="chat-item iphone-chat-list-item" onclick="openChat('${id}')">
+      <div class="chat-list-avatar-wrap"><div class="avatar">${chatProfiles[id]?.avatar_url?`<img src="${esc(chatProfiles[id].avatar_url)}">`:esc((chatProfiles[id]?.full_name||'?')[0])}</div><span class="online-dot ${online?'is-online':''}"></span></div>
+      <div class="chat-list-copy"><b>${esc(chatProfiles[id]?.full_name||'Pessoa')}</b><div class="muted">@${esc(chatProfiles[id]?.username||'')}</div><div class="chat-list-preview">${last?.sender_id===user.id?'Você: ':''}${esc(last?.content||'Comece uma conversa')}</div></div><span class="chat-list-state">${online?'online':''}</span>
+    </div>`;
+  }).join('');
 }
 
 async function openChat(id, username=''){
@@ -1801,7 +1814,7 @@ async function openChat(id, username=''){
 
   if(!p){
     let {data,error}=await db.from('user_profiles')
-      .select('username,full_name')
+      .select('username,full_name,avatar_url,last_seen_at')
       .eq('user_id',id)
       .maybeSingle();
 
@@ -1813,8 +1826,9 @@ async function openChat(id, username=''){
     p=data||{};
   }
 
-  $('chatTitle').textContent=
-    (p.full_name||'Conversa')+' · @'+(p.username||username||'usuario');
+  $('chatTitle').textContent=p.full_name||'Conversa';
+  $('chatHeaderAvatar').innerHTML=p.avatar_url?`<img src="${esc(p.avatar_url)}">`:esc((p.full_name||'?')[0]);
+  updateChatPresence(p.last_seen_at);
 
   $('chatListView').classList.add('hidden');
   $('chatRoomView').classList.remove('hidden');
@@ -1822,7 +1836,7 @@ async function openChat(id, username=''){
   await loadMessages();
   
   if(chatInterval) clearInterval(chatInterval);
-  chatInterval = setInterval(loadMessages, 3000);
+  chatInterval = setInterval(async()=>{await loadMessages();await refreshChatPresence();},3000);
 }
 
 function backToChatList(){
@@ -1834,6 +1848,21 @@ function backToChatList(){
   checkUnreadBadges();
 }
 
+function isUserOnline(lastSeen){return !!lastSeen&&(Date.now()-new Date(lastSeen).getTime()<120000);}
+function updateChatPresence(lastSeen){
+  const online=isUserOnline(lastSeen),el=$('chatPresence');
+  if(el){el.textContent=online?'online':'visto por último '+(lastSeen?new Date(lastSeen).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'há algum tempo');el.classList.toggle('online',online);}
+}
+async function refreshChatPresence(){
+  if(!activeChat)return;
+  const {data}=await db.from('user_profiles').select('last_seen_at').eq('user_id',activeChat).maybeSingle();
+  updateChatPresence(data?.last_seen_at);
+}
+async function updateMyPresence(){
+  if(!user)return;
+  const {error}=await db.from('user_profiles').update({last_seen_at:new Date().toISOString()}).eq('user_id',user.id);
+  if(error)console.warn('Presença indisponível até aplicar a atualização do banco:',error.message);
+}
 function addEmoji(emoji){ $('messageInput').value += emoji; }
 
 async function loadMessages(){
@@ -1849,23 +1878,20 @@ async function loadMessages(){
     return;
   }
 
+  const unread=(data||[]).filter(m=>m.sender_id===activeChat&&m.receiver_id===user.id&&!m.read_at).map(m=>m.id);
+  if(unread.length){
+    const readTime=new Date().toISOString();
+    await db.from('direct_messages').update({read_at:readTime}).in('id',unread);
+    unread.forEach(id=>{const m=data.find(x=>x.id===id);if(m)m.read_at=readTime;});
+  }
   $('messageBox').innerHTML=(data||[]).map(m=>{
     const mine=m.sender_id===user.id;
-
-    return `
-      <div class="bubble ${mine?'mine':'other'}">
-        ${esc(m.content)}
-        <div class="bubble-time">
-          ${new Date(m.created_at).toLocaleTimeString('pt-BR',{
-            hour:'2-digit',
-            minute:'2-digit'
-          })}
-        </div>
-      </div>
-    `;
+    const time=new Date(m.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    const receipt=mine?(m.read_at?'<span class="message-receipt read">✓✓ Lida</span>':'<span class="message-receipt">✓ Enviada</span>'):'';
+    return `<div class="bubble ${mine?'mine':'other'}">${esc(m.content)}<div class="bubble-time">${time} ${receipt}</div></div>`;
   }).join('');
-
   $('messageBox').scrollTop=$('messageBox').scrollHeight;
+  checkUnreadBadges();
 }
 
 async function sendMessage(){
