@@ -2481,13 +2481,60 @@ async function toggleMuteConversation(){
   await loadChats();
 }
 async function deleteConversationForMe(){
-  if(!activeChat)return;
-  const ok=await openAppActionModal({title:'Apagar conversa?',description:'A conversa sairá da sua lista. As mensagens continuarão disponíveis para a outra pessoa.',confirmText:'Apagar conversa',icon:'fa-regular fa-comments',danger:true});
-  if(!ok)return;
-  const {error}=await db.from('direct_conversation_settings').upsert({user_id:user.id,peer_id:activeChat,hidden:true},{onConflict:'user_id,peer_id'});
-  if(error){showToast('Não foi possível apagar a conversa',error.message||'Confira as permissões das configurações de conversa.');return;}
-  if(chatInterval){clearInterval(chatInterval);chatInterval=null;}
-  activeChat=null;backToChatList();
+  const peerId=activeChat;
+  if(!user||!peerId)return;
+
+  const ok=await openAppActionModal({
+    title:'Apagar conversa?',
+    description:'A conversa sairá da sua lista. As mensagens continuarão disponíveis para a outra pessoa.',
+    confirmText:'Apagar conversa',
+    icon:'fa-regular fa-comments',
+    danger:true
+  });
+  if(!ok||activeChat!==peerId)return;
+
+  try{
+    const {data:current,error:readError}=await db
+      .from('direct_conversation_settings')
+      .select('user_id,peer_id,muted,hidden')
+      .eq('user_id',user.id)
+      .eq('peer_id',peerId)
+      .maybeSingle();
+
+    if(readError)throw readError;
+
+    let result;
+    if(current){
+      result=await db
+        .from('direct_conversation_settings')
+        .update({hidden:true,updated_at:new Date().toISOString()})
+        .eq('user_id',user.id)
+        .eq('peer_id',peerId)
+        .select('peer_id')
+        .maybeSingle();
+    }else{
+      result=await db
+        .from('direct_conversation_settings')
+        .insert({user_id:user.id,peer_id:peerId,hidden:true,muted:false})
+        .select('peer_id')
+        .single();
+    }
+
+    if(result.error)throw result.error;
+    if(!result.data)throw new Error('A conversa não foi marcada como apagada. Verifique as permissões da tabela direct_conversation_settings.');
+
+    if(chatInterval){clearInterval(chatInterval);chatInterval=null;}
+    activeChat=null;
+    try{localStorage.removeItem('cottontailActiveChat');}catch(e){}
+    $('chatRoomView').classList.add('hidden');
+    $('chatListView').classList.remove('hidden');
+    await loadChats();
+    checkUnreadBadges();
+    showToast('Conversa apagada','Ela foi removida da sua lista. A outra pessoa ainda terá acesso às mensagens.');
+  }catch(error){
+    console.error('Erro ao apagar conversa:',error);
+    showToast('Não foi possível apagar a conversa',error.message||'Verifique as permissões de configurações de conversa.');
+  }
 }
 async function loadChats(){
   if(!user)return;
