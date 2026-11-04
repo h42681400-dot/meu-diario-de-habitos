@@ -2647,27 +2647,48 @@ async function loadMessages(){
     const mine=m.sender_id===user.id;
     const time=new Date(m.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     const receipt=mine?(m.read_at?'<span class="message-receipt read">✓✓ Lida</span>':'<span class="message-receipt">✓ Enviada</span>'):'';
-    return `<div class="bubble ${mine?'mine':'other'}" style="position:relative;padding-right:30px"><button class="message-options-btn" title="Opções da mensagem" onclick="toggleMessageMenu('${m.id}')" style="position:absolute;right:5px;top:4px;border:0;background:transparent;color:inherit;opacity:.65;padding:2px 5px;cursor:pointer">⋯</button><div>${esc(m.content)}</div>${m.shared_post_id?`<button class="secondary" style="margin-top:7px;font-size:12px" onclick="openSharedPost('${m.shared_post_id}')"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver publicação compartilhada</button>`:''}<div class="bubble-time">${time} ${receipt}</div><div id="message-menu-${m.id}" class="message-options-menu hidden" style="position:absolute;right:5px;top:25px;z-index:20;background:var(--card,#fff);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:6px;box-shadow:0 5px 18px #0002;min-width:155px"><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="deleteMessageForMe('${m.id}')">Apagar para mim</button>${mine?`<button class="danger" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="deleteMessageForEveryone('${m.id}')">Apagar para todos</button>`:''}</div></div>`;
+    return `<div class="bubble ${mine?'mine':'other'}" style="position:relative;padding-right:30px"><button type="button" class="message-options-btn" title="Opções da mensagem" aria-label="Opções da mensagem" onclick="toggleMessageMenu('${m.id}',this);event.stopPropagation()" style="position:absolute;right:5px;top:4px;border:0;background:transparent;color:inherit;opacity:.85;padding:2px 7px;cursor:pointer;z-index:3">⋯</button><div>${esc(m.content)}</div>${m.shared_post_id?`<button class="secondary" style="margin-top:7px;font-size:12px" onclick="openSharedPost('${m.shared_post_id}')"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver publicação compartilhada</button>`:''}<div class="bubble-time">${time} ${receipt}</div><div id="message-menu-${m.id}" class="message-options-menu hidden" style="position:absolute;right:5px;top:25px;z-index:20;background:var(--card,#fff);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:6px;box-shadow:0 5px 18px #0002;min-width:155px"><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="deleteMessageForMe('${m.id}')">Apagar para mim</button>${mine?`<button class="danger" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="deleteMessageForEveryone('${m.id}')">Apagar para todos</button>`:''}</div></div>`;
   }).join('');
   $('messageBox').scrollTop=$('messageBox').scrollHeight;
   checkUnreadBadges();
 }
 
 function openSharedPost(postId){showPage('feed');loadFeed('all').then(()=>setTimeout(()=>{const el=$('post-'+postId);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150));}
-function toggleMessageMenu(id){
-  document.querySelectorAll('.message-options-menu').forEach(el=>{if(el.id!=='message-menu-'+id)el.classList.add('hidden');});
-  const menu=$('message-menu-'+id);if(menu)menu.classList.toggle('hidden');
+function toggleMessageMenu(id,button){
+  const menu=button?.parentElement?.querySelector('#message-menu-'+CSS.escape(id))||$('message-menu-'+id);
+  document.querySelectorAll('#messageBox .message-options-menu').forEach(el=>{
+    if(el!==menu)el.classList.add('hidden');
+  });
+  if(menu){
+    menu.classList.toggle('hidden');
+    if(!menu.classList.contains('hidden'))menu.style.display='block';
+    else menu.style.removeProperty('display');
+  }
 }
 function openAppActionModal({title,description,confirmText='Confirmar',cancelText='Cancelar',icon='fa-regular fa-heart',danger=false,input=false,placeholder=''}){
   if(appActionResolver)appActionResolver(null);
+  const modal=$('appActionModal'),field=$('appActionInput'),suggestions=$('shareRecipientSuggestions');
+  if(suggestions){suggestions.classList.add('hidden');suggestions.innerHTML='';}
   $('appActionTitle').textContent=title;$('appActionDescription').textContent=description;$('appActionIcon').className=icon;
-  $('appActionConfirm').textContent=confirmText;$('appActionCancel').textContent=cancelText;$('appActionConfirm').className=danger?'app-action-danger':'';
-  $('appActionInput').classList.toggle('hidden',!input);$('appActionInput').placeholder=placeholder;$('appActionInput').value='';
-  $('appActionModal').classList.remove('hidden');if(input)setTimeout(()=>$('appActionInput').focus(),80);
+  $('appActionConfirm').textContent=confirmText;$('appActionCancel').textContent=cancelText;
+  $('appActionConfirm').className=danger?'app-action-danger':'';
+  field.classList.toggle('hidden',!input);field.placeholder=placeholder;field.value='';
+  modal.classList.remove('hidden');
+  if(input)setTimeout(()=>field.focus(),80);
   return new Promise(resolve=>{appActionResolver=resolve;});
 }
-function resolveAppAction(value){$('appActionModal').classList.add('hidden');const list=$('shareRecipientSuggestions');if(list)list.classList.add('hidden');const resolve=appActionResolver;appActionResolver=null;if(resolve)resolve(value);}
-function submitAppAction(){const input=$('appActionInput');const list=$('shareRecipientSuggestions');if(list&&!list.classList.contains('hidden'))list.classList.add('hidden');resolveAppAction(input.classList.contains('hidden')?true:input.value.trim());}
+function resolveAppAction(value){
+  $('appActionModal').classList.add('hidden');
+  const list=$('shareRecipientSuggestions');if(list)list.classList.add('hidden');
+  const resolve=appActionResolver;appActionResolver=null;
+  if(resolve)resolve(value);
+}
+function submitAppAction(){
+  const input=$('appActionInput');
+  const isSearch=!input.classList.contains('hidden');
+  const value=isSearch?input.value.trim():true;
+  resolveAppAction(value);
+}
 async function deleteMessageForMe(messageId){
   const ok=await openAppActionModal({title:'Apagar mensagem?',description:'Esta mensagem será removida somente da sua conversa. A outra pessoa continuará vendo.',confirmText:'Apagar mensagem',icon:'fa-regular fa-trash-can',danger:true});
   if(!ok)return;
