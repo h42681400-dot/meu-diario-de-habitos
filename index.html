@@ -1791,16 +1791,17 @@ async function removeMyRepost(postId){
   if($('profileTabContent'))await loadProfileDataTab('reposts');
 }
 
+function postUiElement(postId,suffix){return document.querySelector('#userModal #'+suffix+'-'+postId)||$(''+suffix+'-'+postId);}
 async function toggleCommentsSection(postId){
-  let box=$('comments-box-'+postId);
+  let box=postUiElement(postId,'comments-box');
   box.classList.toggle('hidden');
   if(!box.classList.contains('hidden'))await loadPostComments(postId);
 }
-function closeCommentsSection(postId){$('comments-box-'+postId)?.classList.add('hidden');}
+function closeCommentsSection(postId){postUiElement(postId,'comments-box')?.classList.add('hidden');}
 
 async function loadPostComments(postId){
   const {data,error}=await db.from('post_comments').select('*').eq('post_id',postId).order('created_at',{ascending:true});
-  if(error){$('comments-list-'+postId).innerHTML='<p class="muted">Não foi possível carregar comentários: '+esc(error.message)+'</p>';return;}
+  if(error){postUiElement(postId,'comments-list').innerHTML='<p class="muted">Não foi possível carregar comentários: '+esc(error.message)+'</p>';return;}
   const {data:post}=await db.from('posts').select('user_id').eq('id',postId).maybeSingle();
   const canModerate=post?.user_id===user.id,rows=data||[],userIds=[...new Set(rows.map(c=>c.user_id))],authors={};
   if(userIds.length){const {data:profiles}=await db.from('user_profiles').select('*').in('user_id',userIds);(profiles||[]).forEach(p=>authors[p.user_id]=p);}
@@ -1814,7 +1815,7 @@ async function loadPostComments(postId){
     return '<div class="'+(depth?'comment-reply':'comment-item')+'" style="'+(depth>1?'margin-left:12px;':'')+'"><b>'+esc(name)+'</b> '+esc(c.content)+depthLabel(depth)+deleteButton(c)+replyButton+nested+'</div>';
   };
   const roots=rows.filter(c=>!c.parent_comment_id||!rows.some(p=>p.id===c.parent_comment_id));
-  $('comments-list-'+postId).innerHTML=roots.map(c=>renderComment(c)).join('')||'<p class="muted" style="font-size:13px">Nenhum comentário ainda.</p>';
+  postUiElement(postId,'comments-list').innerHTML=roots.map(c=>renderComment(c)).join('')||'<p class="muted" style="font-size:13px">Nenhum comentário ainda.</p>';
 }
 async function deletePostComment(commentId,postId){
   if(!confirm('Apagar este comentário?'))return;
@@ -1825,10 +1826,10 @@ async function deletePostComment(commentId,postId){
   await loadFeed('all');
 }
 function replyToComment(postId,commentId,name){
-  const input=$('comment-input-'+postId);input.dataset.parentCommentId=commentId;input.placeholder='Respondendo a '+name+'...';input.focus();
+  const input=postUiElement(postId,'comment-input');input.dataset.parentCommentId=commentId;input.placeholder='Respondendo a '+name+'...';input.focus();
 }
 async function addComment(postId,postOwnerId){
-  let input=$('comment-input-'+postId),content=input.value.trim();if(!content)return;
+  let input=postUiElement(postId,'comment-input'),content=input.value.trim();if(!input||!content)return;
   const parent=input.dataset.parentCommentId||null;
   const payload={post_id:postId,user_id:user.id,content};if(parent)payload.parent_comment_id=parent;
   const {error}=await db.from('post_comments').insert(payload);
