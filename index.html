@@ -1707,6 +1707,7 @@ async function pinPost(postId){
   }catch(error){console.error('Erro ao fixar publicação:',error);showToast('Não foi possível fixar',error.message||'Confira a tabela post_pins e suas permissões no Supabase.');}
 }
 async function chooseShareRecipient(id){
+  if(!id)return;
   resolveAppAction({recipientId:id});
 }
 async function openSharePostPicker(){
@@ -1751,8 +1752,9 @@ async function openSharePostPicker(){
   return pending;
 }
 async function sharePostByMessage(postId){
+  if(!user){showToast('Entre na sua conta','Faça login para compartilhar uma publicação.');return;}
   const selected=await openSharePostPicker();
-  if(selected===null)return;
+  if(selected===null||selected===undefined)return;
   try{
     let person;
     if(selected&&selected.recipientId){
@@ -2483,46 +2485,15 @@ async function toggleMuteConversation(){
 async function deleteConversationForMe(){
   const peerId=activeChat;
   if(!user||!peerId)return;
-
-  const ok=await openAppActionModal({
-    title:'Apagar conversa?',
-    description:'A conversa sairá da sua lista. As mensagens continuarão disponíveis para a outra pessoa.',
-    confirmText:'Apagar conversa',
-    icon:'fa-regular fa-comments',
-    danger:true
-  });
+  const ok=await openAppActionModal({title:'Apagar conversa?',description:'A conversa sairá da sua lista. As mensagens continuarão disponíveis para a outra pessoa.',confirmText:'Apagar conversa',icon:'fa-regular fa-comments',danger:true});
   if(!ok||activeChat!==peerId)return;
-
   try{
-    const {data:current,error:readError}=await db
-      .from('direct_conversation_settings')
-      .select('user_id,peer_id,muted,hidden')
-      .eq('user_id',user.id)
-      .eq('peer_id',peerId)
-      .maybeSingle();
-
-    if(readError)throw readError;
-
-    let result;
-    if(current){
-      result=await db
-        .from('direct_conversation_settings')
-        .update({hidden:true,updated_at:new Date().toISOString()})
-        .eq('user_id',user.id)
-        .eq('peer_id',peerId)
-        .select('peer_id')
-        .maybeSingle();
-    }else{
-      result=await db
-        .from('direct_conversation_settings')
-        .insert({user_id:user.id,peer_id:peerId,hidden:true,muted:false})
-        .select('peer_id')
-        .single();
-    }
-
-    if(result.error)throw result.error;
-    if(!result.data)throw new Error('A conversa não foi marcada como apagada. Verifique as permissões da tabela direct_conversation_settings.');
-
+    // UPSERT cobre tanto a primeira exclusão quanto uma configuração já existente.
+    const {error}=await db.from('direct_conversation_settings').upsert({user_id:user.id,peer_id:peerId,hidden:true,updated_at:new Date().toISOString()},{onConflict:'user_id,peer_id'});
+    if(error)throw error;
+    const {data:check,error:checkError}=await db.from('direct_conversation_settings').select('hidden').eq('user_id',user.id).eq('peer_id',peerId).maybeSingle();
+    if(checkError)throw checkError;
+    if(!check?.hidden)throw new Error('O Supabase não confirmou a exclusão da conversa. Confira as permissões da tabela direct_conversation_settings.');
     if(chatInterval){clearInterval(chatInterval);chatInterval=null;}
     activeChat=null;
     try{localStorage.removeItem('cottontailActiveChat');}catch(e){}
@@ -2702,15 +2673,16 @@ async function loadMessages(){
 
 function openSharedPost(postId){showPage('feed');loadFeed('all').then(()=>setTimeout(()=>{const el=$('post-'+postId);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150));}
 function toggleMessageMenu(id,button){
-  const menu=button?.parentElement?.querySelector('#message-menu-'+CSS.escape(id))||$('message-menu-'+id);
+  // Localiza o menu dentro da própria bolha, evitando IDs duplicados ou falhas de CSS.escape.
+  const bubble=button?.closest('.bubble');
+  const menu=bubble?.querySelector('.message-options-menu')||$('message-menu-'+id);
   document.querySelectorAll('#messageBox .message-options-menu').forEach(el=>{
-    if(el!==menu)el.classList.add('hidden');
+    if(el!==menu){el.classList.add('hidden');el.style.removeProperty('display');}
   });
-  if(menu){
-    menu.classList.toggle('hidden');
-    if(!menu.classList.contains('hidden'))menu.style.display='block';
-    else menu.style.removeProperty('display');
-  }
+  if(!menu)return;
+  const willOpen=menu.classList.contains('hidden');
+  menu.classList.toggle('hidden',!willOpen);
+  menu.style.display=willOpen?'block':'none';
 }
 function openAppActionModal({title,description,confirmText='Confirmar',cancelText='Cancelar',icon='fa-regular fa-heart',danger=false,input=false,placeholder=''}){
   if(appActionResolver)appActionResolver(null);
