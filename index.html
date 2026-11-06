@@ -862,6 +862,13 @@ html body .conversation-unread{
           <img id="regAvatarPreviewImg">
         </div>
       </div>
+      <div class="field" style="margin-top:16px">
+        <label style="display:flex;align-items:flex-start;gap:9px;font-size:12px;line-height:1.5">
+          <input type="checkbox" id="legalAccept" style="width:18px;height:18px;flex:none;margin:2px 0 0">
+          <span>Li e aceito os <a href="/termos.html" target="_blank" rel="noopener">Termos de Uso</a>, a <a href="/privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a> e as <a href="/diretrizes.html" target="_blank" rel="noopener">Diretrizes da Comunidade</a>.</span>
+        </label>
+        <small class="muted">Você poderá consultar esses documentos a qualquer momento.</small>
+      </div>
       <div class="login-actions">
         <button onclick="signUp()" style="width:100%">Criar Perfil e Entrar</button>
       </div>
@@ -1163,6 +1170,16 @@ html body .conversation-unread{
       <p id="adminStatus" class="muted" style="font-size:12px"></p>
     </section>
 
+    <div class="field" style="padding:14px;border:1px solid var(--line);border-radius:14px">
+      <h4 style="margin:0 0 8px">Privacidade e documentos</h4>
+      <p class="muted" style="margin:0 0 10px">Consulte as regras e saiba como seus dados são tratados.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <a href="/privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>
+        <a href="/termos.html" target="_blank" rel="noopener">Termos de Uso</a>
+        <a href="/diretrizes.html" target="_blank" rel="noopener">Diretrizes da Comunidade</a>
+        <a href="mailto:contato.mariananazareth@gmail.com?subject=Privacidade%20-%20Cottontail">Solicitar ajuda sobre meus dados</a>
+      </div>
+    </div>
     <div style="margin-bottom:18px">
       <h4 style="margin:0 0 10px 0">Usuários Bloqueados</h4>
       <div id="blockedUsersList"><p class="muted">Carregando bloqueios...</p></div>
@@ -1397,14 +1414,24 @@ function previewRegAvatar(input){
 async function signUp(){
   const name=$('regName').value.trim(),rawUsername=$('regUsername').value.trim().toLowerCase(),username=rawUsername.replace(/^@/,'');
   const email=$('regEmail').value.trim(),password=$('regPassword').value,language=$('regLanguage').value;
+  const legalAccepted=$('legalAccept')?.checked===true;
   if(!name||!rawUsername||!email||password.length<6)return status('loginStatus','Preencha nome, @usuário, e-mail e senha (mín. 6 caracteres).');
+  if(!legalAccepted)return status('loginStatus','Para criar sua conta, leia e aceite os Termos, a Política de Privacidade e as Diretrizes da Comunidade.');
   if(!/^@[a-z0-9._]{3,20}$/.test(rawUsername))return status('loginStatus','Seu nome de usuário precisa começar com @ e ter de 3 a 20 caracteres (letras, números, ponto ou _).');
   status('loginStatus','Verificando disponibilidade do @...');
   const {data:existing,error:checkError}=await db.from('user_profiles').select('user_id').ilike('username',username).maybeSingle();
   if(checkError)return status('loginStatus','Não consegui verificar esse @ agora. Tente novamente.');
   if(existing)return status('loginStatus','Esse @ já está em uso. Escolha outro.');
   status('loginStatus','Criando conta e perfil...');
-  const {data,error}=await db.auth.signUp({email,password});if(error)return status('loginStatus',error.message);
+  const {data,error}=await db.auth.signUp({
+    email,password,
+    options:{data:{
+      cottontail_terms_version:'1.0',
+      cottontail_privacy_version:'1.0',
+      cottontail_community_version:'1.0',
+      cottontail_legal_accepted_at:new Date().toISOString()
+    }}
+  });if(error)return status('loginStatus',error.message);
   const newUser=data.user;
   if(newUser){
     let avatar_url=null;const avatarFile=$('regAvatarInput').files[0];
