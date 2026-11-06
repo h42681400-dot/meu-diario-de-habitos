@@ -7,6 +7,7 @@ on:
     paths:
       - 'package.json'
       - 'capacitor.config.json'
+      - 'index.html'
       - 'www/**'
       - 'icons/**'
       - 'manifest.json'
@@ -56,6 +57,27 @@ jobs:
           fi
           printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
           node -e "JSON.parse(require('fs').readFileSync('android/app/google-services.json', 'utf8')); console.log('Firebase config JSON validated.')"
+
+      - name: Enable Firebase Google Services plugin
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          root = Path("android/build.gradle")
+          app = Path("android/app/build.gradle")
+          root_text = root.read_text()
+          if "com.google.gms:google-services" not in root_text:
+              match = re.search(r"dependencies\\s*\\{", root_text)
+              if not match:
+                  raise SystemExit("Não encontrei o bloco dependencies em android/build.gradle")
+              pos = match.end()
+              root_text = root_text[:pos] + "\\n        classpath 'com.google.gms:google-services:4.4.2'" + root_text[pos:]
+              root.write_text(root_text)
+          app_text = app.read_text()
+          if "com.google.gms.google-services" not in app_text:
+              app.write_text(app_text.rstrip() + "\\n\\napply plugin: 'com.google.gms.google-services'\\n")
+          print("Plugin Google Services configurado.")
+          PY
 
       - name: Generate Cottontail app icon
         run: |
