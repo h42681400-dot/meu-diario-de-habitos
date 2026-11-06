@@ -1665,8 +1665,35 @@ async function adminLoadPosts(targetId){
   const {data,error}=await db.from('posts').select('id,content,created_at').eq('user_id',targetId).order('created_at',{ascending:false}).limit(50);
   if(error){$('adminPostResults').innerHTML='<p class="muted">Erro ao carregar publicações: '+esc(error.message)+'</p>';return;}
   if(!data?.length){$('adminPostResults').innerHTML='<p class="muted">Esse perfil não tem publicações próprias.</p>';return;}
-  $('adminPostResults').innerHTML='<h4>Publicações deste perfil</h4>'+data.map(p=>'<div class="person" style="align-items:flex-start;gap:8px"><div style="flex:1;min-width:0"><div style="font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere">'+esc((p.content||'Publicação com imagem').slice(0,240))+'</div><div class="muted">'+new Date(p.created_at).toLocaleString('pt-BR')+'</div></div><button class="danger" type="button" onclick="adminDeletePost(\''+p.id+'\',\''+targetId+'\')">Apagar</button></div>').join('');
+  $('adminPostResults').innerHTML='<h4>Publicações deste perfil</h4>'+data.map(p=>'<div class="person" style="align-items:flex-start;gap:8px;flex-wrap:wrap"><div style="flex:1;min-width:0"><div style="font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere">'+esc((p.content||'Publicação com imagem').slice(0,240))+'</div><div class="muted">'+new Date(p.created_at).toLocaleString('pt-BR')+'</div></div><button class="secondary" type="button" onclick="adminLoadComments(\''+p.id+'\',\''+targetId+'\')">Comentários</button><button class="danger" type="button" onclick="adminDeletePost(\''+p.id+'\',\''+targetId+'\')">Apagar post</button></div>').join('');
 }
+async function adminLoadComments(postId,targetId){
+  if(!isCottontailAdmin)return;
+  $('adminPostResults').insertAdjacentHTML('beforeend','<div id="adminComments_'+postId+'" style="margin:10px 0 16px;padding:12px;border:1px solid var(--line);border-radius:12px"><p class="muted">Carregando comentários...</p></div>');
+  const box=$('adminComments_'+postId);
+  const {data,error}=await db.from('post_comments').select('id,user_id,content,created_at,parent_comment_id').eq('post_id',postId).order('created_at',{ascending:true}).limit(200);
+  if(error){box.innerHTML='<p class="muted">Erro ao carregar comentários: '+esc(error.message)+'</p>';return;}
+  if(!data?.length){box.innerHTML='<b>Comentários</b><p class="muted">Esta publicação ainda não tem comentários.</p>';return;}
+  const userIds=[...new Set(data.map(c=>c.user_id))];
+  const {data:profiles}=await db.from('user_profiles').select('user_id,username,full_name').in('user_id',userIds);
+  const people={};(profiles||[]).forEach(p=>people[p.user_id]=p);
+  box.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>Comentários ('+data.length+')</b><button class="ghost" type="button" onclick="document.getElementById(\'adminComments_'+postId+'\')?.remove()">Fechar</button></div>'+data.map(c=>{
+    const person=people[c.user_id]||{},handle=String(person.username||'').replace(/^@/,'');
+    return '<div style="padding:10px 0;border-top:1px solid var(--line);display:flex;gap:8px;align-items:flex-start"><div style="flex:1;min-width:0"><b style="font-size:12px">'+esc(person.full_name||('@'+handle)||'Usuário')+'</b><div class="muted" style="font-size:11px">@'+esc(handle)+' · '+new Date(c.created_at).toLocaleString('pt-BR')+(c.parent_comment_id?' · resposta':'')+'</div><div style="font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:4px">'+esc(c.content||'')+'</div></div><button class="danger" type="button" onclick="adminDeleteComment(\''+c.id+'\',\''+postId+'\',\''+targetId+'\')">Apagar</button></div>';
+  }).join('');
+}
+async function adminDeleteComment(commentId,postId,targetId){
+  if(!isCottontailAdmin)return;
+  if(!confirm('Apagar este comentário? As respostas vinculadas a ele também serão removidas.'))return;
+  $('adminStatus').textContent='Apagando comentário...';
+  const {error}=await db.rpc('admin_delete_post_comment',{target_comment_id:commentId});
+  if(error){$('adminStatus').textContent='Não foi possível apagar o comentário: '+error.message;return;}
+  $('adminStatus').textContent='Comentário apagado.';
+  $('adminComments_'+postId)?.remove();
+  await adminLoadComments(postId,targetId);
+  await loadFeed('all');
+}
+
 async function adminDeletePost(postId,targetId){
   if(!isCottontailAdmin)return;
   if(!confirm('Tem certeza que deseja apagar esta publicação? Essa ação não pode ser desfeita.'))return;
