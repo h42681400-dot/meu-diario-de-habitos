@@ -1212,10 +1212,94 @@ html body .conversation-unread{
   </div>
 </div>
 
+<script type="module">
+import { PushNotifications } from 'https://esm.sh/@capacitor/push-notifications@7.0.7?bundle';
+
+let cottontailPushUserId = null;
+let cottontailPushStartedFor = null;
+let cottontailPushListenersReady = false;
+
+async function startCottontailPush(userId) {
+  const nativeApp = window.Capacitor?.isNativePlatform?.() === true;
+  if (!nativeApp || !userId) return;
+  cottontailPushUserId = userId;
+  if (cottontailPushStartedFor === userId) return;
+
+  try {
+    if (!cottontailPushListenersReady) {
+      await PushNotifications.addListener('registration', async ({ value }) => {
+        const activeUserId = cottontailPushUserId;
+        const client = window.cottontailDb;
+        if (!activeUserId || !client || !value) return;
+        const { error } = await client.from('device_push_tokens').upsert({
+          user_id: activeUserId,
+          token: value,
+          platform: 'android',
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id,token' });
+        if (error) console.error('Não foi possível salvar o token de notificações:', error);
+        else console.info('Dispositivo registrado para notificações do Cottontail.');
+      });
+
+      await PushNotifications.addListener('registrationError', error => {
+        console.error('Erro ao registrar notificações do Cottontail:', error);
+      });
+
+      await PushNotifications.addListener('pushNotificationReceived', notification => {
+        console.info('Notificação recebida:', notification);
+      });
+
+      await PushNotifications.addListener('pushNotificationActionPerformed', action => {
+        const data = action.notification?.data || {};
+        if (data.type === 'message' && typeof window.showPage === 'function') {
+          window.showPage('messages');
+        } else if (typeof window.showPage === 'function') {
+          window.showPage('notifications');
+        }
+      });
+      cottontailPushListenersReady = true;
+    }
+
+    await PushNotifications.createChannel({
+      id: 'cottontail_notifications',
+      name: 'Notificações do Cottontail',
+      description: 'Curtidas, comentários, seguidores e mensagens',
+      importance: 4,
+      visibility: 1
+    });
+
+    let permissions = await PushNotifications.checkPermissions();
+    if (permissions.receive !== 'granted') {
+      permissions = await PushNotifications.requestPermissions();
+    }
+    if (permissions.receive !== 'granted') {
+      console.warn('Permissão de notificações não concedida pelo usuário.');
+      return;
+    }
+
+    cottontailPushStartedFor = userId;
+    await PushNotifications.register();
+  } catch (error) {
+    cottontailPushStartedFor = null;
+    console.error('Falha ao ativar notificações push:', error);
+  }
+}
+
+window.addEventListener('cottontail-user-ready', event => {
+  startCottontailPush(event.detail?.userId);
+});
+
+if (window.cottontailCurrentUserId) {
+  startCottontailPush(window.cottontailCurrentUserId);
+}
+</script>
+
 <script>
 const SUPABASE_URL='https://qhveyeqpwguqbokfwlwf.supabase.co';
 const SUPABASE_KEY='sb_publishable_FWLt3OH6KIOwXZ-DqJGacw_vcoMg-eM';
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+window.cottontailDb=db;
+
 
 let user=null, selected=new Date(), entries={}, profile=null, activeChat=null, chatProfiles={}, inspectedProfileId=null, isCottontailAdmin=false;
 let currentFloatingPostImage=null, editAvatarFile=null, editBannerFile=null, postToDeleteId=null, postToReportId=null;
@@ -1434,6 +1518,8 @@ let initializedUserId=null;
 db.auth.onAuthStateChange((_event,session)=>{
   const nextUser=session?.user||null;
   user=nextUser;
+  window.cottontailCurrentUserId=user?.id||null;
+  window.dispatchEvent(new CustomEvent('cottontail-user-ready',{detail:{userId:window.cottontailCurrentUserId}}));
   $('loginScreen').classList.toggle('hidden',!!user);
   $('app').classList.toggle('hidden',!user);
 
