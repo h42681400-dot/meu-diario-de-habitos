@@ -67,15 +67,15 @@ jobs:
           app = Path("android/app/build.gradle")
           root_text = root.read_text()
           if "com.google.gms:google-services" not in root_text:
-              match = re.search(r"dependencies\\s*\\{", root_text)
+              match = re.search(r"dependencies\s*\{", root_text)
               if not match:
                   raise SystemExit("Não encontrei o bloco dependencies em android/build.gradle")
               pos = match.end()
-              root_text = root_text[:pos] + "\\n        classpath 'com.google.gms:google-services:4.4.2'" + root_text[pos:]
+              root_text = root_text[:pos] + "\n        classpath 'com.google.gms:google-services:4.4.2'" + root_text[pos:]
               root.write_text(root_text)
           app_text = app.read_text()
           if "com.google.gms.google-services" not in app_text:
-              app.write_text(app_text.rstrip() + "\\n\\napply plugin: 'com.google.gms.google-services'\\n")
+              app.write_text(app_text.rstrip() + "\n\napply plugin: 'com.google.gms.google-services'\n")
           print("Plugin Google Services configurado.")
           PY
 
