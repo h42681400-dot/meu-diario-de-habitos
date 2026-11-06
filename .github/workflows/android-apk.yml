@@ -9,6 +9,7 @@ on:
       - 'capacitor.config.json'
       - 'www/**'
       - 'icons/**'
+      - 'manifest.json'
       - '.github/workflows/android-apk.yml'
 
 permissions:
