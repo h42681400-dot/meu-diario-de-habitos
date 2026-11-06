@@ -829,6 +829,14 @@ html body .conversation-unread{
       <div id="tabSignUpBtn" class="profile-tab" onclick="toggleAuthTab('signup')">Criar Conta</div>
     </div>
 
+    <div class="field" style="margin:14px 0 18px;padding:12px;border:1px solid var(--line);border-radius:12px">
+      <label style="display:flex;align-items:flex-start;gap:9px;font-size:13px;line-height:1.5">
+        <input type="checkbox" id="betaAdultConfirm" style="width:18px;height:18px;flex:none;margin:2px 0 0">
+        <span>Confirmo que tenho <strong>18 anos ou mais</strong> e entendo que esta versão beta é exclusiva para adultos.</span>
+      </label>
+      <small class="muted">Esta confirmação é uma barreira provisória de acesso, não um sistema independente de verificação de idade.</small>
+    </div>
+
     <div id="loginForm">
       <div class="field"><label>E-mail</label><input id="loginEmail" type="email" placeholder="seuemail@exemplo.com"></div>
       <div class="field"><label>Senha</label><input id="loginPassword" type="password" placeholder="Sua senha"></div>
@@ -1415,6 +1423,8 @@ async function signUp(){
   const name=$('regName').value.trim(),rawUsername=$('regUsername').value.trim().toLowerCase(),username=rawUsername.replace(/^@/,'');
   const email=$('regEmail').value.trim(),password=$('regPassword').value,language=$('regLanguage').value;
   const legalAccepted=$('legalAccept')?.checked===true;
+  const adultConfirmed=$('betaAdultConfirm')?.checked===true;
+  if(!adultConfirmed)return status('loginStatus','O beta está temporariamente disponível apenas para maiores de 18 anos. Confirme sua idade para continuar.');
   if(!name||!rawUsername||!email||password.length<6)return status('loginStatus','Preencha nome, @usuário, e-mail e senha (mín. 6 caracteres).');
   if(!legalAccepted)return status('loginStatus','Para criar sua conta, leia e aceite os Termos, a Política de Privacidade e as Diretrizes da Comunidade.');
   if(!/^@[a-z0-9._]{3,20}$/.test(rawUsername))return status('loginStatus','Seu nome de usuário precisa começar com @ e ter de 3 a 20 caracteres (letras, números, ponto ou _).');
@@ -1429,7 +1439,9 @@ async function signUp(){
       cottontail_terms_version:'1.0',
       cottontail_privacy_version:'1.0',
       cottontail_community_version:'1.0',
-      cottontail_legal_accepted_at:new Date().toISOString()
+      cottontail_legal_accepted_at:new Date().toISOString(),
+      cottontail_beta_adult_attested:true,
+      cottontail_beta_adult_attested_at:new Date().toISOString()
     }}
   });if(error)return status('loginStatus',error.message);
   const newUser=data.user;
@@ -1445,6 +1457,7 @@ async function signUp(){
 async function signIn(){
   const email=$('loginEmail').value.trim(),password=$('loginPassword').value;
   const button=document.querySelector('#loginForm .login-actions button');
+  if(!$('betaAdultConfirm')?.checked){status('loginStatus','O beta está temporariamente disponível apenas para maiores de 18 anos. Confirme sua idade para continuar.');return;}
   if(!email||!password){status('loginStatus','Digite seu e-mail e sua senha para entrar.');return;}
   if(button){button.disabled=true;button.textContent='Entrando...';}
   status('loginStatus','Conectando à sua conta...');
@@ -1452,6 +1465,8 @@ async function signIn(){
     const {data,error}=await db.auth.signInWithPassword({email,password});
     if(error)throw error;
     if(!data?.session)throw new Error('A autenticação não retornou uma sessão. Confira se o e-mail foi confirmado.');
+    const {error:ageAttestationError}=await db.auth.updateUser({data:{cottontail_beta_adult_attested:true,cottontail_beta_adult_attested_at:new Date().toISOString()}});
+    if(ageAttestationError)throw new Error('Não foi possível registrar a confirmação de maioridade. Tente novamente.');
     user=data.user;
     $('loginScreen').classList.add('hidden');
     $('app').classList.remove('hidden');
@@ -1544,6 +1559,14 @@ let initializedUserId=null;
 
 db.auth.onAuthStateChange((_event,session)=>{
   const nextUser=session?.user||null;
+  const adultAttested=nextUser?.user_metadata?.cottontail_beta_adult_attested===true;
+  if(nextUser&&!adultAttested){
+    user=nextUser;
+    $('loginScreen').classList.remove('hidden');
+    $('app').classList.add('hidden');
+    status('loginStatus','Este beta está temporariamente restrito a maiores de 18 anos. Marque a confirmação acima e entre novamente.');
+    return;
+  }
   user=nextUser;
   window.cottontailCurrentUserId=user?.id||null;
   window.dispatchEvent(new CustomEvent('cottontail-user-ready',{detail:{userId:window.cottontailCurrentUserId}}));
