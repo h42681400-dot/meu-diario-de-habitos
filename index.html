@@ -1148,6 +1148,21 @@ html body .conversation-unread{
 
     <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
 
+    <section id="adminPanel" class="hidden" style="border:1px solid var(--rose);border-radius:16px;padding:14px;margin:18px 0">
+      <h3 style="margin:0 0 6px;color:var(--rose)"><i class="fa-solid fa-shield-halved"></i> Administração Cottontail</h3>
+      <p class="muted" style="font-size:12px;margin:0 0 12px">Ferramentas exclusivas da conta administradora.</p>
+      <div class="field">
+        <label for="adminUserSearch">Buscar perfil pelo @ ou nome</label>
+        <div style="display:flex;gap:8px">
+          <input id="adminUserSearch" placeholder="@usuario" style="margin:0">
+          <button class="secondary" type="button" onclick="adminSearchUsers()">Buscar</button>
+        </div>
+      </div>
+      <div id="adminUserResults"></div>
+      <div id="adminPostResults" style="margin-top:12px"></div>
+      <p id="adminStatus" class="muted" style="font-size:12px"></p>
+    </section>
+
     <div style="margin-bottom:18px">
       <h4 style="margin:0 0 10px 0">Usuários Bloqueados</h4>
       <div id="blockedUsersList"><p class="muted">Carregando bloqueios...</p></div>
@@ -1202,7 +1217,7 @@ const SUPABASE_URL='https://qhveyeqpwguqbokfwlwf.supabase.co';
 const SUPABASE_KEY='sb_publishable_FWLt3OH6KIOwXZ-DqJGacw_vcoMg-eM';
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let user=null, selected=new Date(), entries={}, profile=null, activeChat=null, chatProfiles={}, inspectedProfileId=null;
+let user=null, selected=new Date(), entries={}, profile=null, activeChat=null, chatProfiles={}, inspectedProfileId=null, isCottontailAdmin=false;
 let currentFloatingPostImage=null, editAvatarFile=null, editBannerFile=null, postToDeleteId=null, postToReportId=null;
 let chatInterval=null, presenceTimer=null, typingTimer=null;
 let notificationPollTimer=null, notificationCursor=null, appActionResolver=null;
@@ -1445,6 +1460,9 @@ db.auth.onAuthStateChange((_event,session)=>{
     if(!user || user.id!==nextUser.id) return;
     try{
       await ensureProfile();
+      const {data:adminCheck,error:adminCheckError}=await db.rpc('is_cottontail_admin');
+      isCottontailAdmin=!adminCheckError&&adminCheck===true;
+      if($('adminPanel'))$('adminPanel').classList.toggle('hidden',!isCottontailAdmin);
     updateMyPresence();
     if(presenceTimer)clearInterval(presenceTimer);
     presenceTimer=setInterval(updateMyPresence,30000);
@@ -1610,6 +1628,56 @@ function openSettingsModal(){
   if(languageSelect)languageSelect.value=profile?.language||detectPreferredLanguage();
 }
 function closeSettingsModal(){ $('settingsModal').classList.add('hidden'); }
+
+async function adminSearchUsers(){
+  if(!isCottontailAdmin)return;
+  const term=$('adminUserSearch').value.trim().replace(/^@/,'');
+  if(!term){$('adminStatus').textContent='Digite um @ ou nome para buscar.';return;}
+  $('adminStatus').textContent='Buscando perfis...';
+  $('adminPostResults').innerHTML='';
+  const {data,error}=await db.from('user_profiles')
+    .select('user_id,username,full_name,is_verified')
+    .or('username.ilike.%'+term+'%,full_name.ilike.%'+term+'%')
+    .limit(20);
+  if(error){$('adminStatus').textContent='Erro na busca: '+error.message;return;}
+  if(!data?.length){$('adminUserResults').innerHTML='<p class="muted">Nenhum perfil encontrado.</p>';$('adminStatus').textContent='';return;}
+  $('adminUserResults').innerHTML=data.map(p=>{
+    const handle=String(p.username||'').replace(/^@/,'');
+    return '<div class="person" style="align-items:center;gap:8px"><div style="min-width:0;flex:1"><b>'+esc(p.full_name||'Sem nome')+'</b><div class="muted">@'+esc(handle)+'</div></div><button class="secondary" type="button" onclick="adminToggleVerified(\''+p.user_id+'\','+(!p.is_verified)+')">'+(p.is_verified?'Retirar selo':'Dar selo')+'</button><button class="ghost" type="button" onclick="adminLoadPosts(\''+p.user_id+'\')">Publicações</button></div>';
+  }).join('');
+  $('adminStatus').textContent=data.length+' perfil(is) encontrado(s).';
+}
+async function adminToggleVerified(targetId,verified){
+  if(!isCottontailAdmin)return;
+  const action=verified?'dar o selo':'retirar o selo';
+  if(!confirm('Confirma '+action+' deste perfil?'))return;
+  $('adminStatus').textContent='Atualizando selo...';
+  const {error}=await db.rpc('admin_set_profile_verified',{target_user_id:targetId,verified});
+  if(error){$('adminStatus').textContent='Não foi possível atualizar: '+error.message;return;}
+  $('adminStatus').textContent='Selo atualizado com sucesso! 💗';
+  await adminSearchUsers();
+  await loadFeed('all');
+  if(profile?.user_id===targetId)await loadProfile();
+}
+async function adminLoadPosts(targetId){
+  if(!isCottontailAdmin)return;
+  $('adminPostResults').innerHTML='<p class="muted">Carregando publicações...</p>';
+  const {data,error}=await db.from('posts').select('id,content,created_at').eq('user_id',targetId).order('created_at',{ascending:false}).limit(50);
+  if(error){$('adminPostResults').innerHTML='<p class="muted">Erro ao carregar publicações: '+esc(error.message)+'</p>';return;}
+  if(!data?.length){$('adminPostResults').innerHTML='<p class="muted">Esse perfil não tem publicações próprias.</p>';return;}
+  $('adminPostResults').innerHTML='<h4>Publicações deste perfil</h4>'+data.map(p=>'<div class="person" style="align-items:flex-start;gap:8px"><div style="flex:1;min-width:0"><div style="font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere">'+esc((p.content||'Publicação com imagem').slice(0,240))+'</div><div class="muted">'+new Date(p.created_at).toLocaleString('pt-BR')+'</div></div><button class="danger" type="button" onclick="adminDeletePost(\''+p.id+'\',\''+targetId+'\')">Apagar</button></div>').join('');
+}
+async function adminDeletePost(postId,targetId){
+  if(!isCottontailAdmin)return;
+  if(!confirm('Tem certeza que deseja apagar esta publicação? Essa ação não pode ser desfeita.'))return;
+  $('adminStatus').textContent='Apagando publicação...';
+  const {error}=await db.rpc('admin_delete_post',{target_post_id:postId});
+  if(error){$('adminStatus').textContent='Não foi possível apagar: '+error.message;return;}
+  $('adminStatus').textContent='Publicação apagada. Os dados dependentes serão removidos pelo CASCADE.';
+  await adminLoadPosts(targetId);
+  await loadFeed('all');
+  if(!$('profile').classList.contains('hidden'))await loadProfileDataTab('posts');
+}
 
 async function saveMsgPrivacySetting(val){
   await db.from('user_profiles').update({messages_from_following_only: val}).eq('user_id', user.id);
