@@ -948,6 +948,55 @@ input:focus,textarea:focus,select:focus{border-color:var(--rose);box-shadow:0 0 
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
 }
 
+
+
+/* Chat Cottontail — leitura maior e visual inspirado no iMessage */
+#chatRoomView{padding:18px;background:var(--card-bg);border-radius:24px}
+#messageBox.messages{
+  height:min(66vh,680px);
+  min-height:380px;
+  gap:12px;
+  padding:22px 18px;
+  background:#f7f7f9;
+  border-radius:20px;
+}
+body.theme-dark #messageBox.messages{background:#17171b}
+#messageBox .bubble{
+  max-width:min(84%,520px);
+  padding:12px 16px 9px;
+  border-radius:21px;
+  font-size:16px;
+  line-height:1.5;
+  letter-spacing:-.12px;
+}
+#messageBox .bubble.mine{
+  background:#0a84ff;
+  color:#fff;
+  border-bottom-right-radius:6px;
+  box-shadow:0 2px 5px rgba(10,132,255,.16);
+}
+#messageBox .bubble.other{
+  background:#e9e9eb;
+  color:#171719;
+  border:0;
+  border-bottom-left-radius:6px;
+  box-shadow:none;
+}
+body.theme-dark #messageBox .bubble.mine{background:#0a84ff;color:#fff}
+body.theme-dark #messageBox .bubble.other{background:#303036;color:#f5f5f7}
+#messageBox .bubble-time{font-size:10px;margin-top:6px}
+#chatRoomView .row{padding:5px 6px 5px 14px;background:#f1f1f3;border:0;border-radius:28px}
+body.theme-dark #chatRoomView .row{background:#303036}
+#chatRoomView #messageInput{font-size:16px!important;height:44px!important}
+#chatRoomView .row button{width:40px;height:40px;background:#0a84ff!important;color:#fff!important;box-shadow:none}
+#chatHeaderAvatar{width:48px!important;height:48px!important}
+@media(max-width:600px){
+  #chatRoomView{padding:10px;border-radius:20px}
+  #messageBox.messages{height:60vh;min-height:340px;padding:18px 10px;gap:11px}
+  #messageBox .bubble{max-width:88%;font-size:15.5px;padding:11px 14px 8px;line-height:1.48}
+  #chatRoomView #messageInput{font-size:16px!important}
+}
+
 </style></head>
 <body>
 
