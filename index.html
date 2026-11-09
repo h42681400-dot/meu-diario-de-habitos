@@ -2509,7 +2509,8 @@ async function loadProfile(){
     if(languageError)console.warn('Não foi possível salvar o idioma detectado:',languageError.message);
   }
   if($('settingsLanguage'))$('settingsLanguage').value=profile.language||detectPreferredLanguage();
-  document.documentElement.lang=profile.language||detectPreferredLanguage();\n  applyUiLanguage(profile.language||localStorage.getItem('cottontail_language')||detectPreferredLanguage());
+  document.documentElement.lang=profile.language||detectPreferredLanguage();
+  applyUiLanguage(profile.language||localStorage.getItem('cottontail_language')||detectPreferredLanguage());
   $('profileName').value=profile.full_name||'';
   $('profileUsername').value=profile.username||'';
   $('profileBio').value=profile.bio||'';
