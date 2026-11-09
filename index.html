@@ -1622,14 +1622,59 @@ window.addEventListener('DOMContentLoaded',()=>{
   const langSelect=$('regLanguage');
   if(langSelect&&!langSelect.dataset.userChosen)langSelect.value=detectPreferredLanguage();
 });
+/* TRADUÇÃO DA INTERFACE: aplica o idioma escolhido também aos textos já
+   renderizados e aos elementos criados dinamicamente (feed, modais e mensagens). */
+const UI_TRANSLATIONS={
+'en':{
+'Seu espaço de hábitos e comunidade.':'Your space for habits and community.','Entrar':'Log in','Criar Conta':'Create account','Confirmo que tenho':'I confirm that I am','18 anos ou mais':'18 years old or older','e entendo que esta versão beta é exclusiva para adultos.':'and understand this beta version is for adults only.','Esta confirmação é uma barreira provisória de acesso, não um sistema independente de verificação de idade.':'This is a temporary access barrier, not an independent age verification system.','E-mail':'Email','Senha':'Password','Sua senha':'Your password','Esqueci minha senha':'Forgot my password','Nome Completo':'Full name','Nome de usuário (@)':'Username (@)','Obrigatório começar com @. Esse será seu identificador no Cottontail.':'Must start with @. This will be your Cottontail username.','Mínimo 6 caracteres':'At least 6 characters','Idioma Preferido':'Preferred language','Idioma preferido':'Preferred language','Foto de Perfil':'Profile picture','Escolher Foto':'Choose photo','Criar Perfil e Entrar':'Create profile and log in','TOCANDO AGORA':'NOW PLAYING','Início':'Home','Diário':'Diary','Explorar':'Explore','Mensagens':'Messages','Notificações':'Notifications','Perfil':'Profile','Todos':'Everyone','Quem sigo':'Following','Criar publicação':'Create post','Dom':'Sun','Seg':'Mon','Ter':'Tue','Qua':'Wed','Qui':'Thu','Sex':'Fri','Sáb':'Sat','Café da manhã':'Breakfast','Almoço':'Lunch','Lanches':'Snacks','Jantar':'Dinner','Água (ml)':'Water (ml)','Exercícios':'Exercise','Observações':'Notes','Salvar meu dia':'Save my day','Conversas':'Chats','Conversa':'Chat','offline':'offline','Escreva uma mensagem...':'Write a message...','Nenhuma notificação por enquanto.':'No notifications yet.','Editar Perfil':'Edit profile','Seguindo':'Following','Seguidores':'Followers','Perfil Público':'Public profile','Nova publicação':'New post','O que está acontecendo?':'What is happening?','Foto':'Photo','Publicar':'Publish','Confirmar ação':'Confirm action','Cancelar':'Cancel','Confirmar':'Confirm','Excluir postagem':'Delete post','Tem certeza que deseja apagar esta publicação permanentemente?':'Are you sure you want to permanently delete this post?','Excluir':'Delete','Excluir Conta Definitivamente':'Permanently delete account','Denunciar publicação':'Report post','Ajude-nos a manter a comunidade segura.':'Help us keep the community safe.','Motivo da denúncia':'Reason for report','Enviar Denúncia':'Submit report','Configurações':'Settings','Galeria de Músicas (Player)':'Music library (player)','Ou cole URL direta .mp3':'Or paste a direct .mp3 URL','Tocar':'Play','Conectar YouTube Music':'Connect YouTube Music','Traga sua playlist para o Cottontail':'Bring your playlist to Cottontail','Cole o link de uma música ou playlist para ouvir enquanto usa o app.':'Paste a song or playlist link to listen while using the app.','Cole aqui o link da música ou playlist':'Paste the song or playlist link here','Tema da Interface':'Interface theme','Claro (Coreano Soft)':'Light (Soft)','Escuro (Dark Minimalist)':'Dark (Dark Minimalist)','Fonte do Aplicativo':'App font','Padrão do Sistema':'System default','Serifada / Elegante (Georgia)':'Serif / Elegant (Georgia)','Monospaçada / Diário Digital (Courier)':'Monospace / Digital diary (Courier)','Receber mensagens apenas de quem eu sigo 💌':'Receive messages only from people I follow 💌','Administração Cottontail':'Cottontail administration','Privacidade e documentos':'Privacy and documents','Consulte as regras e saiba como seus dados são tratados.':'Review the rules and learn how your data is handled.','Política de Privacidade':'Privacy policy','Termos de Uso':'Terms of use','Diretrizes da Comunidade':'Community guidelines','Solicitar ajuda sobre meus dados':'Request help with my data','Usuários Bloqueados':'Blocked users','Carregando bloqueios...':'Loading blocked users...','Sair da Conta':'Log out','Excluir Minha Conta':'Delete my account','Buscar':'Search','Buscar @usuário, nome ou posts...':'Search @username, name or posts...','Configurar música':'Set up music','Salvar':'Save','Voltar':'Back'
+},
+'es':{
+'Seu espaço de hábitos e comunidade.':'Tu espacio de hábitos y comunidad.','Entrar':'Iniciar sesión','Criar Conta':'Crear cuenta','E-mail':'Correo electrónico','Senha':'Contraseña','Sua senha':'Tu contraseña','Esqueci minha senha':'Olvidé mi contraseña','Nome Completo':'Nombre completo','Nome de usuário (@)':'Nombre de usuario (@)','Idioma Preferido':'Idioma preferido','Idioma preferido':'Idioma preferido','Foto de Perfil':'Foto de perfil','Escolher Foto':'Elegir foto','Criar Perfil e Entrar':'Crear perfil e iniciar sesión','Início':'Inicio','Diário':'Diario','Explorar':'Explorar','Mensagens':'Mensajes','Notificações':'Notificaciones','Perfil':'Perfil','Todos':'Todos','Quem sigo':'Personas que sigo','Criar publicação':'Crear publicación','Dom':'Dom','Seg':'Lun','Ter':'Mar','Qua':'Mié','Qui':'Jue','Sex':'Vie','Sáb':'Sáb','Café da manhã':'Desayuno','Almoço':'Almuerzo','Lanches':'Meriendas','Jantar':'Cena','Água (ml)':'Agua (ml)','Exercícios':'Ejercicio','Observações':'Notas','Salvar meu dia':'Guardar mi día','Conversas':'Conversaciones','Conversa':'Conversación','Escreva uma mensagem...':'Escribe un mensaje...','Nenhuma notificação por enquanto.':'No hay notificaciones por ahora.','Editar Perfil':'Editar perfil','Seguindo':'Siguiendo','Seguidores':'Seguidores','Perfil Público':'Perfil público','Nova publicação':'Nueva publicación','O que está acontecendo?':'¿Qué está pasando?','Foto':'Foto','Publicar':'Publicar','Confirmar ação':'Confirmar acción','Cancelar':'Cancelar','Confirmar':'Confirmar','Excluir postagem':'Eliminar publicación','Tem certeza que deseja apagar esta publicação permanentemente?':'¿Seguro que quieres eliminar esta publicación permanentemente?','Excluir':'Eliminar','Denunciar publicação':'Denunciar publicación','Ajude-nos a manter a comunidade segura.':'Ayúdanos a mantener segura la comunidad.','Motivo da denúncia':'Motivo de la denuncia','Enviar Denúncia':'Enviar denuncia','Configurações':'Configuración','Galeria de Músicas (Player)':'Biblioteca de música (reproductor)','Ou cole URL direta .mp3':'O pega una URL directa .mp3','Tocar':'Reproducir','Conectar YouTube Music':'Conectar YouTube Music','Traga sua playlist para o Cottontail':'Trae tu lista a Cottontail','Cole o link de uma música ou playlist para ouvir enquanto usa o app.':'Pega el enlace de una canción o lista para escuchar mientras usas la app.','Cole aqui o link da música ou playlist':'Pega aquí el enlace de la canción o lista','Tema da Interface':'Tema de la interfaz','Fonte do Aplicativo':'Fuente de la aplicación','Padrão do Sistema':'Predeterminada del sistema','Receber mensagens apenas de quem eu sigo 💌':'Recibir mensajes solo de las personas que sigo 💌','Administração Cottontail':'Administración de Cottontail','Privacidade e documentos':'Privacidad y documentos','Consulte as regras e saiba como seus dados são tratados.':'Consulta las reglas y cómo se tratan tus datos.','Política de Privacidade':'Política de privacidad','Termos de Uso':'Términos de uso','Diretrizes da Comunidade':'Normas de la comunidad','Solicitar ajuda sobre meus dados':'Solicitar ayuda sobre mis datos','Usuários Bloqueados':'Usuarios bloqueados','Carregando bloqueios...':'Cargando bloqueos...','Sair da Conta':'Cerrar sesión','Excluir Minha Conta':'Eliminar mi cuenta','Buscar':'Buscar','Buscar @usuário, nome ou posts...':'Buscar @usuario, nombre o publicaciones...','Configurar música':'Configurar música','Voltar':'Volver'
+},
+'ko':{
+'Seu espaço de hábitos e comunidade.':'습관과 커뮤니티를 위한 나만의 공간.','Entrar':'로그인','Criar Conta':'계정 만들기','E-mail':'이메일','Senha':'비밀번호','Sua senha':'비밀번호를 입력하세요','Esqueci minha senha':'비밀번호를 잊으셨나요?','Nome Completo':'이름','Nome de usuário (@)':'사용자 이름 (@)','Idioma Preferido':'선호 언어','Idioma preferido':'선호 언어','Foto de Perfil':'프로필 사진','Escolher Foto':'사진 선택','Criar Perfil e Entrar':'프로필 만들고 로그인','Início':'홈','Diário':'일기','Explorar':'탐색','Mensagens':'메시지','Notificações':'알림','Perfil':'프로필','Todos':'전체','Quem sigo':'팔로잉','Criar publicação':'게시물 작성','Dom':'일','Seg':'월','Ter':'화','Qua':'수','Qui':'목','Sex':'금','Sáb':'토','Café da manhã':'아침 식사','Almoço':'점심','Lanches':'간식','Jantar':'저녁','Água (ml)':'물 (ml)','Exercícios':'운동','Observações':'메모','Salvar meu dia':'오늘 기록 저장','Conversas':'대화','Conversa':'대화','Escreva uma mensagem...':'메시지를 입력하세요...','Nenhuma notificação por enquanto.':'아직 알림이 없습니다.','Editar Perfil':'프로필 편집','Seguindo':'팔로잉','Seguidores':'팔로워','Perfil Público':'공개 프로필','Nova publicação':'새 게시물','O que está acontecendo?':'무슨 일이 있나요?','Foto':'사진','Publicar':'게시','Cancelar':'취소','Confirmar':'확인','Configurações':'설정','Tema da Interface':'화면 테마','Fonte do Aplicativo':'앱 글꼴','Padrão do Sistema':'시스템 기본값','Privacidade e documentos':'개인정보 및 문서','Política de Privacidade':'개인정보 처리방침','Termos de Uso':'이용 약관','Diretrizes da Comunidade':'커뮤니티 가이드라인','Usuários Bloqueados':'차단된 사용자','Sair da Conta':'로그아웃','Excluir Minha Conta':'내 계정 삭제','Buscar':'검색','Voltar':'뒤로'
+}};
+let activeUiLanguage='pt-BR';
+function applyUiLanguage(language){
+  const lang=['pt-BR','en','es','ko'].includes(language)?language:'pt-BR';
+  activeUiLanguage=lang;document.documentElement.lang=lang;
+  const dict=UI_TRANSLATIONS[lang]||{};
+  const reverse={};Object.entries(UI_TRANSLATIONS).forEach(([l,entries])=>Object.entries(entries).forEach(([pt,tr])=>{reverse[tr]=pt;}));
+  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+  let node;while(node=walker.nextNode()){
+    if(!node.parentElement||['SCRIPT','STYLE','TEXTAREA'].includes(node.parentElement.tagName))continue;
+    if(!node.__cottontailOriginal)node.__cottontailOriginal=node.nodeValue;
+    const original=reverse[node.__cottontailOriginal.trim()]||node.__cottontailOriginal.trim();
+    const translated=dict[original];
+    if(translated!==undefined)node.nodeValue=node.nodeValue.replace(node.nodeValue.trim(),translated);
+    else if(lang==='pt-BR'&&reverse[node.nodeValue.trim()])node.nodeValue=node.nodeValue.replace(node.nodeValue.trim(),reverse[node.nodeValue.trim()]);
+  }
+  document.querySelectorAll('input[placeholder],textarea[placeholder],button[title],button[aria-label],input[aria-label],iframe[title]').forEach(el=>{
+    ['placeholder','title','aria-label'].forEach(attr=>{
+      if(!el.hasAttribute(attr))return;
+      const key='cottontailOriginal'+attr;
+      if(!el.dataset[key])el.dataset[key]=el.getAttribute(attr);
+      const original=reverse[el.dataset[key]]||el.dataset[key];
+      if(dict[original])el.setAttribute(attr,dict[original]);
+      else if(lang==='pt-BR')el.setAttribute(attr,original);
+    });
+  });
+}
+let uiLanguageObserver=null;
+function watchUiTranslations(){
+  if(uiLanguageObserver)uiLanguageObserver.disconnect();
+  uiLanguageObserver=new MutationObserver(()=>{if(activeUiLanguage!=='pt-BR')applyUiLanguage(activeUiLanguage);});
+  uiLanguageObserver.observe(document.body,{childList:true,subtree:true,characterData:true});
+}
 function savePreferredLanguage(value){
-  if(!user)return;
   const allowed=['pt-BR','en','es','ko'];
   const language=allowed.includes(value)?value:'pt-BR';
   if(profile)profile.language=language;
-  document.documentElement.lang=language;
+  localStorage.setItem('cottontail_language',language);
+  applyUiLanguage(language);
+  if(!user){return;}
   db.from('user_profiles').update({language}).eq('user_id',user.id)
-    .then(({error})=>{if(error)console.error('Não foi possível salvar o idioma:',error.message);});
+    .then(({error})=>{if(error){console.error('Não foi possível salvar o idioma:',error.message);showToast?.('Idioma não salvo',error.message);}});
 }
 
 /* MUSIC PLAYER */
@@ -2464,7 +2509,7 @@ async function loadProfile(){
     if(languageError)console.warn('Não foi possível salvar o idioma detectado:',languageError.message);
   }
   if($('settingsLanguage'))$('settingsLanguage').value=profile.language||detectPreferredLanguage();
-  document.documentElement.lang=profile.language||detectPreferredLanguage();
+  document.documentElement.lang=profile.language||detectPreferredLanguage();\n  applyUiLanguage(profile.language||localStorage.getItem('cottontail_language')||detectPreferredLanguage());
   $('profileName').value=profile.full_name||'';
   $('profileUsername').value=profile.username||'';
   $('profileBio').value=profile.bio||'';
