@@ -3300,7 +3300,7 @@ async function loadNotifications(){
   if(markError)console.warn('Não foi possível marcar notificações como lidas:',markError.message);
   $('notifBadge').classList.add('hidden');
   const {data,error}=await db.from('notifications').select('*')
-    .eq('user_id',user.id).order('created_at',{ascending:false}).limit(30);
+    .eq('user_id',user.id).order('created_at',{ascending:false}).limit(500);
   if(error){
     $('notifList').innerHTML='<p class="muted">Não foi possível carregar as notificações: '+esc(error.message)+'</p>';
     return;
@@ -3310,30 +3310,53 @@ async function loadNotifications(){
     $('notifList').innerHTML='<p class="muted">Nenhuma notificação por enquanto.</p>';
     return;
   }
-  const actorIds=[...new Set(data.map(n=>n.actor_id).filter(Boolean))];
+
+  // Agrupa curtidas e comentários da mesma publicação, mantendo o ator mais recente.
+  const grouped=[],activityGroups=new Map();
+  data.forEach(n=>{
+    if((n.type==='like'||n.type==='comment')&&n.post_id){
+      const key=n.type+':'+n.post_id;
+      if(activityGroups.has(key)){
+        const group=activityGroups.get(key);
+        group.count++;
+        if(new Date(n.created_at)>new Date(group.created_at))Object.assign(group,n,{count:group.count});
+      }else{
+        const group={...n,count:1};
+        activityGroups.set(key,group);
+        grouped.push(group);
+      }
+    }else grouped.push({...n,count:1});
+  });
+  grouped.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+
+  const actorIds=[...new Set(grouped.map(n=>n.actor_id).filter(Boolean))];
   let actorMap={};
   if(actorIds.length){
     const {data:actors}=await db.from('user_profiles').select('*').in('user_id',actorIds);
     (actors||[]).forEach(a=>actorMap[a.user_id]=a);
   }
-  $('notifList').innerHTML=data.map(n=>{
+  $('notifList').innerHTML=grouped.map(n=>{
     const actor=actorMap[n.actor_id]||{};
     const name=esc(actor.full_name||actor.username||'Alguém');
-    const text=notificationDescription(n.type);
+    const count=n.count||1;
+    let text=notificationDescription(n.type);
+    if(n.type==='like'&&count>1)text='e mais '+(count-1)+' '+(count===2?'pessoa curtiu':'pessoas curtiram')+' sua publicação. 🤍';
+    if(n.type==='comment'&&count>1)text='e mais '+(count-1)+' '+(count===2?'pessoa comentou':'pessoas comentaram')+' na sua publicação. 💬';
     const date=new Date(n.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
     const unread=!n.read;
     const avatar=actor.avatar_url
       ? '<img src="'+esc(actor.avatar_url)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'
       : '<i class="fa-solid '+notificationIcon(n.type)+'"></i>';
-    const collaborationActions=n.type==='post_collaboration'?`<div style="display:flex;gap:8px;margin-top:8px"><button onclick="event.stopPropagation();respondToCollaboration('${n.post_id}',true,'${n.id}')">Aceitar</button><button class="secondary" onclick="event.stopPropagation();respondToCollaboration('${n.post_id}',false,'${n.id}')">Recusar</button></div>`:'';
+    const collaborationActions=n.type==='post_collaboration'?'<div style="display:flex;gap:8px;margin-top:8px"><button onclick="event.stopPropagation();respondToCollaboration(\''+n.post_id+'\',true,\''+n.id+'\')">Aceitar</button><button class="secondary" onclick="event.stopPropagation();respondToCollaboration(\''+n.post_id+'\',false,\''+n.id+'\')">Recusar</button></div>':'';
     return `
       <div class="notif-item ${unread?'unread':''}" role="button" tabindex="0"
         onclick="openNotification('${n.id}','${n.actor_id||''}','${n.type||''}','${n.post_id||''}')"
-        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openNotification('${n.id}','${n.actor_id||''}','${n.type||''}','${n.post_id||''}')}">
+        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openNotification('${n.id}','${n.actor_id||''}','${n.type||''}','${n.post_id||''}') }">
         <div class="icon">${avatar}</div>
         <div class="notif-content">
           <div><b>${name}</b> ${text}</div>
           <div class="notif-time">${date}</div>
+          ${count>1?'<div class="muted" style="font-size:10px;margin-top:3px">'+count+' interações nesta publicação</div>':''}
           ${unread?'<div class="muted" style="font-size:10px;margin-top:3px">Nova</div>':''}
           ${collaborationActions}
         </div>
