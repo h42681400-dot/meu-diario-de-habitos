@@ -1594,7 +1594,7 @@ function toggleMusic(){
 }
 function changePresetMusic(url){
   activeMusicProvider='audio';
-  $('musicTrackLabel').textContent=({})[url]||'Música do Cottontail';
+  $('musicTrackLabel').textContent=$('musicSelect').selectedOptions[0]?.textContent||'Música do Cottontail';
   $('youtubeMusicFrame').src='about:blank';
   $('youtubeMusicPanel').classList.add('hidden');
   changeMusicUrl(url);
