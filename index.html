@@ -997,6 +997,49 @@ body.theme-dark #chatRoomView .row{background:#303036}
   #chatRoomView #messageInput{font-size:16px!important}
 }
 
+
+/* YouTube Music — acabamento Cottontail */
+.music-bar{gap:9px;padding:7px 9px 7px 8px;border-radius:18px;background:var(--card-bg);border:1px solid var(--line);box-shadow:0 5px 18px rgba(91,63,58,.07)}
+.music-bar-art{width:38px;height:38px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(145deg,#f4dede,#d4a5a5);color:#fff;font-size:16px;flex:none}
+.music-bar-copy{display:flex;flex-direction:column;gap:2px;min-width:76px;max-width:125px}
+.music-bar-copy small{font-size:8px;letter-spacing:1px;color:var(--muted);font-weight:800}
+.music-bar-copy b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+.music-bar .music-play-btn,.music-bar .music-youtube-btn{width:34px;height:34px;min-width:34px;padding:0;border-radius:12px;display:grid;place-items:center;margin:0}
+.music-bar .music-play-btn{background:var(--rose);color:white}
+.music-bar .music-youtube-btn{background:rgba(212,165,165,.13);color:var(--rose)}
+.youtube-player-card{margin:0 0 18px;padding:0;overflow:hidden;border-radius:22px;border:1px solid var(--line);background:var(--card-bg);box-shadow:0 10px 28px rgba(91,63,58,.07)}
+.youtube-player-heading{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+.youtube-player-brand{display:flex;align-items:center;gap:11px}
+.youtube-player-brand>span,.youtube-settings-title>span{width:40px;height:40px;display:grid;place-items:center;border-radius:14px;background:rgba(212,165,165,.16);color:var(--rose);font-size:19px}
+.youtube-player-brand>div,.youtube-settings-title>div{display:flex;flex-direction:column;gap:3px}
+.youtube-player-brand b{font-size:14px;color:var(--ink)}
+.youtube-player-brand small,.youtube-settings-title small{font-size:11px;color:var(--muted)}
+.youtube-close-btn{width:32px;height:32px;padding:0;border-radius:50%;background:var(--bg);color:var(--muted);display:grid;place-items:center}
+.youtube-player-content{padding:14px 16px 16px}
+.youtube-player-note{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:11px;margin:0 2px 12px}
+.youtube-player-note i:first-child{color:var(--rose);margin-right:7px}
+.youtube-player-note span{flex:1}
+.youtube-player-note i:last-child{color:var(--rose)}
+.youtube-frame-wrap{overflow:hidden;border-radius:15px;background:#171313;box-shadow:0 5px 16px rgba(0,0,0,.12)}
+.youtube-frame-wrap iframe{display:block;width:100%;height:190px;border:0}
+.youtube-empty-state{min-height:125px;border:1px dashed var(--line);border-radius:16px;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:7px;text-align:center;padding:18px}
+.youtube-empty-state>i{font-size:23px;color:var(--rose);margin-bottom:2px}
+.youtube-empty-state b{font-size:13px;color:var(--ink)}
+.youtube-empty-state span{font-size:11px;color:var(--muted);max-width:260px;line-height:1.5}
+.youtube-config-link{display:flex;align-items:center;justify-content:center;gap:7px;margin:12px auto 0;padding:8px 12px;background:transparent;color:var(--rose);font-size:11px}
+.youtube-settings-card{margin-top:18px;padding:16px;border:1px solid var(--line);border-radius:17px;background:linear-gradient(145deg,rgba(212,165,165,.09),transparent 75%)}
+.youtube-settings-title{display:flex;align-items:center;gap:10px}
+.youtube-settings-title b{font-size:13px;color:var(--ink)}
+.youtube-settings-card>p{font-size:12px;line-height:1.5;margin:12px 0}
+.youtube-url-row{display:flex;gap:8px;align-items:center}
+.youtube-url-row input{font-size:12px;background:var(--card-bg)}
+.youtube-url-row button{white-space:nowrap;padding:11px 14px;font-size:12px}
+.youtube-settings-card .hint{display:block;margin:9px 0 0;font-size:10px}
+.youtube-settings-card .hint i{color:var(--rose);margin-right:4px}
+body.theme-dark .music-bar-art{background:linear-gradient(145deg,#9d7777,#684c4c)}
+body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(212,165,165,.1),transparent 75%)}
+@media(max-width:480px){.music-bar{gap:6px;padding:6px}.music-bar-art{width:34px;height:34px}.music-bar-copy{min-width:62px;max-width:88px}.music-bar .music-play-btn,.music-bar .music-youtube-btn{width:31px;height:31px;min-width:31px}.youtube-player-content{padding:12px}.youtube-frame-wrap iframe{height:180px}.youtube-url-row{align-items:stretch}.youtube-url-row button{padding:10px}}
+
 </style></head>
 <body>
 
@@ -1073,21 +1116,26 @@ body.theme-dark #chatRoomView .row{background:#303036}
     <h2 class="brand" style="margin:0;font-size:22px">Cottontail 🐰</h2>
     
     <div class="music-bar">
-      <i class="fa-solid fa-music" style="color:var(--rose)"></i>
-      <span id="musicTrackLabel" style="font-weight:600">Lo-Fi Soft</span>
-      <button onclick="toggleMusic()" title="Reproduzir ou pausar"><i id="musicIcon" class="fa-solid fa-play"></i></button>
-      <button class="ghost" onclick="toggleYoutubeMusicPanel()" title="Abrir player do YouTube Music" style="padding:6px 9px"><i class="fa-brands fa-youtube"></i></button>
+      <span class="music-bar-art"><i class="fa-solid fa-headphones"></i></span>
+      <span class="music-bar-copy"><small>TOCANDO AGORA</small><b id="musicTrackLabel">Lo-Fi Soft</b></span>
+      <button class="music-play-btn" onclick="toggleMusic()" title="Reproduzir ou pausar"><i id="musicIcon" class="fa-solid fa-play"></i></button>
+      <button class="music-youtube-btn" onclick="toggleYoutubeMusicPanel()" title="Abrir YouTube Music"><i class="fa-brands fa-youtube"></i></button>
       <audio id="audioPlayer" loop src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"></audio>
     </div>
   </header>
 
-  <section id="youtubeMusicPanel" class="card hidden" style="margin-top:0;padding:14px">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px">
-      <div><b><i class="fa-brands fa-youtube" style="color:#d33"></i> YouTube Music</b><div id="youtubeMusicStatus" class="muted">Cole um link nas configurações para começar.</div></div>
-      <button class="ghost" onclick="toggleYoutubeMusicPanel(false)" aria-label="Fechar player">✕</button>
+  <section id="youtubeMusicPanel" class="youtube-player-card hidden">
+    <div class="youtube-player-heading">
+      <div class="youtube-player-brand"><span><i class="fa-brands fa-youtube"></i></span><div><b>YouTube Music</b><small id="youtubeMusicStatus">Sua trilha sonora, do seu jeito.</small></div></div>
+      <button class="youtube-close-btn" onclick="toggleYoutubeMusicPanel(false)" aria-label="Fechar player"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <div id="youtubeMusicFrameWrap" class="hidden" style="overflow:hidden;border-radius:14px;background:#111">
-      <iframe id="youtubeMusicFrame" title="Player do YouTube Music" width="100%" height="220" src="about:blank" allow="autoplay; encrypted-media; picture-in-picture; clipboard-write" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="display:block;border:0"></iframe>
+    <div class="youtube-player-content">
+      <div class="youtube-player-note"><i class="fa-solid fa-compact-disc"></i><span>Um cantinho para sua música favorita</span><i class="fa-solid fa-heart"></i></div>
+      <div id="youtubeMusicFrameWrap" class="youtube-frame-wrap hidden">
+        <iframe id="youtubeMusicFrame" title="Player do YouTube Music" width="100%" height="190" src="about:blank" allow="autoplay; encrypted-media; picture-in-picture; clipboard-write" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      </div>
+      <div id="youtubeMusicEmpty" class="youtube-empty-state"><i class="fa-solid fa-music"></i><b>Qual vai ser a vibe de hoje?</b><span>Adicione uma música ou playlist nas configurações para começar.</span></div>
+      <button class="youtube-config-link" onclick="toggleYoutubeMusicPanel(false);showPage('profile');setTimeout(()=>document.getElementById('youtubeMusicUrlInput')?.scrollIntoView({behavior:'smooth',block:'center'}),180)"><i class="fa-solid fa-sliders"></i> Configurar música</button>
     </div>
   </section>
 
@@ -1321,14 +1369,11 @@ body.theme-dark #chatRoomView .row{background:#303036}
         <input id="customMusicUrlInput" placeholder="Ou cole URL direta .mp3" style="margin:0">
         <button class="secondary" onclick="changeMusicUrl($('customMusicUrlInput').value)">Tocar</button>
       </div>
-      <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--line)">
-        <label><i class="fa-brands fa-youtube"></i> YouTube Music</label>
-        <p class="muted" style="margin:5px 0 8px">Cole o link de uma música ou playlist do YouTube Music para reproduzir pelo player incorporado.</p>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input id="youtubeMusicUrlInput" placeholder="https://music.youtube.com/watch?v=..." style="margin:0;min-width:0">
-          <button class="secondary" onclick="playYoutubeMusicFromInput()">Tocar</button>
-        </div>
-        <p class="hint" style="margin:7px 0 0">Algumas músicas podem não permitir reprodução incorporada. Nesse caso, abra a música no YouTube Music.</p>
+      <div class="youtube-settings-card">
+        <div class="youtube-settings-title"><span><i class="fa-brands fa-youtube"></i></span><div><b>Conectar YouTube Music</b><small>Traga sua playlist para o Cottontail</small></div></div>
+        <p class="muted">Cole o link de uma música ou playlist para ouvir enquanto usa o app.</p>
+        <div class="youtube-url-row"><input id="youtubeMusicUrlInput" placeholder="Cole aqui o link da música ou playlist" style="margin:0;min-width:0"><button onclick="playYoutubeMusicFromInput()"><i class="fa-solid fa-play"></i> Tocar</button></div>
+        <p class="hint"><i class="fa-regular fa-lightbulb"></i> Algumas faixas podem ter restrição de reprodução incorporada.</p>
       </div>
     </div>
 
@@ -1649,6 +1694,7 @@ function playYoutubeMusicFromInput(){
   $('musicTrackLabel').textContent='YouTube Music';
   $('youtubeMusicFrame').src=embedUrl;
   $('youtubeMusicFrameWrap').classList.remove('hidden');
+  $('youtubeMusicEmpty')?.classList.add('hidden');
   $('youtubeMusicStatus').textContent='Reproduzindo pelo player incorporado';
   $('youtubeMusicPanel').classList.remove('hidden');
   $('youtubeMusicPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
