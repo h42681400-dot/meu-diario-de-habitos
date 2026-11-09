@@ -1646,8 +1646,8 @@ function applyUiLanguage(language){
     if(!node.__cottontailOriginal)node.__cottontailOriginal=node.nodeValue;
     const original=reverse[node.__cottontailOriginal.trim()]||node.__cottontailOriginal.trim();
     const translated=dict[original];
-    if(translated!==undefined)node.nodeValue=node.nodeValue.replace(node.nodeValue.trim(),translated);
-    else if(lang==='pt-BR'&&reverse[node.nodeValue.trim()])node.nodeValue=node.nodeValue.replace(node.nodeValue.trim(),reverse[node.nodeValue.trim()]);
+    if(translated!==undefined&&node.nodeValue.trim()!==translated)node.nodeValue=node.nodeValue.replace(node.nodeValue.trim(),translated);
+    else if(lang==='pt-BR'&&reverse[node.nodeValue.trim()]&&node.nodeValue.trim()!==reverse[node.nodeValue.trim()])node.nodeValue=node.nodeValue.replace(node.nodeValue.trim(),reverse[node.nodeValue.trim()]);
   }
   document.querySelectorAll('input[placeholder],textarea[placeholder],button[title],button[aria-label],input[aria-label],iframe[title]').forEach(el=>{
     ['placeholder','title','aria-label'].forEach(attr=>{
