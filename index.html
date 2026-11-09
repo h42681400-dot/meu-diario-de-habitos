@@ -1617,10 +1617,33 @@ db.auth.onAuthStateChange((_event,session)=>{
 });
 
 async function ensureProfile(){
-  let {data}=await db.from('user_profiles').select('user_id').eq('user_id',user.id).maybeSingle();
-  if(!data){
-    await db.from('user_profiles').insert({user_id:user.id,full_name:'',username:null,bio:'',is_private:false});
+  if(!user?.id)throw new Error('Sua sessão expirou. Entre novamente.');
+  const {data,error}=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
+  if(error)throw new Error('Não consegui consultar seu perfil: '+error.message);
+  if(data){
+    const meta=user.user_metadata||{};
+    const patch={};
+    const recoveredName=String(meta.full_name||meta.name||'').trim();
+    const recoveredUsername=String(meta.username||'').trim().replace(/^@/,'').toLowerCase();
+    if(!String(data.full_name||'').trim()&&recoveredName)patch.full_name=recoveredName;
+    if(!String(data.username||'').trim()&&recoveredUsername)patch.username=recoveredUsername;
+    if(Object.keys(patch).length){
+      patch.updated_at=new Date().toISOString();
+      const {error:updateError}=await db.from('user_profiles').update(patch).eq('user_id',user.id);
+      if(updateError)throw new Error('Não consegui completar os dados do perfil: '+updateError.message);
+    }
+    return;
   }
+  const meta=user.user_metadata||{};
+  const {error:insertError}=await db.from('user_profiles').upsert({
+    user_id:user.id,
+    full_name:String(meta.full_name||meta.name||'').trim(),
+    username:String(meta.username||'').trim().replace(/^@/,'').toLowerCase()||null,
+    language:meta.language||detectPreferredLanguage(),
+    bio:'',
+    is_private:false
+  },{onConflict:'user_id'});
+  if(insertError)throw new Error('Não consegui criar seu registro de perfil: '+insertError.message);
 }
 
 function persistCurrentPage(){
@@ -2105,7 +2128,15 @@ async function submitReport(){
 
 /* PERFIL & CORTADOR */
 async function loadProfile(){
-  let {data}=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
+  if(!user?.id)throw new Error('Sua sessão expirou. Entre novamente.');
+  let {data,error}=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
+  if(error)throw new Error('Não foi possível carregar seu perfil: '+error.message);
+  if(!data){
+    await ensureProfile();
+    const retry=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
+    if(retry.error)throw new Error('Não foi possível confirmar seu perfil: '+retry.error.message);
+    data=retry.data;
+  }
   profile=data||{};
   if(!profile.language){
     profile.language=detectPreferredLanguage();
@@ -2118,7 +2149,7 @@ async function loadProfile(){
   $('profileUsername').value=profile.username||'';
   $('profileBio').value=profile.bio||'';
   $('profileLink').value=profile.website_url||'';
-  $('profileIsPrivate').checked=profile.is_private||false;
+  $('profileIsPrivate').checked=!!profile.is_private;
 
   $('viewProfileName').innerHTML=esc(profile.full_name||'Sem Nome')+verifiedBadge(profile.is_verified);
   $('viewProfileUsername').textContent=profile.username?(profile.username.startsWith('@')?profile.username:'@'+profile.username):'@usuario';
@@ -2129,14 +2160,17 @@ async function loadProfile(){
 
   if(profile.avatar_url){ $('profileBigAvatar').innerHTML=`<img src="${esc(profile.avatar_url)}">`; }
   else { $('profileBigAvatar').textContent=(profile.full_name?profile.full_name[0]:'?').toUpperCase(); }
-  
   if(profile.banner_url){ $('bannerImg').src=profile.banner_url; $('bannerImg').classList.remove('hidden'); }
   else { $('bannerImg').classList.add('hidden'); }
 
-  let {count:fCount}=await db.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',user.id);
-  let {count:wCount}=await db.from('follows').select('*',{count:'exact',head:true}).eq('following_id',user.id);
-  $('countFollowing').textContent=fCount||0;
-  $('countFollowers').textContent=wCount||0;
+  const [{count:fCount,error:fError},{count:wCount,error:wError}]=await Promise.all([
+    db.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',user.id),
+    db.from('follows').select('*',{count:'exact',head:true}).eq('following_id',user.id)
+  ]);
+  if(fError)console.warn('Erro ao contar seguindo:',fError.message);
+  if(wError)console.warn('Erro ao contar seguidores:',wError.message);
+  $('countFollowing').textContent=fCount??0;
+  $('countFollowers').textContent=wCount??0;
 }
 
 function openEditProfileModal(){
@@ -2179,27 +2213,53 @@ async function uploadFile(file, path){
 }
 
 async function saveProfile(){
+  if(!user?.id){status('profileStatus','Sua sessão expirou. Entre novamente.');return;}
   status('profileStatus','Salvando...');
-  let name=$('profileName').value.trim();
+  const name=$('profileName').value.trim();
   let username=$('profileUsername').value.trim().toLowerCase().replace(/^@/,'');
-  let bio=$('profileBio').value.trim();
+  if(username&&!/^[a-z0-9._]{3,20}$/.test(username)){
+    status('profileStatus','O @ deve ter de 3 a 20 caracteres: letras, números, ponto ou _.');
+    return;
+  }
+  username=username||null;
+  const bio=$('profileBio').value.trim();
   let website_url=$('profileLink').value.trim();
   if(website_url&&!/^https?:\/\//i.test(website_url))website_url='https://'+website_url;
-  if(website_url&&!/^https?:\/\//i.test(website_url))return status('profileStatus','Informe um link válido.');
-  let is_private=$('profileIsPrivate').checked;
-  let avatar_url=profile.avatar_url, banner_url=profile.banner_url;
+  if(website_url&&!/^https?:\/\//i.test(website_url)){status('profileStatus','Informe um link válido.');return;}
+  const is_private=$('profileIsPrivate').checked;
+  let avatar_url=profile?.avatar_url||null;
+  let banner_url=profile?.banner_url||null;
 
   try {
-    if(editAvatarFile) avatar_url=await uploadFile(editAvatarFile, `avatar_${user.id}_${Date.now()}`);
-    if(editBannerFile) banner_url=await uploadFile(editBannerFile, `banner_${user.id}_${Date.now()}`);
+    if(username){
+      const {data:matches,error:usernameError}=await db.from('user_profiles')
+        .select('user_id').ilike('username',username).neq('user_id',user.id).limit(1);
+      if(usernameError)throw new Error('Não consegui verificar se esse @ está disponível: '+usernameError.message);
+      if(matches?.length){status('profileStatus','Esse @ já está sendo usado por outra conta.');return;}
+    }
+    if(editAvatarFile)avatar_url=await uploadFile(editAvatarFile,`avatar_${user.id}_${Date.now()}`);
+    if(editBannerFile)banner_url=await uploadFile(editBannerFile,`banner_${user.id}_${Date.now()}`);
 
-    let {error}=await db.from('user_profiles').upsert({
-      user_id:user.id,full_name:name,username,bio,website_url,avatar_url,banner_url,is_private,updated_at:new Date().toISOString()
-    },{onConflict:'user_id'});
-    if(error) throw error;
-    closeEditProfileModal();
+    const payload={
+      user_id:user.id,full_name:name,username,bio,website_url,
+      avatar_url,banner_url,is_private,updated_at:new Date().toISOString()
+    };
+    const {error:saveError}=await db.from('user_profiles').upsert(payload,{onConflict:'user_id'});
+    if(saveError)throw new Error('O Supabase recusou a atualização: '+saveError.message);
+
+    const {data:savedProfile,error:readError}=await db.from('user_profiles')
+      .select('*').eq('user_id',user.id).maybeSingle();
+    if(readError)throw new Error('Os dados foram enviados, mas não consegui confirmar o perfil: '+readError.message);
+    if(!savedProfile)throw new Error('O banco não retornou o perfil salvo. Verifique as permissões da tabela user_profiles.');
+
+    profile=savedProfile;
     await loadProfile();
-  } catch(err){ status('profileStatus', err.message); }
+    closeEditProfileModal();
+    showToast('Perfil atualizado!','Seu nome e seu @ foram salvos. 🐰',{type:'success'});
+  } catch(err){
+    console.error('Erro ao salvar perfil:',err);
+    status('profileStatus',err.message||'Não foi possível atualizar o perfil.');
+  }
 }
 
 async function switchProfileTab(tab){
