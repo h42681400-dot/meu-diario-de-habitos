@@ -1040,6 +1040,15 @@ body.theme-dark .music-bar-art{background:linear-gradient(145deg,#9d7777,#684c4c
 body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(212,165,165,.1),transparent 75%)}
 @media(max-width:480px){.music-bar{gap:6px;padding:6px}.music-bar-art{width:34px;height:34px}.music-bar-copy{min-width:62px;max-width:88px}.music-bar .music-play-btn,.music-bar .music-youtube-btn{width:31px;height:31px;min-width:31px}.youtube-player-content{padding:12px}.youtube-frame-wrap iframe{height:180px}.youtube-url-row{align-items:stretch}.youtube-url-row button{padding:10px}}
 
+
+/* Reprodução compacta: áudio em segundo plano, sem painel grande */
+#youtubeMusicPanel{display:none!important}
+#youtubeMusicFrameWrap{position:fixed!important;width:1px!important;height:1px!important;min-width:1px!important;min-height:1px!important;right:0!important;bottom:0!important;overflow:hidden!important;opacity:.01!important;pointer-events:none!important;z-index:-1!important;border:0!important;box-shadow:none!important}
+#youtubeMusicFrameWrap iframe{width:1px!important;height:1px!important}
+.music-bar-copy small{display:none!important}
+.music-bar-copy{justify-content:center}
+.music-bar-copy b{max-width:145px}
+
 </style></head>
 <body>
 
@@ -1119,7 +1128,7 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
       <span class="music-bar-art"><i class="fa-solid fa-headphones"></i></span>
       <span class="music-bar-copy"><small>TOCANDO AGORA</small><b id="musicTrackLabel">Lo-Fi Soft</b></span>
       <button class="music-play-btn" onclick="toggleMusic()" title="Reproduzir ou pausar"><i id="musicIcon" class="fa-solid fa-play"></i></button>
-      <button class="music-youtube-btn" onclick="toggleYoutubeMusicPanel()" title="Abrir YouTube Music"><i class="fa-brands fa-youtube"></i></button>
+      <button class="music-youtube-btn" onclick="showPage('profile');setTimeout(()=>document.getElementById('youtubeMusicUrlInput')?.scrollIntoView({behavior:'smooth',block:'center'}),180)" title="Configurar YouTube Music"><i class="fa-brands fa-youtube"></i></button>
       <audio id="audioPlayer" loop src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"></audio>
     </div>
   </header>
@@ -1691,13 +1700,12 @@ function playYoutubeMusicFromInput(){
   activeMusicProvider='youtube';
   $('audioPlayer').pause();
   $('musicIcon').className='fa-solid fa-pause';
-  $('musicTrackLabel').textContent='YouTube Music';
+  $('musicTrackLabel').textContent=parsed.listId&&!parsed.videoId?'Playlist do YouTube':'YouTube Music';
   $('youtubeMusicFrame').src=embedUrl;
   $('youtubeMusicFrameWrap').classList.remove('hidden');
   $('youtubeMusicEmpty')?.classList.add('hidden');
-  $('youtubeMusicStatus').textContent='Reproduzindo pelo player incorporado';
-  $('youtubeMusicPanel').classList.remove('hidden');
-  $('youtubeMusicPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+  $('youtubeMusicStatus').textContent='Reproduzindo em segundo plano';
+  $('youtubeMusicPanel').classList.add('hidden');
 }
 function toggleYoutubeMusicPanel(force){
   const panel=$('youtubeMusicPanel');
