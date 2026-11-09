@@ -1697,6 +1697,9 @@ async function signUp(){
   const {data,error}=await db.auth.signUp({
     email,password,
     options:{data:{
+      username,
+      full_name:name,
+      language,
       cottontail_terms_version:'1.0',
       cottontail_privacy_version:'1.0',
       cottontail_community_version:'1.0',
@@ -1706,12 +1709,34 @@ async function signUp(){
     }}
   });if(error)return status('loginStatus',error.message);
   const newUser=data.user;
-  if(newUser){
-    let avatar_url=null;const avatarFile=$('regAvatarInput').files[0];
-    if(avatarFile){try{avatar_url=await uploadFile(avatarFile,`avatar_${newUser.id}_${Date.now()}`);}catch(e){}}
-    const {error:profileError}=await db.from('user_profiles').upsert({user_id:newUser.id,full_name:name,username,language,avatar_url,updated_at:new Date().toISOString()},{onConflict:'user_id'});
-    if(profileError)return status('loginStatus','Conta criada, mas não consegui salvar o @: '+profileError.message);
-    status('loginStatus',data.session?'Perfil criado com sucesso!':'Conta criada! Confirme seu e-mail.');
+  if(!newUser)return status('loginStatus','A autenticação não retornou os dados da conta. Tente novamente.');
+  let avatar_url=null;const avatarFile=$('regAvatarInput').files[0];
+  if(avatarFile){try{avatar_url=await uploadFile(avatarFile,`avatar_${newUser.id}_${Date.now()}`);}catch(e){console.warn('Não foi possível enviar a foto de perfil:',e);}}
+  // O @ também fica nos metadados do Auth para recuperação caso a confirmação de e-mail adie a sessão.
+  const {error:profileError}=await db.from('user_profiles').upsert({
+    user_id:newUser.id,full_name:name,username,language,avatar_url,
+    updated_at:new Date().toISOString()
+  },{onConflict:'user_id'});
+  if(profileError){
+    console.error('Falha ao salvar perfil inicial:',profileError);
+    return status('loginStatus','A conta foi criada, mas o perfil não foi salvo. Entre novamente após confirmar o e-mail; o @ será recuperado dos dados da conta.');
+  }
+  if(data.session){
+    user=data.user;
+    $('loginScreen').classList.add('hidden');
+    $('app').classList.remove('hidden');
+    status('loginStatus','Conta criada! Preparando seu Cottontail...');
+    return;
+  }
+  // Se o projeto exigir confirmação de e-mail, tenta autenticar e informa claramente se ainda não for permitido.
+  const {data:loginData,error:loginError}=await db.auth.signInWithPassword({email,password});
+  if(!loginError&&loginData?.session){
+    user=loginData.user;
+    $('loginScreen').classList.add('hidden');
+    $('app').classList.remove('hidden');
+    status('loginStatus','Conta criada! Entrando no Cottontail...');
+  }else{
+    status('loginStatus','Perfil criado com @'+username+'. Para entrar, confirme primeiro o link enviado ao seu e-mail e depois faça login.');
   }
 }
 
@@ -1878,9 +1903,20 @@ db.auth.onAuthStateChange((_event,session)=>{
 });
 
 async function ensureProfile(){
-  let {data}=await db.from('user_profiles').select('user_id').eq('user_id',user.id).maybeSingle();
+  let {data,error}=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
+  if(error)throw error;
+  const meta=user.user_metadata||{};
   if(!data){
-    await db.from('user_profiles').insert({user_id:user.id,full_name:'',username:null,bio:'',is_private:false});
+    const {error:insertError}=await db.from('user_profiles').upsert({
+      user_id:user.id,full_name:meta.full_name||'',username:meta.username||null,
+      language:meta.language||'pt-BR',bio:'',is_private:false
+    },{onConflict:'user_id'});
+    if(insertError)throw insertError;
+  }else if(!data.username&&meta.username){
+    const {error:updateError}=await db.from('user_profiles').update({
+      username:meta.username,full_name:data.full_name||meta.full_name||''
+    }).eq('user_id',user.id);
+    if(updateError)console.warn('Não foi possível recuperar o @ dos metadados:',updateError.message);
   }
 }
 
