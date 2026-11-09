@@ -2756,7 +2756,11 @@ function clearRecentSearches(){
 
 async function inspectProfile(id){
   inspectedProfileId=id;
-  let {data:u}=await db.from('user_profiles').select('*').eq('user_id',id).maybeSingle();
+  const {data:loadedProfile,error:profileError}=await db.from('user_profiles').select('*').eq('user_id',id).maybeSingle();
+  if(profileError){console.error('Erro ao carregar perfil público:',profileError);showToast('Não foi possível abrir o perfil',profileError.message||'Tente novamente.');return;}
+  const cachedProfile=chatProfiles[id]||{};
+  const u={...cachedProfile,...(loadedProfile||{})};
+  if(u)chatProfiles[id]=u;
   if(u)chatProfiles[id]=u;
   let {data:posts}=await db.from('posts').select('*').eq('user_id',id);
   const {data:collabRows}=await db.from('post_collaborators').select('post_id').eq('invitee_id',id).eq('status','accepted');
@@ -2764,8 +2768,19 @@ async function inspectProfile(id){
   if(collabIds.length){const {data:collabPosts}=await db.from('posts').select('*').in('id',collabIds);posts=[...(posts||[]),...(collabPosts||[])];}
   const {data:pins}=await db.from('post_pins').select('post_id').eq('user_id',id);
   const pinnedIds=new Set((pins||[]).map(x=>x.post_id));(posts||[]).sort((a,b)=>(pinnedIds.has(b.id)?1:0)-(pinnedIds.has(a.id)?1:0));
-  let {count:fCount}=await db.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',id);
-  let {count:wCount}=await db.from('follows').select('*',{count:'exact',head:true}).eq('following_id',id);
+  const [followingResult,followersResult]=await Promise.all([
+    db.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',id),
+    db.from('follows').select('*',{count:'exact',head:true}).eq('following_id',id)
+  ]);
+  let fCount=followingResult.count,wCount=followersResult.count;
+  if(fCount==null||followingResult.error){
+    const fallback=await db.from('follows').select('following_id').eq('follower_id',id);
+    if(!fallback.error)fCount=(fallback.data||[]).length;
+  }
+  if(wCount==null||followersResult.error){
+    const fallback=await db.from('follows').select('follower_id').eq('following_id',id);
+    if(!fallback.error)wCount=(fallback.data||[]).length;
+  }
   let {data:isF}=await db.from('follows').select('*').eq('follower_id',user.id).eq('following_id',id).maybeSingle();
   let {data:isB}=await db.from('blocks').select('*').eq('blocker_id',user.id).eq('blocked_id',id).maybeSingle();
 
@@ -2786,12 +2801,12 @@ async function inspectProfile(id){
     <div style="text-align:center">
       <div class="profile-big-avatar" style="margin:0 auto;width:74px;height:74px">${u?.avatar_url?`<img src="${u.avatar_url}">`:(u?.full_name?u.full_name[0]:'?')}</div>
       <h3 style="margin:10px 0 2px 0">${esc(u?.full_name||'Usuário')}${verifiedBadge(u?.is_verified)}</h3>
-      <div class="muted">${esc((u?.username||'').startsWith('@')?u.username:'@'+(u?.username||''))} ${u?.is_private?'🔒':''}</div>
+      <div class="muted">${esc(String(u?.username||'').trim().replace(/^@+/,'')?('@'+String(u.username).trim().replace(/^@+/,'')):'@usuario')} ${u?.is_private?'🔒':''}</div>
       <p style="font-size:14px;margin:12px 0">${esc(u?.bio||'')}</p>
       ${u?.website_url?'<p style="margin:8px 0"><a class="profile-website-link" href="'+esc(normalizeProfileLink(u.website_url))+'" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-link"></i> '+esc(u.website_url)+'</a></p>':''}
       <div class="friend-stats">
-        <button onclick="loadUserConnections('${id}','followers')"><b>${wCount||0}</b><span>Seguidores</span></button>
-        <button onclick="loadUserConnections('${id}','following')"><b>${fCount||0}</b><span>Seguindo</span></button>
+        <button onclick="loadUserConnections('${id}','followers')"><b>${wCount==null?'—':wCount}</b><span>Seguidores</span></button>
+        <button onclick="loadUserConnections('${id}','following')"><b>${fCount==null?'—':fCount}</b><span>Seguindo</span></button>
         <button onclick="loadUserConnections('${id}','mutual')"><b>♡</b><span>Em comum</span></button>
       </div>
       <div id="friendConnections" class="friend-connections"></div>
