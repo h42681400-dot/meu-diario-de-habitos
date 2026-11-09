@@ -3300,7 +3300,7 @@ async function loadNotifications(){
   if(markError)console.warn('Não foi possível marcar notificações como lidas:',markError.message);
   $('notifBadge').classList.add('hidden');
   const {data,error}=await db.from('notifications').select('*')
-    .eq('user_id',user.id).order('created_at',{ascending:false}).limit(500);
+    .eq('user_id',user.id).neq('type','message').order('created_at',{ascending:false}).limit(500);
   if(error){
     $('notifList').innerHTML='<p class="muted">Não foi possível carregar as notificações: '+esc(error.message)+'</p>';
     return;
