@@ -2760,8 +2760,7 @@ async function inspectProfile(id){
   if(profileError){console.error('Erro ao carregar perfil público:',profileError);showToast('Não foi possível abrir o perfil',profileError.message||'Tente novamente.');return;}
   const cachedProfile=chatProfiles[id]||{};
   const u={...cachedProfile,...(loadedProfile||{})};
-  if(u)chatProfiles[id]=u;
-  if(u)chatProfiles[id]=u;
+  chatProfiles[id]=u;
   let {data:posts}=await db.from('posts').select('*').eq('user_id',id);
   const {data:collabRows}=await db.from('post_collaborators').select('post_id').eq('invitee_id',id).eq('status','accepted');
   const collabIds=(collabRows||[]).map(x=>x.post_id);
