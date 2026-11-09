@@ -1074,11 +1074,22 @@ body.theme-dark #chatRoomView .row{background:#303036}
     
     <div class="music-bar">
       <i class="fa-solid fa-music" style="color:var(--rose)"></i>
-      <span style="font-weight:600">Lo-Fi Soft</span>
-      <button onclick="toggleMusic()"><i id="musicIcon" class="fa-solid fa-play"></i></button>
+      <span id="musicTrackLabel" style="font-weight:600">Lo-Fi Soft</span>
+      <button onclick="toggleMusic()" title="Reproduzir ou pausar"><i id="musicIcon" class="fa-solid fa-play"></i></button>
+      <button class="ghost" onclick="toggleYoutubeMusicPanel()" title="Abrir player do YouTube Music" style="padding:6px 9px"><i class="fa-brands fa-youtube"></i></button>
       <audio id="audioPlayer" loop src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"></audio>
     </div>
   </header>
+
+  <section id="youtubeMusicPanel" class="card hidden" style="margin-top:0;padding:14px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px">
+      <div><b><i class="fa-brands fa-youtube" style="color:#d33"></i> YouTube Music</b><div id="youtubeMusicStatus" class="muted">Cole um link nas configurações para começar.</div></div>
+      <button class="ghost" onclick="toggleYoutubeMusicPanel(false)" aria-label="Fechar player">✕</button>
+    </div>
+    <div id="youtubeMusicFrameWrap" class="hidden" style="overflow:hidden;border-radius:14px;background:#111">
+      <iframe id="youtubeMusicFrame" title="Player do YouTube Music" width="100%" height="220" src="about:blank" allow="autoplay; encrypted-media; picture-in-picture; clipboard-write" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="display:block;border:0"></iframe>
+    </div>
+  </section>
 
   <div id="fabPostBtn" class="fab-post" onclick="openFloatingPostModal()">
     <i class="fa-solid fa-pen"></i>
@@ -1309,6 +1320,15 @@ body.theme-dark #chatRoomView .row{background:#303036}
       <div style="display:flex;gap:8px;margin-top:8px">
         <input id="customMusicUrlInput" placeholder="Ou cole URL direta .mp3" style="margin:0">
         <button class="secondary" onclick="changeMusicUrl($('customMusicUrlInput').value)">Tocar</button>
+      </div>
+      <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--line)">
+        <label><i class="fa-brands fa-youtube"></i> YouTube Music</label>
+        <p class="muted" style="margin:5px 0 8px">Cole o link de uma música ou playlist do YouTube Music para reproduzir pelo player incorporado.</p>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="youtubeMusicUrlInput" placeholder="https://music.youtube.com/watch?v=..." style="margin:0;min-width:0">
+          <button class="secondary" onclick="playYoutubeMusicFromInput()">Tocar</button>
+        </div>
+        <p class="hint" style="margin:7px 0 0">Algumas músicas podem não permitir reprodução incorporada. Nesse caso, abra a música no YouTube Music.</p>
       </div>
     </div>
 
@@ -1559,26 +1579,85 @@ function savePreferredLanguage(value){
 }
 
 /* MUSIC PLAYER */
+let activeMusicProvider='audio';
 function toggleMusic(){
-  let player=$('audioPlayer');
-  let icon=$('musicIcon');
+  if(activeMusicProvider==='youtube'){
+    toggleYoutubeMusicPanel(true);
+    return;
+  }
+  const player=$('audioPlayer'),icon=$('musicIcon');
   if(player.paused){
-    player.play();
-    icon.className='fa-solid fa-pause';
-  } else {
-    player.pause();
-    icon.className='fa-solid fa-play';
+    player.play().then(()=>icon.className='fa-solid fa-pause').catch(()=>showToast('Não foi possível reproduzir','Toque novamente para iniciar a música.'));
+  }else{
+    player.pause();icon.className='fa-solid fa-play';
   }
 }
 function changePresetMusic(url){
+  activeMusicProvider='audio';
+  $('musicTrackLabel').textContent=({})[url]||'Música do Cottontail';
+  $('youtubeMusicFrame').src='about:blank';
+  $('youtubeMusicPanel').classList.add('hidden');
   changeMusicUrl(url);
 }
 function changeMusicUrl(url){
   if(url){
-    $('audioPlayer').src = url;
-    $('audioPlayer').play();
-    $('musicIcon').className='fa-solid fa-pause';
+    activeMusicProvider='audio';
+    $('audioPlayer').src=url;
+    $('musicTrackLabel').textContent='Música do Cottontail';
+    $('youtubeMusicFrame').src='about:blank';
+    $('youtubeMusicPanel').classList.add('hidden');
+    $('audioPlayer').play().then(()=>$('musicIcon').className='fa-solid fa-pause')
+      .catch(()=>showToast('Não foi possível reproduzir','Confira o link do áudio e tente novamente.'));
   }
+}
+function parseYoutubeMusicUrl(raw){
+  try{
+    const url=new URL(String(raw||'').trim());
+    const host=url.hostname.toLowerCase().replace(/^www\./,'');
+    if(!['music.youtube.com','youtube.com','m.youtube.com','youtu.be'].includes(host))return null;
+    let videoId=url.searchParams.get('v');
+    if(host==='youtu.be')videoId=url.pathname.split('/').filter(Boolean)[0]||videoId;
+    if(!videoId){
+      const parts=url.pathname.split('/').filter(Boolean);
+      if(['embed','shorts','live'].includes(parts[0]))videoId=parts[1]||null;
+    }
+    const listId=url.searchParams.get('list');
+    if(videoId&&!/^[\w-]{11}$/.test(videoId))return null;
+    if(!videoId&&listId&&!/^[\w-]+$/.test(listId))return null;
+    if(!videoId&&!listId)return null;
+    return {videoId,listId};
+  }catch(e){return null;}
+}
+function playYoutubeMusicFromInput(){
+  const raw=$('youtubeMusicUrlInput').value.trim();
+  const parsed=parseYoutubeMusicUrl(raw);
+  if(!parsed){
+    showToast('Link não reconhecido','Cole um link válido de música ou playlist do YouTube Music.');
+    return;
+  }
+  const params=new URLSearchParams({autoplay:'1',playsinline:'1',rel:'0'});
+  let embedUrl;
+  if(parsed.videoId){
+    embedUrl='https://www.youtube-nocookie.com/embed/'+parsed.videoId+'?'+params.toString();
+    if(parsed.listId)embedUrl+='&list='+encodeURIComponent(parsed.listId);
+  }else{
+    embedUrl='https://www.youtube-nocookie.com/embed/videoseries?'+params.toString()+'&list='+encodeURIComponent(parsed.listId);
+  }
+  activeMusicProvider='youtube';
+  $('audioPlayer').pause();
+  $('musicIcon').className='fa-solid fa-pause';
+  $('musicTrackLabel').textContent='YouTube Music';
+  $('youtubeMusicFrame').src=embedUrl;
+  $('youtubeMusicFrameWrap').classList.remove('hidden');
+  $('youtubeMusicStatus').textContent='Reproduzindo pelo player incorporado';
+  $('youtubeMusicPanel').classList.remove('hidden');
+  $('youtubeMusicPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function toggleYoutubeMusicPanel(force){
+  const panel=$('youtubeMusicPanel');
+  if(!panel)return;
+  const shouldOpen=typeof force==='boolean'?force:panel.classList.contains('hidden');
+  panel.classList.toggle('hidden',!shouldOpen);
 }
 
 function toggleAuthTab(tab){
