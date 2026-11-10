@@ -3,7 +3,7 @@
   "appName": "Cottontail",
   "webDir": "www",
   "server": {
-    "url": "https://diario-de-habitos-2026.vercel.app/",
+    "url": "https://cottontail.vercel.app/",
     "cleartext": false,
     "androidScheme": "https"
   },
