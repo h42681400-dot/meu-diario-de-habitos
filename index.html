@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#d4a5a5">
@@ -195,6 +195,8 @@ textarea{min-height:85px;resize:vertical}
 .profile-card{padding:0;overflow:hidden}
 .profile-banner{height:140px;background:var(--line);position:relative}
 .profile-banner img{width:100%;height:100%;object-fit:cover}
+.public-profile-banner{width:100%;height:132px;margin:0 auto 0;border-radius:14px;overflow:hidden;background:var(--line);}
+.public-profile-banner img{display:block;width:100%;height:100%;object-fit:cover;}
 .profile-avatar-area{position:relative;padding:0 20px;margin-top:-44px;display:flex;justify-content:space-between;align-items:flex-end}
 .profile-big-avatar{width:90px;height:90px;border-radius:50%;border:4px solid var(--card-bg);background:var(--line);overflow:hidden;font-size:32px;display:flex;align-items:center;justify-content:center;color:var(--rose)}
 .profile-big-avatar img{width:100%;height:100%;object-fit:cover}
@@ -815,6 +817,240 @@ html body .conversation-unread{
 .app-action-danger:hover{filter:brightness(.97)}
 @keyframes appActionIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(prefers-reduced-motion:reduce){.app-action-card{animation:none}}
+
+/* Cottontail — modern social refresh */
+:root{
+  --bg:#f7f3f1;--card-bg:#fffdfc;--ink:#302624;--muted:#8b7975;
+  --rose:#c98791;--rose-hover:#b87580;--line:#eee4e1;
+  --soft-rose:#f8e9e9;--shadow-soft:0 12px 34px rgba(82,53,49,.07);
+}
+body.theme-dark{
+  --bg:#171516;--card-bg:#242021;--ink:#f8efed;--muted:#b6a5a1;
+  --rose:#d49aa2;--rose-hover:#e0aab1;--line:#3a3031;--soft-rose:#38292d;
+  --shadow-soft:0 12px 34px rgba(0,0,0,.22);
+}
+html{scroll-behavior:smooth}
+body{
+  background:
+    radial-gradient(ellipse at 8% 0%,rgba(222,177,178,.14),transparent 34rem),
+    radial-gradient(ellipse at 95% 12%,rgba(235,211,193,.20),transparent 30rem),
+    var(--bg);
+  color:var(--ink);letter-spacing:-.01em;
+}
+.wrap{width:min(100% - 36px,1080px);max-width:1080px;margin:0 auto;padding:96px 0 110px}
+.top{padding:22px 0 18px;align-items:center}
+.brand{font-size:25px;letter-spacing:-1.1px}
+.music-bar{background:rgba(255,253,252,.82);backdrop-filter:blur(16px);border-color:rgba(201,135,145,.16);box-shadow:0 5px 18px rgba(82,53,49,.045)}
+body.theme-dark .music-bar{background:rgba(36,32,33,.88)}
+.nav{
+  position:fixed!important;top:0!important;bottom:auto!important;left:0!important;right:0!important;
+  width:100%!important;max-width:none!important;margin:0!important;padding:12px max(22px,calc((100vw - 1080px)/2))!important;
+  min-height:70px;display:flex!important;flex-wrap:nowrap!important;justify-content:center!important;gap:8px!important;
+  border:0!important;border-bottom:1px solid rgba(201,135,145,.14)!important;border-radius:0!important;
+  background:rgba(255,253,252,.86)!important;backdrop-filter:blur(22px) saturate(1.3);
+  box-shadow:0 8px 28px rgba(70,45,42,.055)!important;
+}
+body.theme-dark .nav{background:rgba(35,31,32,.9)!important}
+.nav button{
+  flex:0 1 auto!important;min-width:92px!important;width:auto!important;flex-direction:row!important;
+  justify-content:center!important;gap:9px!important;padding:11px 16px!important;border-radius:14px!important;
+  color:var(--muted)!important;font-size:14px!important;font-weight:650;
+}
+.nav button i{font-size:16px!important}
+.nav button span{font-size:12px!important;letter-spacing:0!important}
+.nav button.active{background:var(--soft-rose)!important;color:var(--rose)!important}
+.nav button:hover{background:var(--soft-rose)!important;color:var(--rose)!important;transform:translateY(-1px)}
+.card{
+  border:1px solid rgba(201,135,145,.13);border-radius:24px;padding:25px;
+  box-shadow:var(--shadow-soft);margin:20px 0;background:var(--card-bg);
+  transition:box-shadow .22s,border-color .22s,transform .22s;
+}
+.page.active{animation:cottontail-enter .28s ease both}
+@keyframes cottontail-enter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+h1,h2,h3,h4{letter-spacing:-.045em;color:var(--ink)}
+h1{font-size:clamp(25px,3vw,34px)}
+h2{font-size:23px}
+h3{font-size:18px}
+button{
+  border-radius:13px;font-weight:650;box-shadow:0 3px 9px rgba(174,111,120,.10);
+  transition:background .2s,transform .2s,box-shadow .2s;
+}
+button:hover{box-shadow:0 7px 18px rgba(174,111,120,.16);transform:translateY(-1px)}
+button:active{transform:scale(.98)}
+button.secondary,button.ghost{box-shadow:none}
+input,textarea,select{
+  border-radius:14px;background:var(--bg);border-color:var(--line);
+  padding:13px 15px;transition:border-color .2s,box-shadow .2s,background .2s;
+}
+input:focus,textarea:focus,select:focus{border-color:var(--rose);box-shadow:0 0 0 4px rgba(201,135,145,.12)}
+.post{
+  position:relative;margin:16px 0;padding:20px 21px 18px;background:var(--card-bg);
+  border:1px solid rgba(201,135,145,.13);border-radius:22px;box-shadow:0 8px 24px rgba(82,53,49,.045);
+  transition:transform .2s,box-shadow .2s,border-color .2s;
+}
+.post:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(82,53,49,.085);border-color:rgba(201,135,145,.25)}
+.post-head{gap:12px}
+.post-user-info{gap:12px}
+.avatar{width:48px;height:48px;border:2px solid var(--soft-rose);background:var(--soft-rose)}
+.post-media{display:block;width:100%;max-height:540px;aspect-ratio:4/3;object-fit:cover;border-radius:17px;margin-top:15px;background:var(--bg)}
+.post-actions{align-items:center;gap:20px;margin-top:15px;padding-top:12px;border-top:1px solid var(--line)}
+.post-actions button{border-radius:10px;padding:8px 10px}
+.post-actions button:hover{background:var(--soft-rose);box-shadow:none}
+.comments-section{border-top:1px solid var(--line)}
+.comment-item{padding:11px 13px;border-radius:13px;background:var(--bg)}
+.explore-grid{gap:9px!important}
+.explore-post-card{border-radius:13px!important;box-shadow:0 3px 12px rgba(50,30,30,.07)}
+.explore-post-card img{transition:transform .35s ease,filter .35s}
+.explore-post-card:hover img{transform:scale(1.06);filter:saturate(1.06)}
+.explore-text-post{font-size:14px;font-weight:600;padding:16px;background:var(--soft-rose)}
+.profile-card{border-radius:24px;box-shadow:var(--shadow-soft)}
+.profile-banner{height:210px}
+.profile-big-avatar{width:104px;height:104px;border-width:5px}
+.profile-tabs{margin-top:18px}
+.profile-tab{padding:15px;font-size:13px}
+.profile-tab.active{color:var(--rose);border-bottom-width:3px}
+.modal-box{border:1px solid var(--line);border-radius:24px;box-shadow:0 24px 80px rgba(0,0,0,.18)}
+.fab-post{width:60px;height:60px;border-radius:20px;background:var(--rose);box-shadow:0 12px 28px rgba(177,111,121,.32)}
+.fab-post:hover{transform:translateY(-3px) rotate(3deg)}
+.day{border-radius:13px;padding:14px 2px}
+.day.selected{background:var(--rose);box-shadow:0 5px 14px rgba(201,135,145,.25)}
+.chat-list,.messages{border-radius:18px}
+.chat-item{border-radius:14px;transition:background .2s}
+.chat-item:hover{background:var(--soft-rose)}
+.notif-item{border-radius:16px;transition:background .2s}
+.notif-item:hover{background:var(--bg)}
+@media(min-width:768px){
+  .wrap{padding-top:100px;padding-bottom:48px}
+  .nav{justify-content:center!important}
+  .fab-post{right:max(28px,calc((100vw - 1080px)/2))!important;bottom:32px!important}
+}
+@media(max-width:767px){
+  .wrap{width:100%;padding:82px 14px 116px}
+  .top{padding:14px 2px}
+  .brand{font-size:22px}
+  .nav{
+    top:auto!important;bottom:0!important;left:0!important;right:0!important;
+    min-height:68px;padding:8px 5px calc(8px + env(safe-area-inset-bottom))!important;
+    justify-content:space-around!important;gap:1px!important;border-bottom:0!important;border-top:1px solid var(--line)!important;
+    background:rgba(255,253,252,.94)!important;border-radius:18px 18px 0 0!important;
+  }
+  body.theme-dark .nav{background:rgba(35,31,32,.96)!important}
+  .nav button{flex:1 1 0!important;min-width:0!important;width:0!important;flex-direction:column!important;gap:4px!important;padding:8px 2px!important;border-radius:12px!important}
+  .nav button i{font-size:18px!important}
+  .nav button span{font-size:9px!important}
+  .card{padding:19px;border-radius:20px;margin:14px 0}
+  .post{padding:16px 14px;border-radius:18px;margin:13px 0}
+  .post-media{aspect-ratio:1/1;border-radius:14px}
+  .profile-banner{height:155px}
+  .profile-big-avatar{width:88px;height:88px}
+  .fab-post{right:17px!important;bottom:86px!important;width:54px;height:54px;border-radius:18px}
+  .explore-grid{gap:5px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+
+
+
+/* Chat Cottontail — leitura maior e visual inspirado no iMessage */
+#chatRoomView{padding:18px;background:var(--card-bg);border-radius:24px}
+#messageBox.messages{
+  height:min(66vh,680px);
+  min-height:380px;
+  gap:12px;
+  padding:22px 18px;
+  background:#f7f7f9;
+  border-radius:20px;
+}
+body.theme-dark #messageBox.messages{background:#17171b}
+#messageBox .bubble{
+  max-width:min(84%,520px);
+  padding:12px 16px 9px;
+  border-radius:21px;
+  font-size:16px;
+  line-height:1.5;
+  letter-spacing:-.12px;
+}
+#messageBox .bubble.mine{
+  background:linear-gradient(135deg,#dcaeb8,#c98f9e);
+  color:#fff;
+  border-bottom-right-radius:6px;
+  box-shadow:0 2px 5px rgba(190,120,140,.16);
+}
+#messageBox .bubble.other{
+  background:#e9e9eb;
+  color:#171719;
+  border:0;
+  border-bottom-left-radius:6px;
+  box-shadow:none;
+}
+body.theme-dark #messageBox .bubble.mine{background:linear-gradient(135deg,#dcaeb8,#c98f9e);color:#fff}
+body.theme-dark #messageBox .bubble.other{background:#303036;color:#f5f5f7}
+#messageBox .bubble-time{font-size:10px;margin-top:6px}
+#chatRoomView .row{padding:5px 6px 5px 14px;background:#f1f1f3;border:0;border-radius:28px}
+body.theme-dark #chatRoomView .row{background:#303036}
+#chatRoomView #messageInput{font-size:16px!important;height:44px!important}
+#chatRoomView .row button{width:40px;height:40px;background:#0a84ff!important;color:#fff!important;box-shadow:none}
+#chatHeaderAvatar{width:48px!important;height:48px!important}
+@media(max-width:600px){
+  #chatRoomView{padding:10px;border-radius:20px}
+  #messageBox.messages{height:60vh;min-height:340px;padding:18px 10px;gap:11px}
+  #messageBox .bubble{max-width:88%;font-size:15.5px;padding:11px 14px 8px;line-height:1.48}
+  #chatRoomView #messageInput{font-size:16px!important}
+}
+
+
+/* YouTube Music — acabamento Cottontail */
+.music-bar{gap:9px;padding:7px 9px 7px 8px;border-radius:18px;background:var(--card-bg);border:1px solid var(--line);box-shadow:0 5px 18px rgba(91,63,58,.07)}
+.music-bar-art{width:38px;height:38px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(145deg,#f4dede,#d4a5a5);color:#fff;font-size:16px;flex:none}
+.music-bar-copy{display:flex;flex-direction:column;gap:2px;min-width:76px;max-width:125px}
+.music-bar-copy small{font-size:8px;letter-spacing:1px;color:var(--muted);font-weight:800}
+.music-bar-copy b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+.music-bar .music-play-btn,.music-bar .music-youtube-btn{width:34px;height:34px;min-width:34px;padding:0;border-radius:12px;display:grid;place-items:center;margin:0}
+.music-bar .music-play-btn{background:var(--rose);color:white}
+.music-bar .music-youtube-btn{background:rgba(212,165,165,.13);color:var(--rose)}
+.youtube-player-card{margin:0 0 18px;padding:0;overflow:hidden;border-radius:22px;border:1px solid var(--line);background:var(--card-bg);box-shadow:0 10px 28px rgba(91,63,58,.07)}
+.youtube-player-heading{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+.youtube-player-brand{display:flex;align-items:center;gap:11px}
+.youtube-player-brand>span,.youtube-settings-title>span{width:40px;height:40px;display:grid;place-items:center;border-radius:14px;background:rgba(212,165,165,.16);color:var(--rose);font-size:19px}
+.youtube-player-brand>div,.youtube-settings-title>div{display:flex;flex-direction:column;gap:3px}
+.youtube-player-brand b{font-size:14px;color:var(--ink)}
+.youtube-player-brand small,.youtube-settings-title small{font-size:11px;color:var(--muted)}
+.youtube-close-btn{width:32px;height:32px;padding:0;border-radius:50%;background:var(--bg);color:var(--muted);display:grid;place-items:center}
+.youtube-player-content{padding:14px 16px 16px}
+.youtube-player-note{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:11px;margin:0 2px 12px}
+.youtube-player-note i:first-child{color:var(--rose);margin-right:7px}
+.youtube-player-note span{flex:1}
+.youtube-player-note i:last-child{color:var(--rose)}
+.youtube-frame-wrap{overflow:hidden;border-radius:15px;background:#171313;box-shadow:0 5px 16px rgba(0,0,0,.12)}
+.youtube-frame-wrap iframe{display:block;width:100%;height:190px;border:0}
+.youtube-empty-state{min-height:125px;border:1px dashed var(--line);border-radius:16px;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:7px;text-align:center;padding:18px}
+.youtube-empty-state>i{font-size:23px;color:var(--rose);margin-bottom:2px}
+.youtube-empty-state b{font-size:13px;color:var(--ink)}
+.youtube-empty-state span{font-size:11px;color:var(--muted);max-width:260px;line-height:1.5}
+.youtube-config-link{display:flex;align-items:center;justify-content:center;gap:7px;margin:12px auto 0;padding:8px 12px;background:transparent;color:var(--rose);font-size:11px}
+.youtube-settings-card{margin-top:18px;padding:16px;border:1px solid var(--line);border-radius:17px;background:linear-gradient(145deg,rgba(212,165,165,.09),transparent 75%)}
+.youtube-settings-title{display:flex;align-items:center;gap:10px}
+.youtube-settings-title b{font-size:13px;color:var(--ink)}
+.youtube-settings-card>p{font-size:12px;line-height:1.5;margin:12px 0}
+.youtube-url-row{display:flex;gap:8px;align-items:center}
+.youtube-url-row input{font-size:12px;background:var(--card-bg)}
+.youtube-url-row button{white-space:nowrap;padding:11px 14px;font-size:12px}
+.youtube-settings-card .hint{display:block;margin:9px 0 0;font-size:10px}
+.youtube-settings-card .hint i{color:var(--rose);margin-right:4px}
+body.theme-dark .music-bar-art{background:linear-gradient(145deg,#9d7777,#684c4c)}
+body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(212,165,165,.1),transparent 75%)}
+@media(max-width:480px){.music-bar{gap:6px;padding:6px}.music-bar-art{width:34px;height:34px}.music-bar-copy{min-width:62px;max-width:88px}.music-bar .music-play-btn,.music-bar .music-youtube-btn{width:31px;height:31px;min-width:31px}.youtube-player-content{padding:12px}.youtube-frame-wrap iframe{height:180px}.youtube-url-row{align-items:stretch}.youtube-url-row button{padding:10px}}
+
+
+/* Reprodução compacta: áudio em segundo plano, sem painel grande */
+#youtubeMusicPanel{display:none!important}
+#youtubeMusicFrameWrap{position:fixed!important;width:1px!important;height:1px!important;min-width:1px!important;min-height:1px!important;right:0!important;bottom:0!important;overflow:hidden!important;opacity:.01!important;pointer-events:none!important;z-index:-1!important;border:0!important;box-shadow:none!important}
+#youtubeMusicFrameWrap iframe{width:1px!important;height:1px!important}
+.music-bar-copy small{display:none!important}
+.music-bar-copy{justify-content:center}
+.music-bar-copy b{max-width:145px}
+
 </style></head>
 <body>
 
@@ -855,7 +1091,7 @@ html body .conversation-unread{
         <label>Idioma Preferido</label>
         <select id="regLanguage">
           <option value="pt-BR">🇧🇷 Português (Brasil)</option>
-          <option value="en" selected>🇺🇸 English</option>
+          <option value="en">🇺🇸 English</option>
           <option value="es">🇪🇸 Español</option>
           <option value="ko">🇰🇷 한국어 (Coreano)</option>
         </select>
@@ -891,12 +1127,28 @@ html body .conversation-unread{
     <h2 class="brand" style="margin:0;font-size:22px">Cottontail 🐰</h2>
     
     <div class="music-bar">
-      <i class="fa-solid fa-music" style="color:var(--rose)"></i>
-      <span style="font-weight:600">Lo-Fi Soft</span>
-      <button onclick="toggleMusic()"><i id="musicIcon" class="fa-solid fa-play"></i></button>
+      <span class="music-bar-art"><i class="fa-solid fa-headphones"></i></span>
+      <span class="music-bar-copy"><small>TOCANDO AGORA</small><b id="musicTrackLabel">Lo-Fi Soft</b></span>
+      <button class="music-play-btn" onclick="toggleMusic()" title="Reproduzir ou pausar"><i id="musicIcon" class="fa-solid fa-play"></i></button>
+      <button class="music-youtube-btn" onclick="showPage('profile');setTimeout(()=>document.getElementById('youtubeMusicUrlInput')?.scrollIntoView({behavior:'smooth',block:'center'}),180)" title="Configurar YouTube Music"><i class="fa-brands fa-youtube"></i></button>
       <audio id="audioPlayer" loop src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"></audio>
     </div>
   </header>
+
+  <section id="youtubeMusicPanel" class="youtube-player-card hidden">
+    <div class="youtube-player-heading">
+      <div class="youtube-player-brand"><span><i class="fa-brands fa-youtube"></i></span><div><b>YouTube Music</b><small id="youtubeMusicStatus">Sua trilha sonora, do seu jeito.</small></div></div>
+      <button class="youtube-close-btn" onclick="toggleYoutubeMusicPanel(false)" aria-label="Fechar player"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="youtube-player-content">
+      <div class="youtube-player-note"><i class="fa-solid fa-compact-disc"></i><span>Um cantinho para sua música favorita</span><i class="fa-solid fa-heart"></i></div>
+      <div id="youtubeMusicFrameWrap" class="youtube-frame-wrap hidden">
+        <iframe id="youtubeMusicFrame" title="Player do YouTube Music" width="100%" height="190" src="about:blank" allow="autoplay; encrypted-media; picture-in-picture; clipboard-write" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      </div>
+      <div id="youtubeMusicEmpty" class="youtube-empty-state"><i class="fa-solid fa-music"></i><b>Qual vai ser a vibe de hoje?</b><span>Adicione uma música ou playlist nas configurações para começar.</span></div>
+      <button class="youtube-config-link" onclick="toggleYoutubeMusicPanel(false);showPage('profile');setTimeout(()=>document.getElementById('youtubeMusicUrlInput')?.scrollIntoView({behavior:'smooth',block:'center'}),180)"><i class="fa-solid fa-sliders"></i> Configurar música</button>
+    </div>
+  </section>
 
   <div id="fabPostBtn" class="fab-post" onclick="openFloatingPostModal()">
     <i class="fa-solid fa-pen"></i>
@@ -1128,6 +1380,12 @@ html body .conversation-unread{
         <input id="customMusicUrlInput" placeholder="Ou cole URL direta .mp3" style="margin:0">
         <button class="secondary" onclick="changeMusicUrl($('customMusicUrlInput').value)">Tocar</button>
       </div>
+      <div class="youtube-settings-card">
+        <div class="youtube-settings-title"><span><i class="fa-brands fa-youtube"></i></span><div><b>Conectar YouTube Music</b><small>Traga sua playlist para o Cottontail</small></div></div>
+        <p class="muted">Cole o link de uma música ou playlist para ouvir enquanto usa o app.</p>
+        <div class="youtube-url-row"><input id="youtubeMusicUrlInput" placeholder="Cole aqui o link da música ou playlist" style="margin:0;min-width:0"><button onclick="playYoutubeMusicFromInput()"><i class="fa-solid fa-play"></i> Tocar</button></div>
+        <p class="hint"><i class="fa-regular fa-lightbulb"></i> Algumas faixas podem ter restrição de reprodução incorporada.</p>
+      </div>
     </div>
 
     <div class="field">
@@ -1349,42 +1607,161 @@ function esc(s=''){
 }
 
 /* IDIOMA PREFERIDO: usa as preferências de idioma do navegador */
-function detectPreferredLanguage(){return 'en';}
+function detectPreferredLanguage(){
+  const preferences=Array.isArray(navigator.languages)&&navigator.languages.length
+    ?navigator.languages
+    :[navigator.language||navigator.userLanguage||'pt-BR'];
+  for(const raw of preferences){
+    const lang=String(raw||'').toLowerCase();
+    if(lang.startsWith('pt'))return 'pt-BR';
+    if(lang.startsWith('en'))return 'en';
+    if(lang.startsWith('es'))return 'es';
+    if(lang.startsWith('ko'))return 'ko';
+  }
+  return 'pt-BR';
+}
 window.addEventListener('DOMContentLoaded',()=>{
   const langSelect=$('regLanguage');
   if(langSelect&&!langSelect.dataset.userChosen)langSelect.value=detectPreferredLanguage();
 });
+/* TRADUÇÃO DA INTERFACE: aplica o idioma escolhido também aos textos já
+   renderizados e aos elementos criados dinamicamente (feed, modais e mensagens). */
+const UI_TRANSLATIONS={
+'en':{
+'Seu espaço de hábitos e comunidade.':'Your space for habits and community.','Entrar':'Log in','Criar Conta':'Create account','Confirmo que tenho':'I confirm that I am','18 anos ou mais':'18 years old or older','e entendo que esta versão beta é exclusiva para adultos.':'and understand this beta version is for adults only.','Esta confirmação é uma barreira provisória de acesso, não um sistema independente de verificação de idade.':'This is a temporary access barrier, not an independent age verification system.','E-mail':'Email','Senha':'Password','Sua senha':'Your password','Esqueci minha senha':'Forgot my password','Nome Completo':'Full name','Nome de usuário (@)':'Username (@)','Obrigatório começar com @. Esse será seu identificador no Cottontail.':'Must start with @. This will be your Cottontail username.','Mínimo 6 caracteres':'At least 6 characters','Idioma Preferido':'Preferred language','Idioma preferido':'Preferred language','Foto de Perfil':'Profile picture','Escolher Foto':'Choose photo','Criar Perfil e Entrar':'Create profile and log in','TOCANDO AGORA':'NOW PLAYING','Início':'Home','Diário':'Diary','Explorar':'Explore','Mensagens':'Messages','Notificações':'Notifications','Perfil':'Profile','Todos':'Everyone','Quem sigo':'Following','Criar publicação':'Create post','Dom':'Sun','Seg':'Mon','Ter':'Tue','Qua':'Wed','Qui':'Thu','Sex':'Fri','Sáb':'Sat','Café da manhã':'Breakfast','Almoço':'Lunch','Lanches':'Snacks','Jantar':'Dinner','Água (ml)':'Water (ml)','Exercícios':'Exercise','Observações':'Notes','Salvar meu dia':'Save my day','Conversas':'Chats','Conversa':'Chat','offline':'offline','Escreva uma mensagem...':'Write a message...','Nenhuma notificação por enquanto.':'No notifications yet.','Editar Perfil':'Edit profile','Seguindo':'Following','Seguidores':'Followers','Perfil Público':'Public profile','Nova publicação':'New post','O que está acontecendo?':'What is happening?','Foto':'Photo','Publicar':'Publish','Confirmar ação':'Confirm action','Cancelar':'Cancel','Confirmar':'Confirm','Excluir postagem':'Delete post','Tem certeza que deseja apagar esta publicação permanentemente?':'Are you sure you want to permanently delete this post?','Excluir':'Delete','Excluir Conta Definitivamente':'Permanently delete account','Denunciar publicação':'Report post','Ajude-nos a manter a comunidade segura.':'Help us keep the community safe.','Motivo da denúncia':'Reason for report','Enviar Denúncia':'Submit report','Configurações':'Settings','Galeria de Músicas (Player)':'Music library (player)','Ou cole URL direta .mp3':'Or paste a direct .mp3 URL','Tocar':'Play','Conectar YouTube Music':'Connect YouTube Music','Traga sua playlist para o Cottontail':'Bring your playlist to Cottontail','Cole o link de uma música ou playlist para ouvir enquanto usa o app.':'Paste a song or playlist link to listen while using the app.','Cole aqui o link da música ou playlist':'Paste the song or playlist link here','Tema da Interface':'Interface theme','Claro (Coreano Soft)':'Light (Soft)','Escuro (Dark Minimalist)':'Dark (Dark Minimalist)','Fonte do Aplicativo':'App font','Padrão do Sistema':'System default','Serifada / Elegante (Georgia)':'Serif / Elegant (Georgia)','Monospaçada / Diário Digital (Courier)':'Monospace / Digital diary (Courier)','Receber mensagens apenas de quem eu sigo 💌':'Receive messages only from people I follow 💌','Administração Cottontail':'Cottontail administration','Privacidade e documentos':'Privacy and documents','Consulte as regras e saiba como seus dados são tratados.':'Review the rules and learn how your data is handled.','Política de Privacidade':'Privacy policy','Termos de Uso':'Terms of use','Diretrizes da Comunidade':'Community guidelines','Solicitar ajuda sobre meus dados':'Request help with my data','Usuários Bloqueados':'Blocked users','Carregando bloqueios...':'Loading blocked users...','Sair da Conta':'Log out','Excluir Minha Conta':'Delete my account','Buscar':'Search','Buscar @usuário, nome ou posts...':'Search @username, name or posts...','Configurar música':'Set up music','Salvar':'Save','Voltar':'Back'
+},
+'es':{
+'Seu espaço de hábitos e comunidade.':'Tu espacio de hábitos y comunidad.','Entrar':'Iniciar sesión','Criar Conta':'Crear cuenta','E-mail':'Correo electrónico','Senha':'Contraseña','Sua senha':'Tu contraseña','Esqueci minha senha':'Olvidé mi contraseña','Nome Completo':'Nombre completo','Nome de usuário (@)':'Nombre de usuario (@)','Idioma Preferido':'Idioma preferido','Idioma preferido':'Idioma preferido','Foto de Perfil':'Foto de perfil','Escolher Foto':'Elegir foto','Criar Perfil e Entrar':'Crear perfil e iniciar sesión','Início':'Inicio','Diário':'Diario','Explorar':'Explorar','Mensagens':'Mensajes','Notificações':'Notificaciones','Perfil':'Perfil','Todos':'Todos','Quem sigo':'Personas que sigo','Criar publicação':'Crear publicación','Dom':'Dom','Seg':'Lun','Ter':'Mar','Qua':'Mié','Qui':'Jue','Sex':'Vie','Sáb':'Sáb','Café da manhã':'Desayuno','Almoço':'Almuerzo','Lanches':'Meriendas','Jantar':'Cena','Água (ml)':'Agua (ml)','Exercícios':'Ejercicio','Observações':'Notas','Salvar meu dia':'Guardar mi día','Conversas':'Conversaciones','Conversa':'Conversación','Escreva uma mensagem...':'Escribe un mensaje...','Nenhuma notificação por enquanto.':'No hay notificaciones por ahora.','Editar Perfil':'Editar perfil','Seguindo':'Siguiendo','Seguidores':'Seguidores','Perfil Público':'Perfil público','Nova publicação':'Nueva publicación','O que está acontecendo?':'¿Qué está pasando?','Foto':'Foto','Publicar':'Publicar','Confirmar ação':'Confirmar acción','Cancelar':'Cancelar','Confirmar':'Confirmar','Excluir postagem':'Eliminar publicación','Tem certeza que deseja apagar esta publicação permanentemente?':'¿Seguro que quieres eliminar esta publicación permanentemente?','Excluir':'Eliminar','Denunciar publicação':'Denunciar publicación','Ajude-nos a manter a comunidade segura.':'Ayúdanos a mantener segura la comunidad.','Motivo da denúncia':'Motivo de la denuncia','Enviar Denúncia':'Enviar denuncia','Configurações':'Configuración','Galeria de Músicas (Player)':'Biblioteca de música (reproductor)','Ou cole URL direta .mp3':'O pega una URL directa .mp3','Tocar':'Reproducir','Conectar YouTube Music':'Conectar YouTube Music','Traga sua playlist para o Cottontail':'Trae tu lista a Cottontail','Cole o link de uma música ou playlist para ouvir enquanto usa o app.':'Pega el enlace de una canción o lista para escuchar mientras usas la app.','Cole aqui o link da música ou playlist':'Pega aquí el enlace de la canción o lista','Tema da Interface':'Tema de la interfaz','Fonte do Aplicativo':'Fuente de la aplicación','Padrão do Sistema':'Predeterminada del sistema','Receber mensagens apenas de quem eu sigo 💌':'Recibir mensajes solo de las personas que sigo 💌','Administração Cottontail':'Administración de Cottontail','Privacidade e documentos':'Privacidad y documentos','Consulte as regras e saiba como seus dados são tratados.':'Consulta las reglas y cómo se tratan tus datos.','Política de Privacidade':'Política de privacidad','Termos de Uso':'Términos de uso','Diretrizes da Comunidade':'Normas de la comunidad','Solicitar ajuda sobre meus dados':'Solicitar ayuda sobre mis datos','Usuários Bloqueados':'Usuarios bloqueados','Carregando bloqueios...':'Cargando bloqueos...','Sair da Conta':'Cerrar sesión','Excluir Minha Conta':'Eliminar mi cuenta','Buscar':'Buscar','Buscar @usuário, nome ou posts...':'Buscar @usuario, nombre o publicaciones...','Configurar música':'Configurar música','Voltar':'Volver'
+},
+'ko':{
+'Seu espaço de hábitos e comunidade.':'습관과 커뮤니티를 위한 나만의 공간.','Entrar':'로그인','Criar Conta':'계정 만들기','E-mail':'이메일','Senha':'비밀번호','Sua senha':'비밀번호를 입력하세요','Esqueci minha senha':'비밀번호를 잊으셨나요?','Nome Completo':'이름','Nome de usuário (@)':'사용자 이름 (@)','Idioma Preferido':'선호 언어','Idioma preferido':'선호 언어','Foto de Perfil':'프로필 사진','Escolher Foto':'사진 선택','Criar Perfil e Entrar':'프로필 만들고 로그인','Início':'홈','Diário':'일기','Explorar':'탐색','Mensagens':'메시지','Notificações':'알림','Perfil':'프로필','Todos':'전체','Quem sigo':'팔로잉','Criar publicação':'게시물 작성','Dom':'일','Seg':'월','Ter':'화','Qua':'수','Qui':'목','Sex':'금','Sáb':'토','Café da manhã':'아침 식사','Almoço':'점심','Lanches':'간식','Jantar':'저녁','Água (ml)':'물 (ml)','Exercícios':'운동','Observações':'메모','Salvar meu dia':'오늘 기록 저장','Conversas':'대화','Conversa':'대화','Escreva uma mensagem...':'메시지를 입력하세요...','Nenhuma notificação por enquanto.':'아직 알림이 없습니다.','Editar Perfil':'프로필 편집','Seguindo':'팔로잉','Seguidores':'팔로워','Perfil Público':'공개 프로필','Nova publicação':'새 게시물','O que está acontecendo?':'무슨 일이 있나요?','Foto':'사진','Publicar':'게시','Cancelar':'취소','Confirmar':'확인','Configurações':'설정','Tema da Interface':'화면 테마','Fonte do Aplicativo':'앱 글꼴','Padrão do Sistema':'시스템 기본값','Privacidade e documentos':'개인정보 및 문서','Política de Privacidade':'개인정보 처리방침','Termos de Uso':'이용 약관','Diretrizes da Comunidade':'커뮤니티 가이드라인','Usuários Bloqueados':'차단된 사용자','Sair da Conta':'로그아웃','Excluir Minha Conta':'내 계정 삭제','Buscar':'검색','Voltar':'뒤로'
+}};
+let activeUiLanguage='pt-BR';
+function applyUiLanguage(language){
+  const lang=['pt-BR','en','es','ko'].includes(language)?language:'pt-BR';
+  activeUiLanguage=lang;document.documentElement.lang=lang;
+  const dict=UI_TRANSLATIONS[lang]||{};
+  const reverse={};Object.entries(UI_TRANSLATIONS).forEach(([l,entries])=>Object.entries(entries).forEach(([pt,tr])=>{reverse[tr]=pt;}));
+  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+  let node;while(node=walker.nextNode()){
+    if(!node.parentElement||['SCRIPT','STYLE','TEXTAREA'].includes(node.parentElement.tagName))continue;
+    if(!node.__cottontailOriginal)node.__cottontailOriginal=node.nodeValue;
+    const original=reverse[node.__cottontailOriginal.trim()]||node.__cottontailOriginal.trim();
+    const translated=dict[original];
+    if(translated!==undefined&&node.nodeValue.trim()!==translated)node.nodeValue=node.nodeValue.replace(node.nodeValue.trim(),translated);
+    else if(lang==='pt-BR'&&reverse[node.nodeValue.trim()]&&node.nodeValue.trim()!==reverse[node.nodeValue.trim()])node.nodeValue=node.nodeValue.replace(node.nodeValue.trim(),reverse[node.nodeValue.trim()]);
+  }
+  document.querySelectorAll('input[placeholder],textarea[placeholder],button[title],button[aria-label],input[aria-label],iframe[title]').forEach(el=>{
+    ['placeholder','title','aria-label'].forEach(attr=>{
+      if(!el.hasAttribute(attr))return;
+      // Use a literal data-* attribute: dataset property names cannot contain
+      // the hyphen from "aria-label" and would throw before the profile loads.
+      const originalAttr='data-cottontail-original-'+attr;
+      if(!el.hasAttribute(originalAttr))el.setAttribute(originalAttr,el.getAttribute(attr));
+      const stored=el.getAttribute(originalAttr)||'';
+      const original=reverse[stored]||stored;
+      if(dict[original])el.setAttribute(attr,dict[original]);
+      else if(lang==='pt-BR')el.setAttribute(attr,original);
+    });
+  });
+}
+let uiLanguageObserver=null;
+function watchUiTranslations(){
+  if(uiLanguageObserver)uiLanguageObserver.disconnect();
+  uiLanguageObserver=new MutationObserver(()=>{if(activeUiLanguage!=='pt-BR')applyUiLanguage(activeUiLanguage);});
+  uiLanguageObserver.observe(document.body,{childList:true,subtree:true,characterData:true});
+}
 function savePreferredLanguage(value){
-  if(!user)return;
   const allowed=['pt-BR','en','es','ko'];
   const language=allowed.includes(value)?value:'pt-BR';
   if(profile)profile.language=language;
-  document.documentElement.lang=language;
+  localStorage.setItem('cottontail_language',language);
+  applyUiLanguage(language);
+  if(!user){return;}
   db.from('user_profiles').update({language}).eq('user_id',user.id)
-    .then(({error})=>{if(error)console.error('Não foi possível salvar o idioma:',error.message);});
+    .then(({error})=>{if(error){console.error('Não foi possível salvar o idioma:',error.message);showToast?.('Idioma não salvo',error.message);}});
 }
 
 /* MUSIC PLAYER */
+let activeMusicProvider='audio';
 function toggleMusic(){
-  let player=$('audioPlayer');
-  let icon=$('musicIcon');
+  if(activeMusicProvider==='youtube'){
+    toggleYoutubeMusicPanel(true);
+    return;
+  }
+  const player=$('audioPlayer'),icon=$('musicIcon');
   if(player.paused){
-    player.play();
-    icon.className='fa-solid fa-pause';
-  } else {
-    player.pause();
-    icon.className='fa-solid fa-play';
+    player.play().then(()=>icon.className='fa-solid fa-pause').catch(()=>showToast('Não foi possível reproduzir','Toque novamente para iniciar a música.'));
+  }else{
+    player.pause();icon.className='fa-solid fa-play';
   }
 }
 function changePresetMusic(url){
+  activeMusicProvider='audio';
+  $('musicTrackLabel').textContent=$('musicSelect').selectedOptions[0]?.textContent||'Música do Cottontail';
+  $('youtubeMusicFrame').src='about:blank';
+  $('youtubeMusicPanel').classList.add('hidden');
   changeMusicUrl(url);
 }
 function changeMusicUrl(url){
   if(url){
-    $('audioPlayer').src = url;
-    $('audioPlayer').play();
-    $('musicIcon').className='fa-solid fa-pause';
+    activeMusicProvider='audio';
+    $('audioPlayer').src=url;
+    $('musicTrackLabel').textContent='Música do Cottontail';
+    $('youtubeMusicFrame').src='about:blank';
+    $('youtubeMusicPanel').classList.add('hidden');
+    $('audioPlayer').play().then(()=>$('musicIcon').className='fa-solid fa-pause')
+      .catch(()=>showToast('Não foi possível reproduzir','Confira o link do áudio e tente novamente.'));
   }
+}
+function parseYoutubeMusicUrl(raw){
+  try{
+    const url=new URL(String(raw||'').trim());
+    const host=url.hostname.toLowerCase().replace(/^www\./,'');
+    if(!['music.youtube.com','youtube.com','m.youtube.com','youtu.be'].includes(host))return null;
+    let videoId=url.searchParams.get('v');
+    if(host==='youtu.be')videoId=url.pathname.split('/').filter(Boolean)[0]||videoId;
+    if(!videoId){
+      const parts=url.pathname.split('/').filter(Boolean);
+      if(['embed','shorts','live'].includes(parts[0]))videoId=parts[1]||null;
+    }
+    const listId=url.searchParams.get('list');
+    if(videoId&&!/^[\w-]{11}$/.test(videoId))return null;
+    if(!videoId&&listId&&!/^[\w-]+$/.test(listId))return null;
+    if(!videoId&&!listId)return null;
+    return {videoId,listId};
+  }catch(e){return null;}
+}
+function playYoutubeMusicFromInput(){
+  const raw=$('youtubeMusicUrlInput').value.trim();
+  const parsed=parseYoutubeMusicUrl(raw);
+  if(!parsed){
+    showToast('Link não reconhecido','Cole um link válido de música ou playlist do YouTube Music.');
+    return;
+  }
+  const params=new URLSearchParams({autoplay:'1',playsinline:'1',rel:'0'});
+  let embedUrl;
+  if(parsed.videoId){
+    embedUrl='https://www.youtube-nocookie.com/embed/'+parsed.videoId+'?'+params.toString();
+    if(parsed.listId)embedUrl+='&list='+encodeURIComponent(parsed.listId);
+  }else{
+    embedUrl='https://www.youtube-nocookie.com/embed/videoseries?'+params.toString()+'&list='+encodeURIComponent(parsed.listId);
+  }
+  activeMusicProvider='youtube';
+  $('audioPlayer').pause();
+  $('musicIcon').className='fa-solid fa-pause';
+  $('musicTrackLabel').textContent=parsed.listId&&!parsed.videoId?'Playlist do YouTube':'YouTube Music';
+  $('youtubeMusicFrame').src=embedUrl;
+  $('youtubeMusicFrameWrap').classList.remove('hidden');
+  $('youtubeMusicEmpty')?.classList.add('hidden');
+  $('youtubeMusicStatus').textContent='Reproduzindo em segundo plano';
+  $('youtubeMusicPanel').classList.add('hidden');
+}
+function toggleYoutubeMusicPanel(force){
+  const panel=$('youtubeMusicPanel');
+  if(!panel)return;
+  const shouldOpen=typeof force==='boolean'?force:panel.classList.contains('hidden');
+  panel.classList.toggle('hidden',!shouldOpen);
 }
 
 function toggleAuthTab(tab){
@@ -1424,8 +1801,8 @@ async function signUp(){
   const {data,error}=await db.auth.signUp({
     email,password,
     options:{data:{
-      full_name:name,
       username,
+      full_name:name,
       language,
       cottontail_terms_version:'1.0',
       cottontail_privacy_version:'1.0',
@@ -1436,12 +1813,34 @@ async function signUp(){
     }}
   });if(error)return status('loginStatus',error.message);
   const newUser=data.user;
-  if(newUser){
-    let avatar_url=null;const avatarFile=$('regAvatarInput').files[0];
-    if(avatarFile){try{avatar_url=await uploadFile(avatarFile,`avatar_${newUser.id}_${Date.now()}`);}catch(e){}}
-    const {error:profileError}=await db.from('user_profiles').upsert({user_id:newUser.id,full_name:name,username,language,avatar_url,updated_at:new Date().toISOString()},{onConflict:'user_id'});
-    if(profileError)return status('loginStatus','Conta criada, mas não consegui salvar o @: '+profileError.message);
-    status('loginStatus',data.session?'Perfil criado com sucesso!':'Conta criada! Confirme seu e-mail.');
+  if(!newUser)return status('loginStatus','A autenticação não retornou os dados da conta. Tente novamente.');
+  let avatar_url=null;const avatarFile=$('regAvatarInput').files[0];
+  if(avatarFile){try{avatar_url=await uploadFile(avatarFile,`avatar_${newUser.id}_${Date.now()}`);}catch(e){console.warn('Não foi possível enviar a foto de perfil:',e);}}
+  // O @ também fica nos metadados do Auth para recuperação caso a confirmação de e-mail adie a sessão.
+  const {error:profileError}=await db.from('user_profiles').upsert({
+    user_id:newUser.id,full_name:name,username,language,avatar_url,
+    updated_at:new Date().toISOString()
+  },{onConflict:'user_id'});
+  if(profileError){
+    console.error('Falha ao salvar perfil inicial:',profileError);
+    return status('loginStatus','A conta foi criada, mas o perfil não foi salvo. Entre novamente após confirmar o e-mail; o @ será recuperado dos dados da conta.');
+  }
+  if(data.session){
+    user=data.user;
+    $('loginScreen').classList.add('hidden');
+    $('app').classList.remove('hidden');
+    status('loginStatus','Conta criada! Preparando seu Cottontail...');
+    return;
+  }
+  // Se o projeto exigir confirmação de e-mail, tenta autenticar e informa claramente se ainda não for permitido.
+  const {data:loginData,error:loginError}=await db.auth.signInWithPassword({email,password});
+  if(!loginError&&loginData?.session){
+    user=loginData.user;
+    $('loginScreen').classList.add('hidden');
+    $('app').classList.remove('hidden');
+    status('loginStatus','Conta criada! Entrando no Cottontail...');
+  }else{
+    status('loginStatus','Perfil criado com @'+username+'. Para entrar, confirme primeiro o link enviado ao seu e-mail e depois faça login.');
   }
 }
 
@@ -1586,14 +1985,19 @@ db.auth.onAuthStateChange((_event,session)=>{
   setTimeout(async()=>{
     if(!user || user.id!==nextUser.id) return;
     try{
-      await ensureProfile();
+      // O perfil visual deve ser carregado independentemente de falhas auxiliares
+      // na rotina de recuperação/validação do cadastro.
+      try{await ensureProfile();}
+      catch(profileEnsureError){console.warn('Aviso ao verificar cadastro do perfil:',profileEnsureError);}
+      await loadProfile();
+
       const {data:adminCheck,error:adminCheckError}=await db.rpc('is_cottontail_admin');
       isCottontailAdmin=!adminCheckError&&adminCheck===true;
       if($('adminPanel'))$('adminPanel').classList.toggle('hidden',!isCottontailAdmin);
-    updateMyPresence();
-    if(presenceTimer)clearInterval(presenceTimer);
-    presenceTimer=setInterval(updateMyPresence,30000);
-    await Promise.all([loadMonth(),loadProfile(),loadFeed('all'),checkUnreadBadges()]);
+      updateMyPresence();
+      if(presenceTimer)clearInterval(presenceTimer);
+      presenceTimer=setInterval(updateMyPresence,30000);
+      await Promise.all([loadMonth(),loadFeed('all'),checkUnreadBadges()]);
       await startNotificationPolling();
       let savedPage='feed';try{savedPage=localStorage.getItem('cottontailActivePage')||'feed';}catch(e){}
       const validPages=['feed','diary','explore','messages','notifications','profile'];
@@ -1608,33 +2012,30 @@ db.auth.onAuthStateChange((_event,session)=>{
 });
 
 async function ensureProfile(){
-  if(!user?.id)throw new Error('Sua sessão expirou. Entre novamente.');
   const {data,error}=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
-  if(error)throw new Error('Não consegui consultar seu perfil: '+error.message);
-  if(data){
-    const meta=user.user_metadata||{};
-    const patch={};
-    const recoveredName=String(meta.full_name||meta.name||'').trim();
-    const recoveredUsername=String(meta.username||'').trim().replace(/^@/,'').toLowerCase();
-    if(!String(data.full_name||'').trim()&&recoveredName)patch.full_name=recoveredName;
-    if(!String(data.username||'').trim()&&recoveredUsername)patch.username=recoveredUsername;
-    if(Object.keys(patch).length){
-      patch.updated_at=new Date().toISOString();
-      const {error:updateError}=await db.from('user_profiles').update(patch).eq('user_id',user.id);
-      if(updateError)throw new Error('Não consegui completar os dados do perfil: '+updateError.message);
-    }
+  if(error)throw error;
+  const meta=user.user_metadata||{};
+  const recoveredName=String(meta.full_name||meta.name||'').trim();
+  const recoveredUsername=String(meta.username||'').trim().replace(/^@/,'').toLowerCase();
+  if(!data){
+    const {error:insertError}=await db.from('user_profiles').upsert({
+      user_id:user.id,full_name:recoveredName,username:recoveredUsername||null,
+      language:meta.language||'pt-BR',bio:'',is_private:false
+    },{onConflict:'user_id'});
+    if(insertError)throw insertError;
     return;
   }
-  const meta=user.user_metadata||{};
-  const {error:insertError}=await db.from('user_profiles').upsert({
-    user_id:user.id,
-    full_name:String(meta.full_name||meta.name||'').trim(),
-    username:String(meta.username||'').trim().replace(/^@/,'').toLowerCase()||null,
-    language:'en',
-    bio:'',
-    is_private:false
-  },{onConflict:'user_id'});
-  if(insertError)throw new Error('Não consegui criar seu registro de perfil: '+insertError.message);
+  // Recupera somente campos vazios dos metadados do Auth, sem sobrescrever dados existentes.
+  const patch={};
+  if(!String(data.full_name||'').trim()&&recoveredName)patch.full_name=recoveredName;
+  if(!String(data.username||'').trim()&&recoveredUsername)patch.username=recoveredUsername;
+  if(!data.language)patch.language=meta.language||'pt-BR';
+  if(Object.keys(patch).length){
+    patch.updated_at=new Date().toISOString();
+    const {data:updated,error:updateError}=await db.from('user_profiles').update(patch).eq('user_id',user.id).select('*').maybeSingle();
+    if(updateError)throw updateError;
+    if(updated)chatProfiles[user.id]=updated;
+  }else chatProfiles[user.id]=data;
 }
 
 function persistCurrentPage(){
@@ -1660,7 +2061,13 @@ function showPage(id){
   if(id==='messages'){ backToChatList(); }
   if(id==='feed')loadFeed('all');
   if(id==='notifications'){ $('notifBadge').classList.add('hidden'); loadNotifications(); }
-  if(id==='profile'){loadProfile().catch(err=>{console.error('Erro ao atualizar painel do perfil:',err);showToast('Não foi possível atualizar o perfil',err.message||'Tente novamente.');});let tab='posts';try{tab=localStorage.getItem('cottontailProfileTab')||'posts';}catch(e){}loadProfileDataTab(tab==='reposts'?'reposts':'posts');}
+  if(id==='profile'){
+    // Reconsulta os dados do cabeçalho sempre que a página de perfil é aberta,
+    // inclusive quando a navegação é restaurada após atualizar o navegador.
+    if(user)loadProfile().catch(err=>console.error('Erro ao atualizar o cabeçalho do perfil:',err));
+    let tab='posts';try{tab=localStorage.getItem('cottontailProfileTab')||'posts';}catch(e){}
+    loadProfileDataTab(tab==='reposts'?'reposts':'posts');
+  }
   checkUnreadBadges();
 }
 
@@ -2119,96 +2526,82 @@ async function submitReport(){
 
 /* PERFIL & CORTADOR */
 async function loadProfile(){
-  if(!user?.id)throw new Error('Sua sessão expirou. Entre novamente.');
-  const {data,error}=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
-  if(error)throw new Error('Não foi possível carregar seu perfil: '+error.message);
-  if(!data){
-    await ensureProfile();
+  const {data,error:profileLoadError}=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
+  if(profileLoadError){
+    console.error('Erro ao carregar perfil:',profileLoadError);
+    showToast('Não foi possível carregar seu perfil',profileLoadError.message||'Tente novamente.');
+    return;
   }
-  const retryData=data||await (async()=>{
-    const retry=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
-    if(retry.error)throw new Error('Não foi possível confirmar seu perfil: '+retry.error.message);
-    return retry.data;
-  })();
-  const cached=chatProfiles[user.id]||{};
-  const meta=user.user_metadata||{};
-  profile={...cached,...(retryData||{})};
-  if(!String(profile.full_name||'').trim())profile.full_name=String(meta.full_name||meta.name||cached.full_name||'').trim();
-  if(!String(profile.username||'').trim())profile.username=String(meta.username||cached.username||'').trim();
-  chatProfiles[user.id]={...cached,...profile};
-
-  // Migração única: define inglês como padrão para contas já existentes.
-  const languageMigrationKey='cottontail_english_default_v1_'+user.id;
-  let englishDefaultApplied=false;
-  try{englishDefaultApplied=localStorage.getItem(languageMigrationKey)==='1';}catch(e){}
-  if(!englishDefaultApplied){
-    profile.language='en';
-    try{localStorage.setItem(languageMigrationKey,'1');}catch(e){}
-    db.from('user_profiles').update({language:'en'}).eq('user_id',user.id)
-      .then(({error})=>{if(error)console.warn('Não foi possível atualizar o idioma padrão do perfil:',error.message);});
-  }else if(!profile.language){profile.language='en';}
-  if($('settingsLanguage'))$('settingsLanguage').value=profile.language;
-  document.documentElement.lang=profile.language;
-  window.applyCottontailTranslations?.();
-  const username=String(profile.username||'').trim().replace(/^@+/,'');
-  const displayName=$('viewProfileName');
-  const displayUsername=$('viewProfileUsername');
-  const displayBio=$('viewProfileBio');
-  const displayLink=$('viewProfileLink');
-  const privacyBadge=$('profilePrivacyBadge');
-  if($('profileName'))$('profileName').value=profile.full_name||'';
-  if($('profileUsername'))$('profileUsername').value=username;
-  if($('profileBio'))$('profileBio').value=profile.bio||'';
-  if($('profileLink'))$('profileLink').value=profile.website_url||'';
-  if($('profileIsPrivate'))$('profileIsPrivate').checked=!!profile.is_private;
-
-  if(displayName)displayName.innerHTML=esc(profile.full_name||'Sem Nome')+verifiedBadge(profile.is_verified);
-  if(displayUsername)displayUsername.textContent=username?'@'+username:'@usuario';
-  if(displayBio)displayBio.textContent=profile.bio||'';
-  const normalizedLink=normalizeProfileLink(profile.website_url||'');
-  if(displayLink)displayLink.innerHTML=normalizedLink?'<a href="'+esc(normalizedLink)+'" target="_blank" rel="noopener noreferrer" class="profile-website-link"><i class="fa-solid fa-link"></i> '+esc(profile.website_url)+'</a>':'';
-  if(privacyBadge)privacyBadge.textContent=profile.is_private?'🔒 Perfil Privado':'🔓 Perfil Público';
-
-  const avatar=$('profileBigAvatar');
-  if(avatar){
-    if(profile.avatar_url)avatar.innerHTML='<img src="'+esc(profile.avatar_url)+'">';
-    else avatar.textContent=(profile.full_name?profile.full_name[0]:'?').toUpperCase();
+  const metadata=user?.user_metadata||{};
+  profile=data||{
+    full_name:metadata.full_name||'',
+    username:metadata.username||'',
+    bio:'',
+    website_url:'',
+    is_private:false
+  };
+  if(!profile.language){
+    profile.language=detectPreferredLanguage();
+    const {error:languageError}=await db.from('user_profiles').update({language:profile.language}).eq('user_id',user.id);
+    if(languageError)console.warn('Não foi possível salvar o idioma detectado:',languageError.message);
   }
-  const banner=$('bannerImg');
-  if(banner){
-    if(profile.banner_url){banner.src=profile.banner_url;banner.classList.remove('hidden');}
-    else banner.classList.add('hidden');
-  }
+  if($('settingsLanguage'))$('settingsLanguage').value=profile.language||detectPreferredLanguage();
+  document.documentElement.lang=profile.language||detectPreferredLanguage();
+  applyUiLanguage(profile.language||localStorage.getItem('cottontail_language')||detectPreferredLanguage());
+  $('profileName').value=profile.full_name||'';
+  $('profileUsername').value=profile.username||'';
+  $('profileBio').value=profile.bio||'';
+  $('profileLink').value=profile.website_url||'';
+  $('profileIsPrivate').checked=profile.is_private||false;
+
+  $('viewProfileName').innerHTML=esc(profile.full_name||'Sem Nome')+verifiedBadge(profile.is_verified);
+  $('viewProfileUsername').textContent=profile.username?(profile.username.startsWith('@')?profile.username:'@'+profile.username):'@usuario';
+  $('viewProfileBio').textContent=profile.bio||'';
+  const profileLink=normalizeProfileLink(profile.website_url||'');
+  $('viewProfileLink').innerHTML=profileLink?'<a href="'+esc(profileLink)+'" target="_blank" rel="noopener noreferrer" class="profile-website-link"><i class="fa-solid fa-link"></i> '+esc(profile.website_url)+'</a>':'';
+  $('profilePrivacyBadge').textContent=profile.is_private?'🔒 Perfil Privado':'🔓 Perfil Público';
+
+  if(profile.avatar_url){ $('profileBigAvatar').innerHTML=`<img src="${esc(profile.avatar_url)}">`; }
+  else { $('profileBigAvatar').textContent=(profile.full_name?profile.full_name[0]:'?').toUpperCase(); }
+  
+  if(profile.banner_url){ $('bannerImg').src=profile.banner_url; $('bannerImg').classList.remove('hidden'); }
+  else { $('bannerImg').classList.add('hidden'); }
 
   const [followingResult,followersResult]=await Promise.all([
-    db.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',user.id),
-    db.from('follows').select('*',{count:'exact',head:true}).eq('following_id',user.id)
+    db.from('follows').select('following_id',{count:'exact'}).eq('follower_id',user.id),
+    db.from('follows').select('follower_id',{count:'exact'}).eq('following_id',user.id)
   ]);
-  let followingCount=followingResult.count;
-  let followersCount=followersResult.count;
-  if(followingResult.error||followingCount==null){
-    const fallback=await db.from('follows').select('following_id').eq('follower_id',user.id);
-    if(!fallback.error)followingCount=(fallback.data||[]).length;
-    else console.warn('Não foi possível contar seguindo:',followingResult.error?.message||fallback.error.message);
-  }
-  if(followersResult.error||followersCount==null){
-    const fallback=await db.from('follows').select('follower_id').eq('following_id',user.id);
-    if(!fallback.error)followersCount=(fallback.data||[]).length;
-    else console.warn('Não foi possível contar seguidores:',followersResult.error?.message||fallback.error.message);
-  }
-  const followingEl=$('countFollowing'),followersEl=$('countFollowers');
-  if(followingEl)followingEl.textContent=followingCount==null?'—':String(followingCount);
-  if(followersEl)followersEl.textContent=followersCount==null?'—':String(followersCount);
+  if(followingResult.error){console.error('Erro ao contar seguindo:',followingResult.error);$('countFollowing').textContent='—';$('countFollowing').title='Erro ao consultar: '+followingResult.error.message;}
+  else{$('countFollowing').textContent=followingResult.count??(followingResult.data||[]).length;$('countFollowing').removeAttribute('title');}
+  if(followersResult.error){console.error('Erro ao contar seguidores:',followersResult.error);$('countFollowers').textContent='—';$('countFollowers').title='Erro ao consultar: '+followersResult.error.message;}
+  else{$('countFollowers').textContent=followersResult.count??(followersResult.data||[]).length;$('countFollowers').removeAttribute('title');}
 }
 
-function openEditProfileModal(){
+async function openEditProfileModal(){
+  if(!user){showToast('Entre na sua conta','Faça login para editar seu perfil.');return;}
   editAvatarFile=null;editBannerFile=null;
-  $('avatarCropBox').classList.add('hidden');$('bannerCropBox').classList.add('hidden');$('profileStatus').textContent='';
+  $('avatarCropBox').classList.add('hidden');$('bannerCropBox').classList.add('hidden');
+  $('profileStatus').textContent='Carregando seus dados...';
+  $('editProfileModal').classList.remove('hidden');
+  try{
+    const {data,error}=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
+    if(error)throw error;
+    if(data)profile={...profile,...data};
+    const meta=user.user_metadata||{};
+    $('profileName').value=profile?.full_name||meta.full_name||'';
+    $('profileUsername').value=(profile?.username||meta.username||'').replace(/^@/,'');
+    $('profileBio').value=profile?.bio||'';
+    $('profileLink').value=profile?.website_url||'';
+    $('profileIsPrivate').checked=!!profile?.is_private;
+    $('profileStatus').textContent='';
+  }catch(error){
+    console.error('Erro ao abrir editor de perfil:',error);
+    $('profileStatus').textContent='Não foi possível carregar os dados: '+(error.message||'erro desconhecido');
+  }
   $('editAvatarInitial').textContent=(profile?.full_name||'🐰').trim().charAt(0).toUpperCase()||'🐰';
   if(profile?.avatar_url){$('editAvatarCurrent').src=profile.avatar_url;$('editAvatarCurrent').classList.remove('hidden');$('editAvatarInitial').classList.add('hidden');}
   else{$('editAvatarCurrent').classList.add('hidden');$('editAvatarInitial').classList.remove('hidden');}
   if(profile?.banner_url){$('bannerCropImg').src=profile.banner_url;$('bannerCropBox').classList.remove('hidden');}
-  $('editProfileModal').classList.remove('hidden');
 }
 function closeEditProfileModal(){ $('editProfileModal').classList.add('hidden'); }
 
@@ -2241,54 +2634,60 @@ async function uploadFile(file, path){
 }
 
 async function saveProfile(){
-  if(!user?.id){status('profileStatus','Sua sessão expirou. Entre novamente.');return;}
   status('profileStatus','Salvando...');
-  const name=$('profileName').value.trim();
+  let name=$('profileName').value.trim();
   let username=$('profileUsername').value.trim().toLowerCase().replace(/^@/,'');
-  if(username&&!/^[a-z0-9._]{3,20}$/.test(username)){
-    status('profileStatus','O @ deve ter de 3 a 20 caracteres: letras, números, ponto ou _.');
-    return;
-  }
-  username=username||null;
-  const bio=$('profileBio').value.trim();
+  let bio=$('profileBio').value.trim();
   let website_url=$('profileLink').value.trim();
+  if(username&&!/^[a-z0-9._]{3,20}$/.test(username))return status('profileStatus','O @ deve ter de 3 a 20 caracteres: letras, números, ponto ou underline.');
   if(website_url&&!/^https?:\/\//i.test(website_url))website_url='https://'+website_url;
-  if(website_url&&!/^https?:\/\//i.test(website_url)){status('profileStatus','Informe um link válido.');return;}
-  const is_private=$('profileIsPrivate').checked;
-  let avatar_url=profile?.avatar_url||null;
-  let banner_url=profile?.banner_url||null;
+  if(website_url&&!/^https?:\/\//i.test(website_url))return status('profileStatus','Informe um link válido.');
+  let is_private=$('profileIsPrivate').checked;
+  let avatar_url=profile.avatar_url, banner_url=profile.banner_url;
 
   try {
     if(username){
-      const {data:matches,error:usernameError}=await db.from('user_profiles')
-        .select('user_id').ilike('username',username).neq('user_id',user.id).limit(1);
-      if(usernameError)throw new Error('Não consegui verificar se esse @ está disponível: '+usernameError.message);
-      if(matches?.length){status('profileStatus','Esse @ já está sendo usado por outra conta.');return;}
+      const {data:existing,error:lookupError}=await db.from('user_profiles').select('user_id').ilike('username',username).neq('user_id',user.id).maybeSingle();
+      if(lookupError)throw lookupError;
+      if(existing)return status('profileStatus','Esse @usuário já está em uso. Escolha outro.');
     }
-    if(editAvatarFile)avatar_url=await uploadFile(editAvatarFile,`avatar_${user.id}_${Date.now()}`);
-    if(editBannerFile)banner_url=await uploadFile(editBannerFile,`banner_${user.id}_${Date.now()}`);
+    if(editAvatarFile) avatar_url=await uploadFile(editAvatarFile, `avatar_${user.id}_${Date.now()}`);
+    if(editBannerFile) banner_url=await uploadFile(editBannerFile, `banner_${user.id}_${Date.now()}`);
 
-    const payload={
-      user_id:user.id,full_name:name,username,bio,website_url,
-      avatar_url,banner_url,is_private,updated_at:new Date().toISOString()
-    };
-    const {error:saveError}=await db.from('user_profiles').upsert(payload,{onConflict:'user_id'});
-    if(saveError)throw new Error('O Supabase recusou a atualização: '+saveError.message);
-
-    const {data:savedProfile,error:readError}=await db.from('user_profiles')
-      .select('*').eq('user_id',user.id).maybeSingle();
-    if(readError)throw new Error('Os dados foram enviados, mas não consegui confirmar o perfil: '+readError.message);
-    if(!savedProfile)throw new Error('O banco não retornou o perfil salvo. Verifique as permissões da tabela user_profiles.');
-
-    profile=savedProfile;
-    await loadProfile();
+    const profilePayload={user_id:user.id,full_name:name,username:username||null,bio,website_url,avatar_url,banner_url,is_private,updated_at:new Date().toISOString()};
+    let {data:savedProfile,error}=await db.from('user_profiles').update(profilePayload).eq('user_id',user.id).select().maybeSingle();
+    if(error)throw error;
+    if(!savedProfile){
+      const insertResult=await db.from('user_profiles').insert(profilePayload).select().single();
+      if(insertResult.error)throw insertResult.error;
+      savedProfile=insertResult.data;
+    }
+    // Atualiza a tela com a linha confirmada pelo Supabase, sem depender de uma
+    // segunda consulta que poderia retornar vazia por causa das políticas de leitura.
+    profile={...profile,...savedProfile};
+    const displayName=profile.full_name||'Sem Nome';
+    $('viewProfileName').innerHTML=esc(displayName)+verifiedBadge(profile.is_verified);
+    $('viewProfileUsername').textContent=profile.username?(profile.username.startsWith('@')?profile.username:'@'+profile.username):'@usuario';
+    $('viewProfileBio').textContent=profile.bio||'';
+    const profileLink=normalizeProfileLink(profile.website_url||'');
+    $('viewProfileLink').innerHTML=profileLink?'<a href="'+esc(profileLink)+'" target="_blank" rel="noopener noreferrer" class="profile-website-link"><i class="fa-solid fa-link"></i> '+esc(profile.website_url)+'</a>':'';
+    $('profilePrivacyBadge').textContent=profile.is_private?'🔒 Perfil Privado':'🔓 Perfil Público';
+    if(profile.avatar_url){$('profileBigAvatar').innerHTML=`<img src="${esc(profile.avatar_url)}">`;}
+    else{$('profileBigAvatar').textContent=(displayName[0]||'?').toUpperCase();}
+    if(profile.banner_url){$('bannerImg').src=profile.banner_url;$('bannerImg').classList.remove('hidden');}
+    else{$('bannerImg').classList.add('hidden');}
+    const {error:metadataError}=await db.auth.updateUser({data:{full_name:name,username:username||null}});
+    if(metadataError)console.warn('Perfil salvo, mas metadados Auth não foram atualizados:',metadataError.message);
     closeEditProfileModal();
-    showToast('Perfil atualizado!','Seu nome e seu @ foram salvos. 🐰',{type:'success'});
+    showToast('Perfil atualizado','Seu nome, @ e bio foram salvos. 🐰');
   } catch(err){
     console.error('Erro ao salvar perfil:',err);
-    status('profileStatus',err.message||'Não foi possível atualizar o perfil.');
+    status('profileStatus',err.message||'Não foi possível salvar. Tente novamente.');
   }
 }
+
+// Expõe explicitamente a função usada pelo botão do editor em scripts externos.
+window.saveProfile=saveProfile;
 
 async function switchProfileTab(tab){
   try{localStorage.setItem('cottontailProfileTab',tab);}catch(e){}
@@ -2755,29 +3154,29 @@ function clearRecentSearches(){
 async function inspectProfile(id){
   inspectedProfileId=id;
   const {data:loadedProfile,error:profileError}=await db.from('user_profiles').select('*').eq('user_id',id).maybeSingle();
-  if(profileError){console.error('Erro ao carregar perfil público:',profileError);showToast('Não foi possível abrir o perfil',profileError.message||'Tente novamente.');return;}
+  if(profileError){
+    console.error('Erro ao carregar perfil público:',profileError);
+    showToast('Não foi possível abrir o perfil',profileError.message||'Verifique sua conexão e tente novamente.');
+    return;
+  }
+  // Completa apenas campos ausentes com dados já carregados no feed ou nas conversas.
   const cachedProfile=chatProfiles[id]||{};
-  const u={...cachedProfile,...(loadedProfile||{})};
-  chatProfiles[id]=u;
+  let u=loadedProfile?{...cachedProfile,...loadedProfile}:cachedProfile;
+  if(u)chatProfiles[id]=u;
   let {data:posts}=await db.from('posts').select('*').eq('user_id',id);
   const {data:collabRows}=await db.from('post_collaborators').select('post_id').eq('invitee_id',id).eq('status','accepted');
   const collabIds=(collabRows||[]).map(x=>x.post_id);
   if(collabIds.length){const {data:collabPosts}=await db.from('posts').select('*').in('id',collabIds);posts=[...(posts||[]),...(collabPosts||[])];}
   const {data:pins}=await db.from('post_pins').select('post_id').eq('user_id',id);
   const pinnedIds=new Set((pins||[]).map(x=>x.post_id));(posts||[]).sort((a,b)=>(pinnedIds.has(b.id)?1:0)-(pinnedIds.has(a.id)?1:0));
-  const [followingResult,followersResult]=await Promise.all([
+  const [followingCountResult,followersCountResult]=await Promise.all([
     db.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',id),
     db.from('follows').select('*',{count:'exact',head:true}).eq('following_id',id)
   ]);
-  let fCount=followingResult.count,wCount=followersResult.count;
-  if(fCount==null||followingResult.error){
-    const fallback=await db.from('follows').select('following_id').eq('follower_id',id);
-    if(!fallback.error)fCount=(fallback.data||[]).length;
-  }
-  if(wCount==null||followersResult.error){
-    const fallback=await db.from('follows').select('follower_id').eq('following_id',id);
-    if(!fallback.error)wCount=(fallback.data||[]).length;
-  }
+  const fCount=followingCountResult.error?null:followingCountResult.count;
+  const wCount=followersCountResult.error?null:followersCountResult.count;
+  if(followingCountResult.error)console.warn('Erro ao contar seguindo:',followingCountResult.error);
+  if(followersCountResult.error)console.warn('Erro ao contar seguidores:',followersCountResult.error);
   let {data:isF}=await db.from('follows').select('*').eq('follower_id',user.id).eq('following_id',id).maybeSingle();
   let {data:isB}=await db.from('blocks').select('*').eq('blocker_id',user.id).eq('blocked_id',id).maybeSingle();
 
@@ -2796,14 +3195,15 @@ async function inspectProfile(id){
 
   $('modalProfileContent').innerHTML=`
     <div style="text-align:center">
-      <div class="profile-big-avatar" style="margin:0 auto;width:74px;height:74px">${u?.avatar_url?`<img src="${u.avatar_url}">`:(u?.full_name?u.full_name[0]:'?')}</div>
+      <div class="public-profile-banner">${u?.banner_url?'<img src="'+esc(u.banner_url)+'" alt="Capa do perfil">':''}</div>
+      <div class="profile-big-avatar" style="position:relative;margin:-38px auto 0;width:74px;height:74px">${u?.avatar_url?`<img src="${u.avatar_url}">`:(u?.full_name?u.full_name[0]:'?')}</div>
       <h3 style="margin:10px 0 2px 0">${esc(u?.full_name||'Usuário')}${verifiedBadge(u?.is_verified)}</h3>
-      <div class="muted">${esc(String(u?.username||'').trim().replace(/^@+/,'')?('@'+String(u.username).trim().replace(/^@+/,'')):'@usuario')} ${u?.is_private?'🔒':''}</div>
+      <div class="muted">${esc((u?.username||'').startsWith('@')?u.username:'@'+(u?.username||''))} ${u?.is_private?'🔒':''}</div>
       <p style="font-size:14px;margin:12px 0">${esc(u?.bio||'')}</p>
       ${u?.website_url?'<p style="margin:8px 0"><a class="profile-website-link" href="'+esc(normalizeProfileLink(u.website_url))+'" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-link"></i> '+esc(u.website_url)+'</a></p>':''}
       <div class="friend-stats">
-        <button onclick="loadUserConnections('${id}','followers')"><b>${wCount==null?'—':wCount}</b><span>Seguidores</span></button>
-        <button onclick="loadUserConnections('${id}','following')"><b>${fCount==null?'—':fCount}</b><span>Seguindo</span></button>
+        <button onclick="loadUserConnections('${id}','followers')"><b>${wCount??'—'}</b><span>Seguidores</span></button>
+        <button onclick="loadUserConnections('${id}','following')"><b>${fCount??'—'}</b><span>Seguindo</span></button>
         <button onclick="loadUserConnections('${id}','mutual')"><b>♡</b><span>Em comum</span></button>
       </div>
       <div id="friendConnections" class="friend-connections"></div>
@@ -3220,7 +3620,7 @@ async function loadNotifications(){
   if(markError)console.warn('Não foi possível marcar notificações como lidas:',markError.message);
   $('notifBadge').classList.add('hidden');
   const {data,error}=await db.from('notifications').select('*')
-    .eq('user_id',user.id).order('created_at',{ascending:false}).limit(30);
+    .eq('user_id',user.id).neq('type','message').order('created_at',{ascending:false}).limit(500);
   if(error){
     $('notifList').innerHTML='<p class="muted">Não foi possível carregar as notificações: '+esc(error.message)+'</p>';
     return;
@@ -3230,30 +3630,53 @@ async function loadNotifications(){
     $('notifList').innerHTML='<p class="muted">Nenhuma notificação por enquanto.</p>';
     return;
   }
-  const actorIds=[...new Set(data.map(n=>n.actor_id).filter(Boolean))];
+
+  // Agrupa curtidas e comentários da mesma publicação, mantendo o ator mais recente.
+  const grouped=[],activityGroups=new Map();
+  data.forEach(n=>{
+    if((n.type==='like'||n.type==='comment')&&n.post_id){
+      const key=n.type+':'+n.post_id;
+      if(activityGroups.has(key)){
+        const group=activityGroups.get(key);
+        group.count++;
+        if(new Date(n.created_at)>new Date(group.created_at))Object.assign(group,n,{count:group.count});
+      }else{
+        const group={...n,count:1};
+        activityGroups.set(key,group);
+        grouped.push(group);
+      }
+    }else grouped.push({...n,count:1});
+  });
+  grouped.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+
+  const actorIds=[...new Set(grouped.map(n=>n.actor_id).filter(Boolean))];
   let actorMap={};
   if(actorIds.length){
     const {data:actors}=await db.from('user_profiles').select('*').in('user_id',actorIds);
     (actors||[]).forEach(a=>actorMap[a.user_id]=a);
   }
-  $('notifList').innerHTML=data.map(n=>{
+  $('notifList').innerHTML=grouped.map(n=>{
     const actor=actorMap[n.actor_id]||{};
     const name=esc(actor.full_name||actor.username||'Alguém');
-    const text=notificationDescription(n.type);
+    const count=n.count||1;
+    let text=notificationDescription(n.type);
+    if(n.type==='like'&&count>1)text='e mais '+(count-1)+' '+(count===2?'pessoa curtiu':'pessoas curtiram')+' sua publicação. 🤍';
+    if(n.type==='comment'&&count>1)text='e mais '+(count-1)+' '+(count===2?'pessoa comentou':'pessoas comentaram')+' na sua publicação. 💬';
     const date=new Date(n.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
     const unread=!n.read;
     const avatar=actor.avatar_url
       ? '<img src="'+esc(actor.avatar_url)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'
       : '<i class="fa-solid '+notificationIcon(n.type)+'"></i>';
-    const collaborationActions=n.type==='post_collaboration'?`<div style="display:flex;gap:8px;margin-top:8px"><button onclick="event.stopPropagation();respondToCollaboration('${n.post_id}',true,'${n.id}')">Aceitar</button><button class="secondary" onclick="event.stopPropagation();respondToCollaboration('${n.post_id}',false,'${n.id}')">Recusar</button></div>`:'';
+    const collaborationActions=n.type==='post_collaboration'?'<div style="display:flex;gap:8px;margin-top:8px"><button onclick="event.stopPropagation();respondToCollaboration(\''+n.post_id+'\',true,\''+n.id+'\')">Aceitar</button><button class="secondary" onclick="event.stopPropagation();respondToCollaboration(\''+n.post_id+'\',false,\''+n.id+'\')">Recusar</button></div>':'';
     return `
       <div class="notif-item ${unread?'unread':''}" role="button" tabindex="0"
         onclick="openNotification('${n.id}','${n.actor_id||''}','${n.type||''}','${n.post_id||''}')"
-        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openNotification('${n.id}','${n.actor_id||''}','${n.type||''}','${n.post_id||''}')}">
+        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openNotification('${n.id}','${n.actor_id||''}','${n.type||''}','${n.post_id||''}') }">
         <div class="icon">${avatar}</div>
         <div class="notif-content">
           <div><b>${name}</b> ${text}</div>
           <div class="notif-time">${date}</div>
+          ${count>1?'<div class="muted" style="font-size:10px;margin-top:3px">'+count+' interações nesta publicação</div>':''}
           ${unread?'<div class="muted" style="font-size:10px;margin-top:3px">Nova</div>':''}
           ${collaborationActions}
         </div>
@@ -3356,31 +3779,14 @@ window.handleLoginClick = function(event) {
 </script>
 
 <script>
-/* PWA: verifica atualizações ao abrir o app e atualiza a tela após ativar a nova versão. */
+/* Instalação PWA do Cottontail: não intercepta chamadas do Supabase. */
 (function(){
   if(!('serviceWorker' in navigator)) return;
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('/sw.js',{scope:'/'})
+      .catch(function(error){console.warn('PWA: não foi possível registrar o service worker.',error);});
+  });
   let installPrompt=null;
-  let refreshing=false;
-  navigator.serviceWorker.addEventListener('controllerchange',function(){
-    if(refreshing)return;
-    refreshing=true;
-    window.location.reload();
-  });
-  let currentRegistration=null;
-  async function checkForAppUpdate(){
-    if(!currentRegistration)return;
-    try{await currentRegistration.update();}catch(error){console.warn('PWA: verificação de atualização indisponível.',error);}
-  }
-  window.addEventListener('load',async function(){
-    try{
-      currentRegistration=await navigator.serviceWorker.register('/sw.js',{scope:'/',updateViaCache:'none'});
-      await checkForAppUpdate();
-      if(currentRegistration.waiting)currentRegistration.waiting.postMessage({type:'SKIP_WAITING'});
-    }catch(error){console.warn('PWA: não foi possível registrar o service worker.',error);}
-  });
-  document.addEventListener('visibilitychange',function(){
-    if(document.visibilityState==='visible')checkForAppUpdate();
-  });
   window.addEventListener('beforeinstallprompt',function(event){
     event.preventDefault();
     installPrompt=event;
@@ -3388,11 +3794,11 @@ window.handleLoginClick = function(event) {
     const button=document.createElement('button');
     button.id='cottontailInstallButton';
     button.type='button';
-    button.textContent='＋ Install Cottontail';
-    button.setAttribute('aria-label','Install Cottontail app');
+    button.textContent='＋ Instalar Cottontail';
+    button.setAttribute('aria-label','Instalar aplicativo Cottontail');
     button.style.cssText='position:fixed;right:16px;bottom:145px;z-index:1200;border-radius:24px;padding:11px 16px;box-shadow:0 4px 18px rgba(0,0,0,.16);font-weight:700;';
     button.addEventListener('click',async function(){
-      if(!installPrompt)return;
+      if(!installPrompt) return;
       installPrompt.prompt();
       await installPrompt.userChoice;
       installPrompt=null;
@@ -3406,151 +3812,5 @@ window.handleLoginClick = function(event) {
   });
 })();
 </script>
-<script>
-/* Cottontail internationalization: English is the default interface language. */
-(function(){
-  const EN = {
-    "Seu espaço de hábitos e comunidade.":"Your space for habits and community.",
-    "Entrar":"Log in","Criar Conta":"Create account","Confirmo que tenho":"I confirm that I am",
-    "18 anos ou mais":"18 years of age or older","e entendo que esta versão beta é exclusiva para adultos.":"and understand that this beta version is for adults only.",
-    "E-mail":"Email","Senha":"Password","Esqueci minha senha":"Forgot password?",
-    "Nome Completo":"Full name","Nome de usuário (@)":"Username (@)",
-    "Obrigatório começar com @. Esse será seu identificador no Cottontail.":"Must start with @. This will be your Cottontail username.",
-    "Idioma Preferido":"Preferred language","Português (Brasil)":"Portuguese (Brazil)","Español":"Spanish","한국어 (Coreano)":"Korean",
-    "Foto de Perfil":"Profile photo","Escolher Foto":"Choose photo","Li e aceito os":"I have read and agree to the",
-    "Termos de Uso":"Terms of Use","Política de Privacidade":"Privacy Policy","Diretrizes da Comunidade":"Community Guidelines",
-    "Você poderá consultar esses documentos a qualquer momento.":"You can review these documents at any time.",
-    "Criar Perfil e Entrar":"Create account and log in","Início":"Home","Diário":"Diary","Explorar":"Explore",
-    "Mensagens":"Messages","Notificações":"Notifications","Perfil":"Profile","Todos":"All","Quem sigo":"Following",
-    "Criar publicação":"Create post","Dom":"Sun","Seg":"Mon","Ter":"Tue","Qua":"Wed","Qui":"Thu","Sex":"Fri","Sáb":"Sat",
-    "☀️ Café da manhã":"☀️ Breakfast","🍽️ Almoço":"🍽️ Lunch","🍎 Lanches":"🍎 Snacks","🌙 Jantar":"🌙 Dinner",
-    "💧 Água (ml)":"💧 Water (ml)","🏃 Exercícios":"🏃 Exercise","📝 Observações":"📝 Notes","Salvar meu dia":"Save my day",
-    "Conversas":"Chats","Conversa":"Chat","offline":"offline","Notificações 🤍":"Notifications 🤍",
-    "Nenhuma notificação por enquanto.":"No notifications yet.","Editar Perfil":"Edit profile","Nome":"Name",
-    "Seguindo":"Following","Seguidores":"Followers","🔓 Perfil Público":"🔓 Public profile","Posts":"Posts","Reposts":"Reposts",
-    "Nova publicação":"New post","Foto":"Photo","Publicar":"Publish","Confirmar ação":"Confirm action",
-    "Cancelar":"Cancel","Confirmar":"Confirm","Excluir postagem":"Delete post",
-    "Tem certeza que deseja apagar esta publicação permanentemente?":"Are you sure you want to permanently delete this post?",
-    "Excluir":"Delete","Excluir Conta Definitivamente":"Permanently delete account","Sim, Excluir":"Yes, delete",
-    "Denunciar publicação":"Report post","Ajude-nos a manter a comunidade segura.":"Help us keep the community safe.",
-    "Motivo da denúncia":"Reason for report","Gore / Violência Extrema":"Graphic violence / Extreme violence",
-    "Assédio / Bullying":"Harassment / Bullying","Automutilação":"Self-harm","Conteúdo Inadequado":"Inappropriate content",
-    "Enviar Denúncia":"Submit report","Configurações":"Settings","🎵 Galeria de Músicas (Player)":"🎵 Music library (player)",
-    "Lo-Fi Soft / Café":"Lo-Fi Soft / Café","Piano Relaxante":"Relaxing piano","Acústico Calmo":"Calm acoustic","Tocar":"Play",
-    "Tema da Interface":"Interface theme","☀️ Claro (Coreano Soft)":"☀️ Light (Soft)","🌙 Escuro (Dark Minimalist)":"🌙 Dark (Dark minimalist)",
-    "Fonte do Aplicativo":"App font","Padrão do Sistema":"System default","Serifada / Elegante (Georgia)":"Serif / Elegant (Georgia)",
-    "Monospaçada / Diário Digital (Courier)":"Monospaced / Digital diary (Courier)","Idioma preferido":"Preferred language",
-    "Receber mensagens apenas de quem eu sigo 💌":"Only receive messages from people I follow 💌",
-    "Administração Cottontail":"Cottontail administration","Ferramentas exclusivas da conta administradora.":"Tools exclusive to the administrator account.",
-    "Buscar perfil pelo @ ou nome":"Search profile by @ or name","Buscar":"Search","Privacidade e documentos":"Privacy and documents",
-    "Consulte as regras e saiba como seus dados são tratados.":"Review the rules and learn how your data is handled.",
-    "Solicitar ajuda sobre meus dados":"Request help with my data","Usuários Bloqueados":"Blocked users",
-    "Carregando bloqueios...":"Loading blocked users...","Sair da Conta":"Log out","Excluir Minha Conta":"Delete my account",
-    "Editar perfil":"Edit profile","Personalize seu cantinho":"Personalize your space","Salvar":"Save","Adicionar capa":"Add cover",
-    "Alterar foto":"Change photo","Bio":"Bio","Até 240 caracteres":"Up to 240 characters","Link do perfil":"Profile link",
-    "Perfil privado":"Private profile","Só seguidores aprovados poderão ver suas publicações":"Only approved followers can see your posts",
-    "Nenhum perfil encontrado.":"No profiles found.","Sem nome":"No name","Retirar selo":"Remove badge","Dar selo":"Add badge",
-    "Publicações":"Posts","Carregando publicações...":"Loading posts...","Erro ao carregar publicações:":"Error loading posts:",
-    "Esse perfil não tem publicações próprias.":"This profile has no original posts.","Publicações deste perfil":"Posts by this profile",
-    "Publicação com imagem":"Post with image","Comentários":"Comments","Apagar post":"Delete post",
-    "Carregando comentários...":"Loading comments...","Erro ao carregar comentários:":"Error loading comments:",
-    "Esta publicação ainda não tem comentários.":"This post has no comments yet.","Nenhum usuário bloqueado.":"No blocked users.",
-    "Desbloquear":"Unblock","Carregando conversas recentes...":"Loading recent chats...",
-    "Suas conversas recentes aparecerão aqui. Você também pode buscar alguém pelo @usuário.":"Your recent chats will appear here. You can also search for someone by username.",
-    "Conversou recentemente":"Recently contacted","Pessoa":"Person","Nenhum contato recente encontrado. Você pode buscar pelo @usuário.":"No recent contacts found. You can search by username.",
-    "Não foi possível carregar as conversas recentes. Você ainda pode buscar pelo @usuário.":"Could not load recent chats. You can still search by username.",
-    "Você ainda não publicou nada.":"You haven't posted anything yet.","Não foi possível carregar seus reposts.":"Could not load your reposts.",
-    "Nenhum repost ainda.":"No reposts yet.","Não foi possível carregar os números das interações.":"Could not load interaction counts.",
-    "Você repostou com comentário:":"You reposted with a comment:","Apagar meu repost com comentário":"Delete my repost with comment",
-    "Você repostou":"You reposted","Desfazer":"Undo","Nenhum repost encontrado.":"No reposts found.","Nenhum registro.":"No records.",
-    "Ver perfil":"View profile","Nenhuma publicação por aqui.":"No posts here yet.","Publicação fixada":"Pinned post",
-    "Fixar/desafixar no perfil":"Pin/unpin on profile","Compartilhar por mensagem":"Share via message",
-    "Excluir publicação":"Delete post","Denunciar":"Report","Repostado":"Reposted","Repostar":"Repost",
-    "comentários":"comments","Enviar":"Send","Usuário":"User","Ninguém por aqui ainda.":"No one here yet.",
-    "Compartilhar publicação":"Share post","Publicação original":"Original post","Escolha como repostar":"Choose how to repost",
-    "Repostar sem comentário":"Repost without comment","Repostar com comentário":"Repost with comment",
-    "Nenhum comentário ainda.":"No comments yet.","Erro ao carregar publicações.":"Error loading posts.",
-    "Em alta no Cottontail ✨":"Trending on Cottontail ✨",
-    "Publicações com mais curtidas, comentários e reposts":"Posts with the most likes, comments, and reposts",
-    "Ainda não há publicações para ranquear.":"There are no posts to rank yet.","Perfis":"Profiles",
-    "Seguir":"Follow","Nenhum perfil encontrado.":"No profiles found.","Não foi possível carregar esta lista.":"Could not load this list.",
-    "Não foi possível carregar os seguidores em comum.":"Could not load mutual followers.","Mensagem":"Message",
-    "Bloquear":"Block","Este perfil é privado. Siga-o para ver as publicações.":"This profile is private. Follow to see its posts.",
-    "Sem publicações.":"No posts.","Carregando pessoas...":"Loading people...",
-    "Não foi possível carregar os seguidores em comum.":"Could not load mutual followers.","Não foi possível carregar os perfis.":"Could not load profiles.",
-    "Nenhuma conversa recente.":"No recent chats.","Comece uma conversa":"Start a conversation",
-    "Esta é sua primeira conversa com":"This is your first conversation with","Envie um oi! 👋":"Say hello! 👋",
-    "Ainda não há mensagens. Diga oi para começar! 👋":"No messages yet. Say hello to get started! 👋",
-    "✓✓ Lida":"✓✓ Read","✓ Enviada":"✓ Sent","Apagar para mim":"Delete for me","Apagar para todos":"Delete for everyone",
-    "Não foi possível carregar as notificações:":"Could not load notifications:","Aceitar":"Accept","Recusar":"Decline",
-    "Nova":"New","digitando":"typing","online":"online","visto por último":"last seen",
-    "há algum tempo":"some time ago","Opções da mensagem":"Message options","Ver publicação compartilhada":"View shared post",
-    "Apagar mensagem?":"Delete message?","Esta mensagem será removida somente da sua conversa. A outra pessoa continuará vendo.":"This message will only be removed from your chat. The other person will still see it.",
-    "Apagar mensagem":"Delete message","Apagar para todos?":"Delete for everyone?","A mensagem será removida da conversa para você e para a outra pessoa.":"The message will be removed from the conversation for you and the other person.",
-    "Não foi possível apagar a mensagem":"Could not delete the message","Não foi possível apagar para todos":"Could not delete for everyone",
-    "Escolha uma conversa primeiro.":"Choose a chat first.","Enviando...":"Sending...","Erro ao enviar:":"Error sending:",
-    "curtiu sua publicação. 🤍":"liked your post. 🤍","repostou sua publicação. 🔁":"reposted your post. 🔁",
-    "começou a seguir você. ✨":"started following you. ✨","comentou na sua publicação. 💬":"commented on your post. 💬",
-    "enviou uma mensagem. 💌":"sent you a message. 💌","convidou você para colaborar em uma publicação. 🤝":"invited you to collaborate on a post. 🤝",
-    "interagiu com você.":"interacted with you.","Nenhuma notificação por enquanto.":"No notifications yet.",
-    "Não foi possível carregar as notificações:":"Could not load notifications:","Fechar aviso":"Close notification",
-    "Não foi possível carregar o serviço de login. Verifique sua conexão e atualize a página.":"Could not load the sign-in service. Check your connection and refresh the page.",
-    "O código de login não foi carregado corretamente. Atualize a página (Ctrl + F5) e tente novamente.":"The sign-in code did not load correctly. Refresh the page (Ctrl + F5) and try again.",
-    "Verificando...":"Checking...","Mínimo 6 caracteres":"At least 6 characters","Sua senha":"Your password",
-    "seuemail@exemplo.com":"youremail@example.com","Não foi possível carregar conversas:":"Could not load chats:",
-    "Não foi possível carregar mensagens:":"Could not load messages:","Não foi possível carregar contatos recentes.":"Could not load recent contacts.",
-    "Nenhuma conversa encontrada.":"No conversations found.","Publicação compartilhada":"Shared post",
-    "Sua sessão expirou. Entre novamente.":"Your session has expired. Please log in again.",
-    "Não foi possível carregar seu perfil:":"Could not load your profile:","Não consegui consultar seu perfil:":"Could not retrieve your profile:",
-    "Não consegui completar os dados do perfil:":"Could not complete profile details:"
-  };
-  const ATTRS=['placeholder','title','aria-label','alt'];
-  const clean=s=>String(s||'').replace(/\s+/g,' ').trim();
-  function translateTextNode(node){
-    if(!node||node.nodeType!==Node.TEXT_NODE)return;
-    const parent=node.parentElement;
-    if(!parent||/^(SCRIPT|STYLE|TEXTAREA|CODE|PRE)$/i.test(parent.tagName)||parent.isContentEditable)return;
-    const raw=node.nodeValue, key=clean(raw);
-    if(!key||!Object.prototype.hasOwnProperty.call(EN,key))return;
-    const leading=raw.match(/^\s*/)?.[0]||'', trailing=raw.match(/\s*$/)?.[0]||'';
-    node.nodeValue=leading+EN[key]+trailing;
-  }
-  function translateElement(el){
-    if(!(el instanceof Element))return;
-    ATTRS.forEach(a=>{if(el.hasAttribute(a)){const v=el.getAttribute(a),k=clean(v);if(EN[k])el.setAttribute(a,EN[k]);}});
-    if(el.matches('input,textarea')){['placeholder','aria-label','title'].forEach(a=>{const v=el.getAttribute(a),k=clean(v);if(v&&EN[k])el.setAttribute(a,EN[k]);});}
-  }
-  function walk(root){
-    if(!root)return;
-    if(root.nodeType===Node.TEXT_NODE){translateTextNode(root);return;}
-    if(root.nodeType===Node.ELEMENT_NODE){
-      if(/^(SCRIPT|STYLE|TEXTAREA|CODE|PRE)$/i.test(root.tagName)||root.isContentEditable)return;
-      translateElement(root);
-    }
-    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
-    let n;while((n=walker.nextNode()))translateTextNode(n);
-    if(root.querySelectorAll)root.querySelectorAll('*').forEach(translateElement);
-  }
-  window.applyCottontailTranslations=function(){
-    if(document.documentElement.lang!=='en')return;
-    walk(document.body);
-    document.documentElement.lang='en';
-  };
-  let queued=false;
-  const observer=new MutationObserver(records=>{
-    if(document.documentElement.lang!=='en'||queued)return;
-    queued=true;queueMicrotask(()=>{queued=false;records.forEach(r=>{
-      if(r.type==='characterData')translateTextNode(r.target);
-      else r.addedNodes.forEach(n=>walk(n));
-    });});
-  });
-  function start(){
-    window.applyCottontailTranslations();
-    observer.observe(document.body,{subtree:true,childList:true,characterData:true});
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
-})();
-</script>
 </body>
 </html>
-
