@@ -649,6 +649,7 @@ body.theme-dark .bubble-time{color:#b6c7c0}
 .ranking-stats{display:flex;gap:16px;font-size:11px;color:var(--muted);margin-top:9px}
 .ranking-stats i{margin-right:4px}
 
+.post-hashtag,.post-mention{color:var(--rose);font-weight:700;text-decoration:none;cursor:pointer}.post-hashtag:hover,.post-mention:hover{text-decoration:underline}.composer-mention-suggestions{position:relative;z-index:30;margin:4px 0 10px;background:var(--card-bg);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px #00000012;overflow:hidden;max-height:220px;overflow-y:auto}.composer-mention-suggestions.hidden{display:none}.composer-mention-option{width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--text);text-align:left;cursor:pointer}.composer-mention-option:last-child{border-bottom:0}.composer-mention-option .avatar{width:34px;height:34px;flex:none}.composer-mention-option small{display:block;color:var(--muted);margin-top:2px}
 /* Acabamento Cottontail — perfil oficial, composer e chat */
 .verified-badge{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;position:relative;width:18px;height:18px;margin-left:6px;border-radius:50%;background:linear-gradient(145deg,#62c5ff 0%,#2589ed 52%,#1765cf 100%);border:1.5px solid #fff;color:#fff;font-size:9px;line-height:1;box-shadow:0 2px 5px rgba(37,137,237,.28),0 0 0 1px rgba(37,137,237,.12);transform:translateY(-1px)}.verified-badge i{font-size:9px;font-weight:900;text-shadow:0 1px 1px rgba(0,50,120,.18)}.verified-badge::after{content:"";position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(56,151,240,.16);pointer-events:none}
 .feed-create-wrap{display:flex;justify-content:center;align-items:center;margin:0 0 16px}
@@ -1305,7 +1306,7 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
     <div class="tweet-composer-body">
       <div class="tweet-composer-avatar" id="composerAvatar"></div>
       <div class="tweet-composer-main">
-        <textarea id="modalPostContent" maxlength="2000" placeholder="O que está acontecendo?" aria-label="Texto da publicação"></textarea>
+        <textarea id="modalPostContent" maxlength="2000" placeholder="O que está acontecendo? Use #hashtags e @menções" aria-label="Texto da publicação" oninput="handleComposerMentionInput(event)" onkeydown="handleComposerMentionKeydown(event)"></textarea><div id="composerMentionSuggestions" class="composer-mention-suggestions hidden"></div>
         <div id="modalImagePreviewBox" class="tweet-image-preview hidden"><img id="modalImagePreview" class="hidden"><video id="modalVideoPreview" class="hidden" controls playsinline></video><button onclick="removeFloatingPostImage()" aria-label="Remover mídia"><i class="fa-solid fa-xmark"></i></button></div><p class="tweet-media-note">Fotos, GIFs e vídeos verticais ou horizontais. O limite de envio também depende do armazenamento.</p>
         <div class="tweet-composer-footer">
           <label class="tweet-composer-photo" title="Adicionar foto, GIF ou vídeo"><i class="fa-regular fa-images"></i><span>Mídia</span><input type="file" id="modalPostImageInput" accept="image/*,video/mp4,video/webm,video/quicktime,video/ogg" class="hidden" onchange="previewFloatingPostImage()"></label>
@@ -2317,6 +2318,56 @@ function previewFloatingPostImage(){
   reader.onerror=()=>{currentFloatingPostImage=null;status('modalPostStatus','Não foi possível carregar essa mídia. Tente novamente.');};reader.readAsDataURL(file);
 }
 function removeFloatingPostImage(){currentFloatingPostImage=null;$('modalPostImageInput').value='';$('modalImagePreview').removeAttribute('src');$('modalImagePreview').classList.add('hidden');const video=$('modalVideoPreview');video.pause();video.removeAttribute('src');video.load();video.classList.add('hidden');$('modalImagePreviewBox').classList.add('hidden');}
+function formatPostText(content){
+  let safe=esc(String(content||''));
+  safe=safe.replace(/(^|\\s)#([\\p{L}\\p{N}_]{2,40})/gu,(all,space,tag)=>space+'<a class="post-hashtag" href="#" onclick="searchHashtag(\''+tag.toLowerCase()+'\');return false">#'+tag+'</a>');
+  safe=safe.replace(/(^|[^\\w])@([a-zA-Z0-9_.]{3,20})/g,(all,prefix,handle)=>prefix+'<a class="post-mention" href="#" onclick="openMentionProfile(\''+handle.toLowerCase()+'\');return false">@'+handle+'</a>');
+  return safe.replace(/\\n/g,'<br>');
+}
+async function openMentionProfile(handle){
+  const {data,error}=await db.from('user_profiles').select('user_id').ilike('username',handle).maybeSingle();
+  if(error||!data){showToast('Perfil não encontrado','Confira se o nome de usuário está correto.');return;}
+  inspectProfile(data.user_id);
+}
+function searchHashtag(tag){
+  showPage('explore');
+  $('searchPeople').value='#'+tag;
+  searchProfilesAndPosts();
+}
+let composerMentionTimer=null;
+async function handleComposerMentionInput(event){
+  const field=event.target, before=field.value.slice(0,field.selectionStart);
+  const match=before.match(/(^|\\s)@([a-zA-Z0-9_.]{1,20})$/);
+  const box=$('composerMentionSuggestions');
+  clearTimeout(composerMentionTimer);
+  if(!match){box.classList.add('hidden');box.innerHTML='';return;}
+  const term=match[2];
+  composerMentionTimer=setTimeout(async()=>{
+    const {data,error}=await db.from('user_profiles').select('user_id,username,full_name,avatar_url').ilike('username',term+'%').neq('user_id',user.id).limit(6);
+    if(error||!data?.length){box.classList.add('hidden');box.innerHTML='';return;}
+    box.innerHTML=data.map(person=>{
+      const handle=String(person.username||'').replace(/^@/,'');
+      return '<button type="button" class="composer-mention-option" onclick="selectComposerMention(\''+esc(handle)+'\')"><span class="avatar">'+(person.avatar_url?'<img src="'+esc(person.avatar_url)+'">':esc((person.full_name||handle||'?')[0]))+'</span><span><b>'+esc(person.full_name||handle)+'</b><small>@'+esc(handle)+'</small></span></button>';
+    }).join('');
+    box.classList.remove('hidden');
+  },180);
+}
+function selectComposerMention(handle){
+  const field=$('modalPostContent'),start=field.selectionStart,end=field.selectionEnd;
+  const before=field.value.slice(0,start),after=field.value.slice(end);
+  const updated=before.replace(/(^|\\s)@[a-zA-Z0-9_.]{1,20}$/,(all,prefix)=>prefix+'@'+handle+' ')+after;
+  field.value=updated;const pos=updated.length-after.length;
+  field.focus();field.setSelectionRange(pos,pos);
+  $('composerMentionSuggestions').classList.add('hidden');
+  $('composerMentionSuggestions').innerHTML='';
+}
+function handleComposerMentionKeydown(event){
+  if(event.key==='Escape'){$('composerMentionSuggestions').classList.add('hidden');return;}
+  if(event.key==='Enter'&&!$('composerMentionSuggestions').classList.contains('hidden')){
+    const first=$('composerMentionSuggestions').querySelector('button');
+    if(first){event.preventDefault();first.click();}
+  }
+}
 function postMediaHtml(url){if(!url)return '';const clean=String(url).split('?')[0].toLowerCase();if(!/\.(mp4|webm|mov|m4v|ogv)$/.test(clean))return '<img src="'+esc(url)+'" class="post-media" loading="lazy" decoding="async" alt="Mídia da publicação">';return '<video class="post-video" controls playsinline preload="metadata" src="'+esc(url)+'" onloadedmetadata="this.classList.toggle(\'post-video-portrait\',this.videoHeight>this.videoWidth)"></video>';}
 
 async function submitFloatingPost(){
@@ -2821,7 +2872,7 @@ function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false,
         </div>
         <div style="position:relative"><button class="ghost" onclick="togglePostMenu('${p.id}',this)" style="padding:6px 10px;font-size:18px">⋯</button><div id="post-menu-${p.id}" class="post-options-menu message-options-menu hidden" style="position:absolute;right:0;top:30px;z-index:25;background:var(--card,#fff);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:175px;box-shadow:0 5px 18px #0002">${isMine?`<button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" type="button" onclick="return window.handlePinPostClick(event,'${p.id}')"><i class="fa-solid fa-thumbtack"></i> Fixar/desafixar no perfil</button><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="sharePostByMessage('${p.id}')"><i class="fa-solid fa-paper-plane"></i> Compartilhar por mensagem</button><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0;color:var(--red)" onclick="openDeleteConfirmModal('${p.id}')"><i class="fa-solid fa-trash"></i> Excluir publicação</button>`:`<button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="sharePostByMessage('${p.id}')"><i class="fa-solid fa-paper-plane"></i> Compartilhar por mensagem</button><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="openReportModal('${p.id}')"><i class="fa-solid fa-triangle-exclamation"></i> Denunciar</button>`}</div></div>
       </div>
-      <p style="margin:12px 0;line-height:1.4">${esc(p.content).replace(/\n/g,'<br>')}</p>
+      <p style="margin:12px 0;line-height:1.4">${formatPostText(p.content)}</p>
       ${postMediaHtml(p.media_url)}
       ${interactive?`
         <div class="post-actions">
