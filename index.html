@@ -650,6 +650,7 @@ body.theme-dark .bubble-time{color:#b6c7c0}
 .ranking-stats i{margin-right:4px}
 
 .post-hashtag,.post-mention{color:var(--rose);font-weight:700;text-decoration:none;cursor:pointer}.post-hashtag:hover,.post-mention:hover{text-decoration:underline}.composer-mention-suggestions{position:relative;z-index:30;margin:4px 0 10px;background:var(--card-bg);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px #00000012;overflow:hidden;max-height:220px;overflow-y:auto}.composer-mention-suggestions.hidden{display:none}.composer-mention-option{width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--text);text-align:left;cursor:pointer}.composer-mention-option:last-child{border-bottom:0}.composer-mention-option .avatar{width:34px;height:34px;flex:none}.composer-mention-option small{display:block;color:var(--muted);margin-top:2px}
+.trending-hashtags{margin:4px 0 22px;padding-bottom:16px;border-bottom:1px solid var(--line)}.trending-hashtag-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:8px}.trending-hashtag-chip{display:flex;align-items:center;gap:8px;min-width:0;padding:10px 11px;border:1px solid var(--line);border-radius:12px;background:var(--card-bg);color:var(--text);text-align:left;cursor:pointer;transition:transform .15s,border-color .15s}.trending-hashtag-chip:hover{transform:translateY(-1px);border-color:var(--rose)}.trending-hashtag-rank{display:grid;place-items:center;flex:none;width:23px;height:23px;border-radius:50%;background:rgba(212,165,165,.16);color:var(--rose);font-size:11px;font-weight:800}.trending-hashtag-chip>span:nth-child(2){font-weight:750;color:var(--rose);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.trending-hashtag-chip small{margin-left:auto;white-space:nowrap;color:var(--muted);font-size:10px}
 /* Acabamento Cottontail — perfil oficial, composer e chat */
 .verified-badge{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;position:relative;width:18px;height:18px;margin-left:6px;border-radius:50%;background:linear-gradient(145deg,#62c5ff 0%,#2589ed 52%,#1765cf 100%);border:1.5px solid #fff;color:#fff;font-size:9px;line-height:1;box-shadow:0 2px 5px rgba(37,137,237,.28),0 0 0 1px rgba(37,137,237,.12);transform:translateY(-1px)}.verified-badge i{font-size:9px;font-weight:900;text-shadow:0 1px 1px rgba(0,50,120,.18)}.verified-badge::after{content:"";position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(56,151,240,.16);pointer-events:none}
 .feed-create-wrap{display:flex;justify-content:center;align-items:center;margin:0 0 16px}
@@ -3047,6 +3048,20 @@ async function addComment(postId,postOwnerId){
 }
 
 /* EXPLORAR */
+function renderTrendingHashtags(posts){
+  const counts={};
+  (posts||[]).forEach(post=>{
+    const matches=String(post.content||'').matchAll(/(^|\s)#([\p{L}\p{N}_]{2,40})/gu);
+    for(const match of matches){
+      const tag=match[2].toLocaleLowerCase('pt-BR');
+      counts[tag]=(counts[tag]||0)+1;
+    }
+  });
+  const trending=Object.entries(counts).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'pt-BR')).slice(0,8);
+  if(!trending.length)return '<section class="trending-hashtags"><div class="explore-ranking-heading"><div><h3># Hashtags em alta</h3><p class="muted">Os assuntos mais usados nas publicações recentes</p></div></div><p class="muted" style="font-size:12px">Ainda não há hashtags suficientes. Use # em suas publicações para começar!</p></section>';
+  return '<section class="trending-hashtags"><div class="explore-ranking-heading"><div><h3># Hashtags em alta</h3><p class="muted">Mais usadas nas publicações recentes</p></div><span class="ranking-pill">TOP '+trending.length+'</span></div><div class="trending-hashtag-list">'+trending.map(([tag,count],index)=>'<button type="button" class="trending-hashtag-chip" onclick="searchHashtag(\''+esc(tag)+'\')"><span class="trending-hashtag-rank">'+(index+1)+'</span><span>#'+esc(tag)+'</span><small>'+count+' '+(count===1?'publicação':'publicações')+'</small></button>').join('')+'</div></section>';
+}
+
 async function searchProfilesAndPosts(){
   let q=$('searchPeople').value.trim().replace(/^@/,'').toLowerCase();
 
@@ -3070,6 +3085,7 @@ async function searchProfilesAndPosts(){
     (repostsRes.data||[]).forEach(x=>reposts[x.post_id]=(reposts[x.post_id]||0)+1);
     const ranked=(posts||[]).slice().sort((a,b)=>((likes[b.id]||0)+2*(comments[b.id]||0)+3*(reposts[b.id]||0))-((likes[a.id]||0)+2*(comments[a.id]||0)+3*(reposts[a.id]||0)));
     $('peopleList').innerHTML=`
+      ${renderTrendingHashtags(posts)}
       <div class="explore-ranking-heading"><div><h3>Em alta no Cottontail ✨</h3><p class="muted">Publicações com mais curtidas, comentários e reposts</p></div><span class="ranking-pill">TOP ${ranked.length}</span></div>
       ${ranked.map((p,index)=>`
         <article class="ranking-post"><div class="ranking-position">${index+1}</div><div class="ranking-post-content">
