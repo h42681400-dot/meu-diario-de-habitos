@@ -3,7 +3,7 @@ name: Build Cottontail Android APK
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, android-app]
     paths:
       - 'package.json'
       - 'capacitor.config.json'
@@ -47,18 +47,21 @@ jobs:
       - name: Generate Android project
         run: npx cap add android
 
-      - name: Configure Firebase for Android
+      - name: Configure Firebase for Android (optional)
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
-          if [ -z "$GOOGLE_SERVICES_JSON" ]; then
-            echo "GitHub secret GOOGLE_SERVICES_JSON is missing."
-            exit 1
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+            printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+            node -e "JSON.parse(require('fs').readFileSync('android/app/google-services.json', 'utf8')); console.log('Firebase config JSON validated.')"
+            echo "HAS_FIREBASE=true" >> "$GITHUB_ENV"
+          else
+            echo "HAS_FIREBASE=false" >> "$GITHUB_ENV"
+            echo "Firebase não configurado: o APK será criado sem push nativo. As notificações internas do site continuam disponíveis."
           fi
-          printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
-          node -e "JSON.parse(require('fs').readFileSync('android/app/google-services.json', 'utf8')); console.log('Firebase config JSON validated.')"
 
       - name: Enable Firebase Google Services plugin
+        if: env.HAS_FIREBASE == 'true'
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -67,15 +70,15 @@ jobs:
           app = Path("android/app/build.gradle")
           root_text = root.read_text()
           if "com.google.gms:google-services" not in root_text:
-              match = re.search(r"dependencies\s*\{", root_text)
+              match = re.search(r"dependencies\\s*\\{", root_text)
               if not match:
                   raise SystemExit("Não encontrei o bloco dependencies em android/build.gradle")
               pos = match.end()
-              root_text = root_text[:pos] + "\n        classpath 'com.google.gms:google-services:4.4.2'" + root_text[pos:]
+              root_text = root_text[:pos] + "\\n        classpath 'com.google.gms:google-services:4.4.2'" + root_text[pos:]
               root.write_text(root_text)
           app_text = app.read_text()
           if "com.google.gms.google-services" not in app_text:
-              app.write_text(app_text.rstrip() + "\n\napply plugin: 'com.google.gms.google-services'\n")
+              app.write_text(app_text.rstrip() + "\\n\\napply plugin: 'com.google.gms.google-services'\\n")
           print("Plugin Google Services configurado.")
           PY
 
