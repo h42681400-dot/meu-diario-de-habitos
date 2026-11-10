@@ -1980,14 +1980,19 @@ db.auth.onAuthStateChange((_event,session)=>{
   setTimeout(async()=>{
     if(!user || user.id!==nextUser.id) return;
     try{
-      await ensureProfile();
+      // O perfil visual deve ser carregado independentemente de falhas auxiliares
+      // na rotina de recuperação/validação do cadastro.
+      try{await ensureProfile();}
+      catch(profileEnsureError){console.warn('Aviso ao verificar cadastro do perfil:',profileEnsureError);}
+      await loadProfile();
+
       const {data:adminCheck,error:adminCheckError}=await db.rpc('is_cottontail_admin');
       isCottontailAdmin=!adminCheckError&&adminCheck===true;
       if($('adminPanel'))$('adminPanel').classList.toggle('hidden',!isCottontailAdmin);
-    updateMyPresence();
-    if(presenceTimer)clearInterval(presenceTimer);
-    presenceTimer=setInterval(updateMyPresence,30000);
-    await Promise.all([loadMonth(),loadProfile(),loadFeed('all'),checkUnreadBadges()]);
+      updateMyPresence();
+      if(presenceTimer)clearInterval(presenceTimer);
+      presenceTimer=setInterval(updateMyPresence,30000);
+      await Promise.all([loadMonth(),loadFeed('all'),checkUnreadBadges()]);
       await startNotificationPolling();
       let savedPage='feed';try{savedPage=localStorage.getItem('cottontailActivePage')||'feed';}catch(e){}
       const validPages=['feed','diary','explore','messages','notifications','profile'];
