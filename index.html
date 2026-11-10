@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#d4a5a5">
@@ -855,7 +855,7 @@ html body .conversation-unread{
         <label>Idioma Preferido</label>
         <select id="regLanguage">
           <option value="pt-BR">🇧🇷 Português (Brasil)</option>
-          <option value="en">🇺🇸 English</option>
+          <option value="en" selected>🇺🇸 English</option>
           <option value="es">🇪🇸 Español</option>
           <option value="ko">🇰🇷 한국어 (Coreano)</option>
         </select>
@@ -1349,19 +1349,7 @@ function esc(s=''){
 }
 
 /* IDIOMA PREFERIDO: usa as preferências de idioma do navegador */
-function detectPreferredLanguage(){
-  const preferences=Array.isArray(navigator.languages)&&navigator.languages.length
-    ?navigator.languages
-    :[navigator.language||navigator.userLanguage||'pt-BR'];
-  for(const raw of preferences){
-    const lang=String(raw||'').toLowerCase();
-    if(lang.startsWith('pt'))return 'pt-BR';
-    if(lang.startsWith('en'))return 'en';
-    if(lang.startsWith('es'))return 'es';
-    if(lang.startsWith('ko'))return 'ko';
-  }
-  return 'pt-BR';
-}
+function detectPreferredLanguage(){return 'en';}
 window.addEventListener('DOMContentLoaded',()=>{
   const langSelect=$('regLanguage');
   if(langSelect&&!langSelect.dataset.userChosen)langSelect.value=detectPreferredLanguage();
@@ -1642,7 +1630,7 @@ async function ensureProfile(){
     user_id:user.id,
     full_name:String(meta.full_name||meta.name||'').trim(),
     username:String(meta.username||'').trim().replace(/^@/,'').toLowerCase()||null,
-    language:meta.language||detectPreferredLanguage(),
+    language:'en',
     bio:'',
     is_private:false
   },{onConflict:'user_id'});
@@ -2149,9 +2137,19 @@ async function loadProfile(){
   if(!String(profile.username||'').trim())profile.username=String(meta.username||cached.username||'').trim();
   chatProfiles[user.id]={...cached,...profile};
 
-  if(!profile.language)profile.language=detectPreferredLanguage();
+  // Migração única: define inglês como padrão para contas já existentes.
+  const languageMigrationKey='cottontail_english_default_v1_'+user.id;
+  let englishDefaultApplied=false;
+  try{englishDefaultApplied=localStorage.getItem(languageMigrationKey)==='1';}catch(e){}
+  if(!englishDefaultApplied){
+    profile.language='en';
+    try{localStorage.setItem(languageMigrationKey,'1');}catch(e){}
+    db.from('user_profiles').update({language:'en'}).eq('user_id',user.id)
+      .then(({error})=>{if(error)console.warn('Não foi possível atualizar o idioma padrão do perfil:',error.message);});
+  }else if(!profile.language){profile.language='en';}
   if($('settingsLanguage'))$('settingsLanguage').value=profile.language;
   document.documentElement.lang=profile.language;
+  window.applyCottontailTranslations?.();
   const username=String(profile.username||'').trim().replace(/^@+/,'');
   const displayName=$('viewProfileName');
   const displayUsername=$('viewProfileUsername');
@@ -3389,6 +3387,151 @@ window.handleLoginClick = function(event) {
     document.getElementById('cottontailInstallButton')?.remove();
     installPrompt=null;
   });
+})();
+</script>
+<script>
+/* Cottontail internationalization: English is the default interface language. */
+(function(){
+  const EN = {
+    "Seu espaço de hábitos e comunidade.":"Your space for habits and community.",
+    "Entrar":"Log in","Criar Conta":"Create account","Confirmo que tenho":"I confirm that I am",
+    "18 anos ou mais":"18 years of age or older","e entendo que esta versão beta é exclusiva para adultos.":"and understand that this beta version is for adults only.",
+    "E-mail":"Email","Senha":"Password","Esqueci minha senha":"Forgot password?",
+    "Nome Completo":"Full name","Nome de usuário (@)":"Username (@)",
+    "Obrigatório começar com @. Esse será seu identificador no Cottontail.":"Must start with @. This will be your Cottontail username.",
+    "Idioma Preferido":"Preferred language","Português (Brasil)":"Portuguese (Brazil)","Español":"Spanish","한국어 (Coreano)":"Korean",
+    "Foto de Perfil":"Profile photo","Escolher Foto":"Choose photo","Li e aceito os":"I have read and agree to the",
+    "Termos de Uso":"Terms of Use","Política de Privacidade":"Privacy Policy","Diretrizes da Comunidade":"Community Guidelines",
+    "Você poderá consultar esses documentos a qualquer momento.":"You can review these documents at any time.",
+    "Criar Perfil e Entrar":"Create account and log in","Início":"Home","Diário":"Diary","Explorar":"Explore",
+    "Mensagens":"Messages","Notificações":"Notifications","Perfil":"Profile","Todos":"All","Quem sigo":"Following",
+    "Criar publicação":"Create post","Dom":"Sun","Seg":"Mon","Ter":"Tue","Qua":"Wed","Qui":"Thu","Sex":"Fri","Sáb":"Sat",
+    "☀️ Café da manhã":"☀️ Breakfast","🍽️ Almoço":"🍽️ Lunch","🍎 Lanches":"🍎 Snacks","🌙 Jantar":"🌙 Dinner",
+    "💧 Água (ml)":"💧 Water (ml)","🏃 Exercícios":"🏃 Exercise","📝 Observações":"📝 Notes","Salvar meu dia":"Save my day",
+    "Conversas":"Chats","Conversa":"Chat","offline":"offline","Notificações 🤍":"Notifications 🤍",
+    "Nenhuma notificação por enquanto.":"No notifications yet.","Editar Perfil":"Edit profile","Nome":"Name",
+    "Seguindo":"Following","Seguidores":"Followers","🔓 Perfil Público":"🔓 Public profile","Posts":"Posts","Reposts":"Reposts",
+    "Nova publicação":"New post","Foto":"Photo","Publicar":"Publish","Confirmar ação":"Confirm action",
+    "Cancelar":"Cancel","Confirmar":"Confirm","Excluir postagem":"Delete post",
+    "Tem certeza que deseja apagar esta publicação permanentemente?":"Are you sure you want to permanently delete this post?",
+    "Excluir":"Delete","Excluir Conta Definitivamente":"Permanently delete account","Sim, Excluir":"Yes, delete",
+    "Denunciar publicação":"Report post","Ajude-nos a manter a comunidade segura.":"Help us keep the community safe.",
+    "Motivo da denúncia":"Reason for report","Gore / Violência Extrema":"Graphic violence / Extreme violence",
+    "Assédio / Bullying":"Harassment / Bullying","Automutilação":"Self-harm","Conteúdo Inadequado":"Inappropriate content",
+    "Enviar Denúncia":"Submit report","Configurações":"Settings","🎵 Galeria de Músicas (Player)":"🎵 Music library (player)",
+    "Lo-Fi Soft / Café":"Lo-Fi Soft / Café","Piano Relaxante":"Relaxing piano","Acústico Calmo":"Calm acoustic","Tocar":"Play",
+    "Tema da Interface":"Interface theme","☀️ Claro (Coreano Soft)":"☀️ Light (Soft)","🌙 Escuro (Dark Minimalist)":"🌙 Dark (Dark minimalist)",
+    "Fonte do Aplicativo":"App font","Padrão do Sistema":"System default","Serifada / Elegante (Georgia)":"Serif / Elegant (Georgia)",
+    "Monospaçada / Diário Digital (Courier)":"Monospaced / Digital diary (Courier)","Idioma preferido":"Preferred language",
+    "Receber mensagens apenas de quem eu sigo 💌":"Only receive messages from people I follow 💌",
+    "Administração Cottontail":"Cottontail administration","Ferramentas exclusivas da conta administradora.":"Tools exclusive to the administrator account.",
+    "Buscar perfil pelo @ ou nome":"Search profile by @ or name","Buscar":"Search","Privacidade e documentos":"Privacy and documents",
+    "Consulte as regras e saiba como seus dados são tratados.":"Review the rules and learn how your data is handled.",
+    "Solicitar ajuda sobre meus dados":"Request help with my data","Usuários Bloqueados":"Blocked users",
+    "Carregando bloqueios...":"Loading blocked users...","Sair da Conta":"Log out","Excluir Minha Conta":"Delete my account",
+    "Editar perfil":"Edit profile","Personalize seu cantinho":"Personalize your space","Salvar":"Save","Adicionar capa":"Add cover",
+    "Alterar foto":"Change photo","Bio":"Bio","Até 240 caracteres":"Up to 240 characters","Link do perfil":"Profile link",
+    "Perfil privado":"Private profile","Só seguidores aprovados poderão ver suas publicações":"Only approved followers can see your posts",
+    "Nenhum perfil encontrado.":"No profiles found.","Sem nome":"No name","Retirar selo":"Remove badge","Dar selo":"Add badge",
+    "Publicações":"Posts","Carregando publicações...":"Loading posts...","Erro ao carregar publicações:":"Error loading posts:",
+    "Esse perfil não tem publicações próprias.":"This profile has no original posts.","Publicações deste perfil":"Posts by this profile",
+    "Publicação com imagem":"Post with image","Comentários":"Comments","Apagar post":"Delete post",
+    "Carregando comentários...":"Loading comments...","Erro ao carregar comentários:":"Error loading comments:",
+    "Esta publicação ainda não tem comentários.":"This post has no comments yet.","Nenhum usuário bloqueado.":"No blocked users.",
+    "Desbloquear":"Unblock","Carregando conversas recentes...":"Loading recent chats...",
+    "Suas conversas recentes aparecerão aqui. Você também pode buscar alguém pelo @usuário.":"Your recent chats will appear here. You can also search for someone by username.",
+    "Conversou recentemente":"Recently contacted","Pessoa":"Person","Nenhum contato recente encontrado. Você pode buscar pelo @usuário.":"No recent contacts found. You can search by username.",
+    "Não foi possível carregar as conversas recentes. Você ainda pode buscar pelo @usuário.":"Could not load recent chats. You can still search by username.",
+    "Você ainda não publicou nada.":"You haven't posted anything yet.","Não foi possível carregar seus reposts.":"Could not load your reposts.",
+    "Nenhum repost ainda.":"No reposts yet.","Não foi possível carregar os números das interações.":"Could not load interaction counts.",
+    "Você repostou com comentário:":"You reposted with a comment:","Apagar meu repost com comentário":"Delete my repost with comment",
+    "Você repostou":"You reposted","Desfazer":"Undo","Nenhum repost encontrado.":"No reposts found.","Nenhum registro.":"No records.",
+    "Ver perfil":"View profile","Nenhuma publicação por aqui.":"No posts here yet.","Publicação fixada":"Pinned post",
+    "Fixar/desafixar no perfil":"Pin/unpin on profile","Compartilhar por mensagem":"Share via message",
+    "Excluir publicação":"Delete post","Denunciar":"Report","Repostado":"Reposted","Repostar":"Repost",
+    "comentários":"comments","Enviar":"Send","Usuário":"User","Ninguém por aqui ainda.":"No one here yet.",
+    "Compartilhar publicação":"Share post","Publicação original":"Original post","Escolha como repostar":"Choose how to repost",
+    "Repostar sem comentário":"Repost without comment","Repostar com comentário":"Repost with comment",
+    "Nenhum comentário ainda.":"No comments yet.","Erro ao carregar publicações.":"Error loading posts.",
+    "Em alta no Cottontail ✨":"Trending on Cottontail ✨",
+    "Publicações com mais curtidas, comentários e reposts":"Posts with the most likes, comments, and reposts",
+    "Ainda não há publicações para ranquear.":"There are no posts to rank yet.","Perfis":"Profiles",
+    "Seguir":"Follow","Nenhum perfil encontrado.":"No profiles found.","Não foi possível carregar esta lista.":"Could not load this list.",
+    "Não foi possível carregar os seguidores em comum.":"Could not load mutual followers.","Mensagem":"Message",
+    "Bloquear":"Block","Este perfil é privado. Siga-o para ver as publicações.":"This profile is private. Follow to see its posts.",
+    "Sem publicações.":"No posts.","Carregando pessoas...":"Loading people...",
+    "Não foi possível carregar os seguidores em comum.":"Could not load mutual followers.","Não foi possível carregar os perfis.":"Could not load profiles.",
+    "Nenhuma conversa recente.":"No recent chats.","Comece uma conversa":"Start a conversation",
+    "Esta é sua primeira conversa com":"This is your first conversation with","Envie um oi! 👋":"Say hello! 👋",
+    "Ainda não há mensagens. Diga oi para começar! 👋":"No messages yet. Say hello to get started! 👋",
+    "✓✓ Lida":"✓✓ Read","✓ Enviada":"✓ Sent","Apagar para mim":"Delete for me","Apagar para todos":"Delete for everyone",
+    "Não foi possível carregar as notificações:":"Could not load notifications:","Aceitar":"Accept","Recusar":"Decline",
+    "Nova":"New","digitando":"typing","online":"online","visto por último":"last seen",
+    "há algum tempo":"some time ago","Opções da mensagem":"Message options","Ver publicação compartilhada":"View shared post",
+    "Apagar mensagem?":"Delete message?","Esta mensagem será removida somente da sua conversa. A outra pessoa continuará vendo.":"This message will only be removed from your chat. The other person will still see it.",
+    "Apagar mensagem":"Delete message","Apagar para todos?":"Delete for everyone?","A mensagem será removida da conversa para você e para a outra pessoa.":"The message will be removed from the conversation for you and the other person.",
+    "Não foi possível apagar a mensagem":"Could not delete the message","Não foi possível apagar para todos":"Could not delete for everyone",
+    "Escolha uma conversa primeiro.":"Choose a chat first.","Enviando...":"Sending...","Erro ao enviar:":"Error sending:",
+    "curtiu sua publicação. 🤍":"liked your post. 🤍","repostou sua publicação. 🔁":"reposted your post. 🔁",
+    "começou a seguir você. ✨":"started following you. ✨","comentou na sua publicação. 💬":"commented on your post. 💬",
+    "enviou uma mensagem. 💌":"sent you a message. 💌","convidou você para colaborar em uma publicação. 🤝":"invited you to collaborate on a post. 🤝",
+    "interagiu com você.":"interacted with you.","Nenhuma notificação por enquanto.":"No notifications yet.",
+    "Não foi possível carregar as notificações:":"Could not load notifications:","Fechar aviso":"Close notification",
+    "Não foi possível carregar o serviço de login. Verifique sua conexão e atualize a página.":"Could not load the sign-in service. Check your connection and refresh the page.",
+    "O código de login não foi carregado corretamente. Atualize a página (Ctrl + F5) e tente novamente.":"The sign-in code did not load correctly. Refresh the page (Ctrl + F5) and try again.",
+    "Verificando...":"Checking...","Mínimo 6 caracteres":"At least 6 characters","Sua senha":"Your password",
+    "seuemail@exemplo.com":"youremail@example.com","Não foi possível carregar conversas:":"Could not load chats:",
+    "Não foi possível carregar mensagens:":"Could not load messages:","Não foi possível carregar contatos recentes.":"Could not load recent contacts.",
+    "Nenhuma conversa encontrada.":"No conversations found.","Publicação compartilhada":"Shared post",
+    "Sua sessão expirou. Entre novamente.":"Your session has expired. Please log in again.",
+    "Não foi possível carregar seu perfil:":"Could not load your profile:","Não consegui consultar seu perfil:":"Could not retrieve your profile:",
+    "Não consegui completar os dados do perfil:":"Could not complete profile details:"
+  };
+  const ATTRS=['placeholder','title','aria-label','alt'];
+  const clean=s=>String(s||'').replace(/\s+/g,' ').trim();
+  function translateTextNode(node){
+    if(!node||node.nodeType!==Node.TEXT_NODE)return;
+    const parent=node.parentElement;
+    if(!parent||/^(SCRIPT|STYLE|TEXTAREA|CODE|PRE)$/i.test(parent.tagName)||parent.isContentEditable)return;
+    const raw=node.nodeValue, key=clean(raw);
+    if(!key||!Object.prototype.hasOwnProperty.call(EN,key))return;
+    const leading=raw.match(/^\s*/)?.[0]||'', trailing=raw.match(/\s*$/)?.[0]||'';
+    node.nodeValue=leading+EN[key]+trailing;
+  }
+  function translateElement(el){
+    if(!(el instanceof Element))return;
+    ATTRS.forEach(a=>{if(el.hasAttribute(a)){const v=el.getAttribute(a),k=clean(v);if(EN[k])el.setAttribute(a,EN[k]);}});
+    if(el.matches('input,textarea')){['placeholder','aria-label','title'].forEach(a=>{const v=el.getAttribute(a),k=clean(v);if(v&&EN[k])el.setAttribute(a,EN[k]);});}
+  }
+  function walk(root){
+    if(!root)return;
+    if(root.nodeType===Node.TEXT_NODE){translateTextNode(root);return;}
+    if(root.nodeType===Node.ELEMENT_NODE){
+      if(/^(SCRIPT|STYLE|TEXTAREA|CODE|PRE)$/i.test(root.tagName)||root.isContentEditable)return;
+      translateElement(root);
+    }
+    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+    let n;while((n=walker.nextNode()))translateTextNode(n);
+    if(root.querySelectorAll)root.querySelectorAll('*').forEach(translateElement);
+  }
+  window.applyCottontailTranslations=function(){
+    if(document.documentElement.lang!=='en')return;
+    walk(document.body);
+    document.documentElement.lang='en';
+  };
+  let queued=false;
+  const observer=new MutationObserver(records=>{
+    if(document.documentElement.lang!=='en'||queued)return;
+    queued=true;queueMicrotask(()=>{queued=false;records.forEach(r=>{
+      if(r.type==='characterData')translateTextNode(r.target);
+      else r.addedNodes.forEach(n=>walk(n));
+    });});
+  });
+  function start(){
+    window.applyCottontailTranslations();
+    observer.observe(document.body,{subtree:true,childList:true,characterData:true});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
 </script>
 </body>
