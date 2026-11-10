@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cottontail-shell-v2';
+const CACHE_NAME = 'cottontail-shell-v1';
 const APP_SHELL = ['/'];
 
 self.addEventListener('install', event => {
@@ -12,26 +12,23 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(key => key.startsWith('cottontail-shell-') && key !== CACHE_NAME).map(key => caches.delete(key))))
+      .then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))))
       .then(() => self.clients.claim())
   );
-});
-
-self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('fetch', event => {
   const request = event.request;
   const url = new URL(request.url);
 
-  // Never cache authentication, private data, or external Supabase requests.
+  // Não armazenar autenticação, dados privados ou chamadas externas do Supabase.
   if (request.method !== 'GET' || url.origin !== self.location.origin) return;
 
-  // Network-first navigation ensures installed apps receive the latest HTML.
+  // Network-first apenas para navegação: o site abre normalmente online e
+  // usa a última versão em cache como fallback se a conexão cair.
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request, { cache: 'no-store' })
+      fetch(request)
         .then(response => {
           if (response && response.ok) {
             const copy = response.clone();
