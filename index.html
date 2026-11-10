@@ -195,6 +195,8 @@ textarea{min-height:85px;resize:vertical}
 .profile-card{padding:0;overflow:hidden}
 .profile-banner{height:140px;background:var(--line);position:relative}
 .profile-banner img{width:100%;height:100%;object-fit:cover}
+.public-profile-banner{width:100%;height:132px;margin:0 auto 0;border-radius:14px;overflow:hidden;background:var(--line);}
+.public-profile-banner img{display:block;width:100%;height:100%;object-fit:cover;}
 .profile-avatar-area{position:relative;padding:0 20px;margin-top:-44px;display:flex;justify-content:space-between;align-items:flex-end}
 .profile-big-avatar{width:90px;height:90px;border-radius:50%;border:4px solid var(--card-bg);background:var(--line);overflow:hidden;font-size:32px;display:flex;align-items:center;justify-content:center;color:var(--rose)}
 .profile-big-avatar img{width:100%;height:100%;object-fit:cover}
@@ -3193,7 +3195,8 @@ async function inspectProfile(id){
 
   $('modalProfileContent').innerHTML=`
     <div style="text-align:center">
-      <div class="profile-big-avatar" style="margin:0 auto;width:74px;height:74px">${u?.avatar_url?`<img src="${u.avatar_url}">`:(u?.full_name?u.full_name[0]:'?')}</div>
+      <div class="public-profile-banner">${u?.banner_url?'<img src="'+esc(u.banner_url)+'" alt="Capa do perfil">':''}</div>
+      <div class="profile-big-avatar" style="position:relative;margin:-38px auto 0;width:74px;height:74px">${u?.avatar_url?`<img src="${u.avatar_url}">`:(u?.full_name?u.full_name[0]:'?')}</div>
       <h3 style="margin:10px 0 2px 0">${esc(u?.full_name||'Usuário')}${verifiedBadge(u?.is_verified)}</h3>
       <div class="muted">${esc((u?.username||'').startsWith('@')?u.username:'@'+(u?.username||''))} ${u?.is_private?'🔒':''}</div>
       <p style="font-size:14px;margin:12px 0">${esc(u?.bio||'')}</p>
