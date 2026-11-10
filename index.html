@@ -183,6 +183,10 @@ textarea{min-height:85px;resize:vertical}
 .avatar{width:46px;height:46px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;color:var(--rose);font-weight:bold;overflow:hidden;flex:none}
 .avatar img{width:100%;height:100%;object-fit:cover}
 .post-media{width:100%;max-height:340px;border-radius:14px;object-fit:cover;margin-top:12px}
+.post-video{display:block;width:100%;max-height:680px;aspect-ratio:16/9;object-fit:contain;background:#111;border-radius:14px;margin-top:12px}
+.post-video.post-video-portrait{width:auto;max-width:100%;height:min(72vh,680px);aspect-ratio:9/16;margin-left:auto;margin-right:auto}
+.tweet-image-preview video{display:block;width:100%;max-height:300px;object-fit:contain;background:#111}
+.tweet-media-note{font-size:11px;color:var(--muted);margin:4px 0 8px;line-height:1.4}
 .post-actions{display:flex;gap:18px;margin-top:14px;color:var(--muted)}
 .post-actions button{background:transparent;color:var(--muted);padding:6px 10px;font-size:13px;display:flex;align-items:center;gap:6px}
 .post-actions button.liked{color:var(--red)}
@@ -1302,9 +1306,9 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
       <div class="tweet-composer-avatar" id="composerAvatar"></div>
       <div class="tweet-composer-main">
         <textarea id="modalPostContent" maxlength="2000" placeholder="O que está acontecendo?" aria-label="Texto da publicação"></textarea>
-        <div id="modalImagePreviewBox" class="tweet-image-preview hidden"><img id="modalImagePreview"><button onclick="removeFloatingPostImage()" aria-label="Remover imagem"><i class="fa-solid fa-xmark"></i></button></div>
+        <div id="modalImagePreviewBox" class="tweet-image-preview hidden"><img id="modalImagePreview" class="hidden"><video id="modalVideoPreview" class="hidden" controls playsinline></video><button onclick="removeFloatingPostImage()" aria-label="Remover mídia"><i class="fa-solid fa-xmark"></i></button></div><p class="tweet-media-note">Fotos, GIFs e vídeos verticais ou horizontais. O limite de envio também depende do armazenamento.</p>
         <div class="tweet-composer-footer">
-          <label class="tweet-composer-photo" title="Adicionar imagem"><i class="fa-regular fa-image"></i><span>Foto</span><input type="file" id="modalPostImageInput" accept="image/*" class="hidden" onchange="previewFloatingPostImage()"></label>
+          <label class="tweet-composer-photo" title="Adicionar foto, GIF ou vídeo"><i class="fa-regular fa-images"></i><span>Mídia</span><input type="file" id="modalPostImageInput" accept="image/*,video/mp4,video/webm,video/quicktime,video/ogg" class="hidden" onchange="previewFloatingPostImage()"></label>
           <span class="tweet-composer-spacer"></span>
           <button class="tweet-publish-button" onclick="submitFloatingPost()">Publicar</button>
         </div>
@@ -2301,32 +2305,19 @@ function closeFloatingPostModal(){
   removeFloatingPostImage();
 }
 function previewFloatingPostImage(){
-  const file=$('modalPostImageInput').files[0];
-  if(!file)return;
-  if(!file.type.startsWith('image/')){
-    status('modalPostStatus','Escolha um arquivo de imagem válido.');
-    $('modalPostImageInput').value='';
-    currentFloatingPostImage=null;
-    return;
-  }
-  currentFloatingPostImage=file;
-  $('modalPostStatus').textContent='';
-  const reader=new FileReader();
-  reader.onload=e=>{
-    $('modalImagePreview').src=e.target.result;
-    $('modalImagePreviewBox').classList.remove('hidden');
-  };
-  reader.onerror=()=>{
-    currentFloatingPostImage=null;
-    status('modalPostStatus','Não foi possível carregar essa imagem. Tente novamente.');
-  };
-  reader.readAsDataURL(file);
+  const file=$('modalPostImageInput').files[0]; if(!file)return;
+  const isImage=file.type.startsWith('image/'),isVideo=file.type.startsWith('video/');
+  if(!isImage&&!isVideo){status('modalPostStatus','Escolha uma imagem, GIF ou vídeo compatível.');$('modalPostImageInput').value='';return;}
+  if(isVideo&&file.size>100*1024*1024){status('modalPostStatus','O limite de envio direto é 100 MB por vídeo.');$('modalPostImageInput').value='';currentFloatingPostImage=null;return;}
+  currentFloatingPostImage=file;status('modalPostStatus','');const reader=new FileReader();
+  reader.onload=e=>{const image=$('modalImagePreview'),video=$('modalVideoPreview');
+    if(isVideo){image.classList.add('hidden');image.removeAttribute('src');video.src=e.target.result;video.classList.remove('hidden');}
+    else{video.pause();video.removeAttribute('src');video.load();video.classList.add('hidden');image.src=e.target.result;image.classList.remove('hidden');}
+    $('modalImagePreviewBox').classList.remove('hidden');};
+  reader.onerror=()=>{currentFloatingPostImage=null;status('modalPostStatus','Não foi possível carregar essa mídia. Tente novamente.');};reader.readAsDataURL(file);
 }
-function removeFloatingPostImage(){
-  currentFloatingPostImage=null;
-  $('modalPostImageInput').value='';
-  $('modalImagePreviewBox').classList.add('hidden');
-}
+function removeFloatingPostImage(){currentFloatingPostImage=null;$('modalPostImageInput').value='';$('modalImagePreview').removeAttribute('src');$('modalImagePreview').classList.add('hidden');const video=$('modalVideoPreview');video.pause();video.removeAttribute('src');video.load();video.classList.add('hidden');$('modalImagePreviewBox').classList.add('hidden');}
+function postMediaHtml(url){if(!url)return '';const clean=String(url).split('?')[0].toLowerCase();if(!/\.(mp4|webm|mov|m4v|ogv)$/.test(clean))return '<img src="'+esc(url)+'" class="post-media" loading="lazy" decoding="async" alt="Mídia da publicação">';return '<video class="post-video" controls playsinline preload="metadata" src="'+esc(url)+'" onloadedmetadata="this.classList.toggle(\'post-video-portrait\',this.videoHeight>this.videoWidth)"></video>';}
 
 async function submitFloatingPost(){
   let content=$('modalPostContent').value.trim();
@@ -2342,7 +2333,7 @@ async function submitFloatingPost(){
   try {
     let media_url=null;
     if(currentFloatingPostImage){
-      media_url=await uploadFile(currentFloatingPostImage, `post_${user.id}_${Date.now()}`);
+      const file=currentFloatingPostImage;const ext=(file.name.split('.').pop()||(file.type.startsWith('video/')?'mp4':'jpg')).toLowerCase().replace(/[^a-z0-9]/g,'')||'bin';media_url=await uploadFile(file, `post_${user.id}_${Date.now()}.${ext}`);
     }
     const {data:newPost,error:insertError}=await db.from('posts').insert({user_id:user.id,content,media_url}).select('id').single();
     if(insertError)throw insertError;
@@ -2831,7 +2822,7 @@ function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false,
         <div style="position:relative"><button class="ghost" onclick="togglePostMenu('${p.id}',this)" style="padding:6px 10px;font-size:18px">⋯</button><div id="post-menu-${p.id}" class="post-options-menu message-options-menu hidden" style="position:absolute;right:0;top:30px;z-index:25;background:var(--card,#fff);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:175px;box-shadow:0 5px 18px #0002">${isMine?`<button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" type="button" onclick="return window.handlePinPostClick(event,'${p.id}')"><i class="fa-solid fa-thumbtack"></i> Fixar/desafixar no perfil</button><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="sharePostByMessage('${p.id}')"><i class="fa-solid fa-paper-plane"></i> Compartilhar por mensagem</button><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0;color:var(--red)" onclick="openDeleteConfirmModal('${p.id}')"><i class="fa-solid fa-trash"></i> Excluir publicação</button>`:`<button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="sharePostByMessage('${p.id}')"><i class="fa-solid fa-paper-plane"></i> Compartilhar por mensagem</button><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" onclick="openReportModal('${p.id}')"><i class="fa-solid fa-triangle-exclamation"></i> Denunciar</button>`}</div></div>
       </div>
       <p style="margin:12px 0;line-height:1.4">${esc(p.content).replace(/\n/g,'<br>')}</p>
-      ${p.media_url?`<img src="${esc(p.media_url)}" class="post-media" loading="lazy" decoding="async">`:''}
+      ${postMediaHtml(p.media_url)}
       ${interactive?`
         <div class="post-actions">
           <button class="post-heart-button post-count-button ${isLiked?'liked':''}" onclick="toggleLike('${p.id}',${isLiked},'${p.user_id}')" aria-label="Curtir ou retirar curtida"><i class="${isLiked?'fa-solid':'fa-regular'} fa-heart"></i> <b>${likeCount}</b></button>
@@ -2873,7 +2864,7 @@ async function openRepostComposer(postId,postOwnerId){
   let modal=document.getElementById('repostComposerModal');
   if(!modal){
     modal=document.createElement('div');modal.id='repostComposerModal';modal.className='modal-overlay hidden';
-    modal.innerHTML='<div class="modal-box repost-composer-box"><div class="repost-composer-heading"><h3>Compartilhar publicação</h3><button type="button" class="ghost repost-close" onclick="closeRepostComposer();return false" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></div><div class="repost-original-preview"><div class="repost-preview-label"><i class="fa-solid fa-retweet"></i> Publicação original</div><p id="repostOriginalText"></p><img id="repostOriginalImage" class="hidden"></div><div class="repost-choice-label">Escolha como repostar</div><button type="button" class="repost-normal-button" id="confirmSimpleRepostButton" onclick="saveRepost(false);return false"><i class="fa-solid fa-retweet"></i> Repostar sem comentário</button><div class="repost-comment-option"><textarea id="repostCommentInput" rows="3" placeholder="Escreva um comentário (opcional)..."></textarea><button type="button" id="confirmCommentRepostButton" onclick="saveRepost(true);return false"><i class="fa-regular fa-comment"></i> Repostar com comentário</button></div><div class="repost-composer-actions"><button type="button" class="secondary" onclick="closeRepostComposer();return false">Cancelar</button></div></div>';
+    modal.innerHTML='<div class="modal-box repost-composer-box"><div class="repost-composer-heading"><h3>Compartilhar publicação</h3><button type="button" class="ghost repost-close" onclick="closeRepostComposer();return false" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></div><div class="repost-original-preview"><div class="repost-preview-label"><i class="fa-solid fa-retweet"></i> Publicação original</div><p id="repostOriginalText"></p><div id="repostOriginalPreviewMedia"></div><img id="repostOriginalImage" class="hidden"></div><div class="repost-choice-label">Escolha como repostar</div><button type="button" class="repost-normal-button" id="confirmSimpleRepostButton" onclick="saveRepost(false);return false"><i class="fa-solid fa-retweet"></i> Repostar sem comentário</button><div class="repost-comment-option"><textarea id="repostCommentInput" rows="3" placeholder="Escreva um comentário (opcional)..."></textarea><button type="button" id="confirmCommentRepostButton" onclick="saveRepost(true);return false"><i class="fa-regular fa-comment"></i> Repostar com comentário</button></div><div class="repost-composer-actions"><button type="button" class="secondary" onclick="closeRepostComposer();return false">Cancelar</button></div></div>';
     document.body.appendChild(modal);
     modal.addEventListener('click',e=>{if(e.target===modal)closeRepostComposer();});
   }
