@@ -2002,21 +2002,30 @@ db.auth.onAuthStateChange((_event,session)=>{
 });
 
 async function ensureProfile(){
-  let {data,error}=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
+  const {data,error}=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
   if(error)throw error;
   const meta=user.user_metadata||{};
+  const recoveredName=String(meta.full_name||meta.name||'').trim();
+  const recoveredUsername=String(meta.username||'').trim().replace(/^@/,'').toLowerCase();
   if(!data){
     const {error:insertError}=await db.from('user_profiles').upsert({
-      user_id:user.id,full_name:meta.full_name||'',username:meta.username||null,
+      user_id:user.id,full_name:recoveredName,username:recoveredUsername||null,
       language:meta.language||'pt-BR',bio:'',is_private:false
     },{onConflict:'user_id'});
     if(insertError)throw insertError;
-  }else if(!data.username&&meta.username){
-    const {error:updateError}=await db.from('user_profiles').update({
-      username:meta.username,full_name:data.full_name||meta.full_name||''
-    }).eq('user_id',user.id);
-    if(updateError)console.warn('Não foi possível recuperar o @ dos metadados:',updateError.message);
+    return;
   }
+  // Recupera somente campos vazios dos metadados do Auth, sem sobrescrever dados existentes.
+  const patch={};
+  if(!String(data.full_name||'').trim()&&recoveredName)patch.full_name=recoveredName;
+  if(!String(data.username||'').trim()&&recoveredUsername)patch.username=recoveredUsername;
+  if(!data.language)patch.language=meta.language||'pt-BR';
+  if(Object.keys(patch).length){
+    patch.updated_at=new Date().toISOString();
+    const {data:updated,error:updateError}=await db.from('user_profiles').update(patch).eq('user_id',user.id).select('*').maybeSingle();
+    if(updateError)throw updateError;
+    if(updated)chatProfiles[user.id]=updated;
+  }else chatProfiles[user.id]=data;
 }
 
 function persistCurrentPage(){
@@ -2501,8 +2510,20 @@ async function submitReport(){
 
 /* PERFIL & CORTADOR */
 async function loadProfile(){
-  let {data}=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
-  profile=data||{};
+  const {data,error:profileLoadError}=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
+  if(profileLoadError){
+    console.error('Erro ao carregar perfil:',profileLoadError);
+    showToast('Não foi possível carregar seu perfil',profileLoadError.message||'Tente novamente.');
+    return;
+  }
+  const metadata=user?.user_metadata||{};
+  profile=data||{
+    full_name:metadata.full_name||'',
+    username:metadata.username||'',
+    bio:'',
+    website_url:'',
+    is_private:false
+  };
   if(!profile.language){
     profile.language=detectPreferredLanguage();
     const {error:languageError}=await db.from('user_profiles').update({language:profile.language}).eq('user_id',user.id);
@@ -2530,20 +2551,41 @@ async function loadProfile(){
   if(profile.banner_url){ $('bannerImg').src=profile.banner_url; $('bannerImg').classList.remove('hidden'); }
   else { $('bannerImg').classList.add('hidden'); }
 
-  let {count:fCount}=await db.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',user.id);
-  let {count:wCount}=await db.from('follows').select('*',{count:'exact',head:true}).eq('following_id',user.id);
-  $('countFollowing').textContent=fCount||0;
-  $('countFollowers').textContent=wCount||0;
+  const [followingResult,followersResult]=await Promise.all([
+    db.from('follows').select('following_id',{count:'exact'}).eq('follower_id',user.id),
+    db.from('follows').select('follower_id',{count:'exact'}).eq('following_id',user.id)
+  ]);
+  if(followingResult.error){console.error('Erro ao contar seguindo:',followingResult.error);$('countFollowing').textContent='—';$('countFollowing').title='Erro ao consultar: '+followingResult.error.message;}
+  else{$('countFollowing').textContent=followingResult.count??(followingResult.data||[]).length;$('countFollowing').removeAttribute('title');}
+  if(followersResult.error){console.error('Erro ao contar seguidores:',followersResult.error);$('countFollowers').textContent='—';$('countFollowers').title='Erro ao consultar: '+followersResult.error.message;}
+  else{$('countFollowers').textContent=followersResult.count??(followersResult.data||[]).length;$('countFollowers').removeAttribute('title');}
 }
 
-function openEditProfileModal(){
+async function openEditProfileModal(){
+  if(!user){showToast('Entre na sua conta','Faça login para editar seu perfil.');return;}
   editAvatarFile=null;editBannerFile=null;
-  $('avatarCropBox').classList.add('hidden');$('bannerCropBox').classList.add('hidden');$('profileStatus').textContent='';
+  $('avatarCropBox').classList.add('hidden');$('bannerCropBox').classList.add('hidden');
+  $('profileStatus').textContent='Carregando seus dados...';
+  $('editProfileModal').classList.remove('hidden');
+  try{
+    const {data,error}=await db.from('user_profiles').select('*').eq('user_id',user.id).maybeSingle();
+    if(error)throw error;
+    if(data)profile={...profile,...data};
+    const meta=user.user_metadata||{};
+    $('profileName').value=profile?.full_name||meta.full_name||'';
+    $('profileUsername').value=(profile?.username||meta.username||'').replace(/^@/,'');
+    $('profileBio').value=profile?.bio||'';
+    $('profileLink').value=profile?.website_url||'';
+    $('profileIsPrivate').checked=!!profile?.is_private;
+    $('profileStatus').textContent='';
+  }catch(error){
+    console.error('Erro ao abrir editor de perfil:',error);
+    $('profileStatus').textContent='Não foi possível carregar os dados: '+(error.message||'erro desconhecido');
+  }
   $('editAvatarInitial').textContent=(profile?.full_name||'🐰').trim().charAt(0).toUpperCase()||'🐰';
   if(profile?.avatar_url){$('editAvatarCurrent').src=profile.avatar_url;$('editAvatarCurrent').classList.remove('hidden');$('editAvatarInitial').classList.add('hidden');}
   else{$('editAvatarCurrent').classList.add('hidden');$('editAvatarInitial').classList.remove('hidden');}
   if(profile?.banner_url){$('bannerCropImg').src=profile.banner_url;$('bannerCropBox').classList.remove('hidden');}
-  $('editProfileModal').classList.remove('hidden');
 }
 function closeEditProfileModal(){ $('editProfileModal').classList.add('hidden'); }
 
@@ -2581,23 +2623,55 @@ async function saveProfile(){
   let username=$('profileUsername').value.trim().toLowerCase().replace(/^@/,'');
   let bio=$('profileBio').value.trim();
   let website_url=$('profileLink').value.trim();
+  if(username&&!/^[a-z0-9._]{3,20}$/.test(username))return status('profileStatus','O @ deve ter de 3 a 20 caracteres: letras, números, ponto ou underline.');
   if(website_url&&!/^https?:\/\//i.test(website_url))website_url='https://'+website_url;
   if(website_url&&!/^https?:\/\//i.test(website_url))return status('profileStatus','Informe um link válido.');
   let is_private=$('profileIsPrivate').checked;
   let avatar_url=profile.avatar_url, banner_url=profile.banner_url;
 
   try {
+    if(username){
+      const {data:existing,error:lookupError}=await db.from('user_profiles').select('user_id').ilike('username',username).neq('user_id',user.id).maybeSingle();
+      if(lookupError)throw lookupError;
+      if(existing)return status('profileStatus','Esse @usuário já está em uso. Escolha outro.');
+    }
     if(editAvatarFile) avatar_url=await uploadFile(editAvatarFile, `avatar_${user.id}_${Date.now()}`);
     if(editBannerFile) banner_url=await uploadFile(editBannerFile, `banner_${user.id}_${Date.now()}`);
 
-    let {error}=await db.from('user_profiles').upsert({
-      user_id:user.id,full_name:name,username,bio,website_url,avatar_url,banner_url,is_private,updated_at:new Date().toISOString()
-    },{onConflict:'user_id'});
-    if(error) throw error;
+    const profilePayload={user_id:user.id,full_name:name,username:username||null,bio,website_url,avatar_url,banner_url,is_private,updated_at:new Date().toISOString()};
+    let {data:savedProfile,error}=await db.from('user_profiles').update(profilePayload).eq('user_id',user.id).select().maybeSingle();
+    if(error)throw error;
+    if(!savedProfile){
+      const insertResult=await db.from('user_profiles').insert(profilePayload).select().single();
+      if(insertResult.error)throw insertResult.error;
+      savedProfile=insertResult.data;
+    }
+    // Atualiza a tela com a linha confirmada pelo Supabase, sem depender de uma
+    // segunda consulta que poderia retornar vazia por causa das políticas de leitura.
+    profile={...profile,...savedProfile};
+    const displayName=profile.full_name||'Sem Nome';
+    $('viewProfileName').innerHTML=esc(displayName)+verifiedBadge(profile.is_verified);
+    $('viewProfileUsername').textContent=profile.username?(profile.username.startsWith('@')?profile.username:'@'+profile.username):'@usuario';
+    $('viewProfileBio').textContent=profile.bio||'';
+    const profileLink=normalizeProfileLink(profile.website_url||'');
+    $('viewProfileLink').innerHTML=profileLink?'<a href="'+esc(profileLink)+'" target="_blank" rel="noopener noreferrer" class="profile-website-link"><i class="fa-solid fa-link"></i> '+esc(profile.website_url)+'</a>':'';
+    $('profilePrivacyBadge').textContent=profile.is_private?'🔒 Perfil Privado':'🔓 Perfil Público';
+    if(profile.avatar_url){$('profileBigAvatar').innerHTML=`<img src="${esc(profile.avatar_url)}">`;}
+    else{$('profileBigAvatar').textContent=(displayName[0]||'?').toUpperCase();}
+    if(profile.banner_url){$('bannerImg').src=profile.banner_url;$('bannerImg').classList.remove('hidden');}
+    else{$('bannerImg').classList.add('hidden');}
+    const {error:metadataError}=await db.auth.updateUser({data:{full_name:name,username:username||null}});
+    if(metadataError)console.warn('Perfil salvo, mas metadados Auth não foram atualizados:',metadataError.message);
     closeEditProfileModal();
-    await loadProfile();
-  } catch(err){ status('profileStatus', err.message); }
+    showToast('Perfil atualizado','Seu nome, @ e bio foram salvos. 🐰');
+  } catch(err){
+    console.error('Erro ao salvar perfil:',err);
+    status('profileStatus',err.message||'Não foi possível salvar. Tente novamente.');
+  }
 }
+
+// Expõe explicitamente a função usada pelo botão do editor em scripts externos.
+window.saveProfile=saveProfile;
 
 async function switchProfileTab(tab){
   try{localStorage.setItem('cottontailProfileTab',tab);}catch(e){}
@@ -3063,7 +3137,15 @@ function clearRecentSearches(){
 
 async function inspectProfile(id){
   inspectedProfileId=id;
-  let {data:u}=await db.from('user_profiles').select('*').eq('user_id',id).maybeSingle();
+  const {data:loadedProfile,error:profileError}=await db.from('user_profiles').select('*').eq('user_id',id).maybeSingle();
+  if(profileError){
+    console.error('Erro ao carregar perfil público:',profileError);
+    showToast('Não foi possível abrir o perfil',profileError.message||'Verifique sua conexão e tente novamente.');
+    return;
+  }
+  // Completa apenas campos ausentes com dados já carregados no feed ou nas conversas.
+  const cachedProfile=chatProfiles[id]||{};
+  let u=loadedProfile?{...cachedProfile,...loadedProfile}:cachedProfile;
   if(u)chatProfiles[id]=u;
   let {data:posts}=await db.from('posts').select('*').eq('user_id',id);
   const {data:collabRows}=await db.from('post_collaborators').select('post_id').eq('invitee_id',id).eq('status','accepted');
@@ -3071,8 +3153,14 @@ async function inspectProfile(id){
   if(collabIds.length){const {data:collabPosts}=await db.from('posts').select('*').in('id',collabIds);posts=[...(posts||[]),...(collabPosts||[])];}
   const {data:pins}=await db.from('post_pins').select('post_id').eq('user_id',id);
   const pinnedIds=new Set((pins||[]).map(x=>x.post_id));(posts||[]).sort((a,b)=>(pinnedIds.has(b.id)?1:0)-(pinnedIds.has(a.id)?1:0));
-  let {count:fCount}=await db.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',id);
-  let {count:wCount}=await db.from('follows').select('*',{count:'exact',head:true}).eq('following_id',id);
+  const [followingCountResult,followersCountResult]=await Promise.all([
+    db.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',id),
+    db.from('follows').select('*',{count:'exact',head:true}).eq('following_id',id)
+  ]);
+  const fCount=followingCountResult.error?null:followingCountResult.count;
+  const wCount=followersCountResult.error?null:followersCountResult.count;
+  if(followingCountResult.error)console.warn('Erro ao contar seguindo:',followingCountResult.error);
+  if(followersCountResult.error)console.warn('Erro ao contar seguidores:',followersCountResult.error);
   let {data:isF}=await db.from('follows').select('*').eq('follower_id',user.id).eq('following_id',id).maybeSingle();
   let {data:isB}=await db.from('blocks').select('*').eq('blocker_id',user.id).eq('blocked_id',id).maybeSingle();
 
@@ -3097,8 +3185,8 @@ async function inspectProfile(id){
       <p style="font-size:14px;margin:12px 0">${esc(u?.bio||'')}</p>
       ${u?.website_url?'<p style="margin:8px 0"><a class="profile-website-link" href="'+esc(normalizeProfileLink(u.website_url))+'" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-link"></i> '+esc(u.website_url)+'</a></p>':''}
       <div class="friend-stats">
-        <button onclick="loadUserConnections('${id}','followers')"><b>${wCount||0}</b><span>Seguidores</span></button>
-        <button onclick="loadUserConnections('${id}','following')"><b>${fCount||0}</b><span>Seguindo</span></button>
+        <button onclick="loadUserConnections('${id}','followers')"><b>${wCount??'—'}</b><span>Seguidores</span></button>
+        <button onclick="loadUserConnections('${id}','following')"><b>${fCount??'—'}</b><span>Seguindo</span></button>
         <button onclick="loadUserConnections('${id}','mutual')"><b>♡</b><span>Em comum</span></button>
       </div>
       <div id="friendConnections" class="friend-connections"></div>
