@@ -3356,14 +3356,31 @@ window.handleLoginClick = function(event) {
 </script>
 
 <script>
-/* Instalação PWA do Cottontail: não intercepta chamadas do Supabase. */
+/* PWA: verifica atualizações ao abrir o app e atualiza a tela após ativar a nova versão. */
 (function(){
   if(!('serviceWorker' in navigator)) return;
-  window.addEventListener('load',function(){
-    navigator.serviceWorker.register('/sw.js',{scope:'/'})
-      .catch(function(error){console.warn('PWA: não foi possível registrar o service worker.',error);});
-  });
   let installPrompt=null;
+  let refreshing=false;
+  navigator.serviceWorker.addEventListener('controllerchange',function(){
+    if(refreshing)return;
+    refreshing=true;
+    window.location.reload();
+  });
+  let currentRegistration=null;
+  async function checkForAppUpdate(){
+    if(!currentRegistration)return;
+    try{await currentRegistration.update();}catch(error){console.warn('PWA: verificação de atualização indisponível.',error);}
+  }
+  window.addEventListener('load',async function(){
+    try{
+      currentRegistration=await navigator.serviceWorker.register('/sw.js',{scope:'/',updateViaCache:'none'});
+      await checkForAppUpdate();
+      if(currentRegistration.waiting)currentRegistration.waiting.postMessage({type:'SKIP_WAITING'});
+    }catch(error){console.warn('PWA: não foi possível registrar o service worker.',error);}
+  });
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible')checkForAppUpdate();
+  });
   window.addEventListener('beforeinstallprompt',function(event){
     event.preventDefault();
     installPrompt=event;
@@ -3371,11 +3388,11 @@ window.handleLoginClick = function(event) {
     const button=document.createElement('button');
     button.id='cottontailInstallButton';
     button.type='button';
-    button.textContent='＋ Instalar Cottontail';
-    button.setAttribute('aria-label','Instalar aplicativo Cottontail');
+    button.textContent='＋ Install Cottontail';
+    button.setAttribute('aria-label','Install Cottontail app');
     button.style.cssText='position:fixed;right:16px;bottom:145px;z-index:1200;border-radius:24px;padding:11px 16px;box-shadow:0 4px 18px rgba(0,0,0,.16);font-weight:700;';
     button.addEventListener('click',async function(){
-      if(!installPrompt) return;
+      if(!installPrompt)return;
       installPrompt.prompt();
       await installPrompt.userChoice;
       installPrompt=null;
