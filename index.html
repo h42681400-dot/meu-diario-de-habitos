@@ -2056,7 +2056,13 @@ function showPage(id){
   if(id==='messages'){ backToChatList(); }
   if(id==='feed')loadFeed('all');
   if(id==='notifications'){ $('notifBadge').classList.add('hidden'); loadNotifications(); }
-  if(id==='profile'){let tab='posts';try{tab=localStorage.getItem('cottontailProfileTab')||'posts';}catch(e){}loadProfileDataTab(tab==='reposts'?'reposts':'posts');}
+  if(id==='profile'){
+    // Reconsulta os dados do cabeçalho sempre que a página de perfil é aberta,
+    // inclusive quando a navegação é restaurada após atualizar o navegador.
+    if(user)loadProfile().catch(err=>console.error('Erro ao atualizar o cabeçalho do perfil:',err));
+    let tab='posts';try{tab=localStorage.getItem('cottontailProfileTab')||'posts';}catch(e){}
+    loadProfileDataTab(tab==='reposts'?'reposts':'posts');
+  }
   checkUnreadBadges();
 }
 
