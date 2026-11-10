@@ -2870,8 +2870,8 @@ async function openRepostComposer(postId,postOwnerId){
   }
   document.getElementById('repostCommentInput').value='';
   document.getElementById('repostOriginalText').textContent=post.content||'Publicação com imagem';
-  const img=document.getElementById('repostOriginalImage');
-  if(post.media_url){img.src=post.media_url;img.classList.remove('hidden');}else{img.removeAttribute('src');img.classList.add('hidden');}
+  const preview=document.getElementById('repostOriginalPreviewMedia');
+  if(preview)preview.innerHTML=postMediaHtml(post.media_url);
   modal.classList.remove('hidden');
 }
 function closeRepostComposer(){document.getElementById('repostComposerModal')?.classList.add('hidden');repostDraft={postId:null,postOwnerId:null};}
