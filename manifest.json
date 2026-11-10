@@ -2,12 +2,15 @@
   "id": "/",
   "name": "Cottontail",
   "short_name": "Cottontail",
-  "description": "Seu espaço para compartilhar momentos, conversar e acompanhar seus hábitos.",
-  "lang": "pt-BR",
+  "description": "Your space to share moments, chat, and keep track of your habits.",
+  "lang": "en",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "portrait",
   "background_color": "#faf7f6",
   "theme_color": "#d4a5a5",
