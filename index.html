@@ -2320,9 +2320,9 @@ function previewFloatingPostImage(){
 function removeFloatingPostImage(){currentFloatingPostImage=null;$('modalPostImageInput').value='';$('modalImagePreview').removeAttribute('src');$('modalImagePreview').classList.add('hidden');const video=$('modalVideoPreview');video.pause();video.removeAttribute('src');video.load();video.classList.add('hidden');$('modalImagePreviewBox').classList.add('hidden');}
 function formatPostText(content){
   let safe=esc(String(content||''));
-  safe=safe.replace(/(^|\\s)#([\\p{L}\\p{N}_]{2,40})/gu,(all,space,tag)=>space+'<a class="post-hashtag" href="#" onclick="searchHashtag(\''+tag.toLowerCase()+'\');return false">#'+tag+'</a>');
-  safe=safe.replace(/(^|[^\\w])@([a-zA-Z0-9_.]{3,20})/g,(all,prefix,handle)=>prefix+'<a class="post-mention" href="#" onclick="openMentionProfile(\''+handle.toLowerCase()+'\');return false">@'+handle+'</a>');
-  return safe.replace(/\\n/g,'<br>');
+  safe=safe.replace(/(^|\s)#([\p{L}\p{N}_]{2,40})/gu,(all,space,tag)=>space+'<a class="post-hashtag" href="#" onclick="searchHashtag(\''+tag.toLowerCase()+'\');return false">#'+tag+'</a>');
+  safe=safe.replace(/(^|[^\w])@([a-zA-Z0-9_.]{3,20})/g,(all,prefix,handle)=>prefix+'<a class="post-mention" href="#" onclick="openMentionProfile(\''+handle.toLowerCase()+'\');return false">@'+handle+'</a>');
+  return safe.replace(/\n/g,'<br>');
 }
 async function openMentionProfile(handle){
   const {data,error}=await db.from('user_profiles').select('user_id').ilike('username',handle).maybeSingle();
@@ -2337,7 +2337,7 @@ function searchHashtag(tag){
 let composerMentionTimer=null;
 async function handleComposerMentionInput(event){
   const field=event.target, before=field.value.slice(0,field.selectionStart);
-  const match=before.match(/(^|\\s)@([a-zA-Z0-9_.]{1,20})$/);
+  const match=before.match(/(^|\s)@([a-zA-Z0-9_.]{1,20})$/);
   const box=$('composerMentionSuggestions');
   clearTimeout(composerMentionTimer);
   if(!match){box.classList.add('hidden');box.innerHTML='';return;}
@@ -2355,7 +2355,7 @@ async function handleComposerMentionInput(event){
 function selectComposerMention(handle){
   const field=$('modalPostContent'),start=field.selectionStart,end=field.selectionEnd;
   const before=field.value.slice(0,start),after=field.value.slice(end);
-  const updated=before.replace(/(^|\\s)@[a-zA-Z0-9_.]{1,20}$/,(all,prefix)=>prefix+'@'+handle+' ')+after;
+  const updated=before.replace(/(^|\s)@[a-zA-Z0-9_.]{1,20}$/,(all,prefix)=>prefix+'@'+handle+' ')+after;
   field.value=updated;const pos=updated.length-after.length;
   field.focus();field.setSelectionRange(pos,pos);
   $('composerMentionSuggestions').classList.add('hidden');
