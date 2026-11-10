@@ -1652,9 +1652,12 @@ function applyUiLanguage(language){
   document.querySelectorAll('input[placeholder],textarea[placeholder],button[title],button[aria-label],input[aria-label],iframe[title]').forEach(el=>{
     ['placeholder','title','aria-label'].forEach(attr=>{
       if(!el.hasAttribute(attr))return;
-      const key='cottontailOriginal'+attr;
-      if(!el.dataset[key])el.dataset[key]=el.getAttribute(attr);
-      const original=reverse[el.dataset[key]]||el.dataset[key];
+      // Use a literal data-* attribute: dataset property names cannot contain
+      // the hyphen from "aria-label" and would throw before the profile loads.
+      const originalAttr='data-cottontail-original-'+attr;
+      if(!el.hasAttribute(originalAttr))el.setAttribute(originalAttr,el.getAttribute(attr));
+      const stored=el.getAttribute(originalAttr)||'';
+      const original=reverse[stored]||stored;
       if(dict[original])el.setAttribute(attr,dict[original]);
       else if(lang==='pt-BR')el.setAttribute(attr,original);
     });
