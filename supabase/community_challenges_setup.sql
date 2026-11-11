@@ -80,14 +80,14 @@ drop policy if exists "cottontail_challenge_members_leave_self" on public.wellne
 create policy "cottontail_challenge_members_leave_self" on public.wellness_challenge_members for delete to authenticated using (user_id = auth.uid());
 
 drop policy if exists "cottontail_communities_read_public" on public.wellness_communities;
-create policy "cottontail_communities_read_public" on public.wellness_communities for select to authenticated using (not is_private or created_by = auth.uid() or exists (select 1 from public.wellness_community_members m where m.community_id = wellness_communities.id and m.user_id = auth.uid()));
+create policy "cottontail_communities_read_public" on public.wellness_communities for select to authenticated using (not is_private or created_by = auth.uid());
 drop policy if exists "cottontail_communities_create_own" on public.wellness_communities;
 create policy "cottontail_communities_create_own" on public.wellness_communities for insert to authenticated with check (created_by = auth.uid());
 drop policy if exists "cottontail_communities_update_own" on public.wellness_communities;
 create policy "cottontail_communities_update_own" on public.wellness_communities for update to authenticated using (created_by = auth.uid()) with check (created_by = auth.uid());
 
 drop policy if exists "cottontail_community_members_read" on public.wellness_community_members;
-create policy "cottontail_community_members_read" on public.wellness_community_members for select to authenticated using (user_id = auth.uid() or exists (select 1 from public.wellness_communities c where c.id = wellness_community_members.community_id and not c.is_private) or exists (select 1 from public.wellness_community_members mine where mine.community_id = wellness_community_members.community_id and mine.user_id = auth.uid()));
+create policy "cottontail_community_members_read" on public.wellness_community_members for select to authenticated using (user_id = auth.uid() or exists (select 1 from public.wellness_communities c where c.id = wellness_community_members.community_id and not c.is_private));
 drop policy if exists "cottontail_community_members_join_public" on public.wellness_community_members;
 create policy "cottontail_community_members_join_public" on public.wellness_community_members for insert to authenticated with check (user_id = auth.uid() and exists (select 1 from public.wellness_communities c where c.id = community_id and not c.is_private));
 drop policy if exists "cottontail_community_members_leave_self" on public.wellness_community_members;
