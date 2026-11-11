@@ -3704,7 +3704,7 @@ async function loadCommunityHub(){
     (challenges||[]).forEach(ch=>{
       const joined=mine[ch.id],count=members.filter(x=>x.challenge_id===ch.id).length;
       const progress=Number(joined?.progress)||0,goal=Number(ch.goal_value)||1,pct=Math.min(100,Math.round(progress/goal*100));
-      html+='<article class="community-card"><div class="community-card-top"><div class="community-card-icon"><i class="fa-solid fa-seedling"></i></div><div class="community-card-main"><h4>'+esc(ch.title)+'</h4><p>'+esc(ch.description||'Um convite para cuidar de você no seu ritmo.')+'</p></div></div><div class="community-meta"><span>'+esc(ch.category||'Bem-estar')+'</span><span>'+Number(ch.duration_days||7)+' dias</span><span>'+count+' '+(count===1?'participante':'participantes')+'</span></div>';
+      html+='<article class="community-card" id="challenge-card-'+ch.id+'"><div class="community-card-top"><div class="community-card-icon"><i class="fa-solid fa-seedling"></i></div><div class="community-card-main"><h4>'+esc(ch.title)+'</h4><p>'+esc(ch.description||'Um convite para cuidar de você no seu ritmo.')+'</p></div></div><div class="community-meta"><span>'+esc(ch.category||'Bem-estar')+'</span><span>'+Number(ch.duration_days||7)+' dias</span><span>'+count+' '+(count===1?'participante':'participantes')+'</span></div>';
       if(joined)html+='<div class="community-progress-row"><span>Seu progresso</span><b>'+progress+' / '+goal+' '+esc(ch.goal_unit||'dias')+'</b></div><div class="community-progress"><span style="width:'+pct+'%"></span></div><div class="community-compose"><input id="challenge-progress-'+ch.id+'" type="number" min="0" step="0.1" value="'+progress+'" aria-label="Seu progresso no desafio"><button type="button" onclick="updateChallengeProgress(\''+ch.id+'\','+goal+')">Salvar progresso</button></div>';
       html+='<div class="community-card-actions">'+(joined?'<button type="button" class="secondary" onclick="leaveChallenge(\''+ch.id+'\')">Sair do desafio</button>':'<button type="button" onclick="joinChallenge(\''+ch.id+'\')">Participar do desafio</button>')+'</div></article>';
     });
@@ -3732,7 +3732,7 @@ async function joinChallenge(id){
   const {error}=await db.from('wellness_challenge_members').insert({challenge_id:id,user_id:user.id});
   if(error&&error.code!=='23505'){showToast('Não foi possível participar',error.message);return;}
   const {data:challenge}=await db.from('wellness_challenges').select('created_by,title').eq('id',id).maybeSingle();
-  if(challenge?.created_by&&challenge.created_by!==user.id)await createSmartNotification({user_id:challenge.created_by,actor_id:user.id,type:'challenge_join'});
+  if(challenge?.created_by&&challenge.created_by!==user.id)await createSmartNotification({user_id:challenge.created_by,actor_id:user.id,type:'challenge_join',challenge_id:id});
   showToast('Você entrou no desafio!','Cada passo conta. Faça no seu ritmo. 🌱');await loadCommunityHub();
 }
 async function leaveChallenge(id){
@@ -3748,7 +3748,7 @@ async function updateChallengeProgress(id,goal){
   const {data:previous}=await db.from('wellness_challenge_members').select('completed_at').eq('challenge_id',id).eq('user_id',user.id).maybeSingle();
   const {error}=await db.from('wellness_challenge_members').update({progress:value,updated_at:new Date().toISOString(),completed_at:completed?new Date().toISOString():null}).eq('challenge_id',id).eq('user_id',user.id);
   if(error){showToast('Não foi possível atualizar',error.message);return;}
-  if(completed&&!previous?.completed_at){const {data:challenge}=await db.from('wellness_challenges').select('created_by').eq('id',id).maybeSingle();if(challenge?.created_by&&challenge.created_by!==user.id)await createSmartNotification({user_id:challenge.created_by,actor_id:user.id,type:'challenge_complete'});}
+  if(completed&&!previous?.completed_at){const {data:challenge}=await db.from('wellness_challenges').select('created_by').eq('id',id).maybeSingle();if(challenge?.created_by&&challenge.created_by!==user.id)await createSmartNotification({user_id:challenge.created_by,actor_id:user.id,type:'challenge_complete',challenge_id:id});}
   showToast(completed?'Meta alcançada!':'Progresso atualizado',completed?'Parabéns por chegar à sua meta! 🤍':'Seu ritmo é o que importa. 🌷');await loadCommunityHub();
 }
 function openCreateChallenge(){
@@ -3788,7 +3788,7 @@ async function joinCommunity(id){
   const {error}=await db.from('wellness_community_members').insert({community_id:id,user_id:user.id});
   if(error&&error.code!=='23505'){showToast('Não foi possível participar',error.message);return;}
   const {data:community}=await db.from('wellness_communities').select('created_by').eq('id',id).maybeSingle();
-  if(community?.created_by&&community.created_by!==user.id)await createSmartNotification({user_id:community.created_by,actor_id:user.id,type:'community_join'});
+  if(community?.created_by&&community.created_by!==user.id)await createSmartNotification({user_id:community.created_by,actor_id:user.id,type:'community_join',community_id:id});
   showToast('Bem-vinda à comunidade!','Que bom ter você por aqui. 🤍');await loadCommunityHub();
 }
 async function leaveCommunity(id){
@@ -3820,7 +3820,10 @@ async function openCommunityDetail(id,fromLoad=false){
 async function addCommunityPost(id){
   const input=$('communityPostInput'),content=input?.value.trim();if(!content)return;
   const {error}=await db.from('wellness_community_posts').insert({community_id:id,user_id:user.id,content});
-  if(error){showToast('Não foi possível publicar',error.message);return;}await openCommunityDetail(id,true);
+  if(error){showToast('Não foi possível publicar',error.message);return;}
+  const {data:members}=await db.from('wellness_community_members').select('user_id').eq('community_id',id).neq('user_id',user.id);
+  await Promise.all((members||[]).map(member=>createSmartNotification({user_id:member.user_id,actor_id:user.id,type:'community_post',community_id:id})));
+  await openCommunityDetail(id,true);
 }
 
 
@@ -4525,13 +4528,13 @@ function notificationIcon(type){
   if(type==='community_join'||type==='community_post') return 'fa-people-group';
   return 'fa-bell';
 }
-async function openNotification(notificationId,actorId,type,postId){
+async function openNotification(notificationId,actorId,type,postId,communityId,challengeId){
   await db.from('notifications').update({read:true}).eq('id',notificationId).eq('user_id',user.id);
   checkUnreadBadges();
   if(type==='follow'){if(actorId) await inspectProfile(actorId);return;}
   if(type==='message'){if(actorId) await openChat(actorId);return;}
-  if(type==='challenge_join'||type==='challenge_complete'||type==='challenge_update'){showPage('community');switchCommunityTab('challenges');return;}
-  if(type==='community_join'||type==='community_post'){showPage('community');switchCommunityTab('groups');return;}
+  if(type==='challenge_join'||type==='challenge_complete'||type==='challenge_update'){showPage('community');communityView='challenges';activeCommunityId=null;await loadCommunityHub();if(challengeId)setTimeout(()=>$('challenge-card-'+challengeId)?.scrollIntoView({behavior:'smooth',block:'center'}),120);return;}
+  if(type==='community_join'||type==='community_post'){showPage('community');communityView='groups';activeCommunityId=null;await loadCommunityHub();if(communityId)await openCommunityDetail(communityId);return;}
   if(postId){
     showPage('feed');
     await loadFeed('all');
@@ -4601,8 +4604,8 @@ async function loadNotifications(){
     const collaborationActions=n.type==='post_collaboration'?'<div style="display:flex;gap:8px;margin-top:8px"><button onclick="event.stopPropagation();respondToCollaboration(\''+n.post_id+'\',true,\''+n.id+'\')">Aceitar</button><button class="secondary" onclick="event.stopPropagation();respondToCollaboration(\''+n.post_id+'\',false,\''+n.id+'\')">Recusar</button></div>':'';
     return `
       <div class="notif-item ${unread?'unread':''}" role="button" tabindex="0"
-        onclick="openNotification('${n.id}','${n.actor_id||''}','${n.type||''}','${n.post_id||''}')"
-        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openNotification('${n.id}','${n.actor_id||''}','${n.type||''}','${n.post_id||''}') }">
+        onclick="openNotification('${n.id}','${n.actor_id||''}','${n.type||''}','${n.post_id||''}','${n.community_id||''}','${n.challenge_id||''}')"
+        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openNotification('${n.id}','${n.actor_id||''}','${n.type||''}','${n.post_id||''}','${n.community_id||''}','${n.challenge_id||''}') }">
         <div class="icon">${avatar}</div>
         <div class="notif-content">
           <div><b>${name}</b> ${text}</div>
@@ -4638,7 +4641,7 @@ function showToast(title,message,notification){
   close.textContent='×';
   close.onclick=(event)=>{event.stopPropagation();toast.remove();};
   toast.append(icon,body,close);
-  if(notification?.id)toast.onclick=()=>openNotification(notification.id,notification.actor_id,notification.type,notification.post_id);
+  if(notification?.id)toast.onclick=()=>openNotification(notification.id,notification.actor_id,notification.type,notification.post_id,notification.community_id,notification.challenge_id);
   container.appendChild(toast);
   setTimeout(()=>{if(toast.isConnected)toast.remove();},6500);
 }
