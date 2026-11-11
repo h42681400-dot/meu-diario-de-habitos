@@ -1249,6 +1249,23 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
 .community-empty{padding:24px 14px;text-align:center;border:1px dashed var(--line);border-radius:16px;color:var(--muted);font-size:12px;line-height:1.6}
 @media(max-width:600px){.community-hero{padding:19px}.community-hero h2{font-size:23px}.community-section-head{align-items:flex-start}.community-section-head button{padding:8px 9px}.community-card{padding:13px}.community-compose{flex-direction:column}.community-compose button{width:100%}}
 
+
+/* Explorar inteligente e acolhimento */
+.explore-welcome-card{display:flex;gap:13px;align-items:flex-start;padding:18px;margin:0 0 20px;border:1px solid rgba(201,143,152,.2);border-radius:19px;background:linear-gradient(135deg,#f8e9eb,#fbf5ed 70%,#eef2eb)}
+.explore-welcome-icon{width:42px;height:42px;flex:none;display:grid;place-items:center;border-radius:15px;background:rgba(255,255,255,.7);color:#b67d88}
+.explore-welcome-kicker{font-size:9px;font-weight:850;letter-spacing:1.2px;color:#a76f7a}
+.explore-welcome-card p{margin:6px 0;color:#6f5d5b;font-size:14px;line-height:1.55;font-weight:650}
+.explore-welcome-card small{font-size:10px;color:#927d79}
+.explore-suggestions{margin:18px 0}
+.explore-suggest-person{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.explore-suggest-main{display:flex;align-items:center;gap:10px;min-width:0;cursor:pointer}
+.explore-suggest-main>div:last-child{min-width:0}
+.explore-suggest-main b,.explore-suggest-main small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.explore-suggest-main b{font-size:12px}
+.explore-suggest-main small{font-size:10px;color:var(--muted);margin-top:3px}
+.explore-suggest-person>button{padding:8px 13px;font-size:11px}
+@media(max-width:600px){.explore-welcome-card{padding:15px}.explore-welcome-card p{font-size:13px}}
+
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
      crossorigin="anonymous"></script>
@@ -3773,6 +3790,21 @@ async function addCommunityPost(id){
   if(error){showToast('Não foi possível publicar',error.message);return;}await openCommunityDetail(id,true);
 }
 
+
+function renderWellbeingWelcomeCard(){
+  const messages=[
+    'Hoje não precisa ser perfeito. Escolha só um pequeno passo que faça sentido para você.',
+    'Você não precisa acompanhar o ritmo de ninguém. O seu caminho também merece espaço.',
+    'Descansar, recomeçar e mudar de ideia também fazem parte do progresso.',
+    'Um dia difícil não apaga tudo o que você já construiu. Vá com gentileza.',
+    'Não transforme cuidado em cobrança. Faça o que for possível hoje.',
+    'Pequenas pausas também são escolhas importantes. Respire e siga no seu tempo.',
+    'Você merece acolhimento inclusive nos dias em que não consegue fazer tudo.'
+  ];
+  const index=Math.floor(Date.now()/86400000)%messages.length;
+  return '<section class="explore-welcome-card"><span class="explore-welcome-icon"><i class="fa-solid fa-heart"></i></span><div><span class="explore-welcome-kicker">UM LEMBRETE GENTIL</span><p>'+messages[index]+'</p><small>Seu bem-estar não é uma competição. 🤍</small></div></section>';
+}
+
 /* EXPLORAR */
 function renderTrendingHashtags(posts){
   const counts={};
@@ -3793,34 +3825,56 @@ async function searchProfilesAndPosts(){
 
   renderRecentSearches();
 
-  // SEM PESQUISA: ranking de publicações por engajamento
+  // SEM PESQUISA: recomendações baseadas em afinidade, relações e atividade recente
   if(!q){
     const {data:posts,error}=await db.from('posts').select('*').order('created_at',{ascending:false}).limit(60);
-    if(error){$('peopleList').innerHTML='<p class="muted">Erro ao carregar publicações.</p>';return;}
+    if(error){$('peopleList').innerHTML=renderWellbeingWelcomeCard()+'<p class="muted">Não foi possível carregar as publicações agora.</p>';return;}
     const ids=[...new Set((posts||[]).map(p=>p.user_id))],postIds=(posts||[]).map(p=>p.id);
-    const [profilesRes,likesRes,commentsRes,repostsRes]=await Promise.all([
+    const [profilesRes,likesRes,commentsRes,repostsRes,followingRes,myLikesRes]=await Promise.all([
       ids.length?db.from('user_profiles').select('*').in('user_id',ids):Promise.resolve({data:[]}),
       postIds.length?db.from('post_likes').select('post_id').in('post_id',postIds):Promise.resolve({data:[]}),
       postIds.length?db.from('post_comments').select('post_id').in('post_id',postIds):Promise.resolve({data:[]}),
-      postIds.length?db.from('post_reposts').select('post_id').in('post_id',postIds):Promise.resolve({data:[]})
+      postIds.length?db.from('post_reposts').select('post_id').in('post_id',postIds):Promise.resolve({data:[]}),
+      db.from('follows').select('following_id').eq('follower_id',user.id),
+      db.from('post_likes').select('post_id').eq('user_id',user.id).limit(80)
     ]);
     const authors={},likes={},comments={},reposts={};
     (profilesRes.data||[]).forEach(p=>authors[p.user_id]=p);
     (likesRes.data||[]).forEach(x=>likes[x.post_id]=(likes[x.post_id]||0)+1);
     (commentsRes.data||[]).forEach(x=>comments[x.post_id]=(comments[x.post_id]||0)+1);
     (repostsRes.data||[]).forEach(x=>reposts[x.post_id]=(reposts[x.post_id]||0)+1);
-    const ranked=(posts||[]).slice().sort((a,b)=>((likes[b.id]||0)+2*(comments[b.id]||0)+3*(reposts[b.id]||0))-((likes[a.id]||0)+2*(comments[a.id]||0)+3*(reposts[a.id]||0)));
-    $('peopleList').innerHTML=`
-      ${renderTrendingHashtags(posts)}
-      <div class="explore-ranking-heading"><div><h3>Em alta no Cottontail ✨</h3><p class="muted">Publicações com mais curtidas, comentários e reposts</p></div><span class="ranking-pill">TOP ${ranked.length}</span></div>
-      ${ranked.map((p,index)=>`
-        <article class="ranking-post"><div class="ranking-position">${index+1}</div><div class="ranking-post-content">
-          <div class="ranking-author" onclick="inspectProfile('${p.user_id}')"><b>${esc(authors[p.user_id]?.full_name||'Pessoa')}</b><span class="muted">@${esc((authors[p.user_id]?.username||'usuario').replace(/^@/,''))}</span></div>
-          <div class="ranking-text" onclick="inspectProfile('${p.user_id}')">${esc(p.content||'Publicação com imagem')}</div>
-          ${p.media_url?`<img class="ranking-media" src="${esc(p.media_url)}" loading="lazy" onclick="inspectProfile('${p.user_id}')">`:''}
-          <div class="ranking-stats"><span><i class="fa-solid fa-heart"></i> ${likes[p.id]||0}</span><span><i class="fa-solid fa-comment"></i> ${comments[p.id]||0}</span><span><i class="fa-solid fa-retweet"></i> ${reposts[p.id]||0}</span></div>
-        </div></article>`).join('')||'<p class="muted">Ainda não há publicações para ranquear.</p>'}
-    `;
+    const followed=new Set((followingRes.data||[]).map(x=>x.following_id));
+    const likedIds=new Set((myLikesRes.data||[]).map(x=>x.post_id));
+    const interests={};
+    (posts||[]).filter(p=>likedIds.has(p.id)).forEach(p=>{
+      const tags=String(p.content||'').match(/(^|\s)#([\p{L}\p{N}_]{2,40})/gu)||[];
+      tags.forEach(raw=>{const tag=raw.trim().slice(1).toLocaleLowerCase('pt-BR');interests[tag]=(interests[tag]||0)+1;});
+    });
+    const score=post=>{
+      const engagement=(likes[post.id]||0)+2*(comments[post.id]||0)+3*(reposts[post.id]||0);
+      const ageHours=Math.max(0,(Date.now()-new Date(post.created_at).getTime())/3600000);
+      const freshness=Math.max(0,12-ageHours/24);
+      const relation=followed.has(post.user_id)?8:0;
+      const tags=String(post.content||'').match(/(^|\s)#([\p{L}\p{N}_]{2,40})/gu)||[];
+      const affinity=tags.reduce((sum,raw)=>sum+(interests[raw.trim().slice(1).toLocaleLowerCase('pt-BR')]||0)*2,0);
+      return engagement+freshness+relation+affinity;
+    };
+    const ranked=(posts||[]).slice().sort((a,b)=>score(b)-score(a));
+    const suggestions=[];
+    ranked.forEach(p=>{
+      const author=authors[p.user_id];
+      if(author&&p.user_id!==user.id&&!followed.has(p.user_id)&&!suggestions.some(x=>x.user_id===author.user_id))suggestions.push(author);
+    });
+    const peopleHtml=suggestions.slice(0,4).map(p=>'<div class="explore-suggest-person"><div class="explore-suggest-main" onclick="inspectProfile(\''+p.user_id+'\')"><div class="avatar">'+(p.avatar_url?'<img src="'+esc(p.avatar_url)+'" loading="lazy">':esc((p.full_name||'?')[0]))+'</div><div><b>'+esc(p.full_name||'Pessoa')+'</b><small>@'+esc((p.username||'usuario').replace(/^@/,''))+'</small></div></div><button type="button" onclick="toggleFollowFromExplore(\''+p.user_id+'\')">Seguir</button></div>').join('');
+    const postsHtml=ranked.map((p,index)=>{
+      const author=authors[p.user_id]||{};
+      const media=p.media_url?'<img class="ranking-media" src="'+esc(p.media_url)+'" loading="lazy" onclick="inspectProfile(\''+p.user_id+'\')">':'';
+      return '<article class="ranking-post"><div class="ranking-position">'+(index+1)+'</div><div class="ranking-post-content"><div class="ranking-author" onclick="inspectProfile(\''+p.user_id+'\')"><b>'+esc(author.full_name||'Pessoa')+'</b><span class="muted">@'+esc((author.username||'usuario').replace(/^@/,''))+'</span></div><div class="ranking-text" onclick="inspectProfile(\''+p.user_id+'\')">'+esc(p.content||'Publicação com imagem')+'</div>'+media+'<div class="ranking-stats"><span><i class="fa-solid fa-heart"></i> '+(likes[p.id]||0)+'</span><span><i class="fa-solid fa-comment"></i> '+(comments[p.id]||0)+'</span><span><i class="fa-solid fa-retweet"></i> '+(reposts[p.id]||0)+'</span></div></div></article>';
+    }).join('');
+    $('peopleList').innerHTML=renderWellbeingWelcomeCard()+renderTrendingHashtags(posts)+
+      (peopleHtml?'<section class="explore-suggestions"><div class="explore-ranking-heading"><div><h3>Pessoas que você pode gostar</h3><p class="muted">Perfis para conhecer, sem pressa.</p></div></div>'+peopleHtml+'</section>':'')+
+      '<div class="explore-ranking-heading"><div><h3>Para você ✨</h3><p class="muted">Uma seleção que combina novidades, conversas e assuntos que você acompanha.</p></div></div>'+
+      (postsHtml||'<p class="muted">Ainda não há publicações para recomendar.</p>');
     return;
   }
 
