@@ -212,16 +212,17 @@ textarea{min-height:85px;resize:vertical}
 
 
 /* Social lifestyle polish — exclusivo do Diário */
+#diary,#diary button,#diary input,#diary textarea,#diary select{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Arial,sans-serif}
 #diary{--diary-rose:#c98f98;--diary-soft:#f8eeee}
 #diary .diary-hero{position:relative;overflow:hidden;background:radial-gradient(circle at 92% 5%,rgba(255,255,255,.8),transparent 30%),linear-gradient(135deg,#f8e9e9 0%,#f8f1e8 52%,#edf1e9 100%);border:1px solid rgba(201,143,152,.22);border-radius:26px;padding:22px;margin:16px 0;box-shadow:0 12px 32px rgba(130,91,96,.07)}
-#diary .diary-hero:after{content:'♡';position:absolute;right:18px;top:8px;font-size:92px;line-height:1;color:rgba(201,143,152,.12);pointer-events:none}
+#diary .diary-hero:after{content:none}
 #diary .diary-hero-top{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
 #diary .diary-brand-chip{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(201,143,152,.24);background:rgba(255,255,255,.58);padding:7px 11px;border-radius:30px;font-size:11px;font-weight:750;color:#956c74}
 #diary .diary-hero h2{font-size:29px;letter-spacing:-1px;margin:15px 0 5px;position:relative;z-index:1}
 #diary .diary-subtitle{max-width:340px;font-size:13px;position:relative;z-index:1}
 #diary .diary-mood-box{position:relative;z-index:1;background:rgba(255,255,255,.58);border:1px solid rgba(255,255,255,.75);border-radius:18px;padding:13px 14px;margin-top:17px;backdrop-filter:blur(8px)}
-#diary .diary-mood-row{gap:9px}
-#diary .mood-option{border-radius:50%;width:42px;height:42px;padding:0;font-size:19px;transition:transform .18s ease,border-color .18s ease}
+#diary .diary-mood-row{gap:8px}
+#diary .mood-option{border-radius:999px;min-width:0;width:auto;height:38px;padding:0 13px;font-size:12px;font-weight:650;white-space:nowrap;transition:transform .18s ease,border-color .18s ease}
 #diary .mood-option.active{transform:translateY(-3px);box-shadow:0 5px 14px rgba(201,143,152,.2)}
 #diary .diary-social-nav{display:flex;gap:9px;overflow-x:auto;padding:3px 1px 12px;scrollbar-width:none}
 #diary .diary-social-nav::-webkit-scrollbar{display:none}
@@ -1328,16 +1329,16 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
         <span class="diary-brand-chip"><i class="fa-solid fa-heart"></i> COTTONTAIL WELLNESS</span>
         <span class="diary-note" id="diaryTodayLabel"></span>
       </div>
-      <h2>Seu cantinho, seu ritmo. ♡</h2>
+      <h2>Seu cantinho, seu ritmo.</h2>
       <div class="diary-subtitle">Um espaço só seu para registrar momentos, celebrar pequenas conquistas e cuidar de você.</div>
       <div class="diary-mood-box">
         <div style="font-weight:750;font-size:13px">Como está seu coração hoje?</div>
         <div class="diary-mood-row" id="diaryMoodOptions">
-          <button type="button" class="mood-option" data-mood="5" aria-label="Muito bem" aria-pressed="false" onclick="setDiaryMood(5)">🥰</button>
-          <button type="button" class="mood-option" data-mood="4" aria-label="Bem" aria-pressed="false" onclick="setDiaryMood(4)">😊</button>
-          <button type="button" class="mood-option" data-mood="3" aria-label="Tranquila" aria-pressed="false" onclick="setDiaryMood(3)">😌</button>
-          <button type="button" class="mood-option" data-mood="2" aria-label="Neutra" aria-pressed="false" onclick="setDiaryMood(2)">😐</button>
-          <button type="button" class="mood-option" data-mood="1" aria-label="Não estou bem" aria-pressed="false" onclick="setDiaryMood(1)">😔</button>
+          <button type="button" class="mood-option" data-mood="5" aria-label="Muito bem" aria-pressed="false" onclick="setDiaryMood(5)">Muito bem</button>
+          <button type="button" class="mood-option" data-mood="4" aria-label="Bem" aria-pressed="false" onclick="setDiaryMood(4)">Bem</button>
+          <button type="button" class="mood-option" data-mood="3" aria-label="Tranquila" aria-pressed="false" onclick="setDiaryMood(3)">Tranquila</button>
+          <button type="button" class="mood-option" data-mood="2" aria-label="Neutra" aria-pressed="false" onclick="setDiaryMood(2)">Neutra</button>
+          <button type="button" class="mood-option" data-mood="1" aria-label="Não estou bem" aria-pressed="false" onclick="setDiaryMood(1)">Não estou bem</button>
         </div>
         <div class="diary-note" style="margin-top:7px">Seu check-in é privado. Você pode mudar sua resposta a qualquer momento.</div>
       </div>
@@ -1351,7 +1352,7 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
     </div>
     <div class="diary-feed-heading">
       <h3>Seu mural de momentos</h3>
-      <span>Memórias só suas ✨</span>
+      <span>Memórias só suas</span>
     </div>
     <div class="diary-timeline" id="diaryTimeline" aria-live="polite">
       <div class="diary-empty-timeline">Seus registros vão aparecer aqui, como pequenas memórias da sua rotina.</div>
@@ -2437,7 +2438,7 @@ function writeDiaryMeta(meta){
   setDiaryMood(meta?.mood??null);
 }
 function diaryMoodEmoji(value){
-  return ({1:'😔',2:'😐',3:'😌',4:'😊',5:'🥰'})[Number(value)]||'';
+  return ({1:'Não estou bem',2:'Neutra',3:'Tranquila',4:'Bem',5:'Muito bem'})[Number(value)]||'';
 }
 function diaryRecordHasData(row){
   if(!row)return false;
@@ -2474,7 +2475,7 @@ function updateDiaryProgress(){
     timeline.innerHTML='';
     if(!recent.length){
       const empty=document.createElement('div');empty.className='diary-empty-timeline';
-      empty.textContent='Seu mural está começando. Quando você salvar seus dias, suas pequenas memórias aparecerão aqui. ♡';
+      empty.textContent='Seu mural está começando. Quando você salvar seus dias, suas pequenas memórias aparecerão aqui.';
       timeline.append(empty);
     }else recent.forEach(row=>{
       const parsed=diaryMetaFromRow(row),meta=parsed.meta||{},date=new Date(row.entry_date+'T12:00:00');
