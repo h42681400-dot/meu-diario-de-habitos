@@ -1057,6 +1057,54 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
 .music-bar-copy{justify-content:center}
 .music-bar-copy b{max-width:145px}
 
+
+/* Modo foco: Mensagens ocupa a área útil da tela */
+#app.messages-mode>.top,
+#app.messages-mode>#youtubeMusicPanel{display:none!important}
+#app.messages-mode{padding-top:80px;padding-bottom:20px}
+#app.messages-mode #messages.page.active{
+  display:flex;
+  flex-direction:column;
+  height:calc(100dvh - 102px);
+  min-height:360px;
+  margin:0;
+}
+#app.messages-mode #messages>.card{
+  display:flex;
+  flex:1;
+  flex-direction:column;
+  min-height:0;
+  margin:0;
+  padding:14px;
+}
+#app.messages-mode #chatRoomView:not(.hidden){
+  display:flex;
+  flex:1;
+  flex-direction:column;
+  min-height:0;
+}
+#app.messages-mode #messageBox.messages{
+  flex:1;
+  height:auto;
+  min-height:0;
+  overflow-y:auto;
+}
+#app.messages-mode .iphone-chat-header,
+#app.messages-mode #chatRoomView>div:nth-of-type(3),
+#app.messages-mode #chatRoomView>.row,
+#app.messages-mode #messageStatus{flex-shrink:0}
+@media(max-width:767px){
+  #app.messages-mode{padding-top:6px;padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+  #app.messages-mode #messages.page.active{
+    height:calc(100dvh - 116px - env(safe-area-inset-bottom));
+    min-height:320px;
+  }
+  #app.messages-mode #messages>.card{padding:10px}
+  #app.messages-mode #chatRoomView{padding:8px}
+  #app.messages-mode .iphone-chat-header{padding-bottom:10px;margin-bottom:8px}
+  #app.messages-mode #messageBox.messages{padding:12px 9px}
+}
+
 </style></head>
 <body>
 
@@ -2056,6 +2104,7 @@ window.addEventListener('pagehide',persistCurrentPage);
 window.addEventListener('beforeunload',persistCurrentPage);
 
 function showPage(id){
+  $('app')?.classList.toggle('messages-mode',id==='messages');
   if(chatInterval){ clearInterval(chatInterval); chatInterval=null; }
   document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));
   document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
