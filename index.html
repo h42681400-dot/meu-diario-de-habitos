@@ -1266,6 +1266,16 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
 .explore-suggest-person>button{padding:8px 13px;font-size:11px}
 @media(max-width:600px){.explore-welcome-card{padding:15px}.explore-welcome-card p{font-size:13px}}
 
+
+/* Preferências de notificações */
+.notification-preferences-card{margin:16px 0;padding:15px;border:1px solid var(--line);border-radius:16px;background:var(--bg)}
+.notification-preferences-card>div:first-child>b{font-size:13px}
+.notification-preferences-card>div:first-child>b i{color:var(--rose);margin-right:6px}
+.notification-preferences-card>div:first-child p{font-size:11px;line-height:1.5;margin:6px 0 13px}
+.notification-preferences-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.notification-preferences-grid label{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink)}
+.notification-preferences-grid input{width:17px;height:17px;margin:0;accent-color:var(--rose)}
+
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
      crossorigin="anonymous"></script>
@@ -1791,6 +1801,20 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
       <input type="checkbox" id="settingsMsgFollowingOnly" style="width:20px;height:20px" onchange="saveMsgPrivacySetting(this.checked)">
       <label for="settingsMsgFollowingOnly" style="margin:0;cursor:pointer">Receber mensagens apenas de quem eu sigo 💌</label>
     </div>
+    <section class="notification-preferences-card">
+      <div><b><i class="fa-solid fa-bell"></i> Notificações inteligentes</b><p class="muted">Escolha quais novidades você quer receber. As preferências também são consideradas antes do envio de avisos push.</p></div>
+      <div class="notification-preferences-grid">
+        <label><input type="checkbox" id="prefLikes" onchange="saveNotificationPreference('likes',this.checked)"> Curtidas</label>
+        <label><input type="checkbox" id="prefComments" onchange="saveNotificationPreference('comments',this.checked)"> Comentários</label>
+        <label><input type="checkbox" id="prefReposts" onchange="saveNotificationPreference('reposts',this.checked)"> Reposts</label>
+        <label><input type="checkbox" id="prefFollows" onchange="saveNotificationPreference('follows',this.checked)"> Novos seguidores</label>
+        <label><input type="checkbox" id="prefMessages" onchange="saveNotificationPreference('messages',this.checked)"> Mensagens</label>
+        <label><input type="checkbox" id="prefCollaborations" onchange="saveNotificationPreference('collaborations',this.checked)"> Convites para colaborar</label>
+        <label><input type="checkbox" id="prefChallenges" onchange="saveNotificationPreference('challenges',this.checked)"> Desafios coletivos</label>
+        <label><input type="checkbox" id="prefCommunities" onchange="saveNotificationPreference('communities',this.checked)"> Comunidades</label>
+      </div>
+      <p id="notificationPreferencesStatus" class="muted" style="font-size:11px;margin:8px 0 0"></p>
+    </section>
 
     <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
 
@@ -1907,7 +1931,9 @@ async function startCottontailPush(userId) {
 
       await PushNotifications.addListener('pushNotificationActionPerformed', action => {
         const data = action.notification?.data || {};
-        if (data.type === 'message' && typeof window.showPage === 'function') {
+        if (data.type === 'challenge_join' || data.type === 'challenge_complete' || data.type === 'challenge_update' || data.type === 'community_join' || data.type === 'community_post') {
+          if(typeof window.showPage==='function')window.showPage('community');
+        } else if (data.type === 'message' && typeof window.showPage === 'function') {
           window.showPage('messages');
         } else if (typeof window.showPage === 'function') {
           window.showPage('notifications');
@@ -2788,6 +2814,7 @@ function openSettingsModal(){
   $('settingsModal').classList.remove('hidden'); 
   loadBlockedUsers(); 
   $('settingsMsgFollowingOnly').checked = profile?.messages_from_following_only || false;
+  loadNotificationPreferences();
   const languageSelect=$('settingsLanguage');
   if(languageSelect)languageSelect.value=profile?.language||detectPreferredLanguage();
 }
@@ -4419,6 +4446,54 @@ async function sendMessage(){
   }
 }
 
+
+/* PREFERÊNCIAS E ENTREGA INTELIGENTE DE NOTIFICAÇÕES */
+const notificationPreferenceDefaults={likes:true,comments:true,reposts:true,follows:true,messages:true,collaborations:true,challenges:true,communities:true};
+let notificationPreferencesCache={...notificationPreferenceDefaults};
+function notificationPreferenceKey(type){
+  if(type==='like')return 'likes';
+  if(type==='comment')return 'comments';
+  if(type==='repost')return 'reposts';
+  if(type==='follow')return 'follows';
+  if(type==='message')return 'messages';
+  if(type==='post_collaboration')return 'collaborations';
+  if(type==='challenge_join'||type==='challenge_complete'||type==='challenge_update')return 'challenges';
+  if(type==='community_join'||type==='community_post')return 'communities';
+  return null;
+}
+async function loadNotificationPreferences(){
+  if(!user)return;
+  const {data,error}=await db.from('user_notification_preferences').select('*').eq('user_id',user.id).maybeSingle();
+  if(error){console.warn('Não foi possível carregar as preferências de notificações:',error.message);notificationPreferencesCache={...notificationPreferenceDefaults};}
+  else notificationPreferencesCache={...notificationPreferenceDefaults,...(data||{})};
+  const ids={likes:'prefLikes',comments:'prefComments',reposts:'prefReposts',follows:'prefFollows',messages:'prefMessages',collaborations:'prefCollaborations',challenges:'prefChallenges',communities:'prefCommunities'};
+  Object.entries(ids).forEach(([key,id])=>{const el=$(id);if(el)el.checked=notificationPreferencesCache[key]!==false;});
+}
+async function saveNotificationPreference(key,value){
+  if(!user||!Object.prototype.hasOwnProperty.call(notificationPreferenceDefaults,key))return;
+  notificationPreferencesCache[key]=!!value;
+  const {error}=await db.from('user_notification_preferences').upsert({user_id:user.id,[key]:!!value,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+  const statusLine=$('notificationPreferencesStatus');
+  if(error){
+    notificationPreferencesCache[key]=!value;
+    const id={likes:'prefLikes',comments:'prefComments',reposts:'prefReposts',follows:'prefFollows',messages:'prefMessages',collaborations:'prefCollaborations',challenges:'prefChallenges',communities:'prefCommunities'}[key];
+    if($(id))$(id).checked=!value;
+    if(statusLine)statusLine.textContent='Não foi possível salvar. Aplique supabase/notification_preferences_setup.sql no Supabase.';
+    console.warn('Preferência de notificação:',error.message);return;
+  }
+  if(statusLine)statusLine.textContent='Preferência salva. Você pode mudar quando quiser.';
+}
+async function createSmartNotification(payload){
+  const key=notificationPreferenceKey(payload?.type);
+  if(!payload?.user_id)return {error:new Error('Destinatário da notificação ausente.')};
+  if(key){
+    const {data,error}=await db.from('user_notification_preferences').select(key).eq('user_id',payload.user_id).maybeSingle();
+    if(error&&error.code!=='PGRST116')console.warn('Falha ao consultar preferência; mantendo entrega padrão:',error.message);
+    if(data&&data[key]===false)return {data:null,error:null,skipped:true};
+  }
+  return db.from('notifications').insert(payload);
+}
+
 /* NOTIFICAÇÕES */
 function notificationDescription(type){
   if(type==='like') return 'curtiu sua publicação. 🤍';
@@ -4426,6 +4501,11 @@ function notificationDescription(type){
   if(type==='follow') return 'começou a seguir você. ✨';
   if(type==='comment') return 'comentou na sua publicação. 💬';
   if(type==='message') return 'enviou uma mensagem. 💌';
+  if(type==='challenge_join') return 'entrou em um desafio que você criou. 🌱';
+  if(type==='challenge_complete') return 'concluiu um desafio coletivo. ✨';
+  if(type==='challenge_update') return 'atualizou o progresso em um desafio. 🌷';
+  if(type==='community_join') return 'entrou em uma comunidade que você criou. 🤍';
+  if(type==='community_post') return 'compartilhou uma novidade em uma comunidade. 💬';
   if(type==='post_collaboration') return 'convidou você para colaborar em uma publicação. 🤝';
   return 'interagiu com você.';
 }
@@ -4435,6 +4515,8 @@ function notificationIcon(type){
   if(type==='follow') return 'fa-user-plus';
   if(type==='comment') return 'fa-comment';
   if(type==='message') return 'fa-paper-plane';
+  if(type==='challenge_join'||type==='challenge_complete'||type==='challenge_update') return 'fa-seedling';
+  if(type==='community_join'||type==='community_post') return 'fa-people-group';
   return 'fa-bell';
 }
 async function openNotification(notificationId,actorId,type,postId){
