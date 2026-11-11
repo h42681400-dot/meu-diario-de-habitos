@@ -259,6 +259,20 @@ textarea{min-height:85px;resize:vertical}
 #diary .diary-timeline-copy span{display:block;color:var(--muted);font-size:11px;line-height:1.45;overflow-wrap:anywhere}
 #diary .diary-timeline-mood{font-size:19px}
 #diary .diary-empty-timeline{padding:18px;text-align:center;border:1px dashed var(--line);border-radius:17px;color:var(--muted);font-size:12px}
+#diary .diary-share-actions{display:flex;justify-content:flex-end;margin:-5px 0 18px}
+#diary .diary-share-actions button{border:1px solid var(--line);border-radius:13px;padding:10px 14px;font-size:12px}
+#diary .diary-weekly-summary{margin:18px 0;border-radius:22px;background:linear-gradient(135deg,rgba(248,233,233,.8),var(--card-bg) 72%);border-color:rgba(201,143,152,.2)}
+#diary .diary-weekly-heading{display:flex;align-items:center;gap:12px}
+#diary .diary-weekly-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:rgba(201,143,152,.16);color:var(--rose);font-size:18px}
+#diary .diary-weekly-heading h3{margin:0;font-size:16px}
+#diary .diary-weekly-heading p{margin:4px 0 0;color:var(--muted);font-size:11px}
+#diary .diary-weekly-content{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:16px}
+#diary .diary-weekly-stat{padding:12px;border:1px solid var(--line);background:rgba(255,255,255,.55);border-radius:14px}
+#diary .diary-weekly-stat b{display:block;color:var(--rose);font-size:20px}
+#diary .diary-weekly-stat span{display:block;color:var(--muted);font-size:10px;line-height:1.35;margin-top:3px}
+#diary .diary-weekly-foot{grid-column:1/-1;color:var(--muted);font-size:11px;line-height:1.5;margin-top:2px}
+@media(max-width:480px){#diary .diary-weekly-content{grid-template-columns:repeat(2,minmax(0,1fr))}#diary .diary-share-actions{justify-content:stretch}#diary .diary-share-actions button{width:100%}}
+
 #diary .diary-save{border-radius:16px;letter-spacing:.1px}
 @media(min-width:760px){#diary .diary-hero{padding:28px 30px}#diary .diary-social-nav{flex-wrap:wrap}#diary .diary-editor-card{padding:24px}#diary .diary-stat-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:480px){#diary .diary-hero{padding:19px;border-radius:22px}#diary .diary-hero h2{font-size:26px}#diary .diary-calendar-card{padding:13px}#diary .diary-editor-card{padding:13px}#diary .diary-social-nav button{padding:9px 11px}}
@@ -1363,6 +1377,13 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
     <div class="diary-timeline" id="diaryTimeline" aria-live="polite">
       <div class="diary-empty-timeline">Seus registros vão aparecer aqui, como pequenas memórias da sua rotina.</div>
     </div>
+    <div class="diary-share-actions">
+      <button type="button" class="secondary" onclick="openDiaryShareComposer()"><i class="fa-solid fa-share-nodes"></i> Compartilhar um momento</button>
+    </div>
+    <section class="card diary-weekly-summary" id="diaryWeeklySummary" aria-live="polite">
+      <div class="diary-weekly-heading"><span class="diary-weekly-icon"><i class="fa-solid fa-seedling"></i></span><div><h3>Seu resumo da semana</h3><p>Pequenos passos também são progresso.</p></div></div>
+      <div id="diaryWeeklySummaryContent" class="diary-weekly-content"><span class="muted">Seu resumo aparecerá aqui conforme você registra sua rotina.</span></div>
+    </section>
 
     <div class="card diary-calendar-card">
       <div class="calendar-head">
@@ -2507,6 +2528,75 @@ function updateDiaryProgress(){
   const todayLabel=$('diaryTodayLabel');
   if(todayLabel)todayLabel.textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short'}).replace('.','');
 }
+async function loadWeeklyWellnessSummary(){
+  const target=$('diaryWeeklySummaryContent');
+  if(!target||!user)return;
+  target.textContent='Carregando seu resumo...';
+  const today=new Date(),start=new Date(today.getFullYear(),today.getMonth(),today.getDate()-6);
+  const {data,error}=await db.from('diary_entries').select('entry_date,exercise,water_ml,notes')
+    .eq('user_id',user.id).gte('entry_date',dateKey(start)).lte('entry_date',dateKey(today));
+  if(error){target.textContent='Não foi possível carregar seu resumo agora.';console.warn('Resumo semanal do Diário:',error.message);return;}
+  const rows=(data||[]).filter(diaryRecordHasData);
+  const movement=rows.filter(row=>{
+    const meta=diaryMetaFromRow(row).meta||{};
+    return Boolean(row.exercise)||Number(meta.movementMinutes)>0||Number(meta.steps)>0;
+  }).length;
+  const water=rows.map(row=>Number(row.water_ml)||0).filter(value=>value>0);
+  const average=water.length?Math.round(water.reduce((sum,value)=>sum+value,0)/water.length):0;
+  const formatWater=value=>value>=1000?(value/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+' L':value+' ml';
+  const stats=[
+    {value:rows.length+'/7',label:'dias com registros'},
+    {value:String(movement),label:'dias com movimento'},
+    {value:average?formatWater(average):'—',label:'média de água nos dias registrados'}
+  ];
+  target.innerHTML=stats.map(item=>'<div class="diary-weekly-stat"><b>'+esc(item.value)+'</b><span>'+esc(item.label)+'</span></div>').join('')+
+    '<div class="diary-weekly-foot">'+(rows.length?'Você está construindo sua rotina no seu próprio ritmo. Continue valorizando cada pequeno passo.':'Esta semana pode começar com um pequeno cuidado. Não existe obrigação de preencher todos os dias.')+'</div>';
+}
+function openDiaryShareComposer(){
+  if(!user)return;
+  const values=collectDiaryPayload(),meta=readDiaryMeta(),dateLabel=selected.toLocaleDateString('pt-BR',{day:'numeric',month:'long'});
+  const options=[
+    {id:'movement',label:'Atividade ou movimento',value:values.exercise||meta.movementMinutes?(values.exercise||('Movimentei meu corpo por '+meta.movementMinutes+' minutos')):''},
+    {id:'water',label:'Água consumida',value:values.water_ml?((Number(values.water_ml)/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+' L de água') :''},
+    {id:'win',label:'Pequena conquista',value:meta.dailyWin||''},
+    {id:'care',label:'Momento de autocuidado',value:meta.careMoment||''},
+    {id:'gratitude',label:'Gratidão que quero compartilhar',value:meta.gratitude||''}
+  ].filter(item=>String(item.value||'').trim());
+  const modal=document.createElement('div');modal.className='modal-overlay';modal.id='diaryShareComposer';
+  const card=document.createElement('div');card.className='modal-box';
+  const heading=document.createElement('div');heading.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:12px';
+  const title=document.createElement('h3');title.textContent='Compartilhar um momento';title.style.margin='0';
+  const close=document.createElement('button');close.type='button';close.className='ghost';close.textContent='×';close.setAttribute('aria-label','Fechar');close.onclick=()=>modal.remove();
+  heading.append(title,close);
+  const intro=document.createElement('p');intro.className='muted';intro.textContent='Escolha apenas os detalhes que deseja transformar em uma publicação. Nada será compartilhado sem sua confirmação.';
+  const date=document.createElement('p');date.style.cssText='font-size:12px;color:var(--muted)';date.textContent='Registro de '+dateLabel;
+  const list=document.createElement('div');list.style.cssText='display:grid;gap:10px;margin:16px 0';
+  options.forEach(item=>{
+    const label=document.createElement('label');label.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:11px;border:1px solid var(--line);border-radius:13px;background:var(--bg);font-size:13px';
+    const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.value=item.id;checkbox.style.cssText='width:auto;margin:2px 0;accent-color:var(--rose)';
+    const copy=document.createElement('span');copy.textContent=item.label+': '+item.value;
+    label.append(checkbox,copy);list.append(label);
+  });
+  const note=document.createElement('p');note.className='diary-note';note.textContent='Por privacidade, alimentação, humor, sono e anotações pessoais não são incluídos nesta seleção.';
+  const statusLine=document.createElement('p');statusLine.className='muted';statusLine.style.fontSize='12px';
+  const actions=document.createElement('div');actions.style.cssText='display:flex;gap:9px;margin-top:15px';
+  const cancel=document.createElement('button');cancel.type='button';cancel.className='secondary';cancel.textContent='Cancelar';cancel.style.flex='1';cancel.onclick=()=>modal.remove();
+  const publish=document.createElement('button');publish.type='button';publish.textContent='Publicar no feed';publish.style.flex='1';
+  publish.onclick=async()=>{
+    const chosen=[...list.querySelectorAll('input:checked')].map(box=>options.find(item=>item.id===box.value)).filter(Boolean);
+    if(!chosen.length){statusLine.textContent='Selecione pelo menos um momento para compartilhar.';return;}
+    publish.disabled=true;publish.textContent='Publicando...';
+    const content='Um momento da minha jornada de bem-estar · '+dateLabel+'\\n\\n'+chosen.map(item=>item.label+': '+item.value).join('\\n')+'\\n\\nCada pequeno passo conta. 🤍';
+    try{
+      const {error}=await db.from('posts').insert({user_id:user.id,content,media_url:null});
+      if(error)throw error;
+      modal.remove();showPage('feed');await loadFeed('all');
+      showToast('Momento compartilhado','Sua publicação foi adicionada ao feed. 🤍');
+    }catch(error){statusLine.textContent='Não foi possível publicar: '+(error.message||'tente novamente.');publish.disabled=false;publish.textContent='Publicar no feed';}
+  };
+  actions.append(cancel,publish);card.append(heading,intro,date,list,note,statusLine,actions);modal.append(card);document.body.append(modal);
+  modal.addEventListener('click',event=>{if(event.target===modal)modal.remove();});
+}
 function openDiarySection(fieldId){
   const field=$(fieldId);if(!field)return;
   const panel=field.closest('details.diary-panel');
@@ -2523,7 +2613,7 @@ async function loadMonth(){
   const {data,error}=await db.from('diary_entries').select('*').eq('user_id',user.id).gte('entry_date',dateKey(first)).lte('entry_date',dateKey(last));
   if(error){console.error('Erro ao carregar calendário do Diário:',error);status('diaryStatus','Não foi possível carregar seus registros.');return;}
   entries={};(data||[]).forEach(row=>entries[row.entry_date]=row);
-  drawCalendar();await selectDay(selected);updateDiaryProgress();
+  drawCalendar();await selectDay(selected);updateDiaryProgress();await loadWeeklyWellnessSummary();
 }
 function drawCalendar(){
   const y=selected.getFullYear(),m=selected.getMonth();
