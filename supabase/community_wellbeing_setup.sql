@@ -135,3 +135,53 @@ create policy "cottontail_notification_preferences_insert_own" on public.user_no
 drop policy if exists "cottontail_notification_preferences_update_own" on public.user_notification_preferences;
 create policy "cottontail_notification_preferences_update_own" on public.user_notification_preferences for update to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
 grant select,insert,update on public.user_notification_preferences to authenticated;
+
+
+-- A preferência é aplicada no próprio banco antes do INSERT.
+-- Assim, o webhook de push só recebe notificações permitidas, sem expor
+-- as preferências privadas de outros usuários ao cliente.
+create or replace function public.cottontail_filter_notification_preferences()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  preference_column text;
+  preference_enabled boolean;
+begin
+  preference_column := case new.type
+    when 'like' then 'likes'
+    when 'comment' then 'comments'
+    when 'repost' then 'reposts'
+    when 'follow' then 'follows'
+    when 'message' then 'messages'
+    when 'post_collaboration' then 'collaborations'
+    when 'challenge_join' then 'challenges'
+    when 'challenge_complete' then 'challenges'
+    when 'challenge_update' then 'challenges'
+    when 'community_join' then 'communities'
+    when 'community_post' then 'communities'
+    else null
+  end;
+
+  if preference_column is null then
+    return new;
+  end if;
+
+  execute format(
+    'select %I from public.user_notification_preferences where user_id = $1',
+    preference_column
+  ) into preference_enabled using new.user_id;
+
+  if preference_enabled is false then
+    return null;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists cottontail_notification_preferences_before_insert on public.notifications;
+create trigger cottontail_notification_preferences_before_insert
+before insert on public.notifications
+for each row execute function public.cottontail_filter_notification_preferences();
