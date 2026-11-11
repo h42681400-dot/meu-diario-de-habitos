@@ -4756,8 +4756,18 @@ window.handleLoginClick = function(event) {
 (function(){
   if(!('serviceWorker' in navigator)) return;
   window.addEventListener('load',function(){
-    navigator.serviceWorker.register('/sw.js',{scope:'/'})
-      .catch(function(error){console.warn('PWA: não foi possível registrar o service worker.',error);});
+    navigator.serviceWorker.register('/sw.js',{scope:'/',updateViaCache:'none'})
+      .then(function(registration){
+        // Solicita a verificação da versão mais recente sempre que o app é aberto.
+        return registration.update();
+      })
+      .catch(function(error){console.warn('PWA: não foi possível atualizar o aplicativo.',error);});
+    // Quando a nova versão assumir o controle, recarrega a tela com os arquivos atuais.
+    navigator.serviceWorker.addEventListener('controllerchange',function(){
+      if(window.__cottontailPwaReloading)return;
+      window.__cottontailPwaReloading=true;
+      window.location.reload();
+    });
   });
   let installPrompt=null;
   window.addEventListener('beforeinstallprompt',function(event){
