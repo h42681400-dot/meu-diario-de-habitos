@@ -210,6 +210,52 @@ textarea{min-height:85px;resize:vertical}
 #diary .diary-calendar-card{padding:18px}
 @media(max-width:480px){#diary .diary-fields{grid-template-columns:1fr}#diary .diary-checks{grid-template-columns:1fr 1fr}#diary .diary-hero{padding:18px}}
 
+
+/* Social lifestyle polish — exclusivo do Diário */
+#diary{--diary-rose:#c98f98;--diary-soft:#f8eeee}
+#diary .diary-hero{position:relative;overflow:hidden;background:radial-gradient(circle at 92% 5%,rgba(255,255,255,.8),transparent 30%),linear-gradient(135deg,#f8e9e9 0%,#f8f1e8 52%,#edf1e9 100%);border:1px solid rgba(201,143,152,.22);border-radius:26px;padding:22px;margin:16px 0;box-shadow:0 12px 32px rgba(130,91,96,.07)}
+#diary .diary-hero:after{content:'♡';position:absolute;right:18px;top:8px;font-size:92px;line-height:1;color:rgba(201,143,152,.12);pointer-events:none}
+#diary .diary-hero-top{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
+#diary .diary-brand-chip{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(201,143,152,.24);background:rgba(255,255,255,.58);padding:7px 11px;border-radius:30px;font-size:11px;font-weight:750;color:#956c74}
+#diary .diary-hero h2{font-size:29px;letter-spacing:-1px;margin:15px 0 5px;position:relative;z-index:1}
+#diary .diary-subtitle{max-width:340px;font-size:13px;position:relative;z-index:1}
+#diary .diary-mood-box{position:relative;z-index:1;background:rgba(255,255,255,.58);border:1px solid rgba(255,255,255,.75);border-radius:18px;padding:13px 14px;margin-top:17px;backdrop-filter:blur(8px)}
+#diary .diary-mood-row{gap:9px}
+#diary .mood-option{border-radius:50%;width:42px;height:42px;padding:0;font-size:19px;transition:transform .18s ease,border-color .18s ease}
+#diary .mood-option.active{transform:translateY(-3px);box-shadow:0 5px 14px rgba(201,143,152,.2)}
+#diary .diary-social-nav{display:flex;gap:9px;overflow-x:auto;padding:3px 1px 12px;scrollbar-width:none}
+#diary .diary-social-nav::-webkit-scrollbar{display:none}
+#diary .diary-social-nav button{flex:none;border:1px solid var(--line);background:var(--card-bg);color:var(--ink);border-radius:30px;padding:9px 13px;font-size:12px;font-weight:700;box-shadow:0 3px 10px rgba(0,0,0,.025)}
+#diary .diary-social-nav button i{color:var(--rose);margin-right:6px}
+#diary .diary-feed-heading{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:14px 2px 10px}
+#diary .diary-feed-heading h3{font-size:17px;margin:0;letter-spacing:-.3px}
+#diary .diary-feed-heading span{font-size:11px;color:var(--muted)}
+#diary .diary-calendar-card,#diary .diary-editor-card{border-radius:22px;border:1px solid var(--line);box-shadow:0 7px 24px rgba(0,0,0,.035)}
+#diary .diary-calendar-card{padding:17px}
+#diary .day{border-radius:13px;transition:transform .15s ease,background .15s ease}
+#diary .day:active{transform:scale(.94)}
+#diary .day.selected{box-shadow:0 4px 12px rgba(201,143,152,.25)}
+#diary .diary-editor-card{padding:18px}
+#diary details.diary-panel{border-radius:16px;transition:border-color .2s ease,box-shadow .2s ease}
+#diary details.diary-panel[open]{border-color:rgba(201,143,152,.38);box-shadow:0 5px 16px rgba(0,0,0,.025)}
+#diary details.diary-panel>summary{min-height:28px}
+#diary .diary-panel-content{animation:diaryReveal .2s ease}
+@keyframes diaryReveal{from{opacity:.4;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+#diary .diary-stat{border-radius:17px;padding:15px;background:linear-gradient(145deg,var(--bg),var(--card-bg))}
+#diary .diary-stat strong{font-size:23px;letter-spacing:-.6px}
+#diary .diary-timeline{display:grid;gap:10px;margin:10px 0 18px}
+#diary .diary-timeline-item{width:100%;text-align:left;display:flex;gap:12px;align-items:flex-start;background:var(--card-bg);border:1px solid var(--line);border-radius:17px;padding:13px;color:var(--ink);cursor:pointer}
+#diary .diary-timeline-date{width:43px;min-width:43px;height:48px;border-radius:13px;background:rgba(212,165,165,.16);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--rose);font-weight:800}
+#diary .diary-timeline-date small{font-size:9px;text-transform:uppercase}
+#diary .diary-timeline-copy{min-width:0;flex:1}
+#diary .diary-timeline-copy strong{display:block;font-size:13px;margin:1px 0 4px}
+#diary .diary-timeline-copy span{display:block;color:var(--muted);font-size:11px;line-height:1.45;overflow-wrap:anywhere}
+#diary .diary-timeline-mood{font-size:19px}
+#diary .diary-empty-timeline{padding:18px;text-align:center;border:1px dashed var(--line);border-radius:17px;color:var(--muted);font-size:12px}
+#diary .diary-save{border-radius:16px;letter-spacing:.1px}
+@media(min-width:760px){#diary .diary-hero{padding:28px 30px}#diary .diary-social-nav{flex-wrap:wrap}#diary .diary-editor-card{padding:24px}#diary .diary-stat-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:480px){#diary .diary-hero{padding:19px;border-radius:22px}#diary .diary-hero h2{font-size:26px}#diary .diary-calendar-card{padding:13px}#diary .diary-editor-card{padding:13px}#diary .diary-social-nav button{padding:9px 11px}}
+
 /* Posts */
 .post{border-bottom:1px solid var(--line);padding:18px 0}
 .post-pinned-label{display:inline-flex;align-items:center;gap:7px;margin:0 0 10px;padding:5px 10px;border-radius:20px;background:rgba(212,165,165,.15);color:var(--rose);font-size:11px;font-weight:700;letter-spacing:.2px}
@@ -1278,18 +1324,37 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
   <!-- DIÁRIO — Wellness Journal -->
   <section id="diary" class="page">
     <div class="diary-hero">
-      <div class="diary-kicker">Seu espaço de cuidado</div>
-      <h2>Meu Diário ♡</h2>
-      <div class="diary-subtitle">Pequenos cuidados também são grandes conquistas. Registre seu dia no seu próprio ritmo.</div>
-      <div style="margin-top:16px;font-weight:700;font-size:13px">Como você está se sentindo hoje?</div>
-      <div class="diary-mood-row" id="diaryMoodOptions">
-        <button type="button" class="mood-option" data-mood="5" onclick="setDiaryMood(5)">🥰</button>
-        <button type="button" class="mood-option" data-mood="4" onclick="setDiaryMood(4)">😊</button>
-        <button type="button" class="mood-option" data-mood="3" onclick="setDiaryMood(3)">😌</button>
-        <button type="button" class="mood-option" data-mood="2" onclick="setDiaryMood(2)">😐</button>
-        <button type="button" class="mood-option" data-mood="1" onclick="setDiaryMood(1)">😔</button>
+      <div class="diary-hero-top">
+        <span class="diary-brand-chip"><i class="fa-solid fa-heart"></i> COTTontail WELLNESS</span>
+        <span class="diary-note" id="diaryTodayLabel"></span>
       </div>
-      <div class="diary-note" style="margin-top:8px">Seu check-in é privado e pode ser alterado quando quiser.</div>
+      <h2>Seu cantinho, seu ritmo. ♡</h2>
+      <div class="diary-subtitle">Um espaço só seu para registrar momentos, celebrar pequenas conquistas e cuidar de você.</div>
+      <div class="diary-mood-box">
+        <div style="font-weight:750;font-size:13px">Como está seu coração hoje?</div>
+        <div class="diary-mood-row" id="diaryMoodOptions">
+          <button type="button" class="mood-option" data-mood="5" aria-label="Muito bem" aria-pressed="false" onclick="setDiaryMood(5)">🥰</button>
+          <button type="button" class="mood-option" data-mood="4" aria-label="Bem" aria-pressed="false" onclick="setDiaryMood(4)">😊</button>
+          <button type="button" class="mood-option" data-mood="3" aria-label="Tranquila" aria-pressed="false" onclick="setDiaryMood(3)">😌</button>
+          <button type="button" class="mood-option" data-mood="2" aria-label="Neutra" aria-pressed="false" onclick="setDiaryMood(2)">😐</button>
+          <button type="button" class="mood-option" data-mood="1" aria-label="Não estou bem" aria-pressed="false" onclick="setDiaryMood(1)">😔</button>
+        </div>
+        <div class="diary-note" style="margin-top:7px">Seu check-in é privado. Você pode mudar sua resposta a qualquer momento.</div>
+      </div>
+    </div>
+    <div class="diary-social-nav" aria-label="Atalhos do Diário">
+      <button type="button" onclick="openDiarySection('foodFeeling')"><i class="fa-solid fa-utensils"></i>Alimentação</button>
+      <button type="button" onclick="openDiarySection('exercise')"><i class="fa-solid fa-person-walking"></i>Movimento</button>
+      <button type="button" onclick="openDiarySection('sleepBed')"><i class="fa-solid fa-moon"></i>Sono</button>
+      <button type="button" onclick="openDiarySection('gratitude')"><i class="fa-solid fa-book-heart"></i>Reflexões</button>
+      <button type="button" onclick="openDiarySection('careSkincare')"><i class="fa-solid fa-spa"></i>Autocuidado</button>
+    </div>
+    <div class="diary-feed-heading">
+      <h3>Seu mural de momentos</h3>
+      <span>Memórias só suas ✨</span>
+    </div>
+    <div class="diary-timeline" id="diaryTimeline" aria-live="polite">
+      <div class="diary-empty-timeline">Seus registros vão aparecer aqui, como pequenas memórias da sua rotina.</div>
     </div>
 
     <div class="card diary-calendar-card">
@@ -1303,8 +1368,8 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
       <div class="diary-note" style="margin-top:10px">Os dias com registros aparecem marcados no calendário.</div>
     </div>
 
-    <div class="card">
-      <h3 id="selectedDate" style="margin-top:0"></h3>
+    <div class="card diary-editor-card">
+      <div class="diary-feed-heading"><h3 id="selectedDate" style="margin:0"></h3><span>Seu registro</span></div>
       <details class="diary-panel" open>
         <summary><span><i class="fa-solid fa-utensils" style="color:var(--rose);margin-right:8px"></i>Alimentação consciente</span></summary>
         <div class="diary-panel-content">
@@ -2403,6 +2468,44 @@ function updateDiaryProgress(){
   $('diaryProgressMessage').textContent=active.length
     ?'Você registrou '+active.length+' dia(s) neste mês. Observe seus padrões com gentileza — cada rotina é única.'
     :'Seus registros vão aparecer aqui conforme você preencher o Diário. Não existe obrigação de registrar tudo.';
+  const timeline=$('diaryTimeline');
+  if(timeline){
+    const recent=active.slice().sort((a,b)=>String(b.entry_date).localeCompare(String(a.entry_date))).slice(0,4);
+    timeline.innerHTML='';
+    if(!recent.length){
+      const empty=document.createElement('div');empty.className='diary-empty-timeline';
+      empty.textContent='Seu mural está começando. Quando você salvar seus dias, suas pequenas memórias aparecerão aqui. ♡';
+      timeline.append(empty);
+    }else recent.forEach(row=>{
+      const parsed=diaryMetaFromRow(row),meta=parsed.meta||{},date=new Date(row.entry_date+'T12:00:00');
+      const item=document.createElement('button');item.type='button';item.className='diary-timeline-item';
+      const dateBox=document.createElement('span');dateBox.className='diary-timeline-date';
+      const day=document.createElement('strong');day.textContent=String(date.getDate());
+      const month=document.createElement('small');month.textContent=date.toLocaleDateString('pt-BR',{month:'short'}).replace('.','');
+      dateBox.append(day,month);
+      const copy=document.createElement('span');copy.className='diary-timeline-copy';
+      const title=document.createElement('strong');title.textContent=meta.dailyWin||meta.careMoment||'Um dia vivido no seu ritmo';
+      const description=document.createElement('span');
+      const details=[];
+      if(row.exercise)details.push(row.exercise);
+      if(Number(row.water_ml)>0)details.push((Number(row.water_ml)/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+' L de água');
+      if(meta.gratitude)details.push('Gratidão: '+meta.gratitude);
+      if(!details.length&&parsed.notes)details.push(parsed.notes);
+      description.textContent=details.join(' · ')||'Um pequeno registro da sua jornada de bem-estar.';
+      copy.append(title,description);
+      const mood=document.createElement('span');mood.className='diary-timeline-mood';mood.textContent=diaryMoodEmoji(meta.mood);
+      item.append(dateBox,copy,mood);item.addEventListener('click',()=>selectDay(date));timeline.append(item);
+    });
+  }
+  const todayLabel=$('diaryTodayLabel');
+  if(todayLabel)todayLabel.textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short'}).replace('.','');
+}
+function openDiarySection(fieldId){
+  const field=$(fieldId);if(!field)return;
+  const panel=field.closest('details.diary-panel');
+  if(panel)panel.open=true;
+  field.scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(()=>field.focus({preventScroll:true}),280);
 }
 function changeMonth(n){selected=new Date(selected.getFullYear(),selected.getMonth()+n,1);loadMonth();}
 async function loadMonth(){
