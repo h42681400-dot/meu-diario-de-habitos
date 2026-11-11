@@ -173,6 +173,43 @@ textarea{min-height:85px;resize:vertical}
 .day.today{border-color:var(--rose)}
 .day.has-entry::after{content:' •';color:var(--rose);display:block;font-size:10px}
 
+
+/* Cottontail Wellness Diary — estilos isolados da aba Diário */
+#diary .diary-hero{background:linear-gradient(135deg,rgba(212,165,165,.22),rgba(245,238,220,.65));border:1px solid var(--line);border-radius:22px;padding:22px;margin:16px 0}
+#diary .diary-hero h2{margin:4px 0 7px;font-size:25px;letter-spacing:-.6px}
+#diary .diary-kicker{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--rose);font-weight:800}
+#diary .diary-subtitle{color:var(--muted);font-size:13px;line-height:1.55}
+#diary .diary-mood-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+#diary .mood-option{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:10px 12px;min-width:48px}
+#diary .mood-option.active{background:rgba(212,165,165,.22);border-color:var(--rose);color:var(--ink)}
+#diary .diary-section-title{display:flex;align-items:center;gap:9px;margin:0 0 12px;font-size:16px}
+#diary .diary-section-title i{color:var(--rose)}
+#diary details.diary-panel{background:var(--card-bg);border:1px solid var(--line);border-radius:18px;padding:15px 17px;margin:12px 0}
+#diary details.diary-panel>summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:700}
+#diary details.diary-panel>summary::-webkit-details-marker{display:none}
+#diary details.diary-panel>summary:after{content:'＋';color:var(--rose);font-size:18px}
+#diary details.diary-panel[open]>summary:after{content:'−'}
+#diary .diary-panel-content{padding-top:12px}
+#diary .diary-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px}
+#diary .diary-fields .field{min-width:0}
+#diary .diary-fields .field.full{grid-column:1/-1}
+#diary .diary-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+#diary .diary-check{display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:13px}
+#diary .diary-check input{width:auto;margin:0;accent-color:var(--rose)}
+#diary .diary-stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#diary .diary-stat{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:13px}
+#diary .diary-stat strong{display:block;font-size:21px;color:var(--rose);margin-top:4px}
+#diary .diary-stat span{font-size:11px;color:var(--muted)}
+#diary .diary-progress{height:7px;background:var(--line);border-radius:20px;overflow:hidden;margin-top:8px}
+#diary .diary-progress>span{display:block;height:100%;background:var(--rose);border-radius:20px}
+#diary .diary-week-bars{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;align-items:end;height:90px;margin:12px 0 4px}
+#diary .diary-week-bar{height:100%;display:flex;flex-direction:column;justify-content:end;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+#diary .diary-week-bar i{display:block;width:100%;max-width:24px;min-height:4px;background:rgba(212,165,165,.75);border-radius:8px 8px 3px 3px}
+#diary .diary-save{position:sticky;bottom:74px;z-index:5;box-shadow:0 4px 18px rgba(0,0,0,.12)}
+#diary .diary-note{font-size:12px;color:var(--muted);line-height:1.5}
+#diary .diary-calendar-card{padding:18px}
+@media(max-width:480px){#diary .diary-fields{grid-template-columns:1fr}#diary .diary-checks{grid-template-columns:1fr 1fr}#diary .diary-hero{padding:18px}}
+
 /* Posts */
 .post{border-bottom:1px solid var(--line);padding:18px 0}
 .post-pinned-label{display:inline-flex;align-items:center;gap:7px;margin:0 0 10px;padding:5px 10px;border-radius:20px;background:rgba(212,165,165,.15);color:var(--rose);font-size:11px;font-weight:700;letter-spacing:.2px}
@@ -1238,32 +1275,149 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
     </div>
   </section>
 
-  <!-- DIÁRIO -->
+  <!-- DIÁRIO — Wellness Journal -->
   <section id="diary" class="page">
-    <div class="card">
-      <div class="calendar-head">
-        <button class="secondary" onclick="changeMonth(-1)">‹</button>
-        <h3 id="monthTitle" style="margin:0;font-size:15px"></h3>
-        <button class="secondary" onclick="changeMonth(1)">›</button>
+    <div class="diary-hero">
+      <div class="diary-kicker">Seu espaço de cuidado</div>
+      <h2>Meu Diário ♡</h2>
+      <div class="diary-subtitle">Pequenos cuidados também são grandes conquistas. Registre seu dia no seu próprio ritmo.</div>
+      <div style="margin-top:16px;font-weight:700;font-size:13px">Como você está se sentindo hoje?</div>
+      <div class="diary-mood-row" id="diaryMoodOptions">
+        <button type="button" class="mood-option" data-mood="5" onclick="setDiaryMood(5)">🥰</button>
+        <button type="button" class="mood-option" data-mood="4" onclick="setDiaryMood(4)">😊</button>
+        <button type="button" class="mood-option" data-mood="3" onclick="setDiaryMood(3)">😌</button>
+        <button type="button" class="mood-option" data-mood="2" onclick="setDiaryMood(2)">😐</button>
+        <button type="button" class="mood-option" data-mood="1" onclick="setDiaryMood(1)">😔</button>
       </div>
-      <div class="week">
-        <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
-      </div>
-      <div id="days" class="days" style="margin-top:10px"></div>
+      <div class="diary-note" style="margin-top:8px">Seu check-in é privado e pode ser alterado quando quiser.</div>
     </div>
+
+    <div class="card diary-calendar-card">
+      <div class="calendar-head">
+        <button class="secondary" onclick="changeMonth(-1)" aria-label="Mês anterior">‹</button>
+        <h3 id="monthTitle" style="margin:0;font-size:15px"></h3>
+        <button class="secondary" onclick="changeMonth(1)" aria-label="Próximo mês">›</button>
+      </div>
+      <div class="week"><div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div></div>
+      <div id="days" class="days" style="margin-top:10px"></div>
+      <div class="diary-note" style="margin-top:10px">Os dias com registros aparecem marcados no calendário.</div>
+    </div>
+
     <div class="card">
       <h3 id="selectedDate" style="margin-top:0"></h3>
-      <div class="grid">
-        <div class="field"><label>☀️ Café da manhã</label><textarea id="breakfast"></textarea></div>
-        <div class="field"><label>🍽️ Almoço</label><textarea id="lunch"></textarea></div>
-        <div class="field"><label>🍎 Lanches</label><textarea id="snacks"></textarea></div>
-        <div class="field"><label>🌙 Jantar</label><textarea id="dinner"></textarea></div>
-      </div>
-      <div class="field"><label>💧 Água (ml)</label><input id="water" type="number" min="0"></div>
-      <div class="field"><label>🏃 Exercícios</label><textarea id="exercise"></textarea></div>
-      <div class="field"><label>📝 Observações</label><textarea id="notes"></textarea></div>
-      <button onclick="saveEntry()" style="width:100%;margin-top:14px">Salvar meu dia</button>
-      <p id="diaryStatus" class="status"></p>
+      <details class="diary-panel" open>
+        <summary><span><i class="fa-solid fa-utensils" style="color:var(--rose);margin-right:8px"></i>Alimentação consciente</span></summary>
+        <div class="diary-panel-content">
+          <div class="diary-fields">
+            <div class="field"><label>☀️ Café da manhã</label><textarea id="breakfast" placeholder="O que você comeu?"></textarea></div>
+            <div class="field"><label>🍽️ Almoço</label><textarea id="lunch" placeholder="Registre seu almoço"></textarea></div>
+            <div class="field"><label>🍎 Lanches</label><textarea id="snacks" placeholder="Lanches e pequenos momentos"></textarea></div>
+            <div class="field"><label>🌙 Jantar</label><textarea id="dinner" placeholder="Como foi seu jantar?"></textarea></div>
+            <div class="field full"><label>Como você se sentiu após se alimentar?</label><select id="foodFeeling"><option value="">Prefiro não registrar</option><option>Confortável e satisfeita</option><option>Com energia</option><option>Ainda com fome</option><option>Indisposta</option><option>Outro</option></select></div>
+            <div class="field full"><label>Frutas, vegetais e variedade (opcional)</label><input id="foodVariety" placeholder="Ex.: frutas, legumes, verduras..."></div>
+          </div>
+          <div class="field"><label>💧 Água consumida (ml)</label><input id="water" type="number" min="0" step="50" placeholder="Ex.: 2000"></div>
+          <div class="field"><label>Minha meta de água (ml)</label><input id="waterGoal" type="number" min="0" step="50" placeholder="Meta pessoal, sem pressão"></div>
+          <div class="diary-note">O Cottontail não classifica alimentos como bons ou ruins e não substitui orientação nutricional.</div>
+        </div>
+      </details>
+
+      <details class="diary-panel">
+        <summary><span><i class="fa-solid fa-person-walking" style="color:var(--rose);margin-right:8px"></i>Movimento e saúde física</span></summary>
+        <div class="diary-panel-content">
+          <div class="diary-fields">
+            <div class="field full"><label>🏃 Atividade realizada</label><textarea id="exercise" placeholder="Caminhada, dança, academia, yoga, bicicleta..."></textarea></div>
+            <div class="field"><label>Duração (minutos)</label><input id="movementMinutes" type="number" min="0" placeholder="Ex.: 30"></div>
+            <div class="field"><label>Passos (opcional)</label><input id="steps" type="number" min="0" placeholder="Quantidade de passos"></div>
+            <div class="field"><label>Energia antes</label><select id="energyBefore"><option value="">Não registrei</option><option>Baixa</option><option>Média</option><option>Alta</option></select></div>
+            <div class="field"><label>Energia depois</label><select id="energyAfter"><option value="">Não registrei</option><option>Baixa</option><option>Média</option><option>Alta</option></select></div>
+          </div>
+          <div class="diary-note">Descanso também faz parte de uma rotina saudável. Não é necessário treinar todos os dias.</div>
+        </div>
+      </details>
+
+      <details class="diary-panel">
+        <summary><span><i class="fa-solid fa-moon" style="color:var(--rose);margin-right:8px"></i>Sono e descanso</span></summary>
+        <div class="diary-panel-content diary-fields">
+          <div class="field"><label>Fui dormir</label><input id="sleepBed" type="time"></div>
+          <div class="field"><label>Acordei</label><input id="sleepWake" type="time"></div>
+          <div class="field"><label>Qualidade do sono</label><select id="sleepQuality"><option value="">Não registrei</option><option value="1">Muito ruim</option><option value="2">Ruim</option><option value="3">Regular</option><option value="4">Boa</option><option value="5">Muito boa</option></select></div>
+          <div class="field"><label>Me senti descansada?</label><select id="sleepRested"><option value="">Não registrei</option><option>Sim</option><option>Mais ou menos</option><option>Não</option></select></div>
+          <div class="field full"><label>Ritual antes de dormir</label><input id="bedtimeRoutine" placeholder="Leitura, banho, reduzir telas..."></div>
+        </div>
+      </details>
+
+      <details class="diary-panel">
+        <summary><span><i class="fa-solid fa-heart" style="color:var(--rose);margin-right:8px"></i>Saúde emocional e reflexões</span></summary>
+        <div class="diary-panel-content">
+          <div class="diary-fields">
+            <div class="field"><label>Nível de estresse percebido</label><select id="stressLevel"><option value="">Não registrei</option><option value="1">Muito baixo</option><option value="2">Baixo</option><option value="3">Moderado</option><option value="4">Alto</option><option value="5">Muito alto</option></select></div>
+            <div class="field"><label>Minha energia hoje</label><select id="dailyEnergy"><option value="">Não registrei</option><option value="1">Muito baixa</option><option value="2">Baixa</option><option value="3">Média</option><option value="4">Boa</option><option value="5">Muito boa</option></select></div>
+            <div class="field full"><label>Uma coisa pela qual sou grata</label><textarea id="gratitude" placeholder="Pode ser algo simples..."></textarea></div>
+            <div class="field full"><label>O que mais marcou meu dia?</label><textarea id="reflection" placeholder="Escreva livremente, sem julgamentos."></textarea></div>
+            <div class="field full"><label>Uma pequena conquista de hoje</label><input id="dailyWin" placeholder="Algo de que você se orgulha"></div>
+          </div>
+          <div class="diary-note">Estas perguntas são ferramentas de reflexão e autocuidado, não avaliações ou diagnósticos de saúde mental.</div>
+        </div>
+      </details>
+
+      <details class="diary-panel">
+        <summary><span><i class="fa-solid fa-spa" style="color:var(--rose);margin-right:8px"></i>Autocuidado e meu momento</span></summary>
+        <div class="diary-panel-content">
+          <div class="diary-checks">
+            <label class="diary-check"><input type="checkbox" id="careSkincare"> Skincare</label>
+            <label class="diary-check"><input type="checkbox" id="careHair"> Cuidei do cabelo</label>
+            <label class="diary-check"><input type="checkbox" id="careHygiene"> Cuidados pessoais</label>
+            <label class="diary-check"><input type="checkbox" id="careRelax"> Momento de relaxar</label>
+            <label class="diary-check"><input type="checkbox" id="careHobby"> Fiz algo que gosto</label>
+            <label class="diary-check"><input type="checkbox" id="careOffline"> Tempo longe das telas</label>
+          </div>
+          <div class="field" style="margin-top:12px"><label>Meu momento especial</label><input id="careMoment" placeholder="O que fez por você hoje?"></div>
+        </div>
+      </details>
+
+      <details class="diary-panel">
+        <summary><span><i class="fa-solid fa-book-open" style="color:var(--rose);margin-right:8px"></i>Desenvolvimento pessoal</span></summary>
+        <div class="diary-panel-content diary-fields">
+          <div class="field"><label>Leitura (minutos)</label><input id="readingMinutes" type="number" min="0" placeholder="Tempo de leitura"></div>
+          <div class="field"><label>Estudos (minutos)</label><input id="studyMinutes" type="number" min="0" placeholder="Tempo de estudo"></div>
+          <div class="field"><label>Tempo de tela (horas)</label><input id="screenHours" type="number" min="0" step="0.5" placeholder="Opcional"></div>
+          <div class="field"><label>Hobby ou atividade criativa</label><input id="hobby" placeholder="Ex.: pintura, música..."></div>
+          <div class="field full"><label>Observações do dia</label><textarea id="notes" placeholder="Outros detalhes que você queira guardar..."></textarea></div>
+        </div>
+      </details>
+
+      <details class="diary-panel">
+        <summary><span><i class="fa-solid fa-seedling" style="color:var(--rose);margin-right:8px"></i>Metas e desafios pessoais</span></summary>
+        <div class="diary-panel-content">
+          <div class="diary-fields">
+            <div class="field"><label>Minha meta de movimento (min)</label><input id="movementGoal" type="number" min="0" placeholder="Ex.: 30"></div>
+            <div class="field"><label>Minha meta de sono (horas)</label><input id="sleepGoal" type="number" min="0" step="0.5" placeholder="Ex.: 8"></div>
+            <div class="field full"><label>Desafio que estou fazendo</label><input id="challengeName" placeholder="Ex.: 7 dias de leitura"></div>
+          </div>
+          <label class="diary-check" style="margin-top:8px"><input type="checkbox" id="challengeDone"> Completei meu desafio hoje</label>
+          <div class="diary-note" style="margin-top:8px">Sugestões: hidratação, leitura, caminhada, gratidão, sono regular ou autocuidado. Você pode adaptar ou pausar quando quiser.</div>
+        </div>
+      </details>
+
+      <details class="diary-panel">
+        <summary><span><i class="fa-solid fa-chart-line" style="color:var(--rose);margin-right:8px"></i>Minha evolução</span></summary>
+        <div class="diary-panel-content">
+          <div class="diary-stat-grid">
+            <div class="diary-stat"><span>Dias com registros no mês</span><strong id="diaryMonthDays">0</strong></div>
+            <div class="diary-stat"><span>Média de água registrada</span><strong id="diaryWaterAverage">—</strong></div>
+            <div class="diary-stat"><span>Dias com movimento</span><strong id="diaryMovementDays">0</strong></div>
+            <div class="diary-stat"><span>Check-ins emocionais</span><strong id="diaryMoodDays">0</strong></div>
+          </div>
+          <h4 style="margin:18px 0 4px">Seus registros nos últimos 7 dias</h4>
+          <div class="diary-week-bars" id="diaryWeekBars"></div>
+          <div class="diary-note" id="diaryProgressMessage">Cada registro ajuda você a conhecer melhor sua rotina.</div>
+        </div>
+      </details>
+
+      <div class="field" style="margin-top:16px"><label>📝 Anotações gerais</label><textarea id="legacyDiaryNotes" placeholder="Anotações livres do dia..."></textarea></div>
+      <button class="diary-save" onclick="saveEntry()" style="width:100%;margin-top:12px"><i class="fa-solid fa-heart"></i> Salvar meu dia</button>
+      <p id="diaryStatus" class="status" aria-live="polite"></p>
     </div>
   </section>
 
@@ -2173,28 +2327,107 @@ async function checkUnreadBadges(){
 
 }
 
-/* CALENDÁRIO */
-function changeMonth(n){ selected=new Date(selected.getFullYear(),selected.getMonth()+n,1); loadMonth(); }
+/* CALENDÁRIO E WELLNESS JOURNAL — alterações restritas à aba Diário */
+const DIARY_META_MARKER='[[COTTONTAIL_WELLNESS_V1]]';
+const DIARY_FIELD_IDS=[
+  'foodFeeling','foodVariety','waterGoal','movementMinutes','steps','energyBefore','energyAfter',
+  'sleepBed','sleepWake','sleepQuality','sleepRested','bedtimeRoutine','stressLevel','dailyEnergy',
+  'gratitude','reflection','dailyWin','careSkincare','careHair','careHygiene','careRelax','careHobby',
+  'careOffline','careMoment','readingMinutes','studyMinutes','screenHours','hobby','movementGoal',
+  'sleepGoal','challengeName','challengeDone'
+];
+let diaryMoodValue=null;
+function diaryMetaFromRow(row){
+  const raw=String(row?.notes||'');
+  if(raw.startsWith(DIARY_META_MARKER)){
+    try{
+      const parsed=JSON.parse(raw.slice(DIARY_META_MARKER.length));
+      return {notes:parsed.notes||'',meta:parsed.meta||{}};
+    }catch(error){console.warn('Registro complementar do Diário inválido; preservando texto original.',error);}
+  }
+  return {notes:raw,meta:{}};
+}
+function setDiaryMood(value){
+  diaryMoodValue=Number(value)||null;
+  document.querySelectorAll('#diaryMoodOptions .mood-option').forEach(button=>{
+    button.classList.toggle('active',Number(button.dataset.mood)===diaryMoodValue);
+    button.setAttribute('aria-pressed',Number(button.dataset.mood)===diaryMoodValue?'true':'false');
+  });
+}
+function readDiaryMeta(){
+  const meta={};
+  DIARY_FIELD_IDS.forEach(id=>{
+    const el=$(id);if(!el)return;
+    meta[id]=el.type==='checkbox'?el.checked:el.value;
+  });
+  meta.mood=diaryMoodValue;
+  return meta;
+}
+function writeDiaryMeta(meta){
+  DIARY_FIELD_IDS.forEach(id=>{
+    const el=$(id);if(!el)return;
+    const value=meta?.[id];
+    if(el.type==='checkbox')el.checked=Boolean(value);
+    else el.value=value??'';
+  });
+  setDiaryMood(meta?.mood??null);
+}
+function diaryMoodEmoji(value){
+  return ({1:'😔',2:'😐',3:'😌',4:'😊',5:'🥰'})[Number(value)]||'';
+}
+function diaryRecordHasData(row){
+  if(!row)return false;
+  const parsed=diaryMetaFromRow(row);
+  return Boolean(row.breakfast||row.lunch||row.snacks||row.dinner||row.water_ml||row.exercise||parsed.notes||Object.values(parsed.meta||{}).some(v=>v!==''&&v!==null&&v!==false));
+}
+function updateDiaryProgress(){
+  const rows=Object.values(entries||{});
+  const active=rows.filter(diaryRecordHasData);
+  const waterRows=active.map(r=>Number(r.water_ml)||0).filter(v=>v>0);
+  const movementDays=active.filter(r=>Boolean(r.exercise)||Number(diaryMetaFromRow(r).meta.movementMinutes)>0).length;
+  const moodDays=active.filter(r=>Number(diaryMetaFromRow(r).meta.mood)>0).length;
+  const average=waterRows.length?Math.round(waterRows.reduce((a,b)=>a+b,0)/waterRows.length):0;
+  $('diaryMonthDays').textContent=String(active.length);
+  $('diaryWaterAverage').textContent=average?((average>=1000?(average/1000).toFixed(1)+' L':average+' ml')):'—';
+  $('diaryMovementDays').textContent=String(movementDays);
+  $('diaryMoodDays').textContent=String(moodDays);
+  const today=new Date();const bars=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date(today.getFullYear(),today.getMonth(),today.getDate()-i);
+    const row=entries[dateKey(d)];
+    const parsed=diaryMetaFromRow(row||{});
+    const value=row?(Number(row.water_ml)||0):0;
+    const height=Math.max(4,Math.min(100,Math.round(value/Math.max(1500,Number(parsed.meta.waterGoal)||2000)*100)));
+    bars.push('<div class="diary-week-bar"><i style="height:'+height+'%"></i><span>'+d.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','')+'</span></div>');
+  }
+  $('diaryWeekBars').innerHTML=bars.join('');
+  $('diaryProgressMessage').textContent=active.length
+    ?'Você registrou '+active.length+' dia(s) neste mês. Observe seus padrões com gentileza — cada rotina é única.'
+    :'Seus registros vão aparecer aqui conforme você preencher o Diário. Não existe obrigação de registrar tudo.';
+}
+function changeMonth(n){selected=new Date(selected.getFullYear(),selected.getMonth()+n,1);loadMonth();}
 async function loadMonth(){
-  let first=new Date(selected.getFullYear(),selected.getMonth(),1);
-  let last=new Date(selected.getFullYear(),selected.getMonth()+1,0);
+  if(!user)return;
+  const first=new Date(selected.getFullYear(),selected.getMonth(),1);
+  const last=new Date(selected.getFullYear(),selected.getMonth()+1,0);
   $('monthTitle').textContent=first.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
-  let {data}=await db.from('diary_entries').select('*').eq('user_id',user.id).gte('entry_date',dateKey(first)).lte('entry_date',dateKey(last));
-  entries={};
-  (data||[]).forEach(r=>entries[r.entry_date]=r);
-  drawCalendar();
-  await selectDay(selected);
+  const {data,error}=await db.from('diary_entries').select('*').eq('user_id',user.id).gte('entry_date',dateKey(first)).lte('entry_date',dateKey(last));
+  if(error){console.error('Erro ao carregar calendário do Diário:',error);status('diaryStatus','Não foi possível carregar seus registros.');return;}
+  entries={};(data||[]).forEach(row=>entries[row.entry_date]=row);
+  drawCalendar();await selectDay(selected);updateDiaryProgress();
 }
 function drawCalendar(){
-  let y=selected.getFullYear(),m=selected.getMonth();
-  let offset=new Date(y,m,1).getDay(),total=new Date(y,m+1,0).getDate();
+  const y=selected.getFullYear(),m=selected.getMonth();
+  const offset=new Date(y,m,1).getDay(),total=new Date(y,m+1,0).getDate();
   $('days').innerHTML='';
   for(let i=0;i<offset;i++)$('days').append(document.createElement('div'));
   for(let n=1;n<=total;n++){
-    let d=new Date(y,m,n),k=dateKey(d),el=document.createElement('div');
+    const d=new Date(y,m,n),k=dateKey(d),el=document.createElement('div');
     el.className='day'+(k===dateKey(selected)?' selected':'')+(k===dateKey(new Date())?' today':'')+(entries[k]?' has-entry':'');
-    el.textContent=n;
+    el.textContent=n;el.setAttribute('role','button');el.setAttribute('tabindex','0');
+    el.setAttribute('aria-label',d.toLocaleDateString('pt-BR'));
     el.onclick=()=>selectDay(d);
+    el.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();selectDay(d);}};
     $('days').append(el);
   }
 }
@@ -2202,21 +2435,52 @@ async function selectDay(d){
   selected=new Date(d.getFullYear(),d.getMonth(),d.getDate());
   drawCalendar();
   $('selectedDate').textContent=selected.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  let {data}=await db.from('diary_entries').select('*').eq('user_id',user.id).eq('entry_date',dateKey(selected)).maybeSingle();
-  let r=data||{};
-  for(let f of ['breakfast','lunch','snacks','dinner','exercise','notes'])$(f).value=r[f]||'';
-  $('water').value=r.water_ml??'';
+  const {data,error}=await db.from('diary_entries').select('*').eq('user_id',user.id).eq('entry_date',dateKey(selected)).maybeSingle();
+  if(error){console.warn('Erro ao carregar o dia selecionado:',error);status('diaryStatus','Não foi possível abrir este dia.');return;}
+  const row=data||{},parsed=diaryMetaFromRow(row);
+  ['breakfast','lunch','snacks','dinner','exercise'].forEach(id=>$(id).value=row[id]||'');
+  $('water').value=row.water_ml??'';
+  $('notes').value=parsed.notes||'';
+  $('legacyDiaryNotes').value=parsed.notes||'';
+  writeDiaryMeta(parsed.meta||{});
+  status('diaryStatus','');
+}
+function collectDiaryPayload(){
+  const notes=$('legacyDiaryNotes').value.trim();
+  const meta=readDiaryMeta();
+  const hasMeta=Object.values(meta).some(value=>value!==''&&value!==null&&value!==false);
+  const storedNotes=hasMeta?DIARY_META_MARKER+JSON.stringify({notes,meta}):notes;
+  return {
+    breakfast:$('breakfast').value.trim(),lunch:$('lunch').value.trim(),
+    snacks:$('snacks').value.trim(),dinner:$('dinner').value.trim(),
+    water_ml:$('water').value===''?null:Math.max(0,Number($('water').value)||0),
+    exercise:$('exercise').value.trim(),notes:storedNotes
+  };
 }
 async function saveEntry(){
-  let v={breakfast:$('breakfast').value.trim(),lunch:$('lunch').value.trim(),snacks:$('snacks').value.trim(),dinner:$('dinner').value.trim(),water_ml:$('water').value===''?null:Number($('water').value),exercise:$('exercise').value.trim(),notes:$('notes').value.trim()};
-  let k=dateKey(selected);
-  let {data:old}=await db.from('diary_entries').select('id').eq('user_id',user.id).eq('entry_date',k).maybeSingle();
-  let empty=!v.breakfast&&!v.lunch&&!v.snacks&&!v.dinner&&v.water_ml===null&&!v.exercise&&!v.notes;
-  if(empty&&old)await db.from('diary_entries').delete().eq('id',old.id);
-  else if(!empty&&old)await db.from('diary_entries').update(v).eq('id',old.id);
-  else if(!empty)await db.from('diary_entries').insert({user_id:user.id,entry_date:k,...v});
-  status('diaryStatus','Salvo com sucesso! 🤍');
-  await loadMonth();
+  if(!user)return;
+  const button=document.querySelector('#diary .diary-save');
+  if(button){button.disabled=true;button.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';}
+  try{
+    const values=collectDiaryPayload(),key=dateKey(selected);
+    const hasContent=Boolean(values.breakfast||values.lunch||values.snacks||values.dinner||values.water_ml!==null||values.exercise||values.notes);
+    const {data:old,error:lookupError}=await db.from('diary_entries').select('id').eq('user_id',user.id).eq('entry_date',key).maybeSingle();
+    if(lookupError)throw lookupError;
+    if(!hasContent&&old){
+      const {error}=await db.from('diary_entries').delete().eq('id',old.id).eq('user_id',user.id);if(error)throw error;
+    }else if(hasContent&&old){
+      const {error}=await db.from('diary_entries').update(values).eq('id',old.id).eq('user_id',user.id);if(error)throw error;
+    }else if(hasContent){
+      const {error}=await db.from('diary_entries').insert({user_id:user.id,entry_date:key,...values});if(error)throw error;
+    }
+    status('diaryStatus','Seu dia foi salvo com carinho. 🤍');
+    await loadMonth();
+  }catch(error){
+    console.error('Erro ao salvar Diário:',error);
+    status('diaryStatus','Não foi possível salvar: '+(error.message||'tente novamente.'));
+  }finally{
+    if(button){button.disabled=false;button.innerHTML='<i class="fa-solid fa-heart"></i> Salvar meu dia';}
+  }
 }
 
 /* CONFIGURAÇÕES */
