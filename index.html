@@ -1576,7 +1576,7 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
       </details>
 
       <div class="field" style="margin-top:16px"><label>📝 Anotações gerais</label><textarea id="legacyDiaryNotes" placeholder="Anotações livres do dia..."></textarea></div>
-      <button class="diary-save" onclick="saveEntry()" style="width:100%;margin-top:12px"><i class="fa-solid fa-heart"></i> Salvar meu dia</button>
+      <button class="diary-save" onclick="window.saveEntry()" style="width:100%;margin-top:12px"><i class="fa-solid fa-heart"></i> Salvar meu dia</button>
       <p id="diaryStatus" class="status" aria-live="polite"></p>
     </div>
   </section>
@@ -2769,30 +2769,47 @@ function collectDiaryPayload(){
   };
 }
 async function saveEntry(){
-  if(!user)return;
   const button=document.querySelector('#diary .diary-save');
+  status('diaryStatus','Preparando para salvar...');
   if(button){button.disabled=true;button.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';}
   try{
+    // Recupera a sessão diretamente do Supabase caso o estado local ainda não esteja pronto.
+    if(!user){
+      const {data,error}=await db.auth.getUser();
+      if(error)throw error;
+      if(data?.user)user=data.user;
+    }
+    if(!user){
+      status('diaryStatus','Sua sessão não foi identificada. Entre novamente na sua conta e tente salvar.');
+      return;
+    }
+
     const values=collectDiaryPayload(),key=dateKey(selected);
     const hasContent=Boolean(values.breakfast||values.lunch||values.snacks||values.dinner||values.water_ml!==null||values.exercise||values.notes);
     const {data:old,error:lookupError}=await db.from('diary_entries').select('id').eq('user_id',user.id).eq('entry_date',key).maybeSingle();
     if(lookupError)throw lookupError;
+
     if(!hasContent&&old){
-      const {error}=await db.from('diary_entries').delete().eq('id',old.id).eq('user_id',user.id);if(error)throw error;
+      const {error}=await db.from('diary_entries').delete().eq('id',old.id).eq('user_id',user.id);
+      if(error)throw error;
     }else if(hasContent&&old){
-      const {error}=await db.from('diary_entries').update(values).eq('id',old.id).eq('user_id',user.id);if(error)throw error;
+      const {error}=await db.from('diary_entries').update(values).eq('id',old.id).eq('user_id',user.id);
+      if(error)throw error;
     }else if(hasContent){
-      const {error}=await db.from('diary_entries').insert({user_id:user.id,entry_date:key,...values});if(error)throw error;
+      const {error}=await db.from('diary_entries').insert({user_id:user.id,entry_date:key,...values});
+      if(error)throw error;
     }
+
     status('diaryStatus','Seu dia foi salvo com carinho. 🤍');
     await loadMonth();
   }catch(error){
     console.error('Erro ao salvar Diário:',error);
-    status('diaryStatus','Não foi possível salvar: '+(error.message||'tente novamente.'));
+    status('diaryStatus','Não foi possível salvar: '+(error?.message||'verifique sua conexão e tente novamente.'));
   }finally{
     if(button){button.disabled=false;button.innerHTML='<i class="fa-solid fa-heart"></i> Salvar meu dia';}
   }
 }
+window.saveEntry=saveEntry;
 
 /* CONFIGURAÇÕES */
 function changeTheme(theme){
