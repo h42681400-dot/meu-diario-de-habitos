@@ -1319,6 +1319,7 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
     <button data-page="feed" class="active" onclick="showPage('feed')"><i class="fa-solid fa-house"></i><span>Início</span></button>
     <button data-page="diary" onclick="showPage('diary')"><i class="fa-solid fa-book-open"></i><span>Diário</span></button>
     <button data-page="explore" onclick="showPage('explore')"><i class="fa-solid fa-compass"></i><span>Explorar</span></button>
+    <button data-page="community" onclick="showPage('community')"><i class="fa-solid fa-people-group"></i><span>Comunidade</span></button>
     <button data-page="messages" onclick="showPage('messages')">
       <i class="fa-solid fa-paper-plane"></i><span>Mensagens</span>
     </button>
@@ -1522,6 +1523,18 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
       </div>
       <div id="recentSearchesBox" class="muted" style="font-size:12px;margin:8px 0"></div>
       <div id="peopleList" style="margin-top:14px"></div>
+    </div>
+  </section>
+
+  <!-- COMUNIDADE: desafios coletivos e grupos -->
+  <section id="community" class="page">
+    <div class="card community-shell">
+      <div class="community-hero"><span class="community-kicker">COTTONTAIL TOGETHER</span><h2>Pequenos passos, juntos. 🌷</h2><p>Encontre pessoas com objetivos parecidos, participe de desafios leves e celebre cada avanço no seu ritmo.</p></div>
+      <div class="community-tabs">
+        <button type="button" id="communityChallengesTab" class="active" onclick="switchCommunityTab('challenges')"><i class="fa-solid fa-seedling"></i> Desafios</button>
+        <button type="button" id="communityGroupsTab" onclick="switchCommunityTab('groups')"><i class="fa-solid fa-people-group"></i> Comunidades</button>
+      </div>
+      <div id="communityHubContent" aria-live="polite"><p class="muted">Carregando seu espaço coletivo...</p></div>
     </div>
   </section>
 
@@ -2303,7 +2316,7 @@ db.auth.onAuthStateChange((_event,session)=>{
       await Promise.all([loadMonth(),loadFeed('all'),checkUnreadBadges()]);
       await startNotificationPolling();
       let savedPage='feed';try{savedPage=localStorage.getItem('cottontailActivePage')||'feed';}catch(e){}
-      const validPages=['feed','diary','explore','messages','notifications','profile'];
+      const validPages=['feed','diary','explore','community','messages','notifications','profile'];
       showPage(validPages.includes(savedPage)?savedPage:'feed');
       if(savedPage==='messages'){let savedChat=null;try{savedChat=localStorage.getItem('cottontailActiveChat');}catch(e){}if(savedChat)await openChat(savedChat);}
       showToast('Bem-vinda de volta!','Seu Cottontail está prontinho para você. 🐰',{type:'welcome'});
@@ -2362,6 +2375,7 @@ function showPage(id){
   if(user)try{localStorage.setItem('cottontailActivePage',id);}catch(e){}
 
   if(id==='explore')searchProfilesAndPosts();
+  if(id==='community')loadCommunityHub();
   if(id==='messages'){ backToChatList(); }
   if(id==='feed')loadFeed('all');
   if(id==='notifications'){ $('notifBadge').classList.add('hidden'); loadNotifications(); }
