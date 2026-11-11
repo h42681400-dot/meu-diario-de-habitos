@@ -94,9 +94,9 @@ drop policy if exists "cottontail_community_members_leave_self" on public.wellne
 create policy "cottontail_community_members_leave_self" on public.wellness_community_members for delete to authenticated using (user_id = auth.uid());
 
 drop policy if exists "cottontail_community_posts_read_members" on public.wellness_community_posts;
-create policy "cottontail_community_posts_read_members" on public.wellness_community_posts for select to authenticated using (exists (select 1 from public.wellness_community_members m where m.community_id = community_id and m.user_id = auth.uid()));
+create policy "cottontail_community_posts_read_members" on public.wellness_community_posts for select to authenticated using (exists (select 1 from public.wellness_community_members m where m.community_id = wellness_community_members.community_id and m.user_id = auth.uid()));
 drop policy if exists "cottontail_community_posts_create_members" on public.wellness_community_posts;
-create policy "cottontail_community_posts_create_members" on public.wellness_community_posts for insert to authenticated with check (user_id = auth.uid() and exists (select 1 from public.wellness_community_members m where m.community_id = community_id and m.user_id = auth.uid()));
+create policy "cottontail_community_posts_create_members" on public.wellness_community_posts for insert to authenticated with check (user_id = auth.uid() and exists (select 1 from public.wellness_community_members m where m.community_id = wellness_community_members.community_id and m.user_id = auth.uid()));
 drop policy if exists "cottontail_community_posts_delete_own" on public.wellness_community_posts;
 create policy "cottontail_community_posts_delete_own" on public.wellness_community_posts for delete to authenticated using (user_id = auth.uid());
 
