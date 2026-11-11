@@ -212,7 +212,7 @@ textarea{min-height:85px;resize:vertical}
 
 
 /* Social lifestyle polish — exclusivo do Diário */
-#diary,#diary button,#diary input,#diary textarea,#diary select{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Arial,sans-serif}
+#diary,#diary *{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",system-ui,sans-serif!important}
 #diary{--diary-rose:#c98f98;--diary-soft:#f8eeee}
 #diary .diary-hero{position:relative;overflow:hidden;background:radial-gradient(circle at 92% 5%,rgba(255,255,255,.8),transparent 30%),linear-gradient(135deg,#f8e9e9 0%,#f8f1e8 52%,#edf1e9 100%);border:1px solid rgba(201,143,152,.22);border-radius:26px;padding:22px;margin:16px 0;box-shadow:0 12px 32px rgba(130,91,96,.07)}
 #diary .diary-hero:after{content:none}
@@ -1375,14 +1375,14 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
         <summary><span><i class="fa-solid fa-utensils" style="color:var(--rose);margin-right:8px"></i>Alimentação consciente</span></summary>
         <div class="diary-panel-content">
           <div class="diary-fields">
-            <div class="field"><label>☀️ Café da manhã</label><textarea id="breakfast" placeholder="O que você comeu?"></textarea></div>
-            <div class="field"><label>🍽️ Almoço</label><textarea id="lunch" placeholder="Registre seu almoço"></textarea></div>
-            <div class="field"><label>🍎 Lanches</label><textarea id="snacks" placeholder="Lanches e pequenos momentos"></textarea></div>
-            <div class="field"><label>🌙 Jantar</label><textarea id="dinner" placeholder="Como foi seu jantar?"></textarea></div>
+            <div class="field"><label>Café da manhã</label><textarea id="breakfast" placeholder="O que você comeu?"></textarea></div>
+            <div class="field"><label>Almoço</label><textarea id="lunch" placeholder="Registre seu almoço"></textarea></div>
+            <div class="field"><label>Lanches</label><textarea id="snacks" placeholder="Lanches e pequenos momentos"></textarea></div>
+            <div class="field"><label>Jantar</label><textarea id="dinner" placeholder="Como foi seu jantar?"></textarea></div>
             <div class="field full"><label>Como você se sentiu após se alimentar?</label><select id="foodFeeling"><option value="">Prefiro não registrar</option><option>Confortável e satisfeita</option><option>Com energia</option><option>Ainda com fome</option><option>Indisposta</option><option>Outro</option></select></div>
             <div class="field full"><label>Frutas, vegetais e variedade (opcional)</label><input id="foodVariety" placeholder="Ex.: frutas, legumes, verduras..."></div>
           </div>
-          <div class="field"><label>💧 Água consumida (ml)</label><input id="water" type="number" min="0" step="50" placeholder="Ex.: 2000"></div>
+          <div class="field"><label>Água consumida (ml)</label><input id="water" type="number" min="0" step="50" placeholder="Ex.: 2000"></div>
           <div class="field"><label>Minha meta de água (ml)</label><input id="waterGoal" type="number" min="0" step="50" placeholder="Meta pessoal, sem pressão"></div>
           <div class="diary-note">O Cottontail não classifica alimentos como bons ou ruins e não substitui orientação nutricional.</div>
         </div>
@@ -1392,7 +1392,7 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
         <summary><span><i class="fa-solid fa-person-walking" style="color:var(--rose);margin-right:8px"></i>Movimento e saúde física</span></summary>
         <div class="diary-panel-content">
           <div class="diary-fields">
-            <div class="field full"><label>🏃 Atividade realizada</label><textarea id="exercise" placeholder="Caminhada, dança, academia, yoga, bicicleta..."></textarea></div>
+            <div class="field full"><label>Atividade realizada</label><textarea id="exercise" placeholder="Caminhada, dança, academia, yoga, bicicleta..."></textarea></div>
             <div class="field"><label>Duração (minutos)</label><input id="movementMinutes" type="number" min="0" placeholder="Ex.: 30"></div>
             <div class="field"><label>Passos (opcional)</label><input id="steps" type="number" min="0" placeholder="Quantidade de passos"></div>
             <div class="field"><label>Energia antes</label><select id="energyBefore"><option value="">Não registrei</option><option>Baixa</option><option>Média</option><option>Alta</option></select></div>
@@ -1480,7 +1480,7 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
         </div>
       </details>
 
-      <div class="field" style="margin-top:16px"><label>📝 Anotações gerais</label><textarea id="legacyDiaryNotes" placeholder="Anotações livres do dia..."></textarea></div>
+      <div class="field" style="margin-top:16px"><label>Anotações gerais</label><textarea id="legacyDiaryNotes" placeholder="Anotações livres do dia..."></textarea></div>
       <button class="diary-save" onclick="saveEntry()" style="width:100%;margin-top:12px"><i class="fa-solid fa-heart"></i> Salvar meu dia</button>
       <p id="diaryStatus" class="status" aria-live="polite"></p>
     </div>
