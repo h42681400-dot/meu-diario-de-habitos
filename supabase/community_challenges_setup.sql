@@ -73,7 +73,7 @@ create policy "cottontail_challenges_update_own" on public.wellness_challenges f
 drop policy if exists "cottontail_challenge_members_read" on public.wellness_challenge_members;
 create policy "cottontail_challenge_members_read" on public.wellness_challenge_members for select to authenticated using (exists (select 1 from public.wellness_challenges c where c.id = challenge_id and (c.is_public or c.created_by = auth.uid())) or user_id = auth.uid());
 drop policy if exists "cottontail_challenge_members_join_self" on public.wellness_challenge_members;
-create policy "cottontail_challenge_members_join_self" on public.wellness_challenge_members for insert to authenticated with check (user_id = auth.uid());
+create policy "cottontail_challenge_members_join_self" on public.wellness_challenge_members for insert to authenticated with check (user_id = auth.uid() and exists (select 1 from public.wellness_challenges c where c.id = wellness_challenge_members.challenge_id and c.is_public));
 drop policy if exists "cottontail_challenge_members_update_self" on public.wellness_challenge_members;
 create policy "cottontail_challenge_members_update_self" on public.wellness_challenge_members for update to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
 drop policy if exists "cottontail_challenge_members_leave_self" on public.wellness_challenge_members;
