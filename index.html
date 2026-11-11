@@ -4493,13 +4493,8 @@ async function saveNotificationPreference(key,value){
   if(statusLine)statusLine.textContent='Preferência salva. Você pode mudar quando quiser.';
 }
 async function createSmartNotification(payload){
-  const key=notificationPreferenceKey(payload?.type);
   if(!payload?.user_id)return {error:new Error('Destinatário da notificação ausente.')};
-  if(key){
-    const {data,error}=await db.from('user_notification_preferences').select(key).eq('user_id',payload.user_id).maybeSingle();
-    if(error&&error.code!=='PGRST116')console.warn('Falha ao consultar preferência; mantendo entrega padrão:',error.message);
-    if(data&&data[key]===false)return {data:null,error:null,skipped:true};
-  }
+  // O trigger no Supabase aplica as preferências do destinatário antes do webhook de push.
   return db.from('notifications').insert(payload);
 }
 
