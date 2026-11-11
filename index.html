@@ -3631,6 +3631,148 @@ async function addComment(postId,postOwnerId){
   await loadPostComments(postId);await loadFeed('all');
 }
 
+
+/* COMUNIDADE — desafios coletivos e grupos */
+let communityView='challenges',activeCommunityId=null;
+function switchCommunityTab(tab){
+  communityView=tab==='groups'?'groups':'challenges';
+  $('communityChallengesTab')?.classList.toggle('active',communityView==='challenges');
+  $('communityGroupsTab')?.classList.toggle('active',communityView==='groups');
+  activeCommunityId=null;
+  loadCommunityHub();
+}
+async function loadCommunityHub(){
+  const box=$('communityHubContent');if(!box||!user)return;
+  box.innerHTML='<p class="muted">Carregando...</p>';
+  if(activeCommunityId){await openCommunityDetail(activeCommunityId,true);return;}
+  if(communityView==='challenges'){
+    const {data:challenges,error}=await db.from('wellness_challenges').select('*').eq('is_public',true).order('created_at',{ascending:false}).limit(40);
+    if(error){box.innerHTML='<div class="community-empty">Para ativar esta área, aplique o arquivo <b>supabase/community_challenges_setup.sql</b> no SQL Editor do Supabase.<br><small>'+esc(error.message)+'</small></div>';return;}
+    const ids=(challenges||[]).map(x=>x.id);
+    const [membersRes,mineRes]=await Promise.all([
+      ids.length?db.from('wellness_challenge_members').select('challenge_id,user_id,progress').in('challenge_id',ids):Promise.resolve({data:[]}),
+      ids.length?db.from('wellness_challenge_members').select('challenge_id,progress').eq('user_id',user.id).in('challenge_id',ids):Promise.resolve({data:[]})
+    ]);
+    if(membersRes.error||mineRes.error){box.innerHTML='<div class="community-empty">Não foi possível carregar os participantes. Confira as permissões das tabelas de desafios no Supabase.</div>';return;}
+    const members=membersRes.data||[],mine={};(mineRes.data||[]).forEach(x=>mine[x.challenge_id]=x);
+    let html='<div class="community-section-head"><div><h3>Desafios em grupo</h3><p>Metas compartilhadas, sem pressão e sem comparação.</p></div><button type="button" onclick="openCreateChallenge()"><i class="fa-solid fa-plus"></i> Criar desafio</button></div>';
+    if(!challenges?.length)html+='<div class="community-empty">Ainda não há desafios por aqui. Que tal criar o primeiro? 🌱</div>';
+    (challenges||[]).forEach(ch=>{
+      const joined=mine[ch.id],count=members.filter(x=>x.challenge_id===ch.id).length;
+      const progress=Number(joined?.progress)||0,goal=Number(ch.goal_value)||1,pct=Math.min(100,Math.round(progress/goal*100));
+      html+='<article class="community-card"><div class="community-card-top"><div class="community-card-icon"><i class="fa-solid fa-seedling"></i></div><div class="community-card-main"><h4>'+esc(ch.title)+'</h4><p>'+esc(ch.description||'Um convite para cuidar de você no seu ritmo.')+'</p></div></div><div class="community-meta"><span>'+esc(ch.category||'Bem-estar')+'</span><span>'+Number(ch.duration_days||7)+' dias</span><span>'+count+' '+(count===1?'participante':'participantes')+'</span></div>';
+      if(joined)html+='<div class="community-progress-row"><span>Seu progresso</span><b>'+progress+' / '+goal+' '+esc(ch.goal_unit||'dias')+'</b></div><div class="community-progress"><span style="width:'+pct+'%"></span></div><div class="community-compose"><input id="challenge-progress-'+ch.id+'" type="number" min="0" step="0.1" value="'+progress+'" aria-label="Seu progresso no desafio"><button type="button" onclick="updateChallengeProgress(\''+ch.id+'\','+goal+')">Salvar progresso</button></div>';
+      html+='<div class="community-card-actions">'+(joined?'<button type="button" class="secondary" onclick="leaveChallenge(\''+ch.id+'\')">Sair do desafio</button>':'<button type="button" onclick="joinChallenge(\''+ch.id+'\')">Participar do desafio</button>')+'</div></article>';
+    });
+    box.innerHTML=html;
+  }else{
+    const {data:groups,error}=await db.from('wellness_communities').select('*').eq('is_private',false).order('created_at',{ascending:false}).limit(40);
+    if(error){box.innerHTML='<div class="community-empty">Para ativar as comunidades, aplique o arquivo <b>supabase/community_challenges_setup.sql</b> no SQL Editor do Supabase.<br><small>'+esc(error.message)+'</small></div>';return;}
+    const ids=(groups||[]).map(x=>x.id);
+    const [membersRes,mineRes]=await Promise.all([
+      ids.length?db.from('wellness_community_members').select('community_id,user_id').in('community_id',ids):Promise.resolve({data:[]}),
+      ids.length?db.from('wellness_community_members').select('community_id').eq('user_id',user.id).in('community_id',ids):Promise.resolve({data:[]})
+    ]);
+    if(membersRes.error||mineRes.error){box.innerHTML='<div class="community-empty">Não foi possível carregar os membros das comunidades.</div>';return;}
+    const members=membersRes.data||[],mine=new Set((mineRes.data||[]).map(x=>x.community_id));
+    let html='<div class="community-section-head"><div><h3>Encontre sua comunidade</h3><p>Espaços para trocar experiências e se apoiar.</p></div><button type="button" onclick="openCreateCommunity()"><i class="fa-solid fa-plus"></i> Criar grupo</button></div>';
+    if(!groups?.length)html+='<div class="community-empty">Nenhuma comunidade criada ainda. Você pode começar uma com seus interesses. 🤍</div>';
+    (groups||[]).forEach(g=>{
+      const count=members.filter(x=>x.community_id===g.id).length,joined=mine.has(g.id);
+      html+='<article class="community-card"><div class="community-card-top"><div class="community-card-icon"><i class="fa-solid fa-people-group"></i></div><div class="community-card-main"><h4>'+esc(g.name)+'</h4><p>'+esc(g.description||'Uma comunidade para compartilhar pequenos passos.')+'</p></div></div><div class="community-meta"><span>'+esc(g.category||'Bem-estar')+'</span><span>'+count+' '+(count===1?'membro':'membros')+'</span></div><div class="community-card-actions">'+(joined?'<button type="button" onclick="openCommunityDetail(\''+g.id+'\')">Abrir comunidade</button><button type="button" class="secondary" onclick="leaveCommunity(\''+g.id+'\')">Sair</button>':'<button type="button" onclick="joinCommunity(\''+g.id+'\')">Participar</button>')+'</div></article>';
+    });
+    box.innerHTML=html;
+  }
+}
+async function joinChallenge(id){
+  const {error}=await db.from('wellness_challenge_members').insert({challenge_id:id,user_id:user.id});
+  if(error&&error.code!=='23505'){showToast('Não foi possível participar',error.message);return;}
+  showToast('Você entrou no desafio!','Cada passo conta. Faça no seu ritmo. 🌱');await loadCommunityHub();
+}
+async function leaveChallenge(id){
+  const ok=await openAppActionModal({title:'Sair do desafio?',description:'Seu progresso neste desafio será removido. Você poderá participar novamente depois.',confirmText:'Sair do desafio',icon:'fa-solid fa-seedling',danger:true});
+  if(!ok)return;
+  const {error}=await db.from('wellness_challenge_members').delete().eq('challenge_id',id).eq('user_id',user.id);
+  if(error){showToast('Não foi possível sair',error.message);return;}await loadCommunityHub();
+}
+async function updateChallengeProgress(id,goal){
+  const value=Number($('challenge-progress-'+id)?.value);
+  if(!Number.isFinite(value)||value<0){showToast('Informe um progresso válido','Use um número igual ou maior que zero.');return;}
+  const completed=value>=goal;
+  const {error}=await db.from('wellness_challenge_members').update({progress:value,updated_at:new Date().toISOString(),completed_at:completed?new Date().toISOString():null}).eq('challenge_id',id).eq('user_id',user.id);
+  if(error){showToast('Não foi possível atualizar',error.message);return;}
+  showToast(completed?'Meta alcançada!':'Progresso atualizado',completed?'Parabéns por chegar à sua meta! 🤍':'Seu ritmo é o que importa. 🌷');await loadCommunityHub();
+}
+function openCreateChallenge(){
+  const modal=document.createElement('div');modal.className='modal-overlay';modal.id='createChallengeModal';
+  modal.innerHTML='<div class="modal-box"><div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">Criar desafio coletivo</h3><button class="ghost" id="closeCreateChallenge">×</button></div><p class="muted">Convide a comunidade para uma meta possível e gentil.</p><label>Nome do desafio</label><input id="newChallengeTitle" maxlength="90" placeholder="Ex.: 7 dias de leitura"><label>Descrição</label><textarea id="newChallengeDescription" maxlength="500" placeholder="Conte como funciona..."></textarea><label>Categoria</label><select id="newChallengeCategory"><option>Bem-estar</option><option>Movimento</option><option>Hidratação</option><option>Leitura</option><option>Autocuidado</option><option>Organização</option></select><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label>Meta</label><input id="newChallengeGoal" type="number" min="1" value="7"></div><div><label>Unidade</label><select id="newChallengeUnit"><option>dias</option><option>minutos</option><option>litros</option><option>páginas</option><option>vezes</option></select></div></div><label>Duração (dias)</label><input id="newChallengeDuration" type="number" min="1" max="90" value="7"><p id="newChallengeStatus" class="muted"></p><div style="display:flex;gap:9px"><button class="secondary" id="cancelCreateChallenge" style="flex:1">Cancelar</button><button id="saveCreateChallenge" style="flex:1">Criar desafio</button></div></div>';
+  document.body.append(modal);
+  const close=()=>modal.remove();modal.addEventListener('click',e=>{if(e.target===modal)close();});
+  $('closeCreateChallenge').onclick=close;$('cancelCreateChallenge').onclick=close;$('saveCreateChallenge').onclick=saveNewChallenge;
+}
+async function saveNewChallenge(){
+  const title=$('newChallengeTitle').value.trim(),description=$('newChallengeDescription').value.trim(),category=$('newChallengeCategory').value,goal=Number($('newChallengeGoal').value),unit=$('newChallengeUnit').value,duration=Math.max(1,Math.min(90,Number($('newChallengeDuration').value)||7));
+  if(title.length<3||!Number.isFinite(goal)||goal<=0){$('newChallengeStatus').textContent='Informe um nome e uma meta maior que zero.';return;}
+  const start=new Date(),end=new Date(start.getFullYear(),start.getMonth(),start.getDate()+duration-1);
+  const {data,error}=await db.from('wellness_challenges').insert({title,description,category,goal_value:goal,goal_unit:unit,duration_days:duration,starts_on:dateKey(start),ends_on:dateKey(end),created_by:user.id,is_public:true}).select('id').single();
+  if(error){$('newChallengeStatus').textContent='Não foi possível criar: '+error.message;return;}
+  const {error:joinError}=await db.from('wellness_challenge_members').insert({challenge_id:data.id,user_id:user.id});
+  if(joinError)console.warn('Desafio criado, mas a participação não foi registrada:',joinError.message);
+  $('createChallengeModal')?.remove();showToast('Desafio criado!','Seu convite para a comunidade já está disponível. 🤍');await loadCommunityHub();
+}
+function openCreateCommunity(){
+  const modal=document.createElement('div');modal.className='modal-overlay';modal.id='createCommunityModal';
+  modal.innerHTML='<div class="modal-box"><div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">Criar comunidade</h3><button class="ghost" id="closeCreateCommunity">×</button></div><p class="muted">Crie um espaço público e acolhedor em torno de um interesse.</p><label>Nome da comunidade</label><input id="newCommunityName" maxlength="60" placeholder="Ex.: Leitura com calma"><label>Descrição</label><textarea id="newCommunityDescription" maxlength="500" placeholder="Qual é o propósito do grupo?"></textarea><label>Categoria</label><select id="newCommunityCategory"><option>Bem-estar</option><option>Movimento</option><option>Alimentação consciente</option><option>Leitura e estudos</option><option>Autocuidado</option><option>Rotina e organização</option><option>Hobbies</option></select><p id="newCommunityStatus" class="muted"></p><div style="display:flex;gap:9px"><button class="secondary" id="cancelCreateCommunity" style="flex:1">Cancelar</button><button id="saveCreateCommunity" style="flex:1">Criar comunidade</button></div></div>';
+  document.body.append(modal);
+  const close=()=>modal.remove();modal.addEventListener('click',e=>{if(e.target===modal)close();});
+  $('closeCreateCommunity').onclick=close;$('cancelCreateCommunity').onclick=close;$('saveCreateCommunity').onclick=saveNewCommunity;
+}
+async function saveNewCommunity(){
+  const name=$('newCommunityName').value.trim(),description=$('newCommunityDescription').value.trim(),category=$('newCommunityCategory').value;
+  if(name.length<3){$('newCommunityStatus').textContent='O nome precisa ter pelo menos 3 caracteres.';return;}
+  const {data,error}=await db.from('wellness_communities').insert({name,description,category,created_by:user.id,is_private:false}).select('id').single();
+  if(error){$('newCommunityStatus').textContent='Não foi possível criar: '+error.message;return;}
+  const {error:memberError}=await db.from('wellness_community_members').insert({community_id:data.id,user_id:user.id,role:'owner'});
+  if(memberError)console.warn('Comunidade criada, mas a associação do criador falhou:',memberError.message);
+  $('createCommunityModal')?.remove();showToast('Comunidade criada!','Seu espaço já está disponível. 🌷');communityView='groups';await loadCommunityHub();
+}
+async function joinCommunity(id){
+  const {error}=await db.from('wellness_community_members').insert({community_id:id,user_id:user.id});
+  if(error&&error.code!=='23505'){showToast('Não foi possível participar',error.message);return;}
+  showToast('Bem-vinda à comunidade!','Que bom ter você por aqui. 🤍');await loadCommunityHub();
+}
+async function leaveCommunity(id){
+  const ok=await openAppActionModal({title:'Sair da comunidade?',description:'Você deixará de ver as conversas deste grupo. Poderá entrar novamente quando quiser.',confirmText:'Sair da comunidade',icon:'fa-solid fa-people-group',danger:true});
+  if(!ok)return;
+  const {error}=await db.from('wellness_community_members').delete().eq('community_id',id).eq('user_id',user.id);
+  if(error){showToast('Não foi possível sair',error.message);return;}activeCommunityId=null;await loadCommunityHub();
+}
+async function openCommunityDetail(id,fromLoad=false){
+  activeCommunityId=id;const box=$('communityHubContent');if(!box)return;
+  if(!fromLoad)box.innerHTML='<p class="muted">Abrindo comunidade...</p>';
+  const {data:community,error}=await db.from('wellness_communities').select('*').eq('id',id).maybeSingle();
+  if(error||!community){box.innerHTML='<p class="muted">Não foi possível abrir esta comunidade.</p>';activeCommunityId=null;return;}
+  const {data:membership}=await db.from('wellness_community_members').select('role').eq('community_id',id).eq('user_id',user.id).maybeSingle();
+  if(!membership){activeCommunityId=null;await loadCommunityHub();return;}
+  const {data:posts,error:postsError}=await db.from('wellness_community_posts').select('*').eq('community_id',id).order('created_at',{ascending:false}).limit(60);
+  if(postsError){box.innerHTML='<p class="muted">Não foi possível carregar as publicações deste grupo.</p>';return;}
+  const ids=[...new Set((posts||[]).map(p=>p.user_id))];
+  const {data:authors}=ids.length?await db.from('user_profiles').select('user_id,full_name,username').in('user_id',ids):{data:[]};
+  const authorMap={};(authors||[]).forEach(p=>authorMap[p.user_id]=p);
+  let html='<div class="community-detail-head"><button type="button" class="secondary" id="backCommunityList">← Voltar</button><div><b>'+esc(community.name)+'</b><div class="muted" style="font-size:11px">'+esc(community.category||'Bem-estar')+'</div></div></div><p class="muted">'+esc(community.description||'Um espaço para crescer junto.')+'</p><div class="community-compose"><input id="communityPostInput" maxlength="2000" placeholder="Compartilhe uma ideia ou pequena conquista..."><button type="button" id="sendCommunityPost">Publicar</button></div>';
+  if(!posts?.length)html+='<div class="community-empty">Ainda não há publicações. Comece a conversa com uma mensagem acolhedora. 🤍</div>';
+  (posts||[]).forEach(p=>{html+='<article class="community-post"><div><span class="community-post-author">'+esc(authorMap[p.user_id]?.full_name||'Pessoa')+'</span><span class="community-post-time">'+new Date(p.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+'</span></div><div class="community-post-content">'+esc(p.content)+'</div></article>';});
+  box.innerHTML=html;
+  $('backCommunityList').onclick=()=>{activeCommunityId=null;loadCommunityHub();};
+  $('sendCommunityPost').onclick=()=>addCommunityPost(id);
+  $('communityPostInput').onkeydown=e=>{if(e.key==='Enter')addCommunityPost(id);};
+}
+async function addCommunityPost(id){
+  const input=$('communityPostInput'),content=input?.value.trim();if(!content)return;
+  const {error}=await db.from('wellness_community_posts').insert({community_id:id,user_id:user.id,content});
+  if(error){showToast('Não foi possível publicar',error.message);return;}await openCommunityDetail(id,true);
+}
+
 /* EXPLORAR */
 function renderTrendingHashtags(posts){
   const counts={};
