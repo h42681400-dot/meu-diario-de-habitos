@@ -3147,7 +3147,7 @@ async function invitePostCollaborators(postId,content){
       if(person.user_id===user.id){result.failed.push('@'+handle+' (seu próprio perfil)');continue;}
       const {error:inviteError}=await db.from('post_collaborators').insert({post_id,inviter_id:user.id,invitee_id:person.user_id});
       if(inviteError)throw inviteError;
-      const {error:notifError}=await db.from('notifications').insert({user_id:person.user_id,actor_id:user.id,type:'post_collaboration',post_id});
+      const {error:notifError}=await createSmartNotification({user_id:person.user_id,actor_id:user.id,type:'post_collaboration',post_id});
       if(notifError)throw new Error('Convite criado, mas a notificação falhou: '+notifError.message);
       result.invited.push('@'+String(person.username||handle).replace(/^@/,''));
     }catch(error){console.error('Erro ao convidar @'+handle,error);result.failed.push('@'+handle+' ('+error.message+')');}
@@ -3576,7 +3576,7 @@ async function saveRepost(withComment){
     return;
   }
   closeRepostComposer();
-  if(postOwnerId!==user.id)await db.from('notifications').insert({user_id:postOwnerId,actor_id:user.id,type:'repost',post_id:postId});
+  if(postOwnerId!==user.id)await createSmartNotification({user_id:postOwnerId,actor_id:user.id,type:'repost',post_id:postId});
   showToast('Repost publicado!',withComment&&comment?'Sua publicação foi compartilhada com comentário.':'Sua publicação foi compartilhada sem comentário.',{type:'repost'});
   await loadFeed('all');
   if(inspectedProfileId&&$('userModal')&&!$('userModal').classList.contains('hidden'))await inspectProfile(inspectedProfileId);
@@ -3589,7 +3589,7 @@ async function toggleLike(postId,isLiked,postOwnerId){
   }else{
     const {error}=await db.from('post_likes').insert({post_id:postId,user_id:user.id});
     if(error){showToast('Ops!','Não foi possível curtir esta publicação: '+error.message,{type:'like'});return;}
-    if(postOwnerId!==user.id)await db.from('notifications').insert({user_id:postOwnerId,actor_id:user.id,type:'like',post_id:postId});
+    if(postOwnerId!==user.id)await createSmartNotification({user_id:postOwnerId,actor_id:user.id,type:'like',post_id:postId});
   }
   await loadFeed('all');
   if($('profileTabContent'))await loadProfileDataTab('posts');
@@ -3670,7 +3670,7 @@ async function addComment(postId,postOwnerId){
   input.value='';delete input.dataset.parentCommentId;input.placeholder='Escreva um comentário...';
   const {data:parentRow}=parent?await db.from('post_comments').select('user_id').eq('id',parent).maybeSingle():{data:null};
   const notifyIds=[...new Set([postOwnerId,parentRow?.user_id].filter(id=>id&&id!==user.id))];
-  if(notifyIds.length)await db.from('notifications').insert(notifyIds.map(id=>({user_id:id,actor_id:user.id,type:'comment',post_id:postId})));
+  if(notifyIds.length)await Promise.all(notifyIds.map(id=>createSmartNotification({user_id:id,actor_id:user.id,type:'comment',post_id:postId})));
   showToast('Comentário enviado!','Seu comentário foi publicado. 💬',{type:'comment'});
   await loadPostComments(postId);await loadFeed('all');
 }
@@ -3731,6 +3731,8 @@ async function loadCommunityHub(){
 async function joinChallenge(id){
   const {error}=await db.from('wellness_challenge_members').insert({challenge_id:id,user_id:user.id});
   if(error&&error.code!=='23505'){showToast('Não foi possível participar',error.message);return;}
+  const {data:challenge}=await db.from('wellness_challenges').select('created_by,title').eq('id',id).maybeSingle();
+  if(challenge?.created_by&&challenge.created_by!==user.id)await createSmartNotification({user_id:challenge.created_by,actor_id:user.id,type:'challenge_join'});
   showToast('Você entrou no desafio!','Cada passo conta. Faça no seu ritmo. 🌱');await loadCommunityHub();
 }
 async function leaveChallenge(id){
@@ -3783,6 +3785,8 @@ async function saveNewCommunity(){
 async function joinCommunity(id){
   const {error}=await db.from('wellness_community_members').insert({community_id:id,user_id:user.id});
   if(error&&error.code!=='23505'){showToast('Não foi possível participar',error.message);return;}
+  const {data:community}=await db.from('wellness_communities').select('created_by').eq('id',id).maybeSingle();
+  if(community?.created_by&&community.created_by!==user.id)await createSmartNotification({user_id:community.created_by,actor_id:user.id,type:'community_join'});
   showToast('Bem-vinda à comunidade!','Que bom ter você por aqui. 🤍');await loadCommunityHub();
 }
 async function leaveCommunity(id){
@@ -3995,7 +3999,7 @@ async function toggleFollowFromExplore(targetId){
   else{
     const {error}=await db.from('follows').insert({follower_id:user.id,following_id:targetId});
     if(error){showToast('Ops!','Não foi possível seguir este perfil.',{type:'follow'});return;}
-    await db.from('notifications').insert({user_id:targetId,actor_id:user.id,type:'follow'});
+    await createSmartNotification({user_id:targetId,actor_id:user.id,type:'follow'});
     showToast('Novo seguindo!','Você começou a seguir um perfil. ✨',{type:'follow'});
   }
   await searchProfilesAndPosts();
@@ -4120,7 +4124,7 @@ async function toggleFollowModal(targetId,isFollowing){
   else{
     const {error}=await db.from('follows').insert({follower_id:user.id,following_id:targetId});
     if(error){showToast('Ops!','Não foi possível seguir este perfil.',{type:'follow'});return;}
-    await db.from('notifications').insert({user_id:targetId,actor_id:user.id,type:'follow'});
+    await createSmartNotification({user_id:targetId,actor_id:user.id,type:'follow'});
     showToast('Novo seguindo!','Você começou a seguir um perfil. ✨',{type:'follow'});
   }
   await inspectProfile(targetId);
@@ -4427,7 +4431,7 @@ async function sendMessage(){
 
     const {data:recipientSettings}=await db.from('direct_conversation_settings').select('muted').eq('user_id',activeChat).eq('peer_id',user.id).maybeSingle();
     if(!recipientSettings?.muted){
-      const {error:notifError}=await db.from('notifications').insert({user_id:activeChat,actor_id:user.id,type:'message'});
+      const {error:notifError}=await createSmartNotification({user_id:activeChat,actor_id:user.id,type:'message'});
       if(notifError) console.warn('Mensagem enviada, mas a notificação não foi registrada:',notifError.message);
     }
 
