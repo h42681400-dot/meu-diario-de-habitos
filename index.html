@@ -3691,7 +3691,7 @@ async function loadCommunityHub(){
   if(activeCommunityId){await openCommunityDetail(activeCommunityId,true);return;}
   if(communityView==='challenges'){
     const {data:challenges,error}=await db.from('wellness_challenges').select('*').eq('is_public',true).order('created_at',{ascending:false}).limit(40);
-    if(error){box.innerHTML='<div class="community-empty">Para ativar esta área, aplique o arquivo <b>supabase/community_challenges_setup.sql</b> no SQL Editor do Supabase.<br><small>'+esc(error.message)+'</small></div>';return;}
+    if(error){box.innerHTML='<div class="community-empty">Para ativar esta área, aplique o arquivo <b>supabase/community_wellbeing_setup.sql</b> no SQL Editor do Supabase.<br><small>'+esc(error.message)+'</small></div>';return;}
     const ids=(challenges||[]).map(x=>x.id);
     const [membersRes,mineRes]=await Promise.all([
       ids.length?db.from('wellness_challenge_members').select('challenge_id,user_id,progress').in('challenge_id',ids):Promise.resolve({data:[]}),
@@ -3711,7 +3711,7 @@ async function loadCommunityHub(){
     box.innerHTML=html;
   }else{
     const {data:groups,error}=await db.from('wellness_communities').select('*').eq('is_private',false).order('created_at',{ascending:false}).limit(40);
-    if(error){box.innerHTML='<div class="community-empty">Para ativar as comunidades, aplique o arquivo <b>supabase/community_challenges_setup.sql</b> no SQL Editor do Supabase.<br><small>'+esc(error.message)+'</small></div>';return;}
+    if(error){box.innerHTML='<div class="community-empty">Para ativar as comunidades, aplique o arquivo <b>supabase/community_wellbeing_setup.sql</b> no SQL Editor do Supabase.<br><small>'+esc(error.message)+'</small></div>';return;}
     const ids=(groups||[]).map(x=>x.id);
     const [membersRes,mineRes]=await Promise.all([
       ids.length?db.from('wellness_community_members').select('community_id,user_id').in('community_id',ids):Promise.resolve({data:[]}),
@@ -4484,7 +4484,7 @@ async function saveNotificationPreference(key,value){
     notificationPreferencesCache[key]=!value;
     const id={likes:'prefLikes',comments:'prefComments',reposts:'prefReposts',follows:'prefFollows',messages:'prefMessages',collaborations:'prefCollaborations',challenges:'prefChallenges',communities:'prefCommunities'}[key];
     if($(id))$(id).checked=!value;
-    if(statusLine)statusLine.textContent='Não foi possível salvar. Aplique supabase/notification_preferences_setup.sql no Supabase.';
+    if(statusLine)statusLine.textContent='Não foi possível salvar. Aplique supabase/community_wellbeing_setup.sql no Supabase.';
     console.warn('Preferência de notificação:',error.message);return;
   }
   if(statusLine)statusLine.textContent='Preferência salva. Você pode mudar quando quiser.';
