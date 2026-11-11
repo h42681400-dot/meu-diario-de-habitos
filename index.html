@@ -1383,7 +1383,6 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
           <div class="field"><label>Estudos (minutos)</label><input id="studyMinutes" type="number" min="0" placeholder="Tempo de estudo"></div>
           <div class="field"><label>Tempo de tela (horas)</label><input id="screenHours" type="number" min="0" step="0.5" placeholder="Opcional"></div>
           <div class="field"><label>Hobby ou atividade criativa</label><input id="hobby" placeholder="Ex.: pintura, música..."></div>
-          <div class="field full"><label>Observações do dia</label><textarea id="notes" placeholder="Outros detalhes que você queira guardar..."></textarea></div>
         </div>
       </details>
 
@@ -2440,7 +2439,6 @@ async function selectDay(d){
   const row=data||{},parsed=diaryMetaFromRow(row);
   ['breakfast','lunch','snacks','dinner','exercise'].forEach(id=>$(id).value=row[id]||'');
   $('water').value=row.water_ml??'';
-  $('notes').value=parsed.notes||'';
   $('legacyDiaryNotes').value=parsed.notes||'';
   writeDiaryMeta(parsed.meta||{});
   status('diaryStatus','');
