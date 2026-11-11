@@ -1209,6 +1209,73 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
   #app.messages-mode #messageBox.messages{padding:12px 9px}
 }
 
+
+/* Cottontail Together — desafios e comunidades */
+.community-shell{overflow:hidden}
+.community-hero{padding:24px;border-radius:20px;background:linear-gradient(135deg,#f7e7e8,#f7f0e8 58%,#edf1e9);border:1px solid rgba(201,143,152,.18)}
+.community-kicker{font-size:10px;letter-spacing:1.4px;font-weight:800;color:#a76f7a}
+.community-hero h2{margin:9px 0 7px;font-size:26px}
+.community-hero p{max-width:620px;margin:0;color:#826f6d;font-size:13px;line-height:1.6}
+.community-tabs{display:flex;gap:8px;margin:18px 0 14px;padding:5px;background:var(--bg);border:1px solid var(--line);border-radius:15px}
+.community-tabs button{flex:1;background:transparent;color:var(--muted);box-shadow:none;padding:11px 8px;font-size:13px}
+.community-tabs button.active{background:var(--card-bg);color:var(--rose);box-shadow:0 3px 12px rgba(90,55,55,.07)}
+.community-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:20px 0 12px}
+.community-section-head h3{margin:0;font-size:17px}
+.community-section-head p{margin:4px 0 0;color:var(--muted);font-size:11px}
+.community-section-head button{padding:9px 12px;font-size:12px;white-space:nowrap}
+.community-card{padding:16px;margin:11px 0;border:1px solid var(--line);border-radius:18px;background:var(--card-bg)}
+.community-card-top{display:flex;align-items:flex-start;gap:12px}
+.community-card-icon{width:44px;height:44px;flex:none;display:grid;place-items:center;border-radius:15px;background:var(--soft-rose);color:var(--rose);font-size:18px}
+.community-card-main{flex:1;min-width:0}
+.community-card-main h4{margin:1px 0 5px;font-size:15px}
+.community-card-main p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
+.community-meta{display:flex;flex-wrap:wrap;gap:7px;margin:11px 0;color:var(--muted);font-size:10px}
+.community-meta span{padding:5px 8px;background:var(--bg);border-radius:20px}
+.community-card-actions{display:flex;align-items:center;gap:8px;margin-top:12px}
+.community-card-actions button{flex:1;padding:9px 11px;font-size:12px}
+.community-progress{height:7px;margin:10px 0 5px;background:var(--line);border-radius:20px;overflow:hidden}
+.community-progress span{display:block;height:100%;background:linear-gradient(90deg,#d7a2aa,#b98791);border-radius:20px}
+.community-progress-row{display:flex;justify-content:space-between;gap:10px;font-size:10px;color:var(--muted)}
+.community-detail-head{display:flex;align-items:center;gap:10px;margin:10px 0 18px}
+.community-detail-head button{padding:8px 11px}
+.community-post{padding:13px 0;border-bottom:1px solid var(--line)}
+.community-post:last-child{border-bottom:0}
+.community-post-author{font-size:12px;font-weight:750}
+.community-post-time{font-size:10px;color:var(--muted);margin-left:7px}
+.community-post-content{font-size:13px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:6px}
+.community-compose{display:flex;gap:8px;margin:14px 0}
+.community-compose input{margin:0;min-width:0}
+.community-compose button{white-space:nowrap}
+.community-empty{padding:24px 14px;text-align:center;border:1px dashed var(--line);border-radius:16px;color:var(--muted);font-size:12px;line-height:1.6}
+@media(max-width:600px){.community-hero{padding:19px}.community-hero h2{font-size:23px}.community-section-head{align-items:flex-start}.community-section-head button{padding:8px 9px}.community-card{padding:13px}.community-compose{flex-direction:column}.community-compose button{width:100%}}
+
+
+/* Explorar inteligente e acolhimento */
+.explore-welcome-card{display:flex;gap:13px;align-items:flex-start;padding:18px;margin:0 0 20px;border:1px solid rgba(201,143,152,.2);border-radius:19px;background:linear-gradient(135deg,#f8e9eb,#fbf5ed 70%,#eef2eb)}
+.explore-welcome-icon{width:42px;height:42px;flex:none;display:grid;place-items:center;border-radius:15px;background:rgba(255,255,255,.7);color:#b67d88}
+.explore-welcome-kicker{font-size:9px;font-weight:850;letter-spacing:1.2px;color:#a76f7a}
+.explore-welcome-card p{margin:6px 0;color:#6f5d5b;font-size:14px;line-height:1.55;font-weight:650}
+.explore-welcome-card small{font-size:10px;color:#927d79}
+.explore-suggestions{margin:18px 0}
+.explore-suggest-person{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.explore-suggest-main{display:flex;align-items:center;gap:10px;min-width:0;cursor:pointer}
+.explore-suggest-main>div:last-child{min-width:0}
+.explore-suggest-main b,.explore-suggest-main small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.explore-suggest-main b{font-size:12px}
+.explore-suggest-main small{font-size:10px;color:var(--muted);margin-top:3px}
+.explore-suggest-person>button{padding:8px 13px;font-size:11px}
+@media(max-width:600px){.explore-welcome-card{padding:15px}.explore-welcome-card p{font-size:13px}}
+
+
+/* Preferências de notificações */
+.notification-preferences-card{margin:16px 0;padding:15px;border:1px solid var(--line);border-radius:16px;background:var(--bg)}
+.notification-preferences-card>div:first-child>b{font-size:13px}
+.notification-preferences-card>div:first-child>b i{color:var(--rose);margin-right:6px}
+.notification-preferences-card>div:first-child p{font-size:11px;line-height:1.5;margin:6px 0 13px}
+.notification-preferences-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.notification-preferences-grid label{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink)}
+.notification-preferences-grid input{width:17px;height:17px;margin:0;accent-color:var(--rose)}
+
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
      crossorigin="anonymous"></script>
@@ -1319,6 +1386,7 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
     <button data-page="feed" class="active" onclick="showPage('feed')"><i class="fa-solid fa-house"></i><span>Início</span></button>
     <button data-page="diary" onclick="showPage('diary')"><i class="fa-solid fa-book-open"></i><span>Diário</span></button>
     <button data-page="explore" onclick="showPage('explore')"><i class="fa-solid fa-compass"></i><span>Explorar</span></button>
+    <button data-page="community" onclick="showPage('community')"><i class="fa-solid fa-people-group"></i><span>Comunidade</span></button>
     <button data-page="messages" onclick="showPage('messages')">
       <i class="fa-solid fa-paper-plane"></i><span>Mensagens</span>
     </button>
@@ -1525,6 +1593,18 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
     </div>
   </section>
 
+  <!-- COMUNIDADE: desafios coletivos e grupos -->
+  <section id="community" class="page">
+    <div class="card community-shell">
+      <div class="community-hero"><span class="community-kicker">COTTONTAIL TOGETHER</span><h2>Pequenos passos, juntos. 🌷</h2><p>Encontre pessoas com objetivos parecidos, participe de desafios leves e celebre cada avanço no seu ritmo.</p></div>
+      <div class="community-tabs">
+        <button type="button" id="communityChallengesTab" class="active" onclick="switchCommunityTab('challenges')"><i class="fa-solid fa-seedling"></i> Desafios</button>
+        <button type="button" id="communityGroupsTab" onclick="switchCommunityTab('groups')"><i class="fa-solid fa-people-group"></i> Comunidades</button>
+      </div>
+      <div id="communityHubContent" aria-live="polite"><p class="muted">Carregando seu espaço coletivo...</p></div>
+    </div>
+  </section>
+
   <!-- MENSAGENS -->
   <section id="messages" class="page">
     <div class="card">
@@ -1721,6 +1801,20 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
       <input type="checkbox" id="settingsMsgFollowingOnly" style="width:20px;height:20px" onchange="saveMsgPrivacySetting(this.checked)">
       <label for="settingsMsgFollowingOnly" style="margin:0;cursor:pointer">Receber mensagens apenas de quem eu sigo 💌</label>
     </div>
+    <section class="notification-preferences-card">
+      <div><b><i class="fa-solid fa-bell"></i> Notificações inteligentes</b><p class="muted">Escolha quais novidades você quer receber. As preferências também são consideradas antes do envio de avisos push.</p></div>
+      <div class="notification-preferences-grid">
+        <label><input type="checkbox" id="prefLikes" onchange="saveNotificationPreference('likes',this.checked)"> Curtidas</label>
+        <label><input type="checkbox" id="prefComments" onchange="saveNotificationPreference('comments',this.checked)"> Comentários</label>
+        <label><input type="checkbox" id="prefReposts" onchange="saveNotificationPreference('reposts',this.checked)"> Reposts</label>
+        <label><input type="checkbox" id="prefFollows" onchange="saveNotificationPreference('follows',this.checked)"> Novos seguidores</label>
+        <label><input type="checkbox" id="prefMessages" onchange="saveNotificationPreference('messages',this.checked)"> Mensagens</label>
+        <label><input type="checkbox" id="prefCollaborations" onchange="saveNotificationPreference('collaborations',this.checked)"> Convites para colaborar</label>
+        <label><input type="checkbox" id="prefChallenges" onchange="saveNotificationPreference('challenges',this.checked)"> Desafios coletivos</label>
+        <label><input type="checkbox" id="prefCommunities" onchange="saveNotificationPreference('communities',this.checked)"> Comunidades</label>
+      </div>
+      <p id="notificationPreferencesStatus" class="muted" style="font-size:11px;margin:8px 0 0"></p>
+    </section>
 
     <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
 
@@ -1837,7 +1931,9 @@ async function startCottontailPush(userId) {
 
       await PushNotifications.addListener('pushNotificationActionPerformed', action => {
         const data = action.notification?.data || {};
-        if (data.type === 'message' && typeof window.showPage === 'function') {
+        if (data.type === 'challenge_join' || data.type === 'challenge_complete' || data.type === 'challenge_update' || data.type === 'community_join' || data.type === 'community_post') {
+          if(typeof window.showPage==='function')window.showPage('community');
+        } else if (data.type === 'message' && typeof window.showPage === 'function') {
           window.showPage('messages');
         } else if (typeof window.showPage === 'function') {
           window.showPage('notifications');
@@ -2303,7 +2399,7 @@ db.auth.onAuthStateChange((_event,session)=>{
       await Promise.all([loadMonth(),loadFeed('all'),checkUnreadBadges()]);
       await startNotificationPolling();
       let savedPage='feed';try{savedPage=localStorage.getItem('cottontailActivePage')||'feed';}catch(e){}
-      const validPages=['feed','diary','explore','messages','notifications','profile'];
+      const validPages=['feed','diary','explore','community','messages','notifications','profile'];
       showPage(validPages.includes(savedPage)?savedPage:'feed');
       if(savedPage==='messages'){let savedChat=null;try{savedChat=localStorage.getItem('cottontailActiveChat');}catch(e){}if(savedChat)await openChat(savedChat);}
       showToast('Bem-vinda de volta!','Seu Cottontail está prontinho para você. 🐰',{type:'welcome'});
@@ -2362,6 +2458,7 @@ function showPage(id){
   if(user)try{localStorage.setItem('cottontailActivePage',id);}catch(e){}
 
   if(id==='explore')searchProfilesAndPosts();
+  if(id==='community')loadCommunityHub();
   if(id==='messages'){ backToChatList(); }
   if(id==='feed')loadFeed('all');
   if(id==='notifications'){ $('notifBadge').classList.add('hidden'); loadNotifications(); }
@@ -2717,6 +2814,7 @@ function openSettingsModal(){
   $('settingsModal').classList.remove('hidden'); 
   loadBlockedUsers(); 
   $('settingsMsgFollowingOnly').checked = profile?.messages_from_following_only || false;
+  loadNotificationPreferences();
   const languageSelect=$('settingsLanguage');
   if(languageSelect)languageSelect.value=profile?.language||detectPreferredLanguage();
 }
@@ -3049,7 +3147,7 @@ async function invitePostCollaborators(postId,content){
       if(person.user_id===user.id){result.failed.push('@'+handle+' (seu próprio perfil)');continue;}
       const {error:inviteError}=await db.from('post_collaborators').insert({post_id,inviter_id:user.id,invitee_id:person.user_id});
       if(inviteError)throw inviteError;
-      const {error:notifError}=await db.from('notifications').insert({user_id:person.user_id,actor_id:user.id,type:'post_collaboration',post_id});
+      const {error:notifError}=await createSmartNotification({user_id:person.user_id,actor_id:user.id,type:'post_collaboration',post_id});
       if(notifError)throw new Error('Convite criado, mas a notificação falhou: '+notifError.message);
       result.invited.push('@'+String(person.username||handle).replace(/^@/,''));
     }catch(error){console.error('Erro ao convidar @'+handle,error);result.failed.push('@'+handle+' ('+error.message+')');}
@@ -3478,7 +3576,7 @@ async function saveRepost(withComment){
     return;
   }
   closeRepostComposer();
-  if(postOwnerId!==user.id)await db.from('notifications').insert({user_id:postOwnerId,actor_id:user.id,type:'repost',post_id:postId});
+  if(postOwnerId!==user.id)await createSmartNotification({user_id:postOwnerId,actor_id:user.id,type:'repost',post_id:postId});
   showToast('Repost publicado!',withComment&&comment?'Sua publicação foi compartilhada com comentário.':'Sua publicação foi compartilhada sem comentário.',{type:'repost'});
   await loadFeed('all');
   if(inspectedProfileId&&$('userModal')&&!$('userModal').classList.contains('hidden'))await inspectProfile(inspectedProfileId);
@@ -3491,7 +3589,7 @@ async function toggleLike(postId,isLiked,postOwnerId){
   }else{
     const {error}=await db.from('post_likes').insert({post_id:postId,user_id:user.id});
     if(error){showToast('Ops!','Não foi possível curtir esta publicação: '+error.message,{type:'like'});return;}
-    if(postOwnerId!==user.id)await db.from('notifications').insert({user_id:postOwnerId,actor_id:user.id,type:'like',post_id:postId});
+    if(postOwnerId!==user.id)await createSmartNotification({user_id:postOwnerId,actor_id:user.id,type:'like',post_id:postId});
   }
   await loadFeed('all');
   if($('profileTabContent'))await loadProfileDataTab('posts');
@@ -3572,9 +3670,172 @@ async function addComment(postId,postOwnerId){
   input.value='';delete input.dataset.parentCommentId;input.placeholder='Escreva um comentário...';
   const {data:parentRow}=parent?await db.from('post_comments').select('user_id').eq('id',parent).maybeSingle():{data:null};
   const notifyIds=[...new Set([postOwnerId,parentRow?.user_id].filter(id=>id&&id!==user.id))];
-  if(notifyIds.length)await db.from('notifications').insert(notifyIds.map(id=>({user_id:id,actor_id:user.id,type:'comment',post_id:postId})));
+  if(notifyIds.length)await Promise.all(notifyIds.map(id=>createSmartNotification({user_id:id,actor_id:user.id,type:'comment',post_id:postId})));
   showToast('Comentário enviado!','Seu comentário foi publicado. 💬',{type:'comment'});
   await loadPostComments(postId);await loadFeed('all');
+}
+
+
+/* COMUNIDADE — desafios coletivos e grupos */
+let communityView='challenges',activeCommunityId=null;
+function switchCommunityTab(tab){
+  communityView=tab==='groups'?'groups':'challenges';
+  $('communityChallengesTab')?.classList.toggle('active',communityView==='challenges');
+  $('communityGroupsTab')?.classList.toggle('active',communityView==='groups');
+  activeCommunityId=null;
+  loadCommunityHub();
+}
+async function loadCommunityHub(){
+  const box=$('communityHubContent');if(!box||!user)return;
+  box.innerHTML='<p class="muted">Carregando...</p>';
+  if(activeCommunityId){await openCommunityDetail(activeCommunityId,true);return;}
+  if(communityView==='challenges'){
+    const {data:challenges,error}=await db.from('wellness_challenges').select('*').eq('is_public',true).order('created_at',{ascending:false}).limit(40);
+    if(error){box.innerHTML='<div class="community-empty">Para ativar esta área, aplique o arquivo <b>supabase/community_wellbeing_setup.sql</b> no SQL Editor do Supabase.<br><small>'+esc(error.message)+'</small></div>';return;}
+    const ids=(challenges||[]).map(x=>x.id);
+    const [membersRes,mineRes]=await Promise.all([
+      ids.length?db.from('wellness_challenge_members').select('challenge_id,user_id,progress').in('challenge_id',ids):Promise.resolve({data:[]}),
+      ids.length?db.from('wellness_challenge_members').select('challenge_id,progress').eq('user_id',user.id).in('challenge_id',ids):Promise.resolve({data:[]})
+    ]);
+    if(membersRes.error||mineRes.error){box.innerHTML='<div class="community-empty">Não foi possível carregar os participantes. Confira as permissões das tabelas de desafios no Supabase.</div>';return;}
+    const members=membersRes.data||[],mine={};(mineRes.data||[]).forEach(x=>mine[x.challenge_id]=x);
+    let html='<div class="community-section-head"><div><h3>Desafios em grupo</h3><p>Metas compartilhadas, sem pressão e sem comparação.</p></div><button type="button" onclick="openCreateChallenge()"><i class="fa-solid fa-plus"></i> Criar desafio</button></div>';
+    if(!challenges?.length)html+='<div class="community-empty">Ainda não há desafios por aqui. Que tal criar o primeiro? 🌱</div>';
+    (challenges||[]).forEach(ch=>{
+      const joined=mine[ch.id],count=members.filter(x=>x.challenge_id===ch.id).length;
+      const progress=Number(joined?.progress)||0,goal=Number(ch.goal_value)||1,pct=Math.min(100,Math.round(progress/goal*100));
+      html+='<article class="community-card"><div class="community-card-top"><div class="community-card-icon"><i class="fa-solid fa-seedling"></i></div><div class="community-card-main"><h4>'+esc(ch.title)+'</h4><p>'+esc(ch.description||'Um convite para cuidar de você no seu ritmo.')+'</p></div></div><div class="community-meta"><span>'+esc(ch.category||'Bem-estar')+'</span><span>'+Number(ch.duration_days||7)+' dias</span><span>'+count+' '+(count===1?'participante':'participantes')+'</span></div>';
+      if(joined)html+='<div class="community-progress-row"><span>Seu progresso</span><b>'+progress+' / '+goal+' '+esc(ch.goal_unit||'dias')+'</b></div><div class="community-progress"><span style="width:'+pct+'%"></span></div><div class="community-compose"><input id="challenge-progress-'+ch.id+'" type="number" min="0" step="0.1" value="'+progress+'" aria-label="Seu progresso no desafio"><button type="button" onclick="updateChallengeProgress(\''+ch.id+'\','+goal+')">Salvar progresso</button></div>';
+      html+='<div class="community-card-actions">'+(joined?'<button type="button" class="secondary" onclick="leaveChallenge(\''+ch.id+'\')">Sair do desafio</button>':'<button type="button" onclick="joinChallenge(\''+ch.id+'\')">Participar do desafio</button>')+'</div></article>';
+    });
+    box.innerHTML=html;
+  }else{
+    const {data:groups,error}=await db.from('wellness_communities').select('*').eq('is_private',false).order('created_at',{ascending:false}).limit(40);
+    if(error){box.innerHTML='<div class="community-empty">Para ativar as comunidades, aplique o arquivo <b>supabase/community_wellbeing_setup.sql</b> no SQL Editor do Supabase.<br><small>'+esc(error.message)+'</small></div>';return;}
+    const ids=(groups||[]).map(x=>x.id);
+    const [membersRes,mineRes]=await Promise.all([
+      ids.length?db.from('wellness_community_members').select('community_id,user_id').in('community_id',ids):Promise.resolve({data:[]}),
+      ids.length?db.from('wellness_community_members').select('community_id').eq('user_id',user.id).in('community_id',ids):Promise.resolve({data:[]})
+    ]);
+    if(membersRes.error||mineRes.error){box.innerHTML='<div class="community-empty">Não foi possível carregar os membros das comunidades.</div>';return;}
+    const members=membersRes.data||[],mine=new Set((mineRes.data||[]).map(x=>x.community_id));
+    let html='<div class="community-section-head"><div><h3>Encontre sua comunidade</h3><p>Espaços para trocar experiências e se apoiar.</p></div><button type="button" onclick="openCreateCommunity()"><i class="fa-solid fa-plus"></i> Criar grupo</button></div>';
+    if(!groups?.length)html+='<div class="community-empty">Nenhuma comunidade criada ainda. Você pode começar uma com seus interesses. 🤍</div>';
+    (groups||[]).forEach(g=>{
+      const count=members.filter(x=>x.community_id===g.id).length,joined=mine.has(g.id);
+      html+='<article class="community-card"><div class="community-card-top"><div class="community-card-icon"><i class="fa-solid fa-people-group"></i></div><div class="community-card-main"><h4>'+esc(g.name)+'</h4><p>'+esc(g.description||'Uma comunidade para compartilhar pequenos passos.')+'</p></div></div><div class="community-meta"><span>'+esc(g.category||'Bem-estar')+'</span><span>'+count+' '+(count===1?'membro':'membros')+'</span></div><div class="community-card-actions">'+(joined?'<button type="button" onclick="openCommunityDetail(\''+g.id+'\')">Abrir comunidade</button><button type="button" class="secondary" onclick="leaveCommunity(\''+g.id+'\')">Sair</button>':'<button type="button" onclick="joinCommunity(\''+g.id+'\')">Participar</button>')+'</div></article>';
+    });
+    box.innerHTML=html;
+  }
+}
+async function joinChallenge(id){
+  const {error}=await db.from('wellness_challenge_members').insert({challenge_id:id,user_id:user.id});
+  if(error&&error.code!=='23505'){showToast('Não foi possível participar',error.message);return;}
+  const {data:challenge}=await db.from('wellness_challenges').select('created_by,title').eq('id',id).maybeSingle();
+  if(challenge?.created_by&&challenge.created_by!==user.id)await createSmartNotification({user_id:challenge.created_by,actor_id:user.id,type:'challenge_join'});
+  showToast('Você entrou no desafio!','Cada passo conta. Faça no seu ritmo. 🌱');await loadCommunityHub();
+}
+async function leaveChallenge(id){
+  const ok=await openAppActionModal({title:'Sair do desafio?',description:'Seu progresso neste desafio será removido. Você poderá participar novamente depois.',confirmText:'Sair do desafio',icon:'fa-solid fa-seedling',danger:true});
+  if(!ok)return;
+  const {error}=await db.from('wellness_challenge_members').delete().eq('challenge_id',id).eq('user_id',user.id);
+  if(error){showToast('Não foi possível sair',error.message);return;}await loadCommunityHub();
+}
+async function updateChallengeProgress(id,goal){
+  const value=Number($('challenge-progress-'+id)?.value);
+  if(!Number.isFinite(value)||value<0){showToast('Informe um progresso válido','Use um número igual ou maior que zero.');return;}
+  const completed=value>=goal;
+  const {data:previous}=await db.from('wellness_challenge_members').select('completed_at').eq('challenge_id',id).eq('user_id',user.id).maybeSingle();
+  const {error}=await db.from('wellness_challenge_members').update({progress:value,updated_at:new Date().toISOString(),completed_at:completed?new Date().toISOString():null}).eq('challenge_id',id).eq('user_id',user.id);
+  if(error){showToast('Não foi possível atualizar',error.message);return;}
+  if(completed&&!previous?.completed_at){const {data:challenge}=await db.from('wellness_challenges').select('created_by').eq('id',id).maybeSingle();if(challenge?.created_by&&challenge.created_by!==user.id)await createSmartNotification({user_id:challenge.created_by,actor_id:user.id,type:'challenge_complete'});}
+  showToast(completed?'Meta alcançada!':'Progresso atualizado',completed?'Parabéns por chegar à sua meta! 🤍':'Seu ritmo é o que importa. 🌷');await loadCommunityHub();
+}
+function openCreateChallenge(){
+  const modal=document.createElement('div');modal.className='modal-overlay';modal.id='createChallengeModal';
+  modal.innerHTML='<div class="modal-box"><div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">Criar desafio coletivo</h3><button class="ghost" id="closeCreateChallenge">×</button></div><p class="muted">Convide a comunidade para uma meta possível e gentil.</p><label>Nome do desafio</label><input id="newChallengeTitle" maxlength="90" placeholder="Ex.: 7 dias de leitura"><label>Descrição</label><textarea id="newChallengeDescription" maxlength="500" placeholder="Conte como funciona..."></textarea><label>Categoria</label><select id="newChallengeCategory"><option>Bem-estar</option><option>Movimento</option><option>Hidratação</option><option>Leitura</option><option>Autocuidado</option><option>Organização</option></select><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label>Meta</label><input id="newChallengeGoal" type="number" min="1" value="7"></div><div><label>Unidade</label><select id="newChallengeUnit"><option>dias</option><option>minutos</option><option>litros</option><option>páginas</option><option>vezes</option></select></div></div><label>Duração (dias)</label><input id="newChallengeDuration" type="number" min="1" max="90" value="7"><p id="newChallengeStatus" class="muted"></p><div style="display:flex;gap:9px"><button class="secondary" id="cancelCreateChallenge" style="flex:1">Cancelar</button><button id="saveCreateChallenge" style="flex:1">Criar desafio</button></div></div>';
+  document.body.append(modal);
+  const close=()=>modal.remove();modal.addEventListener('click',e=>{if(e.target===modal)close();});
+  $('closeCreateChallenge').onclick=close;$('cancelCreateChallenge').onclick=close;$('saveCreateChallenge').onclick=saveNewChallenge;
+}
+async function saveNewChallenge(){
+  const title=$('newChallengeTitle').value.trim(),description=$('newChallengeDescription').value.trim(),category=$('newChallengeCategory').value,goal=Number($('newChallengeGoal').value),unit=$('newChallengeUnit').value,duration=Math.max(1,Math.min(90,Number($('newChallengeDuration').value)||7));
+  if(title.length<3||!Number.isFinite(goal)||goal<=0){$('newChallengeStatus').textContent='Informe um nome e uma meta maior que zero.';return;}
+  const start=new Date(),end=new Date(start.getFullYear(),start.getMonth(),start.getDate()+duration-1);
+  const {data,error}=await db.from('wellness_challenges').insert({title,description,category,goal_value:goal,goal_unit:unit,duration_days:duration,starts_on:dateKey(start),ends_on:dateKey(end),created_by:user.id,is_public:true}).select('id').single();
+  if(error){$('newChallengeStatus').textContent='Não foi possível criar: '+error.message;return;}
+  const {error:joinError}=await db.from('wellness_challenge_members').insert({challenge_id:data.id,user_id:user.id});
+  if(joinError)console.warn('Desafio criado, mas a participação não foi registrada:',joinError.message);
+  $('createChallengeModal')?.remove();showToast('Desafio criado!','Seu convite para a comunidade já está disponível. 🤍');await loadCommunityHub();
+}
+function openCreateCommunity(){
+  const modal=document.createElement('div');modal.className='modal-overlay';modal.id='createCommunityModal';
+  modal.innerHTML='<div class="modal-box"><div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">Criar comunidade</h3><button class="ghost" id="closeCreateCommunity">×</button></div><p class="muted">Crie um espaço público e acolhedor em torno de um interesse.</p><label>Nome da comunidade</label><input id="newCommunityName" maxlength="60" placeholder="Ex.: Leitura com calma"><label>Descrição</label><textarea id="newCommunityDescription" maxlength="500" placeholder="Qual é o propósito do grupo?"></textarea><label>Categoria</label><select id="newCommunityCategory"><option>Bem-estar</option><option>Movimento</option><option>Alimentação consciente</option><option>Leitura e estudos</option><option>Autocuidado</option><option>Rotina e organização</option><option>Hobbies</option></select><p id="newCommunityStatus" class="muted"></p><div style="display:flex;gap:9px"><button class="secondary" id="cancelCreateCommunity" style="flex:1">Cancelar</button><button id="saveCreateCommunity" style="flex:1">Criar comunidade</button></div></div>';
+  document.body.append(modal);
+  const close=()=>modal.remove();modal.addEventListener('click',e=>{if(e.target===modal)close();});
+  $('closeCreateCommunity').onclick=close;$('cancelCreateCommunity').onclick=close;$('saveCreateCommunity').onclick=saveNewCommunity;
+}
+async function saveNewCommunity(){
+  const name=$('newCommunityName').value.trim(),description=$('newCommunityDescription').value.trim(),category=$('newCommunityCategory').value;
+  if(name.length<3){$('newCommunityStatus').textContent='O nome precisa ter pelo menos 3 caracteres.';return;}
+  const {data,error}=await db.from('wellness_communities').insert({name,description,category,created_by:user.id,is_private:false}).select('id').single();
+  if(error){$('newCommunityStatus').textContent='Não foi possível criar: '+error.message;return;}
+  const {error:memberError}=await db.from('wellness_community_members').insert({community_id:data.id,user_id:user.id,role:'owner'});
+  if(memberError)console.warn('Comunidade criada, mas a associação do criador falhou:',memberError.message);
+  $('createCommunityModal')?.remove();showToast('Comunidade criada!','Seu espaço já está disponível. 🌷');communityView='groups';await loadCommunityHub();
+}
+async function joinCommunity(id){
+  const {error}=await db.from('wellness_community_members').insert({community_id:id,user_id:user.id});
+  if(error&&error.code!=='23505'){showToast('Não foi possível participar',error.message);return;}
+  const {data:community}=await db.from('wellness_communities').select('created_by').eq('id',id).maybeSingle();
+  if(community?.created_by&&community.created_by!==user.id)await createSmartNotification({user_id:community.created_by,actor_id:user.id,type:'community_join'});
+  showToast('Bem-vinda à comunidade!','Que bom ter você por aqui. 🤍');await loadCommunityHub();
+}
+async function leaveCommunity(id){
+  const ok=await openAppActionModal({title:'Sair da comunidade?',description:'Você deixará de ver as conversas deste grupo. Poderá entrar novamente quando quiser.',confirmText:'Sair da comunidade',icon:'fa-solid fa-people-group',danger:true});
+  if(!ok)return;
+  const {error}=await db.from('wellness_community_members').delete().eq('community_id',id).eq('user_id',user.id);
+  if(error){showToast('Não foi possível sair',error.message);return;}activeCommunityId=null;await loadCommunityHub();
+}
+async function openCommunityDetail(id,fromLoad=false){
+  activeCommunityId=id;const box=$('communityHubContent');if(!box)return;
+  if(!fromLoad)box.innerHTML='<p class="muted">Abrindo comunidade...</p>';
+  const {data:community,error}=await db.from('wellness_communities').select('*').eq('id',id).maybeSingle();
+  if(error||!community){box.innerHTML='<p class="muted">Não foi possível abrir esta comunidade.</p>';activeCommunityId=null;return;}
+  const {data:membership}=await db.from('wellness_community_members').select('role').eq('community_id',id).eq('user_id',user.id).maybeSingle();
+  if(!membership){activeCommunityId=null;await loadCommunityHub();return;}
+  const {data:posts,error:postsError}=await db.from('wellness_community_posts').select('*').eq('community_id',id).order('created_at',{ascending:false}).limit(60);
+  if(postsError){box.innerHTML='<p class="muted">Não foi possível carregar as publicações deste grupo.</p>';return;}
+  const ids=[...new Set((posts||[]).map(p=>p.user_id))];
+  const {data:authors}=ids.length?await db.from('user_profiles').select('user_id,full_name,username').in('user_id',ids):{data:[]};
+  const authorMap={};(authors||[]).forEach(p=>authorMap[p.user_id]=p);
+  let html='<div class="community-detail-head"><button type="button" class="secondary" id="backCommunityList">← Voltar</button><div><b>'+esc(community.name)+'</b><div class="muted" style="font-size:11px">'+esc(community.category||'Bem-estar')+'</div></div></div><p class="muted">'+esc(community.description||'Um espaço para crescer junto.')+'</p><div class="community-compose"><input id="communityPostInput" maxlength="2000" placeholder="Compartilhe uma ideia ou pequena conquista..."><button type="button" id="sendCommunityPost">Publicar</button></div>';
+  if(!posts?.length)html+='<div class="community-empty">Ainda não há publicações. Comece a conversa com uma mensagem acolhedora. 🤍</div>';
+  (posts||[]).forEach(p=>{html+='<article class="community-post"><div><span class="community-post-author">'+esc(authorMap[p.user_id]?.full_name||'Pessoa')+'</span><span class="community-post-time">'+new Date(p.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+'</span></div><div class="community-post-content">'+esc(p.content)+'</div></article>';});
+  box.innerHTML=html;
+  $('backCommunityList').onclick=()=>{activeCommunityId=null;loadCommunityHub();};
+  $('sendCommunityPost').onclick=()=>addCommunityPost(id);
+  $('communityPostInput').onkeydown=e=>{if(e.key==='Enter')addCommunityPost(id);};
+}
+async function addCommunityPost(id){
+  const input=$('communityPostInput'),content=input?.value.trim();if(!content)return;
+  const {error}=await db.from('wellness_community_posts').insert({community_id:id,user_id:user.id,content});
+  if(error){showToast('Não foi possível publicar',error.message);return;}await openCommunityDetail(id,true);
+}
+
+
+function renderWellbeingWelcomeCard(){
+  const messages=[
+    'Hoje não precisa ser perfeito. Escolha só um pequeno passo que faça sentido para você.',
+    'Você não precisa acompanhar o ritmo de ninguém. O seu caminho também merece espaço.',
+    'Descansar, recomeçar e mudar de ideia também fazem parte do progresso.',
+    'Um dia difícil não apaga tudo o que você já construiu. Vá com gentileza.',
+    'Não transforme cuidado em cobrança. Faça o que for possível hoje.',
+    'Pequenas pausas também são escolhas importantes. Respire e siga no seu tempo.',
+    'Você merece acolhimento inclusive nos dias em que não consegue fazer tudo.'
+  ];
+  const index=Math.floor(Date.now()/86400000)%messages.length;
+  return '<section class="explore-welcome-card"><span class="explore-welcome-icon"><i class="fa-solid fa-heart"></i></span><div><span class="explore-welcome-kicker">UM LEMBRETE GENTIL</span><p>'+messages[index]+'</p><small>Seu bem-estar não é uma competição. 🤍</small></div></section>';
 }
 
 /* EXPLORAR */
@@ -3597,34 +3858,56 @@ async function searchProfilesAndPosts(){
 
   renderRecentSearches();
 
-  // SEM PESQUISA: ranking de publicações por engajamento
+  // SEM PESQUISA: recomendações baseadas em afinidade, relações e atividade recente
   if(!q){
     const {data:posts,error}=await db.from('posts').select('*').order('created_at',{ascending:false}).limit(60);
-    if(error){$('peopleList').innerHTML='<p class="muted">Erro ao carregar publicações.</p>';return;}
+    if(error){$('peopleList').innerHTML=renderWellbeingWelcomeCard()+'<p class="muted">Não foi possível carregar as publicações agora.</p>';return;}
     const ids=[...new Set((posts||[]).map(p=>p.user_id))],postIds=(posts||[]).map(p=>p.id);
-    const [profilesRes,likesRes,commentsRes,repostsRes]=await Promise.all([
+    const [profilesRes,likesRes,commentsRes,repostsRes,followingRes,myLikesRes]=await Promise.all([
       ids.length?db.from('user_profiles').select('*').in('user_id',ids):Promise.resolve({data:[]}),
       postIds.length?db.from('post_likes').select('post_id').in('post_id',postIds):Promise.resolve({data:[]}),
       postIds.length?db.from('post_comments').select('post_id').in('post_id',postIds):Promise.resolve({data:[]}),
-      postIds.length?db.from('post_reposts').select('post_id').in('post_id',postIds):Promise.resolve({data:[]})
+      postIds.length?db.from('post_reposts').select('post_id').in('post_id',postIds):Promise.resolve({data:[]}),
+      db.from('follows').select('following_id').eq('follower_id',user.id),
+      db.from('post_likes').select('post_id').eq('user_id',user.id).limit(80)
     ]);
     const authors={},likes={},comments={},reposts={};
     (profilesRes.data||[]).forEach(p=>authors[p.user_id]=p);
     (likesRes.data||[]).forEach(x=>likes[x.post_id]=(likes[x.post_id]||0)+1);
     (commentsRes.data||[]).forEach(x=>comments[x.post_id]=(comments[x.post_id]||0)+1);
     (repostsRes.data||[]).forEach(x=>reposts[x.post_id]=(reposts[x.post_id]||0)+1);
-    const ranked=(posts||[]).slice().sort((a,b)=>((likes[b.id]||0)+2*(comments[b.id]||0)+3*(reposts[b.id]||0))-((likes[a.id]||0)+2*(comments[a.id]||0)+3*(reposts[a.id]||0)));
-    $('peopleList').innerHTML=`
-      ${renderTrendingHashtags(posts)}
-      <div class="explore-ranking-heading"><div><h3>Em alta no Cottontail ✨</h3><p class="muted">Publicações com mais curtidas, comentários e reposts</p></div><span class="ranking-pill">TOP ${ranked.length}</span></div>
-      ${ranked.map((p,index)=>`
-        <article class="ranking-post"><div class="ranking-position">${index+1}</div><div class="ranking-post-content">
-          <div class="ranking-author" onclick="inspectProfile('${p.user_id}')"><b>${esc(authors[p.user_id]?.full_name||'Pessoa')}</b><span class="muted">@${esc((authors[p.user_id]?.username||'usuario').replace(/^@/,''))}</span></div>
-          <div class="ranking-text" onclick="inspectProfile('${p.user_id}')">${esc(p.content||'Publicação com imagem')}</div>
-          ${p.media_url?`<img class="ranking-media" src="${esc(p.media_url)}" loading="lazy" onclick="inspectProfile('${p.user_id}')">`:''}
-          <div class="ranking-stats"><span><i class="fa-solid fa-heart"></i> ${likes[p.id]||0}</span><span><i class="fa-solid fa-comment"></i> ${comments[p.id]||0}</span><span><i class="fa-solid fa-retweet"></i> ${reposts[p.id]||0}</span></div>
-        </div></article>`).join('')||'<p class="muted">Ainda não há publicações para ranquear.</p>'}
-    `;
+    const followed=new Set((followingRes.data||[]).map(x=>x.following_id));
+    const likedIds=new Set((myLikesRes.data||[]).map(x=>x.post_id));
+    const interests={};
+    (posts||[]).filter(p=>likedIds.has(p.id)).forEach(p=>{
+      const tags=String(p.content||'').match(/(^|\s)#([\p{L}\p{N}_]{2,40})/gu)||[];
+      tags.forEach(raw=>{const tag=raw.trim().slice(1).toLocaleLowerCase('pt-BR');interests[tag]=(interests[tag]||0)+1;});
+    });
+    const score=post=>{
+      const engagement=(likes[post.id]||0)+2*(comments[post.id]||0)+3*(reposts[post.id]||0);
+      const ageHours=Math.max(0,(Date.now()-new Date(post.created_at).getTime())/3600000);
+      const freshness=Math.max(0,12-ageHours/24);
+      const relation=followed.has(post.user_id)?8:0;
+      const tags=String(post.content||'').match(/(^|\s)#([\p{L}\p{N}_]{2,40})/gu)||[];
+      const affinity=tags.reduce((sum,raw)=>sum+(interests[raw.trim().slice(1).toLocaleLowerCase('pt-BR')]||0)*2,0);
+      return engagement+freshness+relation+affinity;
+    };
+    const ranked=(posts||[]).slice().sort((a,b)=>score(b)-score(a));
+    const suggestions=[];
+    ranked.forEach(p=>{
+      const author=authors[p.user_id];
+      if(author&&p.user_id!==user.id&&!followed.has(p.user_id)&&!suggestions.some(x=>x.user_id===author.user_id))suggestions.push(author);
+    });
+    const peopleHtml=suggestions.slice(0,4).map(p=>'<div class="explore-suggest-person"><div class="explore-suggest-main" onclick="inspectProfile(\''+p.user_id+'\')"><div class="avatar">'+(p.avatar_url?'<img src="'+esc(p.avatar_url)+'" loading="lazy">':esc((p.full_name||'?')[0]))+'</div><div><b>'+esc(p.full_name||'Pessoa')+'</b><small>@'+esc((p.username||'usuario').replace(/^@/,''))+'</small></div></div><button type="button" onclick="toggleFollowFromExplore(\''+p.user_id+'\')">Seguir</button></div>').join('');
+    const postsHtml=ranked.map((p,index)=>{
+      const author=authors[p.user_id]||{};
+      const media=p.media_url?'<img class="ranking-media" src="'+esc(p.media_url)+'" loading="lazy" onclick="inspectProfile(\''+p.user_id+'\')">':'';
+      return '<article class="ranking-post"><div class="ranking-position">'+(index+1)+'</div><div class="ranking-post-content"><div class="ranking-author" onclick="inspectProfile(\''+p.user_id+'\')"><b>'+esc(author.full_name||'Pessoa')+'</b><span class="muted">@'+esc((author.username||'usuario').replace(/^@/,''))+'</span></div><div class="ranking-text" onclick="inspectProfile(\''+p.user_id+'\')">'+esc(p.content||'Publicação com imagem')+'</div>'+media+'<div class="ranking-stats"><span><i class="fa-solid fa-heart"></i> '+(likes[p.id]||0)+'</span><span><i class="fa-solid fa-comment"></i> '+(comments[p.id]||0)+'</span><span><i class="fa-solid fa-retweet"></i> '+(reposts[p.id]||0)+'</span></div></div></article>';
+    }).join('');
+    $('peopleList').innerHTML=renderWellbeingWelcomeCard()+renderTrendingHashtags(posts)+
+      (peopleHtml?'<section class="explore-suggestions"><div class="explore-ranking-heading"><div><h3>Pessoas que você pode gostar</h3><p class="muted">Perfis para conhecer, sem pressa.</p></div></div>'+peopleHtml+'</section>':'')+
+      '<div class="explore-ranking-heading"><div><h3>Para você ✨</h3><p class="muted">Uma seleção que combina novidades, conversas e assuntos que você acompanha.</p></div></div>'+
+      (postsHtml||'<p class="muted">Ainda não há publicações para recomendar.</p>');
     return;
   }
 
@@ -3718,7 +4001,7 @@ async function toggleFollowFromExplore(targetId){
   else{
     const {error}=await db.from('follows').insert({follower_id:user.id,following_id:targetId});
     if(error){showToast('Ops!','Não foi possível seguir este perfil.',{type:'follow'});return;}
-    await db.from('notifications').insert({user_id:targetId,actor_id:user.id,type:'follow'});
+    await createSmartNotification({user_id:targetId,actor_id:user.id,type:'follow'});
     showToast('Novo seguindo!','Você começou a seguir um perfil. ✨',{type:'follow'});
   }
   await searchProfilesAndPosts();
@@ -3843,7 +4126,7 @@ async function toggleFollowModal(targetId,isFollowing){
   else{
     const {error}=await db.from('follows').insert({follower_id:user.id,following_id:targetId});
     if(error){showToast('Ops!','Não foi possível seguir este perfil.',{type:'follow'});return;}
-    await db.from('notifications').insert({user_id:targetId,actor_id:user.id,type:'follow'});
+    await createSmartNotification({user_id:targetId,actor_id:user.id,type:'follow'});
     showToast('Novo seguindo!','Você começou a seguir um perfil. ✨',{type:'follow'});
   }
   await inspectProfile(targetId);
@@ -4150,7 +4433,7 @@ async function sendMessage(){
 
     const {data:recipientSettings}=await db.from('direct_conversation_settings').select('muted').eq('user_id',activeChat).eq('peer_id',user.id).maybeSingle();
     if(!recipientSettings?.muted){
-      const {error:notifError}=await db.from('notifications').insert({user_id:activeChat,actor_id:user.id,type:'message'});
+      const {error:notifError}=await createSmartNotification({user_id:activeChat,actor_id:user.id,type:'message'});
       if(notifError) console.warn('Mensagem enviada, mas a notificação não foi registrada:',notifError.message);
     }
 
@@ -4169,6 +4452,54 @@ async function sendMessage(){
   }
 }
 
+
+/* PREFERÊNCIAS E ENTREGA INTELIGENTE DE NOTIFICAÇÕES */
+const notificationPreferenceDefaults={likes:true,comments:true,reposts:true,follows:true,messages:true,collaborations:true,challenges:true,communities:true};
+let notificationPreferencesCache={...notificationPreferenceDefaults};
+function notificationPreferenceKey(type){
+  if(type==='like')return 'likes';
+  if(type==='comment')return 'comments';
+  if(type==='repost')return 'reposts';
+  if(type==='follow')return 'follows';
+  if(type==='message')return 'messages';
+  if(type==='post_collaboration')return 'collaborations';
+  if(type==='challenge_join'||type==='challenge_complete'||type==='challenge_update')return 'challenges';
+  if(type==='community_join'||type==='community_post')return 'communities';
+  return null;
+}
+async function loadNotificationPreferences(){
+  if(!user)return;
+  const {data,error}=await db.from('user_notification_preferences').select('*').eq('user_id',user.id).maybeSingle();
+  if(error){console.warn('Não foi possível carregar as preferências de notificações:',error.message);notificationPreferencesCache={...notificationPreferenceDefaults};}
+  else notificationPreferencesCache={...notificationPreferenceDefaults,...(data||{})};
+  const ids={likes:'prefLikes',comments:'prefComments',reposts:'prefReposts',follows:'prefFollows',messages:'prefMessages',collaborations:'prefCollaborations',challenges:'prefChallenges',communities:'prefCommunities'};
+  Object.entries(ids).forEach(([key,id])=>{const el=$(id);if(el)el.checked=notificationPreferencesCache[key]!==false;});
+}
+async function saveNotificationPreference(key,value){
+  if(!user||!Object.prototype.hasOwnProperty.call(notificationPreferenceDefaults,key))return;
+  notificationPreferencesCache[key]=!!value;
+  const {error}=await db.from('user_notification_preferences').upsert({user_id:user.id,[key]:!!value,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+  const statusLine=$('notificationPreferencesStatus');
+  if(error){
+    notificationPreferencesCache[key]=!value;
+    const id={likes:'prefLikes',comments:'prefComments',reposts:'prefReposts',follows:'prefFollows',messages:'prefMessages',collaborations:'prefCollaborations',challenges:'prefChallenges',communities:'prefCommunities'}[key];
+    if($(id))$(id).checked=!value;
+    if(statusLine)statusLine.textContent='Não foi possível salvar. Aplique supabase/community_wellbeing_setup.sql no Supabase.';
+    console.warn('Preferência de notificação:',error.message);return;
+  }
+  if(statusLine)statusLine.textContent='Preferência salva. Você pode mudar quando quiser.';
+}
+async function createSmartNotification(payload){
+  const key=notificationPreferenceKey(payload?.type);
+  if(!payload?.user_id)return {error:new Error('Destinatário da notificação ausente.')};
+  if(key){
+    const {data,error}=await db.from('user_notification_preferences').select(key).eq('user_id',payload.user_id).maybeSingle();
+    if(error&&error.code!=='PGRST116')console.warn('Falha ao consultar preferência; mantendo entrega padrão:',error.message);
+    if(data&&data[key]===false)return {data:null,error:null,skipped:true};
+  }
+  return db.from('notifications').insert(payload);
+}
+
 /* NOTIFICAÇÕES */
 function notificationDescription(type){
   if(type==='like') return 'curtiu sua publicação. 🤍';
@@ -4176,6 +4507,11 @@ function notificationDescription(type){
   if(type==='follow') return 'começou a seguir você. ✨';
   if(type==='comment') return 'comentou na sua publicação. 💬';
   if(type==='message') return 'enviou uma mensagem. 💌';
+  if(type==='challenge_join') return 'entrou em um desafio que você criou. 🌱';
+  if(type==='challenge_complete') return 'concluiu um desafio coletivo. ✨';
+  if(type==='challenge_update') return 'atualizou o progresso em um desafio. 🌷';
+  if(type==='community_join') return 'entrou em uma comunidade que você criou. 🤍';
+  if(type==='community_post') return 'compartilhou uma novidade em uma comunidade. 💬';
   if(type==='post_collaboration') return 'convidou você para colaborar em uma publicação. 🤝';
   return 'interagiu com você.';
 }
@@ -4185,6 +4521,8 @@ function notificationIcon(type){
   if(type==='follow') return 'fa-user-plus';
   if(type==='comment') return 'fa-comment';
   if(type==='message') return 'fa-paper-plane';
+  if(type==='challenge_join'||type==='challenge_complete'||type==='challenge_update') return 'fa-seedling';
+  if(type==='community_join'||type==='community_post') return 'fa-people-group';
   return 'fa-bell';
 }
 async function openNotification(notificationId,actorId,type,postId){
@@ -4192,6 +4530,8 @@ async function openNotification(notificationId,actorId,type,postId){
   checkUnreadBadges();
   if(type==='follow'){if(actorId) await inspectProfile(actorId);return;}
   if(type==='message'){if(actorId) await openChat(actorId);return;}
+  if(type==='challenge_join'||type==='challenge_complete'||type==='challenge_update'){showPage('community');switchCommunityTab('challenges');return;}
+  if(type==='community_join'||type==='community_post'){showPage('community');switchCommunityTab('groups');return;}
   if(postId){
     showPage('feed');
     await loadFeed('all');
@@ -4204,6 +4544,7 @@ async function openNotification(notificationId,actorId,type,postId){
   if(actorId) await inspectProfile(actorId);
 }
 async function loadNotifications(){
+  await loadNotificationPreferences();
   const {error:markError}=await db.from('notifications').update({read:true}).eq('user_id',user.id).eq('read',false).neq('type','post_collaboration');
   if(markError)console.warn('Não foi possível marcar notificações como lidas:',markError.message);
   $('notifBadge').classList.add('hidden');
@@ -4220,9 +4561,11 @@ async function loadNotifications(){
   }
 
   // Agrupa curtidas e comentários da mesma publicação, mantendo o ator mais recente.
+  const visibleNotifications=(data||[]).filter(n=>{const key=notificationPreferenceKey(n.type);return !key||notificationPreferencesCache[key]!==false;});
+  if(!visibleNotifications.length){$('notifList').innerHTML='<p class="muted">Nenhuma notificação por enquanto. Você pode ajustar os avisos nas configurações. 🤍</p>';return;}
   const grouped=[],activityGroups=new Map();
-  data.forEach(n=>{
-    if((n.type==='like'||n.type==='comment')&&n.post_id){
+  visibleNotifications.forEach(n=>{
+    if((n.type==='like'||n.type==='comment'||n.type==='repost')&&n.post_id){
       const key=n.type+':'+n.post_id;
       if(activityGroups.has(key)){
         const group=activityGroups.get(key);
