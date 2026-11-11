@@ -2552,15 +2552,30 @@ async function loadWeeklyWellnessSummary(){
   target.innerHTML=stats.map(item=>'<div class="diary-weekly-stat"><b>'+esc(item.value)+'</b><span>'+esc(item.label)+'</span></div>').join('')+
     '<div class="diary-weekly-foot">'+(rows.length?'Você está construindo sua rotina no seu próprio ritmo. Continue valorizando cada pequeno passo.':'Esta semana pode começar com um pequeno cuidado. Não existe obrigação de preencher todos os dias.')+'</div>';
 }
-function openDiaryShareComposer(){
+async function openDiaryShareComposer(){
   if(!user)return;
-  const values=collectDiaryPayload(),meta=readDiaryMeta(),dateLabel=selected.toLocaleDateString('pt-BR',{day:'numeric',month:'long'});
+  const key=dateKey(selected),dateLabel=selected.toLocaleDateString('pt-BR',{day:'numeric',month:'long'});
+  const cachedRow=entries?.[key]||{};
+  let savedRow=cachedRow;
+  try{
+    const {data,error}=await db.from('diary_entries').select('entry_date,exercise,water_ml,notes')
+      .eq('user_id',user.id).eq('entry_date',key).maybeSingle();
+    if(error)throw error;
+    if(data)savedRow=data;
+  }catch(error){console.warn('Não foi possível reler o registro para compartilhar; usando os campos abertos.',error.message);}
+  const currentValues=collectDiaryPayload(),currentMeta=readDiaryMeta();
+  const savedMeta=diaryMetaFromRow(savedRow).meta||{};
+  const meta={...savedMeta,...currentMeta};
+  const exercise=savedRow.exercise||currentValues.exercise||'';
+  const water=savedRow.water_ml??currentValues.water_ml;
+  const firstText=(...values)=>values.find(value=>value!==undefined&&value!==null&&String(value).trim()!=='');
   const options=[
-    {id:'movement',label:'Atividade ou movimento',value:values.exercise||meta.movementMinutes?(values.exercise||('Movimentei meu corpo por '+meta.movementMinutes+' minutos')):''},
-    {id:'water',label:'Água consumida',value:values.water_ml?((Number(values.water_ml)/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+' L de água') :''},
-    {id:'win',label:'Pequena conquista',value:meta.dailyWin||''},
-    {id:'care',label:'Momento de autocuidado',value:meta.careMoment||''},
-    {id:'gratitude',label:'Gratidão que quero compartilhar',value:meta.gratitude||''}
+    {id:'movement',label:'Atividade ou movimento',value:firstText(exercise,meta.movementMinutes?'Movimentei meu corpo por '+meta.movementMinutes+' minutos':'',meta.steps?'Dei '+meta.steps+' passos':'')||''},
+    {id:'water',label:'Água consumida',value:Number(water)>0?(Number(water)/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+' L de água':''},
+    {id:'win',label:'Pequena conquista',value:firstText(meta.dailyWin,meta.challengeDone===true?'Concluí meu desafio pessoal':'')||''},
+    {id:'care',label:'Momento de autocuidado',value:firstText(meta.careMoment,meta.careRelax,meta.careHobby,meta.careOffline,meta.careSkincare,meta.careHair,meta.careHygiene)||''},
+    {id:'gratitude',label:'Gratidão que quero compartilhar',value:meta.gratitude||''},
+    {id:'learning',label:'Leitura ou aprendizado',value:firstText(meta.readingMinutes?'Reservei '+meta.readingMinutes+' minutos para leitura':'',meta.studyMinutes?'Dediquei '+meta.studyMinutes+' minutos aos estudos':'',meta.hobby)||''}
   ].filter(item=>String(item.value||'').trim());
   const modal=document.createElement('div');modal.className='modal-overlay';modal.id='diaryShareComposer';
   const card=document.createElement('div');card.className='modal-box';
@@ -2579,16 +2594,17 @@ function openDiaryShareComposer(){
   });
   const note=document.createElement('p');note.className='diary-note';note.textContent='Por privacidade, alimentação, humor, sono e anotações pessoais não são incluídos nesta seleção.';
   const statusLine=document.createElement('p');statusLine.className='muted';statusLine.style.fontSize='12px';
+  if(!options.length)statusLine.textContent='Ainda não há momentos compartilháveis neste dia. Salve uma atividade, água, conquista, autocuidado, gratidão ou aprendizado para ver as opções aqui.';
   const actions=document.createElement('div');actions.style.cssText='display:flex;gap:9px;margin-top:15px';
   const cancel=document.createElement('button');cancel.type='button';cancel.className='secondary';cancel.textContent='Cancelar';cancel.style.flex='1';cancel.onclick=()=>modal.remove();
-  const publish=document.createElement('button');publish.type='button';publish.textContent='Publicar no feed';publish.style.flex='1';
+  const publish=document.createElement('button');publish.type='button';publish.textContent='Publicar no feed';publish.style.flex='1';publish.disabled=!options.length;
   publish.onclick=async()=>{
     const chosen=[...list.querySelectorAll('input:checked')].map(box=>options.find(item=>item.id===box.value)).filter(Boolean);
     if(!chosen.length){statusLine.textContent='Selecione pelo menos um momento para compartilhar.';return;}
     publish.disabled=true;publish.textContent='Publicando...';
-    const content='Um momento da minha jornada de bem-estar · '+dateLabel+'\n\n'+chosen.map(item=>item.label+': '+item.value).join('\n')+'\n\nCada pequeno passo conta. 🤍';
+    const postContent='Um momento da minha jornada de bem-estar · '+dateLabel+'\n\n'+chosen.map(item=>item.label+': '+item.value).join('\n')+'\n\nCada pequeno passo conta. 🤍';
     try{
-      const {error}=await db.from('posts').insert({user_id:user.id,content,media_url:null});
+      const {error}=await db.from('posts').insert({user_id:user.id,content:postContent,media_url:null});
       if(error)throw error;
       modal.remove();showPage('feed');await loadFeed('all');
       showToast('Momento compartilhado','Sua publicação foi adicionada ao feed. 🤍');
