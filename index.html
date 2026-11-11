@@ -4568,8 +4568,10 @@ async function loadNotifications(){
   if(!visibleNotifications.length){$('notifList').innerHTML='<p class="muted">Nenhuma notificação por enquanto. Você pode ajustar os avisos nas configurações. 🤍</p>';return;}
   const grouped=[],activityGroups=new Map();
   visibleNotifications.forEach(n=>{
-    if((n.type==='like'||n.type==='comment'||n.type==='repost')&&n.post_id){
-      const key=n.type+':'+n.post_id;
+    const groupPostActivity=(n.type==='like'||n.type==='comment'||n.type==='repost')&&n.post_id;
+    const groupCommunityActivity=n.type==='community_post'&&n.community_id;
+    if(groupPostActivity||groupCommunityActivity){
+      const key=groupCommunityActivity?'community_post:'+n.community_id:n.type+':'+n.post_id;
       if(activityGroups.has(key)){
         const group=activityGroups.get(key);
         group.count++;
@@ -4596,6 +4598,7 @@ async function loadNotifications(){
     let text=notificationDescription(n.type);
     if(n.type==='like'&&count>1)text='e mais '+(count-1)+' '+(count===2?'pessoa curtiu':'pessoas curtiram')+' sua publicação. 🤍';
     if(n.type==='comment'&&count>1)text='e mais '+(count-1)+' '+(count===2?'pessoa comentou':'pessoas comentaram')+' na sua publicação. 💬';
+    if(n.type==='community_post'&&count>1)text='e mais '+(count-1)+' '+(count===2?'novidade foi compartilhada':'novidades foram compartilhadas')+' nesta comunidade. 💬';
     const date=new Date(n.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
     const unread=!n.read;
     const avatar=actor.avatar_url
