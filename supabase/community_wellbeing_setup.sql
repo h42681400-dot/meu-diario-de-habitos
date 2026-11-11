@@ -109,6 +109,12 @@ grant select,insert,update,delete on public.wellness_community_posts to authenti
 
 -- Cottontail — Etapa 4: preferências de notificações
 -- Execute este arquivo no SQL Editor do Supabase.
+-- Liga notificações aos recursos coletivos para permitir abrir o destino correto.
+alter table public.notifications add column if not exists challenge_id uuid references public.wellness_challenges(id) on delete cascade;
+alter table public.notifications add column if not exists community_id uuid references public.wellness_communities(id) on delete cascade;
+create index if not exists notifications_challenge_id_idx on public.notifications(challenge_id) where challenge_id is not null;
+create index if not exists notifications_community_id_idx on public.notifications(community_id) where community_id is not null;
+
 create table if not exists public.user_notification_preferences (
   user_id uuid primary key references auth.users(id) on delete cascade,
   likes boolean not null default true,
