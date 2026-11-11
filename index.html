@@ -2586,7 +2586,7 @@ function openDiaryShareComposer(){
     const chosen=[...list.querySelectorAll('input:checked')].map(box=>options.find(item=>item.id===box.value)).filter(Boolean);
     if(!chosen.length){statusLine.textContent='Selecione pelo menos um momento para compartilhar.';return;}
     publish.disabled=true;publish.textContent='Publicando...';
-    const content='Um momento da minha jornada de bem-estar · '+dateLabel+'\\n\\n'+chosen.map(item=>item.label+': '+item.value).join('\\n')+'\\n\\nCada pequeno passo conta. 🤍';
+    const content='Um momento da minha jornada de bem-estar · '+dateLabel+'\n\n'+chosen.map(item=>item.label+': '+item.value).join('\n')+'\n\nCada pequeno passo conta. 🤍';
     try{
       const {error}=await db.from('posts').insert({user_id:user.id,content,media_url:null});
       if(error)throw error;
