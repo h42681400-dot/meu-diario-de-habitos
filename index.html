@@ -3730,7 +3730,7 @@ async function loadCommunityHub(){
 }
 async function joinChallenge(id){
   const {error}=await db.from('wellness_challenge_members').insert({challenge_id:id,user_id:user.id});
-  if(error&&error.code!=='23505'){showToast('Não foi possível participar',error.message);return;}
+  if(error){if(error.code==='23505'){showToast('Você já participa deste desafio','Seu progresso continua salvo. 🌱');return;}showToast('Não foi possível participar',error.message);return;}
   const {data:challenge}=await db.from('wellness_challenges').select('created_by,title').eq('id',id).maybeSingle();
   if(challenge?.created_by&&challenge.created_by!==user.id)await createSmartNotification({user_id:challenge.created_by,actor_id:user.id,type:'challenge_join',challenge_id:id});
   showToast('Você entrou no desafio!','Cada passo conta. Faça no seu ritmo. 🌱');await loadCommunityHub();
@@ -3786,7 +3786,7 @@ async function saveNewCommunity(){
 }
 async function joinCommunity(id){
   const {error}=await db.from('wellness_community_members').insert({community_id:id,user_id:user.id});
-  if(error&&error.code!=='23505'){showToast('Não foi possível participar',error.message);return;}
+  if(error){if(error.code==='23505'){showToast('Você já faz parte desta comunidade','Que bom ter você por aqui. 🤍');return;}showToast('Não foi possível participar',error.message);return;}
   const {data:community}=await db.from('wellness_communities').select('created_by').eq('id',id).maybeSingle();
   if(community?.created_by&&community.created_by!==user.id)await createSmartNotification({user_id:community.created_by,actor_id:user.id,type:'community_join',community_id:id});
   showToast('Bem-vinda à comunidade!','Que bom ter você por aqui. 🤍');await loadCommunityHub();
