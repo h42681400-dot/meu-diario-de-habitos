@@ -3745,8 +3745,10 @@ async function updateChallengeProgress(id,goal){
   const value=Number($('challenge-progress-'+id)?.value);
   if(!Number.isFinite(value)||value<0){showToast('Informe um progresso válido','Use um número igual ou maior que zero.');return;}
   const completed=value>=goal;
+  const {data:previous}=await db.from('wellness_challenge_members').select('completed_at').eq('challenge_id',id).eq('user_id',user.id).maybeSingle();
   const {error}=await db.from('wellness_challenge_members').update({progress:value,updated_at:new Date().toISOString(),completed_at:completed?new Date().toISOString():null}).eq('challenge_id',id).eq('user_id',user.id);
   if(error){showToast('Não foi possível atualizar',error.message);return;}
+  if(completed&&!previous?.completed_at){const {data:challenge}=await db.from('wellness_challenges').select('created_by').eq('id',id).maybeSingle();if(challenge?.created_by&&challenge.created_by!==user.id)await createSmartNotification({user_id:challenge.created_by,actor_id:user.id,type:'challenge_complete'});}
   showToast(completed?'Meta alcançada!':'Progresso atualizado',completed?'Parabéns por chegar à sua meta! 🤍':'Seu ritmo é o que importa. 🌷');await loadCommunityHub();
 }
 function openCreateChallenge(){
@@ -4528,6 +4530,8 @@ async function openNotification(notificationId,actorId,type,postId){
   checkUnreadBadges();
   if(type==='follow'){if(actorId) await inspectProfile(actorId);return;}
   if(type==='message'){if(actorId) await openChat(actorId);return;}
+  if(type==='challenge_join'||type==='challenge_complete'||type==='challenge_update'){showPage('community');switchCommunityTab('challenges');return;}
+  if(type==='community_join'||type==='community_post'){showPage('community');switchCommunityTab('groups');return;}
   if(postId){
     showPage('feed');
     await loadFeed('all');
@@ -4540,6 +4544,7 @@ async function openNotification(notificationId,actorId,type,postId){
   if(actorId) await inspectProfile(actorId);
 }
 async function loadNotifications(){
+  await loadNotificationPreferences();
   const {error:markError}=await db.from('notifications').update({read:true}).eq('user_id',user.id).eq('read',false).neq('type','post_collaboration');
   if(markError)console.warn('Não foi possível marcar notificações como lidas:',markError.message);
   $('notifBadge').classList.add('hidden');
@@ -4556,9 +4561,11 @@ async function loadNotifications(){
   }
 
   // Agrupa curtidas e comentários da mesma publicação, mantendo o ator mais recente.
+  const visibleNotifications=(data||[]).filter(n=>{const key=notificationPreferenceKey(n.type);return !key||notificationPreferencesCache[key]!==false;});
+  if(!visibleNotifications.length){$('notifList').innerHTML='<p class="muted">Nenhuma notificação por enquanto. Você pode ajustar os avisos nas configurações. 🤍</p>';return;}
   const grouped=[],activityGroups=new Map();
-  data.forEach(n=>{
-    if((n.type==='like'||n.type==='comment')&&n.post_id){
+  visibleNotifications.forEach(n=>{
+    if((n.type==='like'||n.type==='comment'||n.type==='repost')&&n.post_id){
       const key=n.type+':'+n.post_id;
       if(activityGroups.has(key)){
         const group=activityGroups.get(key);
