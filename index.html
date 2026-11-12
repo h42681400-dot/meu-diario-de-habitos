@@ -18,7 +18,7 @@
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" href="/icons/WhatsApp%20Image%202026-11-04%20at%2010.41.26.jpeg?v=3" type="image/jpeg">
 <link rel="apple-touch-icon" href="/icons/WhatsApp%20Image%202026-11-04%20at%2010.41.26.jpeg?v=3">
-<title>Cottontail 🐰</title>
+<title>Cottontail</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 if(!window.supabase){
@@ -36,7 +36,7 @@ if(!window.supabase){
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Satisfy&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
 <style>
 html.cottontail-native #androidDownloadCard{display:none!important;visibility:hidden!important;pointer-events:none!important}
@@ -958,7 +958,10 @@ body{
 }
 .wrap{width:min(100% - 36px,1080px);max-width:1080px;margin:0 auto;padding:96px 0 110px}
 .top{padding:22px 0 18px;align-items:center}
-.brand{font-size:25px;letter-spacing:-1.1px}
+.brand{font-family:"Satisfy",cursive!important;font-weight:400!important;font-size:36px;letter-spacing:0!important;color:var(--rose)!important;line-height:1.2;text-shadow:0 2px 12px rgba(201,135,145,.12)}
+.login .brand{font-size:48px!important;margin:4px 0 8px}
+#app .top .brand{font-size:36px!important;margin:0}
+@media(max-width:520px){.login .brand{font-size:44px!important}#app .top .brand{font-size:32px!important}}
 .music-bar{background:rgba(255,253,252,.82);backdrop-filter:blur(16px);border-color:rgba(201,135,145,.16);box-shadow:0 5px 18px rgba(82,53,49,.045)}
 body.theme-dark .music-bar{background:rgba(36,32,33,.88)}
 .nav{
@@ -1294,7 +1297,7 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
 <!-- LOGIN -->
 <div id="loginScreen" class="wrap login">
   <div class="card">
-    <h1 class="brand">Cottontail 🐰</h1>
+    <h1 class="brand">Cottontail</h1>
     <p class="muted" style="text-align:center;margin-bottom:20px">Seu espaço de hábitos e comunidade.</p>
     
     <div style="display:flex;border-bottom:1px solid var(--line);margin-bottom:18px">
@@ -1361,7 +1364,7 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
 <!-- APP PRINCIPAL -->
 <div id="app" class="wrap hidden">
   <header class="top">
-    <h2 class="brand" style="margin:0;font-size:22px">Cottontail 🐰</h2>
+    <h2 class="brand" style="margin:0;font-size:22px">Cottontail</h2>
     
     <div class="music-bar">
       <span class="music-bar-art"><i class="fa-solid fa-headphones"></i></span>
