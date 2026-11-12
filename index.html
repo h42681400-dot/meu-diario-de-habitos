@@ -2747,7 +2747,7 @@ async function selectDay(d){
   selected=new Date(d.getFullYear(),d.getMonth(),d.getDate());
   drawCalendar();
   $('selectedDate').textContent=selected.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  const {data,error}=await db.from('diary_entries').select('*').eq('user_id',user.id).eq('entry_date',dateKey(selected)).maybeSingle();
+  const {data,error}=await db.from('diary_entries').select('*').eq('user_id',user.id).eq('entry_date',dateKey(selected)).order('id',{ascending:true}).limit(1).maybeSingle();
   if(error){console.warn('Erro ao carregar o dia selecionado:',error);status('diaryStatus','Não foi possível abrir este dia.');return;}
   const row=data||{},parsed=diaryMetaFromRow(row);
   ['breakfast','lunch','snacks','dinner','exercise'].forEach(id=>$(id).value=row[id]||'');
@@ -2770,7 +2770,12 @@ function collectDiaryPayload(){
 }
 async function saveEntry(){
   const button=document.querySelector('#diary .diary-save');
-  const message=(text)=>{const el=$('diaryStatus');if(el)el.textContent=text;};
+  const message=(text,type='info')=>{
+    const el=$('diaryStatus');
+    if(!el)return;
+    el.textContent=text;
+    el.style.cssText='display:block!important;visibility:visible!important;min-height:24px;margin:12px 0 4px;padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.45;font-weight:600;background:'+(type==='error'?'#fff0f0':type==='success'?'#edf8f0':'#f7f1f1')+';color:'+(type==='error'?'#a12b2b':type==='success'?'#27633b':'#674d4d')+';border:1px solid '+(type==='error'?'#f2cccc':type==='success'?'#cfe8d5':'#eadede')+';';
+  };
   message('Conectando e preparando seu Diário...');
   if(button){button.disabled=true;button.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';}
   try{
@@ -2825,10 +2830,10 @@ async function saveEntry(){
     if(!check?.id)throw new Error('A gravação não apareceu na leitura do Diário. Confira as políticas RLS da tabela.');
 
     await loadMonth();
-    message('Seu dia foi salvo e confirmado! 🤍');
+    message('Seu dia foi salvo e confirmado! 🤍','success');
   }catch(error){
     console.error('Erro ao salvar Diário:',error);
-    message('Não foi possível salvar: '+(error?.message||'verifique sua conexão e tente novamente.'));
+    message('Não foi possível salvar: '+(error?.message||'verifique sua conexão e tente novamente.'),'error');
   }finally{
     if(button){button.disabled=false;button.innerHTML='<i class="fa-solid fa-heart"></i> Salvar meu dia';}
   }
