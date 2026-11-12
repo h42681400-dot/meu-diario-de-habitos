@@ -1341,7 +1341,7 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
           <button class="profile-count-btn" onclick="switchProfileTab('followers')"><b id="countFollowers">0</b><span>Seguidores</span></button>
         </div>
         <div id="profilePrivacyBadge" class="muted" style="font-size:12px">🔓 Perfil Público</div>
-        <div class="card" style="margin:16px 18px;padding:16px;border:1px solid var(--line);background:var(--card-bg);border-radius:16px">
+        <div id="androidDownloadCard" class="card" style="margin:16px 18px;padding:16px;border:1px solid var(--line);background:var(--card-bg);border-radius:16px">
           <div style="display:flex;align-items:center;gap:12px">
             <div style="width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:rgba(212,165,165,.18);color:var(--rose);font-size:20px"><i class="fa-brands fa-android"></i></div>
             <div style="flex:1;min-width:0">
@@ -3904,6 +3904,8 @@ window.handleLoginClick = function(event) {
 <script>
 /* Instalação PWA do Cottontail: não intercepta chamadas do Supabase. */
 (function(){
+  const isNativeApp = window.Capacitor?.isNativePlatform?.() === true;
+  if(isNativeApp) document.getElementById('androidDownloadCard')?.remove();
   if(!('serviceWorker' in navigator)) return;
   window.addEventListener('load',function(){
     navigator.serviceWorker.register('/sw.js',{scope:'/'})
@@ -3911,6 +3913,7 @@ window.handleLoginClick = function(event) {
   });
   let installPrompt=null;
   window.addEventListener('beforeinstallprompt',function(event){
+    if(isNativeApp) return;
     event.preventDefault();
     installPrompt=event;
     if(document.getElementById('cottontailInstallButton')) return;
