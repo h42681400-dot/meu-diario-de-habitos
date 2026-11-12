@@ -7,6 +7,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Cottontail">
 <meta name="mobile-web-app-capable" content="yes">
+<script>
+(function(){
+  var ua=navigator.userAgent||'';
+  var nativeCapacitor=!!(window.Capacitor&&typeof window.Capacitor.isNativePlatform==='function'&&window.Capacitor.isNativePlatform());
+  var androidWebView=/Android/i.test(ua)&&(/;\s*wv\)/i.test(ua)||/Version\/4\.0/i.test(ua));
+  if(nativeCapacitor||androidWebView) document.documentElement.classList.add('cottontail-native');
+})();
+</script>
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" href="/icons/WhatsApp%20Image%202026-11-04%20at%2010.41.26.jpeg?v=3" type="image/jpeg">
 <link rel="apple-touch-icon" href="/icons/WhatsApp%20Image%202026-11-04%20at%2010.41.26.jpeg?v=3">
@@ -31,6 +39,7 @@ if(!window.supabase){
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
 <style>
+html.cottontail-native #androidDownloadCard{display:none!important;visibility:hidden!important;pointer-events:none!important}
 :root{
   --bg:#faf7f6;
   --card-bg:#ffffff;
@@ -4778,7 +4787,10 @@ window.handleLoginClick = function(event) {
 <script>
 /* Instalação PWA do Cottontail: não intercepta chamadas do Supabase. */
 (function(){
-  const isNativeApp=window.Capacitor?.isNativePlatform?.()===true;
+  const ua=navigator.userAgent||'';
+  const isNativeApp=document.documentElement.classList.contains('cottontail-native')
+    || window.Capacitor?.isNativePlatform?.()===true
+    || (/Android/i.test(ua)&&(/;\\s*wv\\)/i.test(ua)||/Version\\/4\\.0/i.test(ua)));
   if(isNativeApp) document.getElementById('androidDownloadCard')?.remove();
   if(!('serviceWorker' in navigator)) return;
   window.addEventListener('load',function(){
