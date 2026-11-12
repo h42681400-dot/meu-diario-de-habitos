@@ -2771,10 +2771,16 @@ function collectDiaryPayload(){
 async function saveEntry(){
   const button=document.querySelector('#diary .diary-save');
   const message=(text,type='info')=>{
-    const el=$('diaryStatus');
-    if(!el)return;
+    let el=$('diaryStatus');
+    if(!el&&button){
+      el=document.createElement('div');
+      el.id='diaryStatus';
+      button.insertAdjacentElement('afterend',el);
+    }
+    if(!el){window.alert(text);return;}
     el.textContent=text;
-    el.style.cssText='display:block!important;visibility:visible!important;min-height:24px;margin:12px 0 4px;padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.45;font-weight:600;background:'+(type==='error'?'#fff0f0':type==='success'?'#edf8f0':'#f7f1f1')+';color:'+(type==='error'?'#a12b2b':type==='success'?'#27633b':'#674d4d')+';border:1px solid '+(type==='error'?'#f2cccc':type==='success'?'#cfe8d5':'#eadede')+';';
+    el.setAttribute('role',type==='error'?'alert':'status');
+    el.style.cssText='display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:20!important;min-height:24px!important;margin:12px 0 4px!important;padding:12px 14px!important;border-radius:12px!important;font-size:13px!important;line-height:1.45!important;font-weight:600!important;background:'+(type==='error'?'#fff0f0':type==='success'?'#edf8f0':'#f7f1f1')+'!important;color:'+(type==='error'?'#a12b2b':type==='success'?'#27633b':'#674d4d')+'!important;border:1px solid '+(type==='error'?'#f2cccc':type==='success'?'#cfe8d5':'#eadede')+'!important;';
   };
   message('Conectando e preparando seu Diário...');
   if(button){button.disabled=true;button.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';}
