@@ -1288,6 +1288,70 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
 .notification-preferences-grid label{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink)}
 .notification-preferences-grid input{width:17px;height:17px;margin:0;accent-color:var(--rose)}
 
+
+/* Cottontail — identidade visual da autenticação */
+#loginScreen.auth-layout{width:min(1080px,calc(100% - 40px));max-width:1080px;min-height:min(760px,calc(100vh - 48px));margin:24px auto;padding:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(420px,.92fr);gap:0;background:var(--card-bg);border:1px solid rgba(201,143,152,.18);border-radius:30px;overflow:hidden;box-shadow:0 24px 80px rgba(91,62,65,.10)}
+.auth-showcase{position:relative;overflow:hidden;display:flex;align-items:center;padding:clamp(34px,5vw,68px);background:radial-gradient(circle at 85% 12%,rgba(255,255,255,.82),transparent 25%),linear-gradient(145deg,#f8e9e9 0%,#f7eee8 48%,#e9eee5 100%);color:#574448}
+.auth-showcase-content{position:relative;z-index:1;max-width:430px}
+.auth-brand-mark{width:46px;height:46px;border-radius:16px;display:grid;place-items:center;background:rgba(255,255,255,.72);color:#b77f89;font-size:19px;box-shadow:0 8px 24px rgba(140,95,103,.10)}
+.auth-eyebrow{font-size:10px;font-weight:800;letter-spacing:2px;color:#ad7d85;margin:26px 0 12px}
+.auth-showcase h1{font-family:Georgia,serif;font-size:clamp(39px,5vw,62px);font-weight:500;line-height:1.08;letter-spacing:-2px;margin:0;color:#49383b}
+.auth-showcase h1 em{font-weight:400;color:#b77f89}
+.auth-showcase-copy{max-width:340px;color:#806d6d;line-height:1.75;font-size:14px;margin:22px 0 26px}
+.auth-feature-list{display:grid;gap:14px;color:#715d61;font-size:13px;font-weight:600}
+.auth-feature-list span{display:flex;align-items:center;gap:11px}
+.auth-feature-list i{width:30px;height:30px;border-radius:11px;display:grid;place-items:center;background:rgba(255,255,255,.65);color:#b77f89}
+.auth-showcase-footer{display:block;margin-top:62px;color:#a78c8d;font-size:9px;letter-spacing:1.8px;font-weight:800}
+.auth-flower-art{position:absolute;right:-12px;bottom:35px;color:rgba(183,127,137,.24);font-family:Georgia,serif}
+.auth-flower-art span{font-size:150px}.auth-flower-art i{position:absolute;top:0;right:12px;font-size:40px}.auth-flower-art b{position:absolute;bottom:22px;left:10px;font-size:38px}
+.auth-showcase-orb{position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.5);pointer-events:none}
+.auth-orb-one{width:360px;height:360px;right:-170px;top:-100px}.auth-orb-two{width:230px;height:230px;right:-100px;top:-35px}
+.auth-panel{display:flex;align-items:center;justify-content:center;padding:clamp(28px,4vw,58px);background:var(--card-bg)}
+.auth-card{width:100%;max-width:440px}
+.auth-heading{margin-bottom:25px}
+.auth-heading .auth-eyebrow{margin:0 0 10px}
+.auth-heading h2{font-family:Georgia,serif;font-size:32px;line-height:1.15;font-weight:500;letter-spacing:-.7px;margin:0 0 8px;color:var(--ink)}
+.auth-heading>p:last-child{font-size:13px;color:var(--muted);margin:0}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:5px;border-radius:14px;background:var(--bg);margin-bottom:24px}
+.auth-tab{background:transparent;color:var(--muted);border-radius:10px;padding:11px;font-size:13px;font-weight:700}
+.auth-tab:hover{background:rgba(201,143,152,.08);color:var(--ink)}
+.auth-tab.active{background:var(--card-bg);color:#ad7882;box-shadow:0 2px 9px rgba(60,40,40,.08)}
+.auth-age-check{padding:12px 14px;border:1px solid var(--line);border-radius:13px;background:var(--bg);margin:0 0 19px}
+.auth-check-label{display:flex!important;align-items:flex-start;gap:10px;font-size:12px;line-height:1.5;color:var(--muted)}
+.auth-check-label input{width:17px!important;height:17px;flex:none;margin:2px 0 0!important;accent-color:var(--rose)}
+.auth-check-label strong{display:block;color:var(--ink);font-size:12px}
+.auth-check-label small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.auth-form .field{margin:0 0 15px}
+.auth-form .field>label{display:block;font-size:11px;font-weight:750;color:var(--ink);margin:0 0 7px}
+.auth-input-wrap{position:relative}
+.auth-input-wrap>i{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:13px;color:#b58b91;z-index:1}
+.auth-input-wrap input,.auth-input-wrap select{height:47px;margin:0;padding:0 14px 0 40px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:13px;transition:border-color .2s,box-shadow .2s}
+.auth-input-wrap input:focus,.auth-input-wrap select:focus{border-color:#c9949d;box-shadow:0 0 0 3px rgba(201,143,152,.12)}
+.auth-input-wrap input::placeholder{color:#b4a8a6}
+.auth-select-wrap select{appearance:none}
+.auth-form .muted{display:block;font-size:10px;margin:5px 0 0}
+.auth-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.auth-upload{height:47px;border:1px dashed #d9c5c7;border-radius:12px;display:flex!important;align-items:center;justify-content:center;gap:9px;color:#a87882!important;background:rgba(212,165,165,.07);font-size:12px!important;cursor:pointer}
+.auth-upload input{display:none}
+.auth-optional{font-size:10px;font-weight:500;color:var(--muted);margin-left:4px}
+.auth-legal{padding:12px;background:var(--bg);border-radius:12px;margin-top:3px!important}
+.auth-legal a{color:#ad7882;font-weight:700;text-decoration:none}
+.auth-legal a:hover{text-decoration:underline}
+.auth-primary{width:100%;min-height:49px;border-radius:13px;background:linear-gradient(110deg,#c98f98,#b77f89);box-shadow:0 8px 18px rgba(183,127,137,.22);font-size:13px;letter-spacing:.1px}
+.auth-primary:hover{background:linear-gradient(110deg,#bd808a,#a96f79);transform:translateY(-1px)}
+.auth-primary i{margin-left:8px;font-size:11px}
+.auth-forgot{background:transparent!important;color:var(--muted)!important;font-size:11px;padding:7px!important}
+.auth-forgot:hover{color:#ad7882!important;background:transparent!important}
+.auth-status{min-height:18px;margin:10px 0 0;text-align:center;font-size:12px}
+.auth-privacy{margin:17px 0 0;text-align:center;color:var(--muted);font-size:10px}
+.auth-privacy i{color:#b98a91;margin-right:5px}
+.auth-mobile-brand{display:none}
+#loginScreen.auth-layout .login-actions{gap:8px;margin-top:20px}
+#loginScreen.auth-layout .status:empty{display:none}
+@media(max-width:820px){#loginScreen.auth-layout{grid-template-columns:1fr;max-width:560px;min-height:0;margin:22px auto;border-radius:25px}.auth-showcase{display:none}.auth-panel{padding:34px 28px}.auth-mobile-brand{display:flex;align-items:center;gap:10px;margin-bottom:28px;color:var(--ink);font-family:Georgia,serif;font-size:22px}.auth-mobile-brand .auth-brand-mark{width:38px;height:38px;border-radius:13px}}
+@media(max-width:520px){#loginScreen.auth-layout{width:100%;min-height:100vh;margin:0;border:0;border-radius:0;box-shadow:none}.auth-panel{padding:28px 22px calc(30px + env(safe-area-inset-bottom))}.auth-heading h2{font-size:29px}.auth-form-grid{grid-template-columns:1fr;gap:0}.auth-mobile-brand{margin-bottom:25px}}
+@media(min-width:821px) and (max-height:760px){#loginScreen.auth-layout{min-height:0;margin:18px auto}.auth-panel{padding-top:28px;padding-bottom:28px}.auth-showcase-footer{margin-top:35px}}
+
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
      crossorigin="anonymous"></script>
@@ -1295,70 +1359,70 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
 <body>
 
 <!-- LOGIN -->
-<div id="loginScreen" class="wrap login">
-  <div class="card">
-    <h1 class="brand">Cottontail</h1>
-    <p class="muted" style="text-align:center;margin-bottom:20px">Seu espaço de hábitos e comunidade.</p>
-    
-    <div style="display:flex;border-bottom:1px solid var(--line);margin-bottom:18px">
-      <div id="tabLoginBtn" class="profile-tab active" onclick="toggleAuthTab('login')">Entrar</div>
-      <div id="tabSignUpBtn" class="profile-tab" onclick="toggleAuthTab('signup')">Criar Conta</div>
-    </div>
-
-    <div class="field" style="margin:14px 0 18px;padding:12px;border:1px solid var(--line);border-radius:12px">
-      <label style="display:flex;align-items:flex-start;gap:9px;font-size:13px;line-height:1.5">
-        <input type="checkbox" id="betaAdultConfirm" style="width:18px;height:18px;flex:none;margin:2px 0 0">
-        <span>Confirmo que tenho <strong>18 anos ou mais</strong> e entendo que esta versão beta é exclusiva para adultos.</span>
-      </label>
-      <small class="muted">Esta confirmação é uma barreira provisória de acesso, não um sistema independente de verificação de idade.</small>
-    </div>
-
-    <div id="loginForm">
-      <div class="field"><label>E-mail</label><input id="loginEmail" type="email" placeholder="seuemail@exemplo.com"></div>
-      <div class="field"><label>Senha</label><input id="loginPassword" type="password" placeholder="Sua senha"></div>
-      <div class="login-actions">
-        <button id="loginSubmitButton" type="button" onclick="handleLoginClick(event)" style="width:100%">Entrar</button>
-        <button class="ghost" onclick="resetPassword()" style="width:100%">Esqueci minha senha</button>
+<div id="loginScreen" class="wrap login auth-layout">
+  <section class="auth-showcase" aria-label="Bem-vinda ao Cottontail">
+    <div class="auth-showcase-orb auth-orb-one"></div><div class="auth-showcase-orb auth-orb-two"></div>
+    <div class="auth-showcase-content">
+      <div class="auth-brand-mark"><i class="fa-solid fa-leaf"></i></div>
+      <p class="auth-eyebrow">SEU ESPAÇO, SEU RITMO</p>
+      <h1>Floresça no<br><em>seu próprio tempo.</em></h1>
+      <p class="auth-showcase-copy">Um lugar para cuidar de você, acompanhar seus hábitos e compartilhar pequenos momentos da vida.</p>
+      <div class="auth-feature-list">
+        <span><i class="fa-regular fa-calendar-check"></i> Seus hábitos, com leveza</span>
+        <span><i class="fa-regular fa-heart"></i> Uma comunidade acolhedora</span>
+        <span><i class="fa-regular fa-bookmark"></i> Um diário só seu</span>
       </div>
+      <div class="auth-flower-art" aria-hidden="true"><span>✿</span><i>✧</i><b>·</b></div>
+      <small class="auth-showcase-footer">COTTONTAIL · UM DIA DE CADA VEZ</small>
     </div>
+  </section>
 
-    <div id="signUpForm" class="hidden">
-      <div class="field"><label>Nome Completo</label><input id="regName" placeholder="Ex: Mariana Silva"></div>
-      <div class="field"><label>Nome de usuário (@)</label><input id="regUsername" placeholder="@mariana.fit" autocomplete="username"><small class="muted">Obrigatório começar com @. Esse será seu identificador no Cottontail.</small></div>
-      <div class="field"><label>E-mail</label><input id="regEmail" type="email" placeholder="seuemail@exemplo.com"></div>
-      <div class="field"><label>Senha</label><input id="regPassword" type="password" placeholder="Mínimo 6 caracteres"></div>
-      <div class="field">
-        <label>Idioma Preferido</label>
-        <select id="regLanguage">
-          <option value="pt-BR">🇧🇷 Português (Brasil)</option>
-          <option value="en">🇺🇸 English</option>
-          <option value="es">🇪🇸 Español</option>
-          <option value="ko">🇰🇷 한국어 (Coreano)</option>
-        </select>
+  <section class="auth-panel">
+    <div class="auth-card">
+      <div class="auth-mobile-brand"><span class="auth-brand-mark"><i class="fa-solid fa-leaf"></i></span><b>Cottontail</b></div>
+      <div class="auth-heading">
+        <p class="auth-eyebrow">QUE BOM TER VOCÊ AQUI</p>
+        <h2 id="authHeading">Boas-vindas de volta</h2>
+        <p id="authSubheading">Entre para continuar de onde parou.</p>
       </div>
-      <div class="field">
-        <label>Foto de Perfil</label>
-        <label class="tweet-media-btn" style="width:100%;justify-content:center">
-          <i class="fa-regular fa-image"></i> Escolher Foto
-          <input type="file" id="regAvatarInput" accept="image/*" class="hidden" onchange="previewRegAvatar(this)">
+
+      <div class="auth-tabs" role="tablist" aria-label="Acesso à conta">
+        <button type="button" id="tabLoginBtn" class="auth-tab active" role="tab" aria-selected="true" onclick="toggleAuthTab('login')">Entrar</button>
+        <button type="button" id="tabSignUpBtn" class="auth-tab" role="tab" aria-selected="false" onclick="toggleAuthTab('signup')">Criar conta</button>
+      </div>
+
+      <div class="field auth-age-check">
+        <label class="auth-check-label">
+          <input type="checkbox" id="betaAdultConfirm">
+          <span><strong>Tenho 18 anos ou mais</strong><small>Esta versão beta é exclusiva para adultos.</small></span>
         </label>
-        <div id="regAvatarPreviewBox" class="crop-preview-box hidden" style="margin-top:8px">
-          <img id="regAvatarPreviewImg">
+      </div>
+
+      <div id="loginForm" class="auth-form">
+        <div class="field"><label for="loginEmail">E-mail</label><div class="auth-input-wrap"><i class="fa-regular fa-envelope"></i><input id="loginEmail" type="email" placeholder="seuemail@exemplo.com" autocomplete="email"></div></div>
+        <div class="field"><label for="loginPassword">Senha</label><div class="auth-input-wrap"><i class="fa-solid fa-lock"></i><input id="loginPassword" type="password" placeholder="Sua senha" autocomplete="current-password"></div></div>
+        <div class="login-actions">
+          <button id="loginSubmitButton" type="button" onclick="handleLoginClick(event)" class="auth-primary">Entrar na minha conta <i class="fa-solid fa-arrow-right"></i></button>
+          <button class="auth-forgot" type="button" onclick="resetPassword()">Esqueci minha senha</button>
         </div>
       </div>
-      <div class="field" style="margin-top:16px">
-        <label style="display:flex;align-items:flex-start;gap:9px;font-size:12px;line-height:1.5">
-          <input type="checkbox" id="legalAccept" style="width:18px;height:18px;flex:none;margin:2px 0 0">
-          <span>Li e aceito os <a href="/termos.html" target="_blank" rel="noopener">Termos de Uso</a>, a <a href="/privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a> e as <a href="/diretrizes.html" target="_blank" rel="noopener">Diretrizes da Comunidade</a>.</span>
-        </label>
-        <small class="muted">Você poderá consultar esses documentos a qualquer momento.</small>
+
+      <div id="signUpForm" class="hidden auth-form">
+        <div class="auth-form-grid">
+          <div class="field"><label for="regName">Nome completo</label><div class="auth-input-wrap"><i class="fa-regular fa-user"></i><input id="regName" placeholder="Ex.: Mariana Silva" autocomplete="name"></div></div>
+          <div class="field"><label for="regUsername">Nome de usuário</label><div class="auth-input-wrap"><i class="fa-solid fa-at"></i><input id="regUsername" placeholder="@seuusuario" autocomplete="username"></div><small class="muted">Comece com @. Será seu identificador.</small></div>
+          <div class="field"><label for="regEmail">E-mail</label><div class="auth-input-wrap"><i class="fa-regular fa-envelope"></i><input id="regEmail" type="email" placeholder="seuemail@exemplo.com" autocomplete="email"></div></div>
+          <div class="field"><label for="regPassword">Senha</label><div class="auth-input-wrap"><i class="fa-solid fa-lock"></i><input id="regPassword" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password"></div></div>
+          <div class="field"><label for="regLanguage">Idioma preferido</label><div class="auth-input-wrap auth-select-wrap"><i class="fa-solid fa-globe"></i><select id="regLanguage"><option value="pt-BR">🇧🇷 Português (Brasil)</option><option value="en">🇺🇸 English</option><option value="es">🇪🇸 Español</option><option value="ko">🇰🇷 한국어 (Coreano)</option></select></div></div>
+          <div class="field"><label>Foto de perfil <span class="auth-optional">opcional</span></label><label class="auth-upload" for="regAvatarInput"><i class="fa-regular fa-image"></i><span>Escolher uma foto</span><input type="file" id="regAvatarInput" accept="image/*" class="hidden" onchange="previewRegAvatar(this)"></label><div id="regAvatarPreviewBox" class="crop-preview-box hidden" style="margin-top:8px"><img id="regAvatarPreviewImg"></div></div>
+        </div>
+        <div class="field auth-legal"><label class="auth-check-label"><input type="checkbox" id="legalAccept"><span>Li e aceito os <a href="/termos.html" target="_blank" rel="noopener">Termos de Uso</a>, a <a href="/privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a> e as <a href="/diretrizes.html" target="_blank" rel="noopener">Diretrizes da Comunidade</a>.</span></label></div>
+        <div class="login-actions"><button type="button" onclick="signUp()" class="auth-primary">Criar minha conta <i class="fa-solid fa-arrow-right"></i></button></div>
       </div>
-      <div class="login-actions">
-        <button onclick="signUp()" style="width:100%">Criar Perfil e Entrar</button>
-      </div>
+      <p id="loginStatus" class="status auth-status" aria-live="polite"></p>
+      <p class="auth-privacy"><i class="fa-solid fa-shield-heart"></i> Seus dados são tratados com cuidado.</p>
     </div>
-    <p id="loginStatus" class="status"></p>
-  </div>
+  </section>
 </div>
 
 <!-- APP PRINCIPAL -->
