@@ -1355,7 +1355,7 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
 
 /* Cottontail — sistema visual unificado para o aplicativo */
 #app{--app-rose:#c98f98;--app-rose-deep:#ad7882;--app-blush:#f8eeee;--app-shadow:0 12px 34px rgba(91,62,65,.055);max-width:980px;font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-#app *{font-family:inherit}
+#app *:not(i){font-family:inherit}
 #app .top{padding:22px 2px 20px;align-items:center;border-bottom:1px solid rgba(201,143,152,.13);margin-bottom:22px}
 #app .brand{font-family:Georgia,serif!important;font-size:27px!important;letter-spacing:-.8px;color:var(--ink)}
 #app .brand:before{content:"✿";font-family:Georgia,serif;color:var(--app-rose);font-size:19px;margin-right:9px;vertical-align:2px}
@@ -1442,6 +1442,18 @@ body.theme-dark #app .community-hero{background:linear-gradient(135deg,#3a2e31,#
 body.theme-dark #app .music-bar{background:linear-gradient(120deg,var(--card-bg),rgba(201,143,152,.08))}
 body.theme-dark #app .feed-create-button{background:linear-gradient(110deg,rgba(201,143,152,.12),var(--card-bg))!important}
 body.theme-dark #app .nav{background:color-mix(in srgb,var(--card-bg) 94%,transparent)}
+
+
+/* Correções de compatibilidade do tema unificado */
+#app i.fa-solid,#app i.fa-regular{font-family:"Font Awesome 6 Free"!important;font-style:normal!important}
+#app i.fa-solid{font-weight:900!important}
+#app i.fa-regular{font-weight:400!important}
+#app i.fa-brands{font-family:"Font Awesome 6 Brands"!important;font-weight:400!important}
+@media(min-width:768px){
+  #app .nav{position:fixed!important;top:0!important;bottom:auto!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(980px,calc(100% - 36px))!important;max-width:980px!important;display:flex!important;justify-content:space-around!important;align-items:center!important}
+  #app.wrap{max-width:980px!important;width:calc(100% - 36px)!important}
+}
+#app .profile-banner{background-color:#f5e8e8}
 
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
