@@ -7,21 +7,24 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "portrait",
-  "background_color": "#faf7f6",
-  "theme_color": "#d4a5a5",
+  "background_color": "#FFF9F5",
+  "theme_color": "#D6A0A3",
   "icons": [
     {
-      "src": "/icons/WhatsApp%20Image%202026-11-04%20at%2010.41.26.jpeg?v=3",
+      "src": "/icons/cottontail-cotton.svg?v=1",
       "sizes": "any",
-      "type": "image/jpeg",
+      "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/icons/WhatsApp%20Image%202026-11-04%20at%2010.41.26.jpeg?v=3",
+      "src": "/icons/cottontail-cotton.svg?v=1",
       "sizes": "any",
-      "type": "image/jpeg",
+      "type": "image/svg+xml",
       "purpose": "maskable"
     }
   ]
