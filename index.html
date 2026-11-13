@@ -2255,8 +2255,13 @@ function toggleYoutubeMusicPanel(force){
 function toggleAuthTab(tab){
   $('tabLoginBtn').classList.toggle('active', tab==='login');
   $('tabSignUpBtn').classList.toggle('active', tab==='signup');
+  $('tabLoginBtn').setAttribute('aria-selected',String(tab==='login'));
+  $('tabSignUpBtn').setAttribute('aria-selected',String(tab==='signup'));
   $('loginForm').classList.toggle('hidden', tab!=='login');
   $('signUpForm').classList.toggle('hidden', tab!=='signup');
+  const heading=$('authHeading'),subheading=$('authSubheading');
+  if(heading)heading.textContent=tab==='login'?'Boas-vindas de volta':'Vamos criar seu espaço';
+  if(subheading)subheading.textContent=tab==='login'?'Entre para continuar de onde parou.':'Crie sua conta e comece uma nova rotina.';
   status('loginStatus','');
 }
 
