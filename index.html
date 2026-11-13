@@ -1658,6 +1658,48 @@ body.theme-dark #app .community-hero,body.theme-dark #app .diary-hero{
   #app .community-hero,#app .diary-hero{padding:20px!important}
 }
 
+ 
+/* HOME — painel pessoal e estados de interação */
+#app .home-welcome-card{
+  display:flex;align-items:center;justify-content:space-between;gap:22px;
+  padding:28px 30px;margin:0 0 16px;border:1px solid #E8D7D5;border-radius:25px;
+  background:linear-gradient(118deg,#F2E1E3 0%,#F8F0E9 60%,#E8EEE6 100%);
+}
+#app .home-welcome-copy{min-width:0}
+#app .home-eyebrow{display:block;color:#95616B;font-size:10px;font-weight:800;letter-spacing:1.45px}
+#app .home-welcome-card h2{margin:8px 0 5px;font-size:clamp(25px,3vw,36px);color:#67464D}
+#app .home-welcome-card p{margin:0;color:#806E69;font-size:13px;line-height:1.6}
+#app .home-quick-actions{display:flex;flex-direction:column;gap:8px;flex:none}
+#app .home-quick-actions button{padding:11px 15px;border-radius:14px;background:#B87581;color:white;font-size:12px;font-weight:700}
+#app .home-quick-actions .home-quiet-action{background:rgba(255,252,250,.72);border:1px solid rgba(121,83,91,.15);color:#754B55;box-shadow:none}
+#app .home-overview-card{padding:22px 24px;margin:0 0 18px;border:1px solid var(--line);border-radius:22px;background:var(--card-bg);box-shadow:0 8px 26px rgba(76,54,49,.045)}
+#app .home-overview-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+#app .home-overview-heading h3{margin:5px 0 0;font-size:22px;color:var(--ink)}
+#app .home-text-link{background:transparent!important;color:#94616B!important;box-shadow:none!important;padding:8px!important;font-size:12px}
+#app .home-overview-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+#app .home-overview-stat{display:flex;flex-direction:column;gap:5px;padding:14px 15px;background:#F7F0EC;border:1px solid #EDE2DC;border-radius:16px}
+#app .home-overview-stat b{font-family:"Cormorant Garamond",Georgia,serif;font-size:27px;line-height:1;color:#79535B}
+#app .home-overview-stat span{font-size:11px;color:#897B77}
+#app .home-overview-message{margin-top:13px;color:var(--muted);font-size:12px;line-height:1.6}
+body.theme-dark #app .home-welcome-card{background:linear-gradient(118deg,#49363B 0%,#3B3230 60%,#343C34 100%);border-color:#5A4446}
+body.theme-dark #app .home-welcome-card h2{color:#F4E5E6}
+body.theme-dark #app .home-welcome-card p,body.theme-dark #app .home-eyebrow{color:#D9BFC0}
+body.theme-dark #app .home-quick-actions .home-quiet-action{background:#443638;color:#F2DDE0;border-color:#5A4548}
+body.theme-dark #app .home-overview-stat{background:#382F2D;border-color:#514342}
+body.theme-dark #app .home-overview-stat b{color:#E8B9C0}
+@media(max-width:700px){
+ #app .home-welcome-card{align-items:flex-start;flex-direction:column;padding:22px 20px;gap:16px}
+ #app .home-quick-actions{width:100%;flex-direction:row}
+ #app .home-quick-actions button{flex:1}
+ #app .home-overview-card{padding:18px 16px}
+ #app .home-overview-heading{align-items:flex-start}
+ #app .home-overview-heading h3{font-size:20px}
+ #app .home-overview-stats{gap:7px}
+ #app .home-overview-stat{padding:11px 9px}
+ #app .home-overview-stat b{font-size:23px}
+ #app .home-overview-stat span{font-size:10px}
+}
+
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
      crossorigin="anonymous"></script>
@@ -1782,6 +1824,26 @@ body.theme-dark #app .community-hero,body.theme-dark #app .diary-hero{
 
   <!-- FEED -->
   <section id="feed" class="page active">
+    <section class="home-welcome-card" aria-label="Resumo pessoal">
+      <div class="home-welcome-copy">
+        <span class="home-eyebrow">COTTONTAIL · SEU ESPAÇO</span>
+        <h2 id="homeGreeting">Um novo dia, no seu ritmo.</h2>
+        <p>Pequenos cuidados também fazem parte de uma vida bonita.</p>
+      </div>
+      <div class="home-quick-actions">
+        <button type="button" onclick="showPage('diary')"><i class="fa-solid fa-book-open"></i> Registrar meu dia</button>
+        <button type="button" class="home-quiet-action" onclick="openFloatingPostModal()"><i class="fa-solid fa-pen"></i> Compartilhar</button>
+      </div>
+    </section>
+    <section class="home-overview-card" aria-label="Seu progresso recente">
+      <div class="home-overview-heading"><div><span class="home-eyebrow">SEUS PEQUENOS PASSOS</span><h3>Seu resumo dos últimos 7 dias</h3></div><button type="button" class="home-text-link" onclick="showPage('diary')">Ver diário <i class="fa-solid fa-arrow-right"></i></button></div>
+      <div id="homeOverviewStats" class="home-overview-stats" aria-live="polite">
+        <div class="home-overview-stat"><b>—</b><span>Dias registrados</span></div>
+        <div class="home-overview-stat"><b>—</b><span>Dias em movimento</span></div>
+        <div class="home-overview-stat"><b>—</b><span>Média de água</span></div>
+      </div>
+      <div id="homeOverviewMessage" class="home-overview-message">Seu progresso aparecerá aqui conforme você registra sua rotina.</div>
+    </section>
     <div class="card">
       <div class="row" style="margin-bottom:14px;display:flex;gap:10px">
         <button class="secondary" onclick="loadFeed('all')">Todos</button>
@@ -2860,7 +2922,7 @@ function showPage(id){
   if(id==='explore')searchProfilesAndPosts();
   if(id==='community')loadCommunityHub();
   if(id==='messages'){ backToChatList(); }
-  if(id==='feed')loadFeed('all');
+  if(id==='feed'){loadHomeOverview();loadFeed('all');}
   if(id==='notifications'){ $('notifBadge').classList.add('hidden'); loadNotifications(); }
   if(id==='profile'){
     // Reconsulta os dados do cabeçalho sempre que a página de perfil é aberta,
@@ -2888,6 +2950,35 @@ async function markInboxMessagesRead(){
   await loadChats();
   await checkUnreadBadges();
 }
+async function loadHomeOverview(){
+  const stats=$('homeOverviewStats'),message=$('homeOverviewMessage'),greeting=$('homeGreeting');
+  if(!stats||!message||!user)return;
+  const hour=new Date().getHours();
+  if(greeting)greeting.textContent=hour<12?'Bom dia, que bom ter você aqui.':hour<18?'Boa tarde, que bom ter você aqui.':'Boa noite, reserve um momento para você.';
+  stats.innerHTML='<div class="home-overview-stat"><b>…</b><span>Dias registrados</span></div><div class="home-overview-stat"><b>…</b><span>Dias em movimento</span></div><div class="home-overview-stat"><b>…</b><span>Média de água</span></div>';
+  message.textContent='Buscando seus pequenos passos desta semana…';
+  const today=new Date(),start=new Date(today.getFullYear(),today.getMonth(),today.getDate()-6);
+  try{
+    const {data,error}=await db.from('diary_entries').select('entry_date,exercise,water_ml,notes').eq('user_id',user.id).gte('entry_date',dateKey(start)).lte('entry_date',dateKey(today));
+    if(error)throw error;
+    const rows=(data||[]).filter(row=>typeof diaryRecordHasData==='function'?diaryRecordHasData(row):Boolean(row.exercise||Number(row.water_ml)||row.notes));
+    const movement=rows.filter(row=>Boolean(row.exercise)).length;
+    const water=rows.map(row=>Number(row.water_ml)||0).filter(value=>value>0);
+    const average=water.length?Math.round(water.reduce((sum,value)=>sum+value,0)/water.length):0;
+    const waterLabel=average?(average>=1000?(average/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+' L':average+' ml'):'—';
+    stats.innerHTML=[
+      {value:rows.length+'/7',label:'Dias registrados'},
+      {value:String(movement),label:'Dias em movimento'},
+      {value:waterLabel,label:'Média de água'}
+    ].map(item=>'<div class="home-overview-stat"><b>'+esc(item.value)+'</b><span>'+esc(item.label)+'</span></div>').join('');
+    message.textContent=rows.length?'Você está construindo sua rotina no seu próprio ritmo. Cada registro conta.':'Sua semana está começando. Registre um pequeno cuidado quando quiser — sem cobranças.';
+  }catch(error){
+    console.warn('Resumo da página inicial indisponível:',error.message);
+    stats.innerHTML='<div class="home-overview-stat"><b>♡</b><span>Seu espaço</span></div><div class="home-overview-stat"><b>♡</b><span>Seu ritmo</span></div><div class="home-overview-stat"><b>♡</b><span>Seu cuidado</span></div>';
+    message.textContent='Seus registros estarão disponíveis aqui quando conseguirmos sincronizar com o Diário.';
+  }
+}
+
 function updateUnreadBadge(id,count){
   const badge=$(id);
   if(!badge)return;
