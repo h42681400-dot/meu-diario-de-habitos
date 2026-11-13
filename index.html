@@ -1717,6 +1717,24 @@ body.theme-dark #app .home-overview-stat b{color:#E8B9C0}
 #app .feed-empty-state>button{margin-top:5px;background:#B87581;color:#fff;padding:10px 17px;border-radius:13px}
 @media(prefers-reduced-motion:reduce){#app .feed-loading-dot{animation:none}#app .page{animation:none}}
 
+
+/* Acabamento das áreas sociais e acessibilidade */
+#app .community-section-head{padding:8px 2px 12px}
+#app .community-group-card,#app .community-challenge-card{border:1px solid var(--line);border-radius:19px;background:var(--card-bg);box-shadow:0 6px 20px rgba(76,54,49,.035);padding:18px}
+#app .community-group-card h3,#app .community-challenge-card h3{font-family:"Cormorant Garamond",Georgia,serif;font-size:22px}
+#app .chat-list{display:grid;gap:9px}
+#app .chat-item,#app .notification-item{border:1px solid var(--line);border-radius:17px;background:var(--card-bg);padding:13px 15px;transition:background .18s ease,border-color .18s ease}
+#app .chat-item:hover,#app .notification-item:hover{background:#FBF5F2;border-color:#E5D1D0}
+#app .profile-tabs{border-bottom:1px solid var(--line)}
+#app .profile-tab{transition:color .18s ease,border-color .18s ease}
+#app button:focus-visible,#app a:focus-visible,#app [role="button"]:focus-visible{outline:3px solid rgba(201,135,145,.48);outline-offset:3px}
+#app img{max-width:100%}
+@media(max-width:700px){
+ #app .home-section-intro h3{font-size:23px}
+ #app .home-section-intro{margin-bottom:13px}
+ #app .chat-list{gap:7px}
+}
+
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
      crossorigin="anonymous"></script>
@@ -1823,7 +1841,7 @@ body.theme-dark #app .home-overview-stat b{color:#E8B9C0}
     <i class="fa-solid fa-pen"></i>
   </div>
 
-  <nav class="nav">
+  <nav class="nav" aria-label="Navegação principal">
     <button data-page="feed" class="active" onclick="showPage('feed')"><i class="fa-solid fa-house"></i><span>Início</span></button>
     <button data-page="diary" onclick="showPage('diary')"><i class="fa-solid fa-book-open"></i><span>Diário</span></button>
     <button data-page="explore" onclick="showPage('explore')"><i class="fa-solid fa-compass"></i><span>Explorar</span></button>
@@ -2046,6 +2064,7 @@ body.theme-dark #app .home-overview-stat b{color:#E8B9C0}
   <!-- EXPLORAR -->
   <section id="explore" class="page">
     <div class="card">
+      <div class="home-section-intro"><span class="home-eyebrow">DESCUBRA NOVAS CONEXÕES</span><h3>Explore</h3><p>Encontre pessoas, ideias e publicações que inspiram você.</p></div>
       <div style="display:flex;gap:8px">
         <input id="searchPeople" placeholder="🔍 Buscar @usuário, nome ou posts..." oninput="queueExploreSearch()">
         <button class="secondary" onclick="clearRecentSearches()"><i class="fa-solid fa-trash-can"></i></button>
@@ -2071,7 +2090,7 @@ body.theme-dark #app .home-overview-stat b{color:#E8B9C0}
   <section id="messages" class="page">
     <div class="card">
       <div id="chatListView">
-        <h3 style="margin-top:0">Conversas</h3>
+        <div class="home-section-intro"><span class="home-eyebrow">CONEXÕES MAIS PRÓXIMAS</span><h3>Suas conversas</h3><p>Um cantinho para continuar boas conversas.</p></div>
         <div id="chatList" class="chat-list"></div>
       </div>
       <div id="chatRoomView" class="hidden">
@@ -2099,7 +2118,7 @@ body.theme-dark #app .home-overview-stat b{color:#E8B9C0}
   <!-- NOTIFICAÇÕES -->
   <section id="notifications" class="page">
     <div class="card">
-      <h3 style="margin-top:0;font-size:16px">Notificações 🤍</h3>
+      <div class="home-section-intro"><span class="home-eyebrow">NOVIDADES DO SEU ESPAÇO</span><h3>Notificações</h3><p>Veja quem interagiu com você e acompanhe suas novidades.</p></div>
       <div id="notifList"><p class="muted">Nenhuma notificação por enquanto.</p></div>
     </div>
   </section>
@@ -2932,7 +2951,7 @@ function showPage(id){
   $('app')?.classList.toggle('messages-mode',id==='messages');
   if(chatInterval){ clearInterval(chatInterval); chatInterval=null; }
   document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));
-  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
+  document.querySelectorAll('.nav button').forEach(x=>{const active=x.dataset.page===id;x.classList.toggle('active',active);if(active)x.setAttribute('aria-current','page');else x.removeAttribute('aria-current');});
   
   $('fabPostBtn').classList.toggle('hidden', !['diary','explore','notifications','profile'].includes(id));
   if(user)try{localStorage.setItem('cottontailActivePage',id);}catch(e){}
