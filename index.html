@@ -1455,6 +1455,46 @@ body.theme-dark #app .nav{background:color-mix(in srgb,var(--card-bg) 94%,transp
 }
 #app .profile-banner{background-color:#f5e8e8}
 
+
+/* Comunidade interativa: posts, mídia, comentários e ações */
+#app .community-detail-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+#app .community-detail-title{flex:1;min-width:100px}
+#app .community-leave-btn{flex:none;color:#a66f78!important}
+#app .community-composer-card{padding:14px;border:1px solid rgba(201,143,152,.2);background:linear-gradient(135deg,rgba(248,238,238,.72),var(--card-bg));border-radius:18px;margin:15px 0 20px}
+#app .community-compose{margin:0}
+#app .community-compose textarea{width:100%;resize:vertical;min-height:86px;background:var(--card-bg);border-radius:13px}
+#app .community-compose-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+#app .community-media-pick{display:inline-flex;align-items:center;gap:7px;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card-bg);color:var(--app-rose-deep);font-size:12px;font-weight:700;cursor:pointer}
+#app .community-compose-tools>span{flex:1;min-width:100px;font-size:10px;overflow-wrap:anywhere}
+#app .community-compose-tools>button{padding:10px 16px}
+#app .community-media-hint{margin:8px 0 0;font-size:10px;color:var(--muted)}
+#app .community-post{padding:18px 0}
+#app .community-post-head{display:flex;align-items:center;gap:10px}
+#app .community-post-avatar,#app .community-comment-avatar{width:36px;height:36px;flex:none;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:var(--app-blush);color:var(--app-rose-deep);font-weight:800;font-size:12px}
+#app .community-post-avatar img,#app .community-comment-avatar img{width:100%;height:100%;object-fit:cover}
+#app .community-post-by{flex:1;min-width:0}
+#app .community-post-by .community-post-author,#app .community-post-by .community-post-time{display:block;margin:0}
+#app .community-post-by .community-post-time{font-size:10px}
+#app .community-post-delete,#app .community-comment-delete{background:transparent!important;color:var(--muted)!important;padding:8px!important;border:0!important}
+#app .community-post-delete:hover,#app .community-comment-delete:hover{color:#bd6978!important;background:var(--app-blush)!important}
+#app .community-post-content{margin:12px 0}
+#app .community-post-media{display:block;width:100%;max-height:520px;object-fit:contain;background:var(--bg);border-radius:16px;margin:10px 0 14px}
+#app .community-comments{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+#app .community-comments-list{display:grid;gap:10px}
+#app .community-no-comments{font-size:11px}
+#app .community-comment{display:flex;align-items:flex-start;gap:8px}
+#app .community-comment-avatar{width:28px;height:28px;font-size:10px}
+#app .community-comment-body{flex:1;min-width:0;padding:8px 10px;background:var(--bg);border-radius:12px}
+#app .community-comment-body>div{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#app .community-comment-body b{font-size:11px}
+#app .community-comment-body span{font-size:9px;color:var(--muted)}
+#app .community-comment-body p{margin:4px 0 0;font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+#app .community-comment-delete{padding:5px!important}
+#app .community-comment-compose{display:flex;gap:8px;margin-top:12px}
+#app .community-comment-compose input{flex:1;min-width:0;margin:0!important;padding:10px 12px!important}
+#app .community-comment-compose button{width:40px;flex:none}
+@media(max-width:600px){#app .community-compose-tools{align-items:stretch}#app .community-compose-tools>button{width:100%}#app .community-detail-head{gap:8px}#app .community-leave-btn{padding:8px 10px}}
+
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
      crossorigin="anonymous"></script>
@@ -4056,24 +4096,94 @@ async function openCommunityDetail(id,fromLoad=false){
   const {data:posts,error:postsError}=await db.from('wellness_community_posts').select('*').eq('community_id',id).order('created_at',{ascending:false}).limit(60);
   if(postsError){box.innerHTML='<p class="muted">Não foi possível carregar as publicações deste grupo.</p>';return;}
   const ids=[...new Set((posts||[]).map(p=>p.user_id))];
-  const {data:authors}=ids.length?await db.from('user_profiles').select('user_id,full_name,username').in('user_id',ids):{data:[]};
+  const [{data:authors},{data:comments, error:commentsError}]=await Promise.all([
+    ids.length?db.from('user_profiles').select('user_id,full_name,username,avatar_url').in('user_id',ids):Promise.resolve({data:[]}),
+    (posts||[]).length?db.from('wellness_community_post_comments').select('*').in('post_id',posts.map(p=>p.id)).order('created_at',{ascending:true}):Promise.resolve({data:[],error:null})
+  ]);
   const authorMap={};(authors||[]).forEach(p=>authorMap[p.user_id]=p);
-  let html='<div class="community-detail-head"><button type="button" class="secondary" id="backCommunityList">← Voltar</button><div><b>'+esc(community.name)+'</b><div class="muted" style="font-size:11px">'+esc(community.category||'Bem-estar')+'</div></div></div><p class="muted">'+esc(community.description||'Um espaço para crescer junto.')+'</p><div class="community-compose"><input id="communityPostInput" maxlength="2000" placeholder="Compartilhe uma ideia ou pequena conquista..."><button type="button" id="sendCommunityPost">Publicar</button></div>';
+  const commentIds=[...new Set((comments||[]).map(c=>c.user_id))];
+  const {data:commentAuthors}=commentIds.length?await db.from('user_profiles').select('user_id,full_name,username,avatar_url').in('user_id',commentIds):{data:[]};
+  (commentAuthors||[]).forEach(p=>authorMap[p.user_id]=p);
+  const initials=name=>esc((name||'C').trim().slice(0,1).toUpperCase());
+  let html='<div class="community-detail-head"><button type="button" class="secondary" id="backCommunityList">← Voltar</button><div class="community-detail-title"><b>'+esc(community.name)+'</b><div class="muted" style="font-size:11px">'+esc(community.category||'Bem-estar')+'</div></div><button type="button" class="secondary community-leave-btn" id="leaveCommunityDetail"><i class="fa-solid fa-right-from-bracket"></i> Sair</button></div><p class="muted community-detail-description">'+esc(community.description||'Um espaço para crescer junto.')+'</p>';
+  html+='<div class="community-composer-card"><div class="community-compose"><textarea id="communityPostInput" maxlength="2000" rows="3" placeholder="Compartilhe uma ideia ou pequena conquista..."></textarea></div><div class="community-compose-tools"><label class="community-media-pick" for="communityPostMedia"><i class="fa-regular fa-image"></i> Foto ou vídeo</label><input id="communityPostMedia" type="file" accept="image/*,video/mp4,video/webm,video/quicktime" hidden><span id="communityMediaName" class="muted">Sem arquivo selecionado</span><button type="button" id="sendCommunityPost"><i class="fa-solid fa-paper-plane"></i> Publicar</button></div><p class="community-media-hint">Imagens até 10 MB e vídeos até 50 MB.</p></div>';
+  if(commentsError)html+='<div class="community-empty">Os comentários ainda precisam da atualização do banco de dados.</div>';
   if(!posts?.length)html+='<div class="community-empty">Ainda não há publicações. Comece a conversa com uma mensagem acolhedora. 🤍</div>';
-  (posts||[]).forEach(p=>{html+='<article class="community-post"><div><span class="community-post-author">'+esc(authorMap[p.user_id]?.full_name||'Pessoa')+'</span><span class="community-post-time">'+new Date(p.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+'</span></div><div class="community-post-content">'+esc(p.content)+'</div></article>';});
+  (posts||[]).forEach(p=>{
+    const author=authorMap[p.user_id]||{},name=author.full_name||author.username||'Pessoa';
+    const mediaUrl=p.media_url||'',mediaType=p.media_type||'';
+    let media='';
+    if(mediaUrl&&mediaType.startsWith('image/'))media='<img class="community-post-media" src="'+esc(mediaUrl)+'" alt="Imagem publicada na comunidade" loading="lazy">';
+    else if(mediaUrl&&mediaType.startsWith('video/'))media='<video class="community-post-media" src="'+esc(mediaUrl)+'" controls preload="metadata"></video>';
+    const postComments=(comments||[]).filter(c=>c.post_id===p.id);
+    html+='<article class="community-post" id="community-post-'+p.id+'"><div class="community-post-head"><div class="community-post-avatar">'+(author.avatar_url?'<img src="'+esc(author.avatar_url)+'" alt="">':initials(name))+'</div><div class="community-post-by"><span class="community-post-author">'+esc(name)+'</span><span class="community-post-time">'+new Date(p.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+'</span></div>'+(p.user_id===user.id?'<button type="button" class="community-post-delete" onclick="deleteCommunityPost(\''+p.id+'\')" aria-label="Apagar publicação" title="Apagar publicação"><i class="fa-regular fa-trash-can"></i></button>':'')+'</div><div class="community-post-content">'+esc(p.content)+'</div>'+media+'<div class="community-comments"><div class="community-comments-list" id="community-comments-'+p.id+'">';
+    if(!postComments.length)html+='<span class="muted community-no-comments">Seja a primeira pessoa a comentar 🤍</span>';
+    postComments.forEach(c=>{
+      const ca=authorMap[c.user_id]||{},cn=ca.full_name||ca.username||'Pessoa';
+      html+='<div class="community-comment"><div class="community-comment-avatar">'+(ca.avatar_url?'<img src="'+esc(ca.avatar_url)+'" alt="">':initials(cn))+'</div><div class="community-comment-body"><div><b>'+esc(cn)+'</b><span>'+new Date(c.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+'</span></div><p>'+esc(c.content)+'</p></div>'+(c.user_id===user.id?'<button type="button" class="community-comment-delete" onclick="deleteCommunityComment(\''+c.id+'\',\''+p.id+'\')" aria-label="Apagar comentário"><i class="fa-regular fa-trash-can"></i></button>':'')+'</div>';
+    });
+    html+='</div><div class="community-comment-compose"><input id="community-comment-input-'+p.id+'" maxlength="1000" placeholder="Escreva um comentário..."><button type="button" onclick="addCommunityComment(\''+p.id+'\')" aria-label="Enviar comentário"><i class="fa-solid fa-paper-plane"></i></button></div></div></article>';
+  });
   box.innerHTML=html;
   $('backCommunityList').onclick=()=>{activeCommunityId=null;loadCommunityHub();};
+  $('leaveCommunityDetail').onclick=()=>leaveCommunity(id);
   $('sendCommunityPost').onclick=()=>addCommunityPost(id);
-  $('communityPostInput').onkeydown=e=>{if(e.key==='Enter')addCommunityPost(id);};
+  $('communityPostInput').onkeydown=e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();addCommunityPost(id);}};
+  $('communityPostMedia').onchange=e=>{$('communityMediaName').textContent=e.target.files[0]?.name||'Sem arquivo selecionado';};
+  (comments||[]).forEach(c=>{const input=$('community-comment-input-'+c.post_id);if(input)input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();addCommunityComment(c.post_id);}};});
+  (posts||[]).forEach(p=>{const input=$('community-comment-input-'+p.id);if(input)input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();addCommunityComment(p.id);}};});
 }
 async function addCommunityPost(id){
-  const input=$('communityPostInput'),content=input?.value.trim();if(!content)return;
-  const {error}=await db.from('wellness_community_posts').insert({community_id:id,user_id:user.id,content});
-  if(error){showToast('Não foi possível publicar',error.message);return;}
-  const {data:members}=await db.from('wellness_community_members').select('user_id').eq('community_id',id).neq('user_id',user.id);
-  await Promise.all((members||[]).map(member=>createSmartNotification({user_id:member.user_id,actor_id:user.id,type:'community_post',community_id:id})));
-  await openCommunityDetail(id,true);
+  const input=$('communityPostInput'),file=$('communityPostMedia')?.files?.[0],content=input?.value.trim();
+  if(!content){showToast('Escreva uma legenda','Adicione um texto à sua publicação.');return;}
+  if(content.length>2000){showToast('Texto muito longo','O limite é de 2.000 caracteres.');return;}
+  if(file){
+    const allowed=file.type.startsWith('image/')||['video/mp4','video/webm','video/quicktime'].includes(file.type);
+    const limit=file.type.startsWith('video/')?50*1024*1024:10*1024*1024;
+    if(!allowed){showToast('Formato não permitido','Escolha uma imagem ou vídeo MP4, WebM ou MOV.');return;}
+    if(file.size>limit){showToast('Arquivo muito grande',file.type.startsWith('video/')?'O limite para vídeos é 50 MB.':'O limite para imagens é 10 MB.');return;}
+  }
+  const send=$('sendCommunityPost');send.disabled=true;send.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Enviando';
+  try{
+    let media_url=null,media_type=null;
+    if(file){
+      const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      const path=user.id+'/'+id+'/'+Date.now()+'-'+safeName;
+      const {error:uploadError}=await db.storage.from('community-media').upload(path,file,{upsert:false,contentType:file.type});
+      if(uploadError)throw new Error('Não foi possível enviar a mídia. Confira se a atualização de mídia foi aplicada no Supabase. '+uploadError.message);
+      const {data:urlData}=db.storage.from('community-media').getPublicUrl(path);
+      media_url=urlData.publicUrl;media_type=file.type;
+    }
+    const payload={community_id:id,user_id:user.id,content};
+    if(media_url){payload.media_url=media_url;payload.media_type=media_type;}
+    const {error}=await db.from('wellness_community_posts').insert(payload);
+    if(error)throw error;
+    const {data:members}=await db.from('wellness_community_members').select('user_id').eq('community_id',id).neq('user_id',user.id);
+    await Promise.all((members||[]).map(member=>createSmartNotification({user_id:member.user_id,actor_id:user.id,type:'community_post',community_id:id})));
+    showToast('Publicação enviada!','Sua comunidade já pode ver seu post. 🤍');await openCommunityDetail(id,true);
+  }catch(error){showToast('Não foi possível publicar',error.message||'Tente novamente.');send.disabled=false;send.innerHTML='<i class="fa-solid fa-paper-plane"></i> Publicar';}
 }
+async function addCommunityComment(postId){
+  const input=$('community-comment-input-'+postId),content=input?.value.trim();if(!content)return;
+  const {error}=await db.from('wellness_community_post_comments').insert({post_id:postId,user_id:user.id,content});
+  if(error){showToast('Não foi possível comentar','Confira se a atualização de comentários foi aplicada no Supabase. '+error.message);return;}
+  input.value='';showToast('Comentário enviado!','Sua resposta foi publicada. 💬');await openCommunityDetail(activeCommunityId,true);
+}
+async function deleteCommunityComment(commentId,postId){
+  const ok=await openAppActionModal({title:'Apagar comentário?',description:'Essa ação não pode ser desfeita.',confirmText:'Apagar comentário',icon:'fa-regular fa-trash-can',danger:true});
+  if(!ok)return;
+  const {error}=await db.from('wellness_community_post_comments').delete().eq('id',commentId).eq('user_id',user.id);
+  if(error){showToast('Não foi possível apagar',error.message);return;}
+  showToast('Comentário apagado','');await openCommunityDetail(activeCommunityId,true);
+}
+async function deleteCommunityPost(postId){
+  const ok=await openAppActionModal({title:'Apagar publicação?',description:'A publicação e seus comentários serão removidos. Essa ação não pode ser desfeita.',confirmText:'Apagar publicação',icon:'fa-regular fa-trash-can',danger:true});
+  if(!ok)return;
+  const {error}=await db.from('wellness_community_posts').delete().eq('id',postId).eq('user_id',user.id);
+  if(error){showToast('Não foi possível apagar',error.message);return;}
+  showToast('Publicação apagada','');await openCommunityDetail(activeCommunityId,true);
+}
+
 
 
 function renderWellbeingWelcomeCard(){
