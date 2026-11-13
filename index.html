@@ -2789,7 +2789,7 @@ function collectDiaryPayload(){
   return {
     breakfast:$('breakfast').value.trim(),lunch:$('lunch').value.trim(),
     snacks:$('snacks').value.trim(),dinner:$('dinner').value.trim(),
-    water_ml:$('water').value===''?null:Math.max(0,Number($('water').value)||0),
+    water_ml:$('water').value.trim()===''?0:Math.max(0,Math.floor(Number($('water').value)||0)),
     exercise:$('exercise').value.trim(),notes:storedNotes
   };
 }
@@ -2822,7 +2822,7 @@ async function saveEntry(){
     const hasMeta=Object.values(parsed.meta||{}).some(value=>value!==''&&value!==null&&value!==false);
     const hasContent=Boolean(
       values.breakfast||values.lunch||values.snacks||values.dinner||
-      values.water_ml!==null||values.exercise||parsed.notes||hasMeta
+      $('water').value.trim()!==''||values.exercise||parsed.notes||hasMeta
     );
 
     // Busca só um registro para evitar falha caso já existam linhas duplicadas antigas.
