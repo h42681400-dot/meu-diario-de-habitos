@@ -1700,6 +1700,23 @@ body.theme-dark #app .home-overview-stat b{color:#E8B9C0}
  #app .home-overview-stat span{font-size:10px}
 }
 
+
+/* Estados de carregamento e conteúdo vazio */
+#app .home-section-intro{margin:4px 0 16px}
+#app .home-section-intro h3{font-family:"Cormorant Garamond",Georgia,serif;font-size:25px;margin:5px 0 2px;color:var(--ink)}
+#app .home-section-intro p{font-size:12px;color:var(--muted);margin:0}
+#app .feed-loading-state,#app .feed-empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:9px;padding:34px 18px;color:var(--muted)}
+#app .feed-loading-state p{font-size:12px;margin:3px 0}
+#app .feed-loading-dot{width:7px;height:7px;border-radius:50%;background:var(--rose);display:inline-block;animation:ctPulse 1s infinite ease-in-out}
+#app .feed-loading-dot:nth-child(2){animation-delay:.15s}
+#app .feed-loading-dot:nth-child(3){animation-delay:.3s}
+@keyframes ctPulse{0%,80%,100%{opacity:.35;transform:translateY(0)}40%{opacity:1;transform:translateY(-5px)}}
+#app .feed-empty-state>i{font-size:27px;color:var(--rose)}
+#app .feed-empty-state>b{font-family:"Cormorant Garamond",Georgia,serif;font-size:23px;color:var(--ink)}
+#app .feed-empty-state>span{max-width:340px;font-size:12px;line-height:1.6}
+#app .feed-empty-state>button{margin-top:5px;background:#B87581;color:#fff;padding:10px 17px;border-radius:13px}
+@media(prefers-reduced-motion:reduce){#app .feed-loading-dot{animation:none}#app .page{animation:none}}
+
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
      crossorigin="anonymous"></script>
@@ -1845,6 +1862,7 @@ body.theme-dark #app .home-overview-stat b{color:#E8B9C0}
       <div id="homeOverviewMessage" class="home-overview-message">Seu progresso aparecerá aqui conforme você registra sua rotina.</div>
     </section>
     <div class="card">
+      <div class="home-section-intro"><span class="home-eyebrow">UM ESPAÇO PARA COMPARTILHAR</span><h3>Seu feed</h3><p>Ideias, descobertas e pequenos momentos da comunidade.</p></div>
       <div class="row" style="margin-bottom:14px;display:flex;gap:10px">
         <button class="secondary" onclick="loadFeed('all')">Todos</button>
         <button class="secondary" onclick="loadFeed('following')">Quem sigo</button>
@@ -3979,12 +3997,19 @@ async function loadProfileDataTab(tab){
 
 /* FEED & POSTS */
 async function loadFeed(mode='all'){
+  const feedTarget=$('feedList');
+  if(feedTarget){feedTarget.setAttribute('aria-busy','true');feedTarget.innerHTML='<div class="feed-loading-state"><span class="feed-loading-dot"></span><span class="feed-loading-dot"></span><span class="feed-loading-dot"></span><p>Preparando seu feed…</p></div>';}
   const [blockedResult,postsResult,followingResult,repostFeedResult]=await Promise.all([
     db.from('blocks').select('blocked_id').eq('blocker_id',user.id),
     db.from('posts').select('*').order('created_at',{ascending:false}).limit(50),
     mode==='following'?db.from('follows').select('following_id').eq('follower_id',user.id):Promise.resolve({data:[]}),
     db.from('post_reposts').select('post_id,user_id,comment_text,created_at').order('created_at',{ascending:false}).limit(50)
   ]);
+  if(blockedResult.error||postsResult.error||repostFeedResult.error){
+    console.warn('Não foi possível carregar o feed:',postsResult.error||blockedResult.error||repostFeedResult.error);
+    if(feedTarget){feedTarget.setAttribute('aria-busy','false');feedTarget.innerHTML='<div class="feed-empty-state"><i class="fa-solid fa-cloud-arrow-down"></i><b>Não conseguimos carregar o feed agora.</b><span>Confira sua conexão e tente novamente.</span><button type="button" class="secondary" onclick="loadFeed(\''+mode+'\')">Tentar novamente</button></div>';}
+    return;
+  }
   const blockedIds=(blockedResult.data||[]).map(b=>b.blocked_id);
   const followedIds=(followingResult.data||[]).map(x=>x.following_id);
   let rows=(postsResult.data||[]).filter(p=>!blockedIds.includes(p.user_id));
@@ -4022,10 +4047,13 @@ async function loadFeed(mode='all'){
   (likesResult.data||[]).forEach(x=>{likes[x.post_id]=(likes[x.post_id]||0)+1;if(x.user_id===user.id)mineLikes.add(x.post_id);});
   (repostsResult.data||[]).forEach(x=>{reposts[x.post_id]=(reposts[x.post_id]||0)+1;if(x.user_id===user.id)mineReposts.add(x.post_id);});
   (commentsResult.data||[]).forEach(x=>{commentCounts[x.post_id]=(commentCounts[x.post_id]||0)+1;});
-  $('feedList').innerHTML=feedItems.length?feedItems.map(item=>{
-    const p=item.post;
-    return renderPostHtml(p,profs[p.user_id]||{},true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),commentCounts[p.id]||0,reposts[p.id]||0,pinnedIds.has(p.id),item.repost?{...item.repost,profile:profs[item.repost.user_id]||{}}:null);
-  }).join(''):'<p class="muted">Nenhuma publicação por aqui.</p>';
+  if(feedTarget){
+    feedTarget.setAttribute('aria-busy','false');
+    feedTarget.innerHTML=feedItems.length?feedItems.map(item=>{
+      const p=item.post;
+      return renderPostHtml(p,profs[p.user_id]||{},true,likes[p.id]||0,mineLikes.has(p.id),mineReposts.has(p.id),commentCounts[p.id]||0,reposts[p.id]||0,pinnedIds.has(p.id),item.repost?{...item.repost,profile:profs[item.repost.user_id]||{}}:null);
+    }).join(''):'<div class="feed-empty-state"><i class="fa-regular fa-heart"></i><b>Seu feed está começando.</b><span>Encontre pessoas, siga perfis e compartilhe pequenos momentos da sua rotina.</span><button type="button" onclick="showPage(\'explore\')">Explorar pessoas</button></div>';
+  }
 }
 
 function renderPostHtml(p, author, interactive=true, likeCount=0, isLiked=false, isReposted=false, commentCount=0, repostCount=0, isPinned=false, repostMeta=null){
