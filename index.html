@@ -1735,6 +1735,49 @@ body.theme-dark #app .home-overview-stat b{color:#E8B9C0}
  #app .chat-list{gap:7px}
 }
 
+
+/* MOBILE APP COMFORT — navegação e respiro para telas pequenas */
+@media(max-width:767px){
+  #app.wrap{padding:16px 14px calc(116px + env(safe-area-inset-bottom))!important}
+  #app .top{gap:12px;padding:12px 2px 18px!important;margin-bottom:18px;align-items:center}
+  #app .brand{font-size:27px!important;line-height:1.05}
+  #app .music-bar{max-width:100%;gap:8px;padding:7px 10px;font-size:11px}
+  #app .music-bar button{padding:7px 9px;min-width:34px}
+  #app .page>.card{padding:20px 17px!important}
+  #app .home-section-intro{margin:5px 1px 20px}
+  #app .home-section-intro h3{font-size:29px;line-height:1.12;margin:5px 0 7px}
+  #app .home-section-intro p{font-size:13px;line-height:1.55;max-width:34em}
+  #app .nav{
+    left:0;right:0;bottom:0;transform:none;
+    width:100%;max-width:none;
+    display:grid;grid-template-columns:repeat(7,minmax(0,1fr));
+    gap:2px;padding:8px 5px calc(8px + env(safe-area-inset-bottom));
+    border-radius:18px 18px 0 0;border-left:0;border-right:0;border-bottom:0;
+    min-height:68px;
+  }
+  #app .nav button{
+    min-width:0;width:100%;min-height:52px;flex:initial;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+    gap:5px;padding:6px 1px;border-radius:12px;
+  }
+  #app .nav button i{font-size:18px;line-height:1}
+  #app .nav button span{display:block;font-size:9px;line-height:1.05;font-weight:600;white-space:nowrap;letter-spacing:-.2px}
+  #app .nav button.active{background:#F4E5E7;color:#754B55}
+  #app .badge-red{top:3px;right:calc(50% - 16px)}
+  #app .fab-post{bottom:calc(82px + env(safe-area-inset-bottom))!important;right:17px!important}
+}
+@media(max-width:390px){
+  #app .nav{padding-left:3px;padding-right:3px;gap:1px}
+  #app .nav button{gap:4px;padding-left:0;padding-right:0}
+  #app .nav button i{font-size:17px}
+  #app .nav button span{font-size:8px;letter-spacing:-.35px}
+  #app .music-bar-copy{display:none}
+  #app .music-bar{gap:6px;padding:6px 8px}
+}
+@media(min-width:768px){
+  #app .nav button span{font-size:11px}
+}
+
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
      crossorigin="anonymous"></script>
@@ -1845,12 +1888,12 @@ body.theme-dark #app .home-overview-stat b{color:#E8B9C0}
     <button data-page="feed" class="active" onclick="showPage('feed')"><i class="fa-solid fa-house"></i><span>Início</span></button>
     <button data-page="diary" onclick="showPage('diary')"><i class="fa-solid fa-book-open"></i><span>Diário</span></button>
     <button data-page="explore" onclick="showPage('explore')"><i class="fa-solid fa-compass"></i><span>Explorar</span></button>
-    <button data-page="community" onclick="showPage('community')"><i class="fa-solid fa-people-group"></i><span>Comunidade</span></button>
+    <button data-page="community" onclick="showPage('community')"><i class="fa-solid fa-people-group"></i><span>Comunid.</span></button>
     <button data-page="messages" onclick="showPage('messages')">
-      <i class="fa-solid fa-paper-plane"></i><span>Mensagens</span>
+      <i class="fa-solid fa-paper-plane"></i><span>Mensag.</span>
     </button>
     <button data-page="notifications" onclick="showPage('notifications')">
-      <i class="fa-solid fa-heart"></i><span>Notificações</span>
+      <i class="fa-solid fa-heart"></i><span>Avisos</span>
       <span id="notifBadge" class="badge-red hidden"></span>
     </button>
     <button data-page="profile" onclick="showPage('profile')"><i class="fa-solid fa-user"></i><span>Perfil</span></button>
