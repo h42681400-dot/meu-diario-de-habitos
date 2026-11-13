@@ -2999,7 +2999,7 @@ async function loadHomeOverview(){
     const {data,error}=await db.from('diary_entries').select('entry_date,exercise,water_ml,notes').eq('user_id',user.id).gte('entry_date',dateKey(start)).lte('entry_date',dateKey(today));
     if(error)throw error;
     const rows=(data||[]).filter(row=>typeof diaryRecordHasData==='function'?diaryRecordHasData(row):Boolean(row.exercise||Number(row.water_ml)||row.notes));
-    const movement=rows.filter(row=>Boolean(row.exercise)).length;
+    const movement=rows.filter(row=>Boolean(row.exercise)||Number((typeof diaryMetaFromRow==='function'?diaryMetaFromRow(row).meta:{}).movementMinutes)>0||Number((typeof diaryMetaFromRow==='function'?diaryMetaFromRow(row).meta:{}).steps)>0).length;
     const water=rows.map(row=>Number(row.water_ml)||0).filter(value=>value>0);
     const average=water.length?Math.round(water.reduce((sum,value)=>sum+value,0)/water.length):0;
     const waterLabel=average?(average>=1000?(average/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})+' L':average+' ml'):'—';
