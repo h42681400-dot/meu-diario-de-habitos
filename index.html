@@ -36,18 +36,18 @@ if(!window.supabase){
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Satisfy&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Satisfy&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
 <style>
 html.cottontail-native #androidDownloadCard{display:none!important;visibility:hidden!important;pointer-events:none!important}
 :root{
-  --bg:#faf7f6;
-  --card-bg:#ffffff;
-  --ink:#332928;
-  --muted:#8c7e7b;
-  --rose:#d4a5a5;
-  --rose-hover:#c39494;
-  --line:#f0eae9;
+  --bg:#F8F3F0;
+  --card-bg:#FFFFFF;
+  --ink:#352C2A;
+  --muted:#897B77;
+  --rose:#D69AA3;
+  --rose-hover:#C78590;
+  --line:#EDE3DF;
   --red:#ff4d4f;
   --bubble-me:#007aff;
   --bubble-me-text:#ffffff;
@@ -57,13 +57,13 @@ html.cottontail-native #androidDownloadCard{display:none!important;visibility:hi
 }
 
 body.theme-dark {
-  --bg:#1a1818;
-  --card-bg:#262323;
-  --ink:#f5ecea;
-  --muted:#a39592;
-  --rose:#d4a5a5;
-  --rose-hover:#c39494;
-  --line:#383332;
+  --bg:#211D1D;
+  --card-bg:#2C2626;
+  --ink:#F5ECE8;
+  --muted:#B6A5A0;
+  --rose:#D69AA3;
+  --rose-hover:#E2AEB5;
+  --line:#443838;
   --red:#ff4d4f;
   --bubble-me:#0a84ff;
   --bubble-me-text:#ffffff;
@@ -1494,6 +1494,76 @@ body.theme-dark #app .nav{background:color-mix(in srgb,var(--card-bg) 94%,transp
 #app .community-comment-compose input{flex:1;min-width:0;margin:0!important;padding:10px 12px!important}
 #app .community-comment-compose button{width:40px;flex:none}
 @media(max-width:600px){#app .community-compose-tools{align-items:stretch}#app .community-compose-tools>button{width:100%}#app .community-detail-head{gap:8px}#app .community-leave-btn{padding:8px 10px}}
+
+
+/* COTTONTAIL SOFT EDITORIAL — sistema visual refinado */
+#app{--app-rose:#D69AA3;--app-rose-deep:#79535B;--app-blush:#F7EDEF;--app-sage:#A7B4A0;--app-sage-soft:#EDF1EA;--app-shadow:0 10px 30px rgba(76,54,49,.055);--app-shadow-hover:0 16px 38px rgba(76,54,49,.09);font-family:"DM Sans",sans-serif!important;color:var(--ink)}
+#app *:not(i){font-family:"DM Sans",sans-serif}
+#app .brand,#app .diary-hero h2,#app .community-hero h2,#app .diary-feed-heading h3,#app .diary-weekly-heading h3{font-family:"Cormorant Garamond",Georgia,serif!important;font-weight:600;letter-spacing:-.025em}
+#app .brand{font-size:30px!important;color:var(--app-rose-deep)}
+#app .brand:before{content:"✿";font-family:"Cormorant Garamond",serif;color:var(--app-rose);font-size:21px}
+#app .top{border-color:var(--line);margin-bottom:24px}
+#app .page>.card,#app .card{border:1px solid rgba(121,83,91,.075);box-shadow:var(--app-shadow)}
+#app .page>.card{border-radius:22px}
+#app button{font-family:"DM Sans",sans-serif;letter-spacing:-.01em;transition:background .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+#app button:not(:disabled):hover{transform:translateY(-1px)}
+#app button:focus-visible,#app input:focus-visible,#app textarea:focus-visible,#app select:focus-visible,#app a:focus-visible{outline:3px solid rgba(214,154,163,.35);outline-offset:2px}
+#app input,#app textarea,#app select{border-color:var(--line);background:var(--bg);border-radius:13px;transition:border-color .18s ease,box-shadow .18s ease,background .18s ease}
+#app input:focus,#app textarea:focus,#app select:focus{border-color:var(--app-rose);box-shadow:0 0 0 3px rgba(214,154,163,.13)}
+#app .secondary{background:#F3ECE9;color:var(--app-rose-deep);border:1px solid #EDE1DE}
+#app .secondary:hover{background:var(--app-blush)}
+#app .nav{border:1px solid rgba(121,83,91,.09);box-shadow:0 9px 30px rgba(76,54,49,.075)}
+#app .nav button{color:var(--muted);font-weight:600}
+#app .nav button.active{background:var(--app-blush);color:var(--app-rose-deep)}
+#app .nav button.active:before{background:var(--app-rose)}
+#app .music-bar{border-color:rgba(121,83,91,.1);box-shadow:0 5px 18px rgba(76,54,49,.045)}
+#app .feed-create-button{border:1px solid rgba(214,154,163,.2)!important}
+#app .post{border:1px solid var(--line);border-radius:18px;padding:17px;margin:14px 0;background:var(--card-bg);box-shadow:0 5px 18px rgba(76,54,49,.035)}
+#app .post-media{border-radius:15px}
+#app .avatar{box-shadow:0 0 0 3px var(--card-bg),0 0 0 4px rgba(214,154,163,.25)}
+#app .profile-card{overflow:hidden;border-radius:24px}
+#app .profile-banner{border-radius:20px 20px 0 0}
+#app .profile-big-avatar{border:5px solid var(--card-bg);box-shadow:0 0 0 2px rgba(214,154,163,.4),0 8px 24px rgba(76,54,49,.12)}
+#app .profile-count-btn{background:var(--bg);border:1px solid var(--line);border-radius:14px}
+#app .profile-count-btn b{color:var(--app-rose-deep)}
+#app .community-hero{background:linear-gradient(118deg,#F7E9E9 0%,#F6F0EA 62%,#EEF1EA 100%)!important;border:1px solid rgba(214,154,163,.22);border-radius:22px}
+#app .community-tabs{border-radius:16px;border:1px solid var(--line);background:#F5EFEC}
+#app .community-tabs button.active{background:#fff;color:var(--app-rose-deep);box-shadow:0 4px 15px rgba(76,54,49,.07)}
+#app .diary-hero{background:linear-gradient(125deg,#F7E9E9 0%,#F8F1EC 65%,#EDF1EA 100%)!important;border:1px solid rgba(214,154,163,.22);border-radius:23px;padding:25px}
+#app .diary-hero h2{font-size:clamp(30px,4vw,43px);color:#493638;margin:12px 0 7px}
+#app .diary-subtitle{color:#796C68;line-height:1.7;max-width:680px}
+#app .diary-brand-chip{color:var(--app-rose-deep);letter-spacing:.12em;font-size:10px;font-weight:800}
+#app .diary-mood-box{background:rgba(255,255,255,.65);border:1px solid rgba(121,83,91,.08);border-radius:17px;padding:14px;margin-top:17px}
+#app .mood-option{background:#fff;color:var(--app-rose-deep);border:1px solid #EADBDD;border-radius:999px}
+#app .mood-option[aria-pressed="true"],#app .mood-option.active{background:var(--app-rose-deep);color:#fff;border-color:var(--app-rose-deep)}
+#app .diary-social-nav{gap:9px;margin:16px 0}
+#app .diary-social-nav button{background:var(--card-bg);border:1px solid var(--line);color:var(--app-rose-deep);border-radius:14px;box-shadow:0 3px 12px rgba(76,54,49,.035)}
+#app .diary-feed-heading h3,#app .diary-weekly-heading h3{font-size:25px;color:var(--app-rose-deep)}
+#app .diary-weekly-summary,#app .diary-calendar-card,#app .diary-editor-card{border-radius:20px;border:1px solid var(--line);box-shadow:var(--app-shadow)}
+#app .diary-panel{border:1px solid var(--line);border-radius:15px;background:var(--card-bg);margin:10px 0;overflow:hidden}
+#app .diary-panel summary{padding:15px 16px;font-weight:700}
+#app .diary-panel-content{padding:0 16px 16px}
+#app .diary-empty-timeline{background:var(--card-bg);border:1px dashed #DCC9C7;border-radius:16px;padding:24px;text-align:center;color:var(--muted)}
+#app .day{border-radius:11px}
+#app .day.selected{background:var(--app-rose-deep);color:#fff}
+#app .chat-list,#app .iphone-chat-header{border-radius:17px}
+#app .app-toast{border:1px solid var(--line);box-shadow:var(--app-shadow-hover);border-radius:15px}
+#app .fab-post{background:linear-gradient(145deg,#D69AA3,#B77F89);box-shadow:0 9px 25px rgba(183,127,137,.28)}
+#app .muted{color:var(--muted)}
+body.theme-dark #app{--app-rose:#D69AA3;--app-rose-deep:#E4B6BD;--app-blush:#3A2D31;--app-sage:#A7B4A0;--app-sage-soft:#30382F}
+body.theme-dark #app .secondary{background:#3A3030;color:#E7C5C9;border-color:#4B3B3D}
+body.theme-dark #app .community-hero,body.theme-dark #app .diary-hero{background:linear-gradient(125deg,#3B2D31 0%,#342E2B 65%,#2D352F 100%)!important;border-color:#514044}
+body.theme-dark #app .diary-hero h2{color:#F3E6E2}
+body.theme-dark #app .diary-subtitle{color:#C3B3AE}
+body.theme-dark #app .diary-mood-box{background:rgba(30,25,25,.55);border-color:#514044}
+body.theme-dark #app .diary-social-nav button{background:var(--card-bg);border-color:var(--line);color:#E4B6BD}
+body.theme-dark #app .community-tabs{background:#302929;border-color:#493B3B}
+body.theme-dark #app .community-tabs button.active{background:#49383D;color:#F1CDD2}
+body.theme-dark #app .diary-panel{background:var(--card-bg);border-color:var(--line)}
+body.theme-dark #app .diary-empty-timeline{background:var(--card-bg);border-color:#665052}
+body.theme-dark #app .mood-option{background:#342B2C;border-color:#594347;color:#E7C5C9}
+body.theme-dark #app .mood-option[aria-pressed="true"],body.theme-dark #app .mood-option.active{background:#A66F7A;color:#fff}
+@media(max-width:767px){#app .diary-hero{padding:19px}#app .diary-hero h2{font-size:32px}#app .page>.card{border-radius:19px}#app .diary-social-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}#app .diary-social-nav button:last-child{grid-column:1/-1}}
 
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
