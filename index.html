@@ -1909,6 +1909,59 @@ body.theme-dark #app .home-overview-stat b{color:#E8B9C0}
   }
 }
 
+
+/* Refinamento visual dos controles de mídia do chat */
+#messages .chat-attachment-tools{
+  display:flex!important;align-items:center!important;gap:8px!important;
+  margin:8px 5px 5px!important;padding:0!important;
+  border:0!important;background:transparent!important;
+}
+#messages .chat-tool-btn{
+  width:36px!important;height:36px!important;min-width:36px!important;
+  border:1px solid rgba(190,145,150,.22)!important;border-radius:13px!important;
+  background:var(--card-bg)!important;color:#b47d89!important;
+  box-shadow:0 2px 8px rgba(90,55,65,.045)!important;
+  font-size:14px!important;transition:all .18s ease!important;
+}
+#messages .chat-tool-btn:hover{transform:translateY(-2px);background:#f8eeee!important;border-color:#dfbdc3!important}
+#messages .chat-tool-btn.recording{background:#b85e70!important;color:#fff!important;border-color:#b85e70!important;border-radius:13px!important}
+#messages .audio-record-status{font-size:10px!important;letter-spacing:.1px!important;color:var(--muted)!important;margin-left:3px!important;opacity:.8}
+#messages .chat-composer{
+  display:flex!important;align-items:center!important;gap:8px!important;
+  padding:5px 6px 5px 15px!important;border:1px solid rgba(190,145,150,.23)!important;
+  border-radius:19px!important;background:var(--card-bg)!important;
+  box-shadow:0 5px 18px rgba(70,45,50,.055)!important;
+}
+#messages .chat-composer #messageInput{
+  flex:1!important;min-width:0!important;border:0!important;outline:0!important;
+  box-shadow:none!important;background:transparent!important;padding:10px 0!important;
+  font-size:13px!important;
+}
+#messages .chat-composer>button{
+  width:40px!important;height:40px!important;min-width:40px!important;
+  border:0!important;border-radius:14px!important;padding:0!important;
+  display:grid!important;place-items:center!important;
+  background:linear-gradient(145deg,#d7a7b1,#bd8290)!important;color:#fff!important;
+  box-shadow:0 4px 10px rgba(180,115,132,.2)!important;
+}
+#messages .message-reactions{display:flex!important;align-items:center!important;gap:5px!important;margin-top:6px!important;min-height:0!important}
+#messages .message-reaction,#messages .reaction-add{
+  min-height:25px!important;padding:2px 8px!important;border-radius:12px!important;
+  border:1px solid rgba(190,145,150,.22)!important;background:rgba(255,255,255,.78)!important;
+  color:#8d6871!important;font-size:11px!important;line-height:1.2!important;
+  box-shadow:0 1px 4px rgba(70,45,50,.04)!important;
+}
+#messages .message-reaction.mine{background:#f4e3e7!important;border-color:#d8aeb8!important;color:#925e6c!important}
+#messages .reaction-add{width:26px!important;min-width:26px!important;padding:0!important;border-style:solid!important;opacity:.72}
+#messages .bubble.mine .message-reaction,#messages .bubble.mine .reaction-add{background:rgba(255,255,255,.88)!important;color:#946a74!important;border-color:rgba(255,255,255,.5)!important}
+#messages .chat-audio-player{width:min(250px,65vw)!important;height:36px!important;border-radius:20px!important}
+#messages .chat-media-image{border-radius:15px!important;box-shadow:0 4px 14px rgba(50,30,35,.12)!important}
+@media(max-width:600px){
+ #messages .audio-record-status{font-size:9px!important}
+ #messages .chat-tool-btn{width:34px!important;height:34px!important;min-width:34px!important}
+ #messages .chat-composer{border-radius:17px!important}
+}
+
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
      crossorigin="anonymous"></script>
