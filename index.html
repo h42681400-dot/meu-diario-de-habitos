@@ -1963,48 +1963,126 @@ body.theme-dark #app .home-overview-stat b{color:#E8B9C0}
 }
 
 
-/* Cottontail • chat refinado — regras consolidadas */
-#messages>.card{background:linear-gradient(180deg,#fffdfc,#fbf7f5)!important;border:1px solid #eadcda!important;border-radius:27px!important;box-shadow:0 16px 44px #5c3d4310!important}
-#messages .messages-hero{padding:23px 26px!important;margin-bottom:20px!important;border:1px solid #f0e2e1!important;border-radius:22px!important;background:linear-gradient(115deg,#f8ebed,#fbf4f0 58%,#f3efeb)!important}
-#messages .messages-eyebrow{letter-spacing:1.8px!important;font-size:9px!important;color:#a47780!important}
-#messages .messages-hero h2{font-family:Georgia,serif!important;font-size:clamp(28px,3.5vw,36px)!important;color:#654b50!important}
-#messages .messages-hero p{font-size:12px!important;color:#927d7c!important}
-#messages .messages-hero-icon{width:56px!important;height:56px!important;border:1px solid #fff!important;border-radius:18px!important;background:#ffffff9c!important;color:#b77f8c!important}
-#messages .chat-search{height:48px!important;border-radius:15px!important;background:#fff!important;border:1px solid #eee3e1!important}
-#messages .chat-list-caption{font-size:9px!important;letter-spacing:1.6px!important;margin:18px 5px 9px!important}
-#messages .iphone-chat-list-item{padding:14px 12px!important;margin:3px 0!important;border:1px solid transparent!important;border-radius:17px!important}
-#messages .iphone-chat-list-item:hover{background:#fff!important;border-color:#f0e4e3!important;box-shadow:0 5px 16px #57373d0b!important}
-#messages .chat-list-avatar-wrap .avatar{width:52px!important;height:52px!important;border:2px solid #fff!important;box-shadow:0 0 0 1px #ead9dc,0 4px 12px #50323712!important}
-#messages .chat-list-copy>b{font-size:13px!important;font-weight:700!important}#messages .chat-list-preview{font-size:11px!important;color:#9a8988!important}
-#messages #chatRoomView:not(.hidden){display:flex!important;flex-direction:column!important;gap:0!important;width:100%!important;min-height:0!important;height:auto!important;flex:0 0 auto!important;overflow:visible!important;padding:20px!important;border:1px solid #efe4e1!important;border-radius:24px!important;background:linear-gradient(180deg,#fffefd,#fffaf8)!important;box-shadow:0 10px 30px #4f34390b!important}
-#messages .iphone-chat-header{display:flex!important;align-items:center!important;gap:12px!important;min-height:66px!important;padding:0 0 14px!important;margin:0 0 14px!important;border:0!important;border-bottom:1px solid #f1e7e5!important;border-radius:0!important;background:transparent!important}
-#messages .iphone-chat-header>button{display:grid!important;place-items:center!important;width:42px!important;height:42px!important;min-width:42px!important;padding:0!important;border:1px solid #f0e3e2!important;border-radius:13px!important;background:#fff!important;color:#b77f8c!important;box-shadow:0 3px 10px #4b30350a!important}
-#messages .iphone-chat-person{display:flex!important;align-items:center!important;gap:11px!important;min-width:0!important}
-#messages #chatHeaderAvatar{width:48px!important;height:48px!important;border:2px solid #fff!important;box-shadow:0 0 0 1px #e9d5da,0 4px 12px #462d3218!important}
-#messages #chatTitle{font-size:14px!important;font-weight:700!important;color:#493b3e!important}#messages .chat-presence{font-size:10px!important;color:#a18c8c!important}#messages .chat-header-spacer{flex:1!important}
-#messages #messageBox.messages{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:12px!important;flex:0 0 auto!important;width:100%!important;height:clamp(340px,48vh,500px)!important;min-height:340px!important;max-height:500px!important;margin:0!important;padding:22px!important;overflow-y:auto!important;overscroll-behavior:contain!important;border:1px solid #f0e6e2!important;border-radius:20px!important;background-color:#faf6f3!important;background-image:radial-gradient(#c1919613 .7px,transparent .7px)!important;background-size:20px 20px!important;box-shadow:inset 0 2px 8px #5a3d4106!important}
-#messages #messageBox .chat-date-divider{align-self:center!important;margin:2px auto 8px!important;padding:6px 13px!important;border-radius:20px!important;background:#f4e8e7!important;color:#a17d82!important;font-size:10px!important;font-weight:650!important}
-#messages #messageBox .bubble{position:relative!important;align-self:flex-start!important;width:fit-content!important;min-width:108px!important;max-width:min(76%,460px)!important;padding:12px 14px 9px!important;border-radius:18px!important;font-size:13px!important;line-height:1.5!important;overflow-wrap:anywhere!important;box-shadow:0 4px 13px #4a30340e!important}
-#messages #messageBox .bubble.mine{align-self:flex-end!important;margin-left:auto!important;padding-right:14px!important;background:linear-gradient(145deg,#d8a6b2,#c58b9a)!important;color:#fff!important;border:1px solid #ffffff40!important;border-bottom-right-radius:6px!important}
-#messages #messageBox .bubble.other{background:#fff!important;color:#514447!important;border:1px solid #efe5e2!important;border-bottom-left-radius:6px!important}
-#messages #messageBox .bubble-time{display:block!important;margin-top:7px!important;font-size:9px!important;opacity:.76!important}
-#messages #messageBox .message-options-btn{font-size:17px!important;line-height:1!important;opacity:.72!important}
+/* Cottontail • redesign do chat — composição limpa */
+#messages.page.active{padding-top:18px!important}
+#messages.page.active>.card{
+  width:min(100%,1240px)!important;max-width:1240px!important;margin:0 auto!important;
+  padding:22px!important;border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;
+}
+#messages .messages-hero{display:none!important}
+#messages .chat-search,#messages .chat-list-caption,#messages #chatList{max-width:940px!important;margin-left:auto!important;margin-right:auto!important}
+#messages #chatRoomView:not(.hidden){
+  display:flex!important;flex-direction:column!important;gap:0!important;
+  width:min(100%,1040px)!important;max-width:1040px!important;min-height:0!important;
+  height:auto!important;flex:0 0 auto!important;margin:8px auto 22px!important;padding:0!important;
+  overflow:visible!important;border:1px solid #eadfdd!important;border-radius:24px!important;
+  background:#fffdfc!important;box-shadow:0 14px 42px rgba(76,49,55,.075)!important;
+}
+#messages .iphone-chat-header{
+  display:flex!important;align-items:center!important;gap:13px!important;min-height:82px!important;
+  padding:14px 20px!important;margin:0!important;border:0!important;border-bottom:1px solid #f1e8e6!important;
+  border-radius:24px 24px 0 0!important;background:#fffdfc!important;
+}
+#messages .iphone-chat-header>button{
+  display:grid!important;place-items:center!important;width:40px!important;height:40px!important;min-width:40px!important;
+  padding:0!important;border:1px solid #eee3e1!important;border-radius:13px!important;
+  background:#fff!important;color:#ad7c86!important;box-shadow:none!important;
+}
+#messages .iphone-chat-header>button:hover{background:#fbf1f2!important}
+#messages .iphone-chat-person{display:flex!important;align-items:center!important;gap:12px!important;min-width:0!important}
+#messages #chatHeaderAvatar{width:48px!important;height:48px!important;border:2px solid white!important;box-shadow:0 0 0 1px #ead7db!important}
+#messages #chatTitle{margin:0!important;font-size:14px!important;font-weight:700!important;letter-spacing:-.2px!important;color:#493b3e!important}
+#messages .chat-presence{margin-top:4px!important;font-size:10px!important;color:#a18b8d!important}
+#messages .chat-header-spacer{flex:1!important}
+#messages #messageBox.messages{
+  display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:15px!important;
+  flex:0 0 auto!important;width:auto!important;height:clamp(420px,54vh,560px)!important;
+  min-height:420px!important;max-height:560px!important;margin:0!important;padding:28px clamp(18px,4vw,48px)!important;
+  overflow-y:auto!important;overscroll-behavior:contain!important;
+  border:0!important;border-radius:0!important;background:#fbf8f6!important;
+  background-image:linear-gradient(rgba(255,255,255,.38) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.38) 1px,transparent 1px)!important;
+  background-size:28px 28px!important;box-shadow:none!important;
+}
+#messages #messageBox .chat-date-divider{align-self:center!important;margin:0 auto 10px!important;padding:6px 13px!important;border-radius:20px!important;background:#f2e8e7!important;color:#a17d82!important;font-size:10px!important;font-weight:650!important}
+#messages #messageBox .bubble{
+  position:relative!important;align-self:flex-start!important;width:fit-content!important;
+  min-width:0!important;max-width:min(72%,520px)!important;padding:12px 16px 10px!important;
+  border-radius:18px!important;font-size:14px!important;line-height:1.5!important;
+  overflow-wrap:anywhere!important;box-shadow:0 2px 8px rgba(65,43,47,.055)!important;
+}
+#messages #messageBox .bubble>div:first-of-type{min-width:0!important;padding-right:0!important}
+#messages #messageBox .bubble.mine{
+  align-self:flex-end!important;margin-left:auto!important;padding-right:16px!important;
+  background:#c98f9e!important;color:#fff!important;border:0!important;border-bottom-right-radius:5px!important;
+}
+#messages #messageBox .bubble.other{
+  background:#fff!important;color:#514447!important;border:1px solid #eee5e2!important;border-bottom-left-radius:5px!important;
+}
+#messages #messageBox .message-options-btn{
+  top:4px!important;right:5px!important;padding:0 4px!important;font-size:15px!important;
+  opacity:0!important;transition:opacity .15s ease!important;
+}
+#messages #messageBox .bubble:hover .message-options-btn,
+#messages #messageBox .message-options-btn:focus-visible{opacity:.72!important}
+#messages #messageBox .bubble.mine:has(.message-options-btn){padding-right:28px!important}
+#messages #messageBox .bubble-time{display:flex!important;justify-content:flex-end!important;align-items:center!important;gap:4px!important;margin-top:7px!important;font-size:9px!important;opacity:.76!important}
 #messages #messageBox .message-reactions{display:flex!important;align-items:center!important;flex-wrap:wrap!important;gap:5px!important;margin-top:7px!important;min-height:0!important}
-#messages .message-reaction,#messages .reaction-add{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-height:25px!important;padding:3px 8px!important;border-radius:13px!important;border:1px solid #eadcde!important;background:#fff!important;color:#9d7480!important;font-size:11px!important;box-shadow:0 2px 7px #462d320b!important}
-#messages .bubble.mine .message-reaction,#messages .bubble.mine .reaction-add{background:#fff!important;color:#946a74!important;border-color:#ffffffa6!important}
-#messages .message-reaction.mine{background:#f4e3e7!important;border-color:#d8aeb8!important;color:#925e6c!important}
-#messages .chat-audio-player{width:min(250px,65vw)!important;height:36px!important}#messages .chat-media-image{max-width:min(260px,60vw)!important;max-height:260px!important;object-fit:cover!important;border-radius:14px!important}
-#messages #chatRoomView .chat-composer,#messages #chatRoomView .chat-composer[style]{display:flex!important;visibility:visible!important;opacity:1!important;flex:0 0 auto!important;flex-wrap:nowrap!important;align-items:center!important;gap:8px!important;width:100%!important;min-height:62px!important;margin:14px 0 3px!important;padding:8px 9px 8px 11px!important;border:1px solid #ecdfde!important;border-radius:20px!important;background:#fff!important;box-shadow:0 5px 18px #4c30360d!important;position:relative!important;z-index:5!important}
-#messages #chatRoomView .chat-attachment-tools{display:flex!important;align-items:center!important;gap:6px!important;flex:0 0 auto!important;margin:0!important;padding:0!important}
-#messages #chatRoomView .chat-composer .chat-tool-btn{display:grid!important;place-items:center!important;flex:0 0 38px!important;width:38px!important;height:38px!important;min-width:38px!important;padding:0!important;border:1px solid #f0dfe3!important;border-radius:13px!important;background:linear-gradient(145deg,#d9a5b1,#c88798)!important;color:#fff!important;box-shadow:0 3px 9px #be788c29!important}
-#messages #chatRoomView .chat-composer .chat-tool-btn.recording{background:#a95d70!important}
-#messages #chatRoomView .chat-composer #messageInput{display:block!important;visibility:visible!important;opacity:1!important;flex:1 1 auto!important;width:auto!important;min-width:0!important;height:42px!important;min-height:42px!important;margin:0!important;padding:0 7px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:#514447!important;font-size:13px!important}
+#messages .message-reaction,#messages .reaction-add{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;min-height:24px!important;
+  padding:2px 8px!important;border:1px solid #eadcde!important;border-radius:12px!important;
+  background:#fff!important;color:#946f79!important;font-size:11px!important;box-shadow:none!important;
+}
+#messages .bubble.mine .message-reaction,#messages .bubble.mine .reaction-add{background:#fff!important;color:#946f79!important;border-color:#ffffffa8!important}
+#messages .reaction-add{width:25px!important;min-width:25px!important;padding:0!important;font-size:12px!important;opacity:.8!important}
+#messages .chat-audio-player{display:block!important;width:min(280px,60vw)!important;height:38px!important}
+#messages .chat-media-image{display:block!important;max-width:min(280px,60vw)!important;max-height:280px!important;object-fit:cover!important;border-radius:13px!important}
+#messages #chatRoomView .chat-composer,#messages #chatRoomView .chat-composer[style]{
+  display:flex!important;visibility:visible!important;opacity:1!important;flex:0 0 auto!important;
+  flex-wrap:nowrap!important;align-items:center!important;gap:9px!important;width:auto!important;
+  min-height:72px!important;margin:0!important;padding:12px 18px!important;
+  border:0!important;border-top:1px solid #f0e7e5!important;border-radius:0!important;
+  background:#fffdfc!important;box-shadow:none!important;position:relative!important;z-index:5!important;
+}
+#messages #chatRoomView .chat-attachment-tools{display:flex!important;align-items:center!important;gap:7px!important;flex:0 0 auto!important;margin:0!important;padding:0!important}
+#messages #chatRoomView .chat-composer .chat-tool-btn{
+  display:grid!important;place-items:center!important;flex:0 0 38px!important;width:38px!important;height:38px!important;min-width:38px!important;
+  padding:0!important;border:1px solid #f0e4e4!important;border-radius:13px!important;
+  background:#fbf2f3!important;color:#b47d89!important;box-shadow:none!important;
+}
+#messages #chatRoomView .chat-composer .chat-tool-btn:hover{background:#f5e7e9!important}
+#messages #chatRoomView .chat-composer #messageInput{
+  display:block!important;visibility:visible!important;opacity:1!important;flex:1 1 auto!important;width:auto!important;min-width:0!important;
+  height:44px!important;min-height:44px!important;margin:0!important;padding:0 10px!important;
+  border:0!important;border-radius:12px!important;background:#faf7f6!important;box-shadow:none!important;
+  color:#514447!important;font-size:13px!important;
+}
 #messages #chatRoomView .chat-composer #messageInput::placeholder{color:#b3a2a1!important}
-#messages #chatRoomView .chat-composer .chat-send-btn{display:grid!important;visibility:visible!important;place-items:center!important;flex:0 0 44px!important;width:44px!important;min-width:44px!important;height:44px!important;padding:0!important;border:0!important;border-radius:15px!important;background:linear-gradient(145deg,#d7a5b0,#bd7e8e)!important;color:#fff!important;box-shadow:0 5px 13px #b8758738!important}
-#messages #chatRoomView .chat-composer .chat-send-btn:hover{filter:brightness(.97);transform:translateY(-1px)}
-#messages #chatRoomView .audio-record-status{display:block!important;margin:5px 5px 0!important;font-size:10px!important;color:#aa9695!important}#messages #chatRoomView #messageStatus{display:block!important;margin:3px 5px 0!important}
-body.theme-dark #messages>.card{background:#242126!important;border-color:#3d343b!important}body.theme-dark #messages #chatRoomView:not(.hidden){background:#262329!important;border-color:#413840!important}body.theme-dark #messages .iphone-chat-header{border-color:#40373e!important}body.theme-dark #messages #chatTitle{color:#f3e9ec!important}body.theme-dark #messages #messageBox.messages{background-color:#201e23!important;border-color:#40373e!important}body.theme-dark #messages #messageBox .bubble.other{background:#343039!important;border-color:#49404a!important;color:#f4eaed!important}body.theme-dark #messages #chatRoomView .chat-composer{background:#302c33!important;border-color:#49404a!important}body.theme-dark #messages #chatRoomView .chat-composer #messageInput{color:#f5edf0!important}
-@media(max-width:700px){#messages>.card{padding:12px!important;border-radius:21px!important}#messages #chatRoomView:not(.hidden){padding:12px!important;border-radius:19px!important}#messages #messageBox.messages{height:clamp(300px,48vh,430px)!important;min-height:300px!important;padding:14px 11px!important}#messages #messageBox .bubble{max-width:88%!important;font-size:13px!important}#messages #chatRoomView .chat-composer{gap:5px!important;min-height:56px!important;padding:6px!important;border-radius:17px!important}#messages #chatRoomView .chat-composer .chat-tool-btn{flex-basis:34px!important;width:34px!important;height:34px!important;min-width:34px!important}#messages #chatRoomView .chat-composer .chat-send-btn{flex-basis:40px!important;width:40px!important;height:40px!important;min-width:40px!important}}
+#messages #chatRoomView .chat-composer .chat-send-btn{
+  display:grid!important;visibility:visible!important;place-items:center!important;flex:0 0 44px!important;
+  width:44px!important;min-width:44px!important;height:44px!important;padding:0!important;border:0!important;border-radius:14px!important;
+  background:#c98f9e!important;color:#fff!important;box-shadow:none!important;
+}
+#messages #chatRoomView .chat-composer .chat-send-btn:hover{background:#b97889!important}
+#messages #chatRoomView .audio-record-status{display:block!important;margin:0!important;padding:0 20px 10px!important;background:#fffdfc!important;font-size:10px!important;color:#aa9695!important}
+#messages #chatRoomView #messageStatus{display:block!important;margin:0!important;padding:0 20px 10px!important;background:#fffdfc!important}
+body.theme-dark #messages #chatRoomView:not(.hidden){background:#262329!important;border-color:#413840!important}
+body.theme-dark #messages .iphone-chat-header,body.theme-dark #messages #chatRoomView .chat-composer,body.theme-dark #messages #chatRoomView .audio-record-status,body.theme-dark #messages #chatRoomView #messageStatus{background:#262329!important;border-color:#413840!important}
+body.theme-dark #messages #chatTitle{color:#f3e9ec!important}
+body.theme-dark #messages #messageBox.messages{background:#201e23!important;background-image:none!important}
+body.theme-dark #messages #messageBox .bubble.other{background:#343039!important;border-color:#49404a!important;color:#f4eaed!important}
+body.theme-dark #messages #chatRoomView .chat-composer #messageInput{background:#302c33!important;color:#f5edf0!important}
+body.theme-dark #messages #chatRoomView .chat-composer .chat-tool-btn{background:#393139!important;border-color:#51434a!important}
+@media(max-width:700px){
+  #messages.page.active>.card{padding:10px!important}
+  #messages #chatRoomView:not(.hidden){width:100%!important;margin:0 auto!important;border-radius:18px!important}
+  #messages .iphone-chat-header{min-height:70px!important;padding:10px 12px!important;border-radius:18px 18px 0 0!important}
+  #messages #messageBox.messages{height:clamp(360px,52vh,500px)!important;min-height:360px!important;padding:18px 12px!important}
+  #messages #messageBox .bubble{max-width:86%!important;font-size:13px!important}
+  #messages #chatRoomView .chat-composer{gap:6px!important;padding:9px!important}
+  #messages #chatRoomView .chat-composer .chat-tool-btn{flex-basis:34px!important;width:34px!important;height:34px!important;min-width:34px!important}
+  #messages #chatRoomView .chat-composer .chat-send-btn{flex-basis:40px!important;width:40px!important;height:40px!important;min-width:40px!important}
+}
 
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
