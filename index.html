@@ -793,6 +793,64 @@ body.theme-dark #messageBox .bubble.other{background:#303036;color:#f7eff2;borde
 #messageStatus{min-height:0;margin:4px 8px}
 @media(max-width:600px){#chatRoomView{padding:10px;border-radius:18px}#messageBox.messages{height:55vh;min-height:260px;padding:12px 9px}#messageBox .bubble{max-width:88%;font-size:13px}.feed-create-button{min-width:175px}}
 
+
+/* Cottontail Messages — redesign visual da caixa de entrada e da conversa */
+#messages>.card{padding:clamp(16px,2.5vw,28px);border-radius:26px;overflow:hidden}
+#messages .messages-hero{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px 24px;margin:0 0 18px;border:1px solid rgba(201,143,152,.2);border-radius:23px;background:radial-gradient(circle at 88% 10%,rgba(255,255,255,.8),transparent 28%),linear-gradient(125deg,#f8e9e9 0%,#f8f1e9 58%,#edf1e9 100%);color:#684d52}
+#messages .messages-eyebrow{font-size:10px;font-weight:800;letter-spacing:1.6px;color:#a36e79}
+#messages .messages-hero h2{font-family:Georgia,serif;font-size:clamp(27px,4vw,36px);font-weight:500;letter-spacing:-.8px;margin:8px 0 4px;color:#694d53}
+#messages .messages-hero h2 span{color:#c58c9a}
+#messages .messages-hero p{font-size:13px;margin:0;color:#8b7776}
+#messages .messages-hero-icon{width:58px;height:58px;flex:none;display:grid;place-items:center;border-radius:19px;background:rgba(255,255,255,.62);color:#bd8290;font-size:23px;box-shadow:0 5px 16px rgba(130,91,96,.07)}
+#messages .chat-search{display:flex;align-items:center;gap:11px;padding:0 15px;height:48px;border:1px solid var(--line);border-radius:15px;background:var(--bg);color:var(--muted);margin:0 0 22px;transition:border-color .2s,box-shadow .2s}
+#messages .chat-search:focus-within{border-color:var(--rose);box-shadow:0 0 0 3px rgba(212,165,165,.13)}
+#messages .chat-search>i{font-size:14px;color:var(--rose)}
+#messages .chat-search input{flex:1;min-width:0;margin:0!important;padding:10px 0!important;border:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;color:var(--ink);font:inherit;font-size:13px!important}
+#messages .chat-search kbd{font-size:10px;color:var(--muted);opacity:.65}
+#messages .chat-list-caption{display:flex;justify-content:space-between;align-items:center;margin:0 4px 8px;font-size:10px;letter-spacing:1.2px;font-weight:800;color:var(--muted)}
+#messages .iphone-chat-list-item{padding:14px 9px;border:1px solid transparent;border-bottom-color:var(--line);border-radius:15px;transition:background .18s,border-color .18s,transform .18s}
+#messages .iphone-chat-list-item:hover{background:var(--bg);border-color:var(--line);transform:translateY(-1px)}
+#messages .chat-list-avatar-wrap .avatar{width:52px;height:52px;border:2px solid var(--card-bg);box-shadow:0 2px 9px rgba(80,50,55,.1)}
+#messages .chat-list-copy>b{font-size:14px;color:var(--ink);letter-spacing:-.15px}
+#messages .chat-list-copy>.muted{font-size:10px;margin-top:2px}
+#messages .chat-list-preview{font-size:12px;margin-top:5px;max-width:100%}
+#messages .chat-list-state{padding-left:7px}
+#messages #chatRoomView{padding:clamp(12px,2vw,22px);border-radius:24px;background:var(--card-bg);box-shadow:0 12px 34px rgba(55,35,40,.055)}
+#messages .iphone-chat-header{padding:4px 2px 16px;margin-bottom:14px}
+#messages .iphone-chat-header>button{width:38px;height:38px;min-width:38px;border-radius:13px;background:var(--bg);border:1px solid var(--line);color:var(--rose);transition:background .2s,transform .2s}
+#messages .iphone-chat-header>button:hover{background:rgba(212,165,165,.16);transform:translateY(-1px)}
+#messages #chatHeaderAvatar{width:48px!important;height:48px!important}
+#messages #chatTitle{font-family:Inter,-apple-system,sans-serif;font-size:15px!important;font-weight:750}
+#messages .chat-presence{font-size:11px}
+#messages #messageBox.messages{height:min(60vh,620px);min-height:320px;padding:20px 16px;gap:12px;background-color:#faf5f2;background-image:radial-gradient(rgba(193,145,150,.12) .7px,transparent .7px);background-size:17px 17px;border:1px solid rgba(201,143,152,.12);border-radius:19px}
+body.theme-dark #messages #messageBox.messages{background-color:#202024;background-image:radial-gradient(rgba(220,180,190,.08) .7px,transparent .7px);border-color:#39343a}
+#messages #messageBox .bubble{max-width:min(78%,460px);padding:11px 14px 8px;border-radius:18px;font-size:13px;line-height:1.55;box-shadow:0 3px 10px rgba(55,35,40,.055)}
+#messages #messageBox .bubble.mine{background:linear-gradient(135deg,#d9aab5,#bf8291);border-bottom-right-radius:6px;color:#fff}
+#messages #messageBox .bubble.other{background:#fffdfc;border:1px solid #eee3df;border-bottom-left-radius:6px;color:#514447}
+body.theme-dark #messages #messageBox .bubble.other{background:#303036;border-color:#414149;color:#f7eff2}
+#messages #messageBox .bubble-time{font-size:9px;letter-spacing:.1px;margin-top:6px}
+#messages #chatRoomView>div:nth-of-type(3){display:flex;align-items:center;gap:7px!important;margin:11px 2px 9px!important}
+#messages #chatRoomView>div:nth-of-type(3) button{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--line);background:var(--bg);border-radius:50%;padding:0!important;font-size:14px!important;transition:transform .18s,background .18s}
+#messages #chatRoomView>div:nth-of-type(3) button:hover{transform:translateY(-2px);background:rgba(212,165,165,.16)}
+#messages #chatRoomView .row{gap:8px;padding:6px 7px 6px 14px;background:var(--bg);border:1px solid var(--line);border-radius:25px;box-shadow:0 4px 14px rgba(70,45,50,.04)}
+#messages #chatRoomView #messageInput{font-size:13px!important;min-height:40px}
+#messages #chatRoomView .row button{width:42px;height:42px;min-width:42px;background:linear-gradient(135deg,#d5a2ad,#bd7e8d);color:#fff;box-shadow:0 4px 12px rgba(190,120,140,.23)}
+#messages #messageStatus{font-size:11px}
+#messages .chat-empty-state{text-align:center;padding:34px 18px;border:1px dashed var(--line);border-radius:18px;background:var(--bg);color:var(--muted)}
+#messages .chat-empty-state i{display:block;font-size:27px;color:var(--rose);margin-bottom:10px}
+#messages .chat-empty-state b{display:block;color:var(--ink);font-family:Georgia,serif;font-size:19px;font-weight:500;margin-bottom:5px}
+#messages .chat-empty-state p{font-size:12px;margin:0}
+#messages .chat-date-divider{align-self:center;padding:5px 11px;border-radius:20px;background:rgba(212,165,165,.16);color:#9b747c;font-size:10px;font-weight:700;letter-spacing:.2px;margin:5px 0}
+@media(max-width:600px){
+ #messages>.card{padding:13px;border-radius:20px}
+ #messages .messages-hero{padding:17px;border-radius:19px}
+ #messages .messages-hero-icon{width:47px;height:47px;border-radius:15px;font-size:19px}
+ #messages .iphone-chat-list-item{padding:12px 5px}
+ #messages #chatRoomView{padding:10px}
+ #messages #messageBox.messages{height:55vh;min-height:260px;padding:13px 9px}
+ #messages #messageBox .bubble{max-width:88%;font-size:13px}
+}
+
 /* Editor de perfil inspirado no X */
 .edit-profile-box{max-width:560px!important;padding:0!important;border-radius:22px!important;overflow-y:auto!important}
 .edit-profile-topbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:13px;padding:14px 18px;background:var(--card-bg);border-bottom:1px solid var(--line)}
@@ -2191,7 +2249,12 @@ body.theme-dark #app .home-overview-stat b{color:#E8B9C0}
   <section id="messages" class="page">
     <div class="card">
       <div id="chatListView">
-        <div class="home-section-intro"><span class="home-eyebrow">CONEXÕES MAIS PRÓXIMAS</span><h3>Suas conversas</h3><p>Um cantinho para continuar boas conversas.</p></div>
+        <div class="messages-hero">
+          <div><span class="messages-eyebrow">COTTONTAIL • CONEXÕES</span><h2>Mensagens <span>♡</span></h2><p>Um cantinho para continuar boas conversas.</p></div>
+          <div class="messages-hero-icon"><i class="fa-regular fa-paper-plane"></i></div>
+        </div>
+        <label class="chat-search"><i class="fa-solid fa-magnifying-glass"></i><input id="chatSearchInput" type="search" placeholder="Buscar uma conversa..." oninput="filterChatList(this.value)" autocomplete="off"><kbd>⌕</kbd></label>
+        <div class="chat-list-caption"><span>SUAS CONVERSAS</span><span id="chatCountLabel"></span></div>
         <div id="chatList" class="chat-list"></div>
       </div>
       <div id="chatRoomView" class="hidden">
@@ -4973,7 +5036,8 @@ async function loadChats(){
   const peers=[...new Set(uniqueMessages.map(m=>m.sender_id===user.id?m.receiver_id:m.sender_id))]
     .filter(id=>id&&id!==user.id&&(!settingsMap[id]?.hidden));
   if(!peers.length){
-    $('chatList').innerHTML='<p class="muted">Nenhuma conversa recente.</p>';
+    $('chatList').innerHTML='<div class="chat-empty-state"><i class="fa-regular fa-paper-plane"></i><b>Suas conversas começam aqui</b><p>Quando você trocar mensagens com alguém, tudo aparecerá neste cantinho.</p></div>';
+    $('chatCountLabel').textContent='0 conversas';
     chatProfiles={};
     return;
   }
@@ -4985,8 +5049,21 @@ async function loadChats(){
     const unread=settingsMap[id]?.muted?0:uniqueMessages.filter(m=>m.sender_id===id&&m.receiver_id===user.id&&!m.read_at).length;
     const online=isUserOnline(chatProfiles[id]?.last_seen_at);
     const typing=chatProfiles[id]?.typing_to===user.id&&chatProfiles[id]?.typing_at&&(Date.now()-new Date(chatProfiles[id].typing_at).getTime()<6500);
-    return `<div class="chat-item iphone-chat-list-item" onclick="openChat('${id}')"><div class="chat-list-avatar-wrap"><div class="avatar">${chatProfiles[id]?.avatar_url?`<img src="${esc(chatProfiles[id].avatar_url)}">`:esc((chatProfiles[id]?.full_name||'?')[0])}</div><span class="online-dot ${online?'is-online':''}"></span></div><div class="chat-list-copy"><b>${esc(chatProfiles[id]?.full_name||'Pessoa')}</b><div class="muted">@${esc(chatProfiles[id]?.username||'')}</div><div class="chat-list-preview">${typing?'<span class="typing-label">digitando'+typingDotsMarkup()+'</span>':`${last?.sender_id===user.id?'Você: ':''}${esc(last?.content||'Comece uma conversa')}`}</div></div><span class="chat-list-state">${settingsMap[id]?.muted?'<i class="fa-solid fa-bell-slash muted"></i>':unread?`<span class="conversation-unread" style="background:#f6b6d0!important;background-color:#f6b6d0!important;background-image:none!important;color:#9b4969!important;border:2px solid #fff7fa!important;box-shadow:0 2px 8px rgba(226,145,177,.25)!important">${unread>99?'99+':unread}</span>`:online?'online':''}</span></div>`;
+    const searchable=[chatProfiles[id]?.full_name,chatProfiles[id]?.username,last?.content].filter(Boolean).join(' ').toLowerCase();
+    return `<div class="chat-item iphone-chat-list-item" data-search="${esc(searchable)}" onclick="openChat('${id}')"><div class="chat-list-avatar-wrap"><div class="avatar">${chatProfiles[id]?.avatar_url?`<img src="${esc(chatProfiles[id].avatar_url)}">`:esc((chatProfiles[id]?.full_name||'?')[0])}</div><span class="online-dot ${online?'is-online':''}"></span></div><div class="chat-list-copy"><b>${esc(chatProfiles[id]?.full_name||'Pessoa')}</b><div class="muted">@${esc(chatProfiles[id]?.username||'')}</div><div class="chat-list-preview">${typing?'<span class="typing-label">digitando'+typingDotsMarkup()+'</span>':`${last?.sender_id===user.id?'Você: ':''}${esc(last?.content||'Comece uma conversa')}`}</div></div><span class="chat-list-state">${settingsMap[id]?.muted?'<i class="fa-solid fa-bell-slash muted"></i>':unread?`<span class="conversation-unread" style="background:#f6b6d0!important;background-color:#f6b6d0!important;background-image:none!important;color:#9b4969!important;border:2px solid #fff7fa!important;box-shadow:0 2px 8px rgba(226,145,177,.25)!important">${unread>99?'99+':unread}</span>`:online?'online':''}</span></div>`;
   }).join('');
+  $('chatCountLabel').textContent=peers.length+' '+(peers.length===1?'conversa':'conversas');
+  filterChatList($('chatSearchInput')?.value||'');
+}
+function filterChatList(query=''){
+  const term=String(query||'').trim().toLowerCase();
+  const items=[...document.querySelectorAll('#chatList .iphone-chat-list-item')];
+  let visible=0;
+  items.forEach(item=>{const match=!term||(item.dataset.search||'').includes(term);item.style.display=match?'':'none';if(match)visible++;});
+  let empty=$('chatSearchEmpty');
+  if(term&&visible===0){
+    if(!empty){empty=document.createElement('div');empty.id='chatSearchEmpty';empty.className='chat-empty-state';empty.innerHTML='<i class="fa-solid fa-magnifying-glass"></i><b>Nenhuma conversa encontrada</b><p>Tente buscar pelo nome ou @usuário.</p>';$('chatList').appendChild(empty);}
+  }else if(empty){empty.remove();}
 }
 async function openChat(id, username=''){
   if(!user||!id||id===user.id)return;
@@ -5106,11 +5183,17 @@ async function loadMessages(){
     }
   }
   if(!data?.length){$('messageBox').innerHTML='<p class="muted" style="text-align:center">Ainda não há mensagens. Diga oi para começar! 👋</p>';checkUnreadBadges();return;}
+  let previousDay='';
   $('messageBox').innerHTML=(data||[]).map(m=>{
     const mine=m.sender_id===user.id;
-    const time=new Date(m.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    const date=new Date(m.created_at);
+    const dayKey=date.toLocaleDateString('pt-BR');
+    const dayLabel=dayKey===new Date().toLocaleDateString('pt-BR')?'Hoje':dayKey===new Date(Date.now()-86400000).toLocaleDateString('pt-BR')?'Ontem':date.toLocaleDateString('pt-BR',{day:'2-digit',month:'long'});
+    const divider=dayKey!==previousDay?`<div class="chat-date-divider">${dayLabel}</div>`:'';
+    previousDay=dayKey;
+    const time=date.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     const receipt=mine?(m.read_at?'<span class="message-receipt read">✓✓ Lida</span>':'<span class="message-receipt">✓ Enviada</span>'):'';
-    return `<div class="bubble ${mine?'mine':'other'}" style="position:relative;padding-right:${mine?'30px':'12px'}">${mine?`<button type="button" class="message-options-btn" title="Opções da mensagem" aria-label="Opções da mensagem" onclick="toggleMessageMenu('${m.id}',this);event.stopPropagation()" style="position:absolute;right:5px;top:4px;border:0;background:transparent;color:inherit;opacity:.85;padding:2px 7px;cursor:pointer;z-index:3">⋯</button>`:''}<div>${esc(m.content)}</div>${m.shared_post_id?`<button class="secondary" style="margin-top:7px;font-size:12px" onclick="openSharedPost('${m.shared_post_id}')"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver publicação compartilhada</button>`:''}<div class="bubble-time">${time} ${receipt}</div>${mine?`<div id="message-menu-${m.id}" class="message-options-menu hidden" style="position:absolute;right:5px;top:25px;z-index:20;background:var(--card,#fff);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:6px;box-shadow:0 5px 18px #0002;min-width:155px"><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" type="button" onclick="event.preventDefault();event.stopPropagation();deleteMessageForMe('${m.id}');return false">Apagar para mim</button><button class="danger" style="display:block;width:100%;text-align:left;margin:2px 0" type="button" onclick="event.preventDefault();event.stopPropagation();deleteMessageForEveryone('${m.id}');return false">Apagar para todos</button></div>`:''}</div>`;
+    return `${divider}<div class="bubble ${mine?'mine':'other'}" style="position:relative;padding-right:${mine?'30px':'12px'}">${mine?`<button type="button" class="message-options-btn" title="Opções da mensagem" aria-label="Opções da mensagem" onclick="toggleMessageMenu('${m.id}',this);event.stopPropagation()" style="position:absolute;right:5px;top:4px;border:0;background:transparent;color:inherit;opacity:.85;padding:2px 7px;cursor:pointer;z-index:3">⋯</button>`:''}<div>${esc(m.content)}</div>${m.shared_post_id?`<button class="secondary" style="margin-top:7px;font-size:12px" onclick="openSharedPost('${m.shared_post_id}')"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver publicação compartilhada</button>`:''}<div class="bubble-time">${time} ${receipt}</div>${mine?`<div id="message-menu-${m.id}" class="message-options-menu hidden" style="position:absolute;right:5px;top:25px;z-index:20;background:var(--card,#fff);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:6px;box-shadow:0 5px 18px #0002;min-width:155px"><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" type="button" onclick="event.preventDefault();event.stopPropagation();deleteMessageForMe('${m.id}');return false">Apagar para mim</button><button class="danger" style="display:block;width:100%;text-align:left;margin:2px 0" type="button" onclick="event.preventDefault();event.stopPropagation();deleteMessageForEveryone('${m.id}');return false">Apagar para todos</button></div>`:''}</div>`;
   }).join('');
   $('messageBox').scrollTop=$('messageBox').scrollHeight;
   checkUnreadBadges();
