@@ -2072,6 +2072,40 @@ body.theme-dark #messages #messageBox.messages{background:#242124!important;bord
  #messages #chatRoomView .chat-composer{flex-wrap:nowrap!important}
 }
 
+
+/* Correção definitiva: o seletor antigo escondia o compositor de mensagens */
+#messages #chatRoomView .chat-composer,
+#messages #chatRoomView .chat-composer[style]{
+  display:flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+  flex:0 0 auto!important;
+  position:relative!important;
+  z-index:5!important;
+  width:100%!important;
+  min-height:58px!important;
+  margin:12px 0 4px!important;
+  flex-wrap:nowrap!important;
+}
+#messages #chatRoomView .chat-composer .chat-attachment-tools{
+  display:flex!important;flex:0 0 auto!important;align-items:center!important;
+  gap:6px!important;margin:0!important;
+}
+#messages #chatRoomView .chat-composer .chat-tool-btn{
+  width:36px!important;height:36px!important;min-width:36px!important;
+}
+#messages #chatRoomView .chat-composer #messageInput{
+  display:block!important;visibility:visible!important;opacity:1!important;
+  flex:1 1 auto!important;width:auto!important;min-width:0!important;
+  height:42px!important;margin:0!important;
+}
+#messages #chatRoomView .chat-composer .chat-send-btn{
+  display:grid!important;visibility:visible!important;flex:0 0 42px!important;
+  width:42px!important;min-width:42px!important;height:42px!important;
+  place-items:center!important;border-radius:50%!important;padding:0!important;
+}
+#messages #chatRoomView .audio-record-status,
+#messages #chatRoomView #messageStatus{display:block!important;flex:0 0 auto!important}
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
      crossorigin="anonymous"></script>
@@ -2448,7 +2482,7 @@ body.theme-dark #messages #messageBox.messages{background:#242124!important;bord
             <button type="button" class="chat-tool-btn" id="recordAudioButton" title="Gravar áudio" aria-label="Gravar áudio" onclick="toggleAudioRecording()"><i class="fa-solid fa-microphone"></i></button>
           </div>
           <input id="messageInput" placeholder="Escreva uma mensagem..." oninput="handleTyping()" onkeydown="if(event.key==='Enter')sendMessage()" style="margin:0">
-          <button onclick="sendMessage()" style="padding:10px 16px" title="Enviar mensagem"><i class="fa-solid fa-paper-plane"></i></button>
+          <button type="button" class="chat-send-btn" onclick="sendMessage()" style="padding:10px 16px" title="Enviar mensagem" aria-label="Enviar mensagem"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
         <p id="audioRecordStatus" class="audio-record-status">Você pode enviar uma foto ou gravar um áudio</p>
         <p id="messageStatus" class="status"></p>
@@ -5494,7 +5528,7 @@ async function sendMessage(){
 
   if(!content)return;
 
-  const button=input.parentElement.querySelector('button');
+  const button=input.parentElement.querySelector('.chat-send-btn');
   button.disabled=true;
   status('messageStatus','Enviando...');
 
