@@ -2119,6 +2119,128 @@ body.theme-dark #messages #messageBox.messages{background:#242124!important;bord
   background:linear-gradient(135deg,#ce94a2 0%,#b97889 100%)!important;
   transform:translateY(-1px);
 }
+
+/* Cottontail Chat — acabamento premium (camada visual final, sem alterar a lógica) */
+#messages>.card{
+  background:linear-gradient(180deg,#fffdfc 0%,#fbf7f5 100%)!important;
+  border:1px solid rgba(193,151,157,.16)!important;
+  border-radius:30px!important;
+  box-shadow:0 18px 55px rgba(92,61,67,.075)!important;
+}
+#messages .messages-hero{
+  position:relative;overflow:hidden;
+  padding:26px 28px!important;margin-bottom:22px!important;
+  border:1px solid rgba(190,143,151,.18)!important;
+  border-radius:25px!important;
+  background:linear-gradient(115deg,#f7e8e9 0%,#fbf3ef 54%,#f1eee9 100%)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 8px 24px rgba(121,83,91,.045)!important;
+}
+#messages .messages-hero:after{
+  content:"";position:absolute;width:190px;height:190px;right:-55px;top:-105px;
+  border:1px solid rgba(255,255,255,.6);border-radius:50%;
+  box-shadow:0 0 0 22px rgba(255,255,255,.12),0 0 0 48px rgba(255,255,255,.09);
+  pointer-events:none;
+}
+#messages .messages-eyebrow{letter-spacing:2px!important;font-size:9px!important;color:#a47780!important}
+#messages .messages-hero h2{font-family:Georgia,serif!important;font-size:clamp(30px,4vw,39px)!important;letter-spacing:-1.1px!important;color:#654b50!important}
+#messages .messages-hero p{font-size:12px!important;color:#927d7c!important}
+#messages .messages-hero-icon{width:60px!important;height:60px!important;border:1px solid rgba(255,255,255,.75)!important;border-radius:21px!important;background:rgba(255,255,255,.58)!important;backdrop-filter:blur(8px);color:#b77f8c!important}
+#messages .chat-search{
+  height:50px!important;border-radius:17px!important;background:#fff!important;
+  border:1px solid #eee3e1!important;box-shadow:0 3px 12px rgba(75,48,53,.025)!important;
+}
+#messages .chat-list-caption{font-size:9px!important;letter-spacing:1.7px!important;margin:2px 5px 10px!important}
+#messages .iphone-chat-list-item{
+  padding:15px 12px!important;margin:3px 0!important;border:1px solid transparent!important;
+  border-radius:18px!important;border-bottom-color:transparent!important;
+}
+#messages .iphone-chat-list-item:hover{background:#fff!important;border-color:#f0e4e3!important;box-shadow:0 5px 18px rgba(85,55,60,.045)!important;transform:translateY(-1px)}
+#messages .chat-list-avatar-wrap .avatar{width:54px!important;height:54px!important;border:2px solid #fff!important;box-shadow:0 0 0 1px #ead9dc,0 4px 12px rgba(80,50,55,.09)!important}
+#messages .chat-list-copy>b{font-size:13px!important;font-weight:700!important;letter-spacing:-.2px!important}
+#messages .chat-list-preview{font-size:11px!important;color:#9a8988!important}
+#messages #chatRoomView:not(.hidden){
+  background:linear-gradient(180deg,#fffefd 0%,#fffaf8 100%)!important;
+  border:1px solid #f0e5e2!important;border-radius:26px!important;
+  box-shadow:0 12px 36px rgba(79,52,57,.065),inset 0 1px 0 #fff!important;
+  padding:clamp(15px,2.2vw,25px)!important;
+}
+#messages .iphone-chat-header{border-bottom:1px solid #f1e7e5!important;padding:2px 2px 17px!important;margin-bottom:15px!important}
+#messages .iphone-chat-header>button{
+  background:#fff!important;border:1px solid #f0e3e2!important;color:#b77f8c!important;
+  border-radius:13px!important;box-shadow:0 3px 10px rgba(75,48,53,.04)!important;
+}
+#messages #chatHeaderAvatar{width:49px!important;height:49px!important;border:2px solid #fff!important;box-shadow:0 0 0 1px #e9d5da,0 4px 12px rgba(70,45,50,.1)!important}
+#messages #chatTitle{font-size:14px!important;font-weight:750!important;letter-spacing:-.25px!important;color:#493b3e!important}
+#messages .chat-presence{font-size:10px!important;color:#a18c8c!important}
+#messages #messageBox.messages{
+  background-color:#faf5f2!important;
+  background-image:radial-gradient(rgba(193,145,150,.10) .65px,transparent .65px)!important;
+  background-size:19px 19px!important;
+  border:1px solid #f0e6e2!important;border-radius:21px!important;
+  padding:22px 19px!important;gap:13px!important;
+  box-shadow:inset 0 2px 8px rgba(90,61,65,.025)!important;
+}
+#messages #messageBox .bubble{
+  max-width:min(76%,460px)!important;padding:12px 15px 9px!important;
+  border-radius:19px!important;font-size:13px!important;line-height:1.55!important;
+  box-shadow:0 4px 13px rgba(74,48,52,.055)!important;
+}
+#messages #messageBox .bubble.mine{
+  background:linear-gradient(145deg,#d9aab5 0%,#c48a99 100%)!important;
+  color:#fff!important;border:1px solid rgba(255,255,255,.22)!important;
+  border-bottom-right-radius:6px!important;
+}
+#messages #messageBox .bubble.other{
+  background:rgba(255,255,255,.96)!important;color:#514447!important;
+  border:1px solid #efe5e2!important;border-bottom-left-radius:6px!important;
+}
+#messages #messageBox .bubble-time{font-size:9px!important;opacity:.72!important}
+#messages #chatRoomView .chat-composer,
+#messages #chatRoomView .chat-composer[style]{
+  min-height:60px!important;padding:8px 9px 8px 12px!important;
+  margin:13px 0 4px!important;border:1px solid #ecdfde!important;
+  border-radius:21px!important;background:#fff!important;
+  box-shadow:0 6px 20px rgba(76,48,54,.055),inset 0 1px 0 #fff!important;
+}
+#messages #chatRoomView .chat-composer .chat-tool-btn{
+  width:37px!important;height:37px!important;min-width:37px!important;
+  border-radius:13px!important;background:#f8edef!important;color:#b47b88!important;
+  border:1px solid #f0dfe3!important;box-shadow:none!important;
+}
+#messages #chatRoomView .chat-composer #messageInput{
+  font-size:13px!important;color:#514447!important;padding:0 7px!important;
+}
+#messages #chatRoomView .chat-composer #messageInput::placeholder{color:#b3a2a1!important}
+#messages #chatRoomView .chat-composer .chat-send-btn{
+  width:43px!important;height:43px!important;min-width:43px!important;flex-basis:43px!important;
+  border-radius:15px!important;background:linear-gradient(145deg,#d7a5b0,#bd7e8e)!important;
+  color:#fff!important;box-shadow:0 5px 13px rgba(184,117,135,.24)!important;
+}
+#messages #chatRoomView .chat-composer .chat-send-btn:hover{filter:brightness(.97);transform:translateY(-1px)}
+#messages .audio-record-status{font-size:9px!important;color:#aa9695!important;letter-spacing:.15px!important}
+#messages .message-reaction,#messages .reaction-add{border-radius:12px!important;box-shadow:0 2px 7px rgba(70,45,50,.045)!important}
+body.theme-dark #messages>.card{background:linear-gradient(180deg,#242126,#201e23)!important;border-color:#3d343b!important}
+body.theme-dark #messages .messages-hero{background:linear-gradient(115deg,#392d35,#302b30 58%,#292d2a)!important;border-color:#51404a!important}
+body.theme-dark #messages .messages-hero h2{color:#f1dfe4!important}
+body.theme-dark #messages .messages-hero p{color:#c0aeb1!important}
+body.theme-dark #messages #chatRoomView:not(.hidden){background:#262329!important;border-color:#413840!important}
+body.theme-dark #messages .iphone-chat-header{border-color:#40373e!important}
+body.theme-dark #messages #chatTitle{color:#f3e9ec!important}
+body.theme-dark #messages #messageBox.messages{background-color:#201e23!important;border-color:#40373e!important}
+body.theme-dark #messages #messageBox .bubble.other{background:#343039!important;border-color:#49404a!important;color:#f4eaed!important}
+body.theme-dark #messages #chatRoomView .chat-composer{background:#302c33!important;border-color:#49404a!important}
+body.theme-dark #messages #chatRoomView .chat-composer #messageInput{color:#f5edf0!important}
+@media(max-width:600px){
+  #messages>.card{padding:12px!important;border-radius:22px!important}
+  #messages .messages-hero{padding:18px!important;border-radius:20px!important}
+  #messages #chatRoomView:not(.hidden){padding:11px!important;border-radius:20px!important}
+  #messages #messageBox.messages{padding:14px 10px!important;border-radius:17px!important}
+  #messages #messageBox .bubble{max-width:88%!important;font-size:13px!important}
+  #messages #chatRoomView .chat-composer{min-height:54px!important;padding:6px!important;border-radius:18px!important}
+  #messages #chatRoomView .chat-composer .chat-tool-btn{width:33px!important;height:33px!important;min-width:33px!important}
+  #messages #chatRoomView .chat-composer .chat-send-btn{width:39px!important;height:39px!important;min-width:39px!important;flex-basis:39px!important}
+}
+
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
      crossorigin="anonymous"></script>
