@@ -1778,6 +1778,64 @@ body.theme-dark #app .home-overview-stat b{color:#E8B9C0}
   #app .nav button span{font-size:11px}
 }
 
+
+/* Correção definitiva do cabeçalho desktop: reserva espaço real para a navegação fixa */
+@media (min-width: 768px) {
+  #app.wrap {
+    padding-top: 112px !important;
+    padding-bottom: 40px !important;
+  }
+  #app .nav {
+    position: fixed !important;
+    top: 0 !important;
+    bottom: auto !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    width: min(1080px, calc(100% - 48px)) !important;
+    max-width: 1080px !important;
+    min-height: 76px !important;
+    height: 76px !important;
+    margin: 0 !important;
+    padding: 10px 22px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    border-radius: 0 0 20px 20px !important;
+    z-index: 1200 !important;
+  }
+  #app .nav button {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    height: 48px !important;
+    padding: 8px 10px !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+  #app .top {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 24px !important;
+    min-height: 76px !important;
+    padding: 12px 2px 22px !important;
+    margin: 0 0 24px !important;
+  }
+  #app .top .brand {
+    flex: 0 1 auto !important;
+    white-space: nowrap !important;
+  }
+  #app .top .music-bar {
+    flex: 0 0 auto !important;
+    max-width: 100% !important;
+  }
+}
+
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
      crossorigin="anonymous"></script>
