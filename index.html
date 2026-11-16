@@ -2031,6 +2031,47 @@ body.theme-dark #messages #messageBox.messages{background:#242124!important;bord
  #messages #messageInput{font-size:12px!important}
 }
 
+
+/* Correção de layout: manter o campo de envio sempre visível */
+#messages #chatRoomView:not(.hidden){
+  display:flex!important;
+  flex:1 1 auto!important;
+  flex-direction:column!important;
+  min-height:0!important;
+  height:100%!important;
+  overflow:hidden!important;
+}
+#messages #messageBox.messages{
+  flex:1 1 0!important;
+  height:auto!important;
+  min-height:160px!important;
+  max-height:none!important;
+  overflow-y:auto!important;
+  margin:0!important;
+}
+#messages #chatRoomView .chat-composer{
+  display:flex!important;
+  flex:0 0 auto!important;
+  min-height:56px!important;
+  margin-top:10px!important;
+  position:relative!important;
+  z-index:2!important;
+}
+#messages #chatRoomView .audio-record-status,
+#messages #chatRoomView #messageStatus{flex:0 0 auto!important}
+#messages #chatRoomView .chat-attachment-tools{flex:0 0 auto!important}
+#messages #chatRoomView #messageInput{flex:1 1 0!important;width:0!important}
+#messages #chatRoomView .chat-composer>button{flex:0 0 40px!important}
+@media(min-width:768px){
+ #app.messages-mode #messages.page.active{height:calc(100dvh - 102px)!important;min-height:360px!important}
+ #app.messages-mode #messages>.card{min-height:0!important;overflow:hidden!important}
+}
+@media(max-width:767px){
+ #messages #chatRoomView:not(.hidden){height:auto!important;overflow:visible!important}
+ #messages #messageBox.messages{flex:initial!important;height:42vh!important;min-height:220px!important}
+ #messages #chatRoomView .chat-composer{flex-wrap:nowrap!important}
+}
+
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
      crossorigin="anonymous"></script>
