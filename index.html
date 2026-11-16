@@ -1962,6 +1962,75 @@ body.theme-dark #app .home-overview-stat b{color:#E8B9C0}
  #messages .chat-composer{border-radius:17px!important}
 }
 
+
+/* Chat: layout compacto e coerente — revisão de espaçamento */
+#messages #chatRoomView:not(.hidden){
+  display:block!important;
+  flex:initial!important;
+  min-height:0!important;
+  height:auto!important;
+}
+#messages #messageBox.messages{
+  display:flex!important;
+  flex:initial!important;
+  height:clamp(300px,42vh,430px)!important;
+  min-height:300px!important;
+  max-height:430px!important;
+  padding:18px!important;
+  margin:0!important;
+  overflow-y:auto!important;
+  align-items:stretch;
+  background:#fbf7f5!important;
+  border:1px solid #eee2df!important;
+  border-radius:18px!important;
+}
+body.theme-dark #messages #messageBox.messages{background:#242124!important;border-color:#44383b!important}
+#messages #chatRoomView>div:nth-of-type(3){display:none!important}
+#messages #chatRoomView .chat-composer{
+  display:flex!important;align-items:center!important;gap:9px!important;
+  margin-top:12px!important;padding:7px 8px!important;
+  border:1px solid #eadcda!important;border-radius:20px!important;
+  background:#fff!important;box-shadow:0 4px 16px rgba(85,55,60,.045)!important;
+}
+#messages .chat-attachment-tools{
+  display:flex!important;align-items:center!important;gap:5px!important;
+  flex:0 0 auto!important;margin:0!important;padding:0!important;
+}
+#messages .chat-tool-btn{
+  display:grid!important;place-items:center!important;
+  width:34px!important;height:34px!important;min-width:34px!important;
+  padding:0!important;border:0!important;border-radius:11px!important;
+  background:#f8eeee!important;color:#ad7883!important;
+  box-shadow:none!important;
+}
+#messages .chat-tool-btn:hover{background:#f1dfe3!important;transform:none!important}
+#messages #messageInput{
+  height:42px!important;min-height:42px!important;margin:0!important;
+  padding:0 5px!important;border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;
+  font-size:13px!important;
+}
+#messages .chat-composer>button{
+  display:grid!important;place-items:center!important;
+  width:40px!important;height:40px!important;min-width:40px!important;
+  padding:0!important;border:0!important;border-radius:14px!important;
+  background:#c98f9e!important;color:#fff!important;
+  box-shadow:0 3px 9px rgba(180,115,132,.18)!important;
+}
+#messages .audio-record-status{display:block!important;margin:5px 8px 0!important;font-size:10px!important;color:#a18c8b!important}
+#messages #messageStatus{margin:3px 8px 0!important}
+#messages #chatRoomView{padding:20px!important}
+@media(min-width:768px){
+ #messages #messageBox.messages{height:390px!important;max-height:390px!important}
+}
+@media(max-width:600px){
+ #messages #chatRoomView{padding:10px!important}
+ #messages #messageBox.messages{height:42vh!important;min-height:250px!important;padding:12px!important}
+ #messages .chat-composer{gap:5px!important;padding:6px!important}
+ #messages .chat-tool-btn{width:31px!important;height:31px!important;min-width:31px!important}
+ #messages #messageInput{font-size:12px!important}
+}
+
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
      crossorigin="anonymous"></script>
@@ -2331,23 +2400,16 @@ body.theme-dark #app .home-overview-stat b{color:#E8B9C0}
           <div class="iphone-chat-person"><div id="chatHeaderAvatar" class="avatar" style="width:38px;height:38px">?</div><div><h3 id="chatTitle" style="margin:0;font-size:15px">Conversa</h3><div id="chatPresence" class="chat-presence">offline</div></div></div><span class="chat-header-spacer"></span><button class="secondary" title="Silenciar conversa" onclick="toggleMuteConversation()" style="padding:6px 9px"><i class="fa-solid fa-bell-slash"></i></button><button type="button" class="secondary" title="Apagar conversa para mim" onclick="event.preventDefault();event.stopPropagation();deleteConversationForMe();return false" style="padding:6px 9px"><i class="fa-solid fa-trash"></i></button>
         </div>
         <div id="messageBox" class="messages"></div>
-        <div style="display:flex;gap:6px;margin-bottom:8px">
-          <button class="secondary" style="padding:6px 10px;font-size:14px" onclick="addEmoji('✨')">✨</button>
-          <button class="secondary" style="padding:6px 10px;font-size:14px" onclick="addEmoji('🤍')">🤍</button>
-          <button class="secondary" style="padding:6px 10px;font-size:14px" onclick="addEmoji('🥺')">🥺</button>
-          <button class="secondary" style="padding:6px 10px;font-size:14px" onclick="addEmoji('🌷')">🌷</button>
-          <button class="secondary" style="padding:6px 10px;font-size:14px" onclick="addEmoji('☕')">☕</button>
-        </div>
-        <div class="chat-attachment-tools">
-          <button type="button" class="chat-tool-btn" title="Enviar foto" onclick="$('chatImageInput').click()"><i class="fa-regular fa-image"></i></button>
-          <input id="chatImageInput" type="file" accept="image/*" hidden onchange="sendChatImage(this.files[0]);this.value=''">
-          <button type="button" class="chat-tool-btn" id="recordAudioButton" title="Gravar áudio" onclick="toggleAudioRecording()"><i class="fa-solid fa-microphone"></i></button>
-          <span id="audioRecordStatus" class="audio-record-status">Envie fotos ou grave um áudio</span>
-        </div>
         <div class="row chat-composer" style="display:flex;gap:8px">
+          <div class="chat-attachment-tools">
+            <button type="button" class="chat-tool-btn" title="Enviar foto" aria-label="Enviar foto" onclick="$('chatImageInput').click()"><i class="fa-regular fa-image"></i></button>
+            <input id="chatImageInput" type="file" accept="image/*" hidden onchange="sendChatImage(this.files[0]);this.value=''">
+            <button type="button" class="chat-tool-btn" id="recordAudioButton" title="Gravar áudio" aria-label="Gravar áudio" onclick="toggleAudioRecording()"><i class="fa-solid fa-microphone"></i></button>
+          </div>
           <input id="messageInput" placeholder="Escreva uma mensagem..." oninput="handleTyping()" onkeydown="if(event.key==='Enter')sendMessage()" style="margin:0">
           <button onclick="sendMessage()" style="padding:10px 16px" title="Enviar mensagem"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
+        <p id="audioRecordStatus" class="audio-record-status">Você pode enviar uma foto ou gravar um áudio</p>
         <p id="messageStatus" class="status"></p>
       </div>
     </div>
