@@ -851,6 +851,21 @@ body.theme-dark #messages #messageBox .bubble.other{background:#303036;border-co
  #messages #messageBox .bubble{max-width:88%;font-size:13px}
 }
 
+ 
+/* Chat features: media, audio and reactions */
+#messages .chat-attachment-tools{display:flex;align-items:center;gap:9px;margin:12px 4px 4px}
+#messages .chat-tool-btn{width:34px;height:34px;border:1px solid var(--line);border-radius:50%;background:var(--bg);color:var(--rose);display:grid;place-items:center;cursor:pointer}
+#messages .chat-tool-btn.recording{background:#b85e70;color:#fff;animation:chatPulse 1s infinite}
+#messages .audio-record-status{font-size:11px;color:var(--muted)}
+@keyframes chatPulse{50%{box-shadow:0 0 0 6px rgba(184,94,112,.15)}}
+#messages .chat-media-image{display:block;max-width:min(260px,65vw);max-height:300px;border-radius:13px;margin:3px 0;object-fit:cover}
+#messages .chat-audio-player{width:min(260px,65vw);height:38px;display:block;margin:4px 0}
+#messages .message-reactions{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+#messages .message-reaction{border:1px solid rgba(190,130,145,.3);background:rgba(255,255,255,.75);border-radius:15px;padding:3px 8px;font-size:12px;cursor:pointer;color:#74545d}
+#messages .message-reaction.mine{background:#f5dfe4;border-color:#d6a1ae}
+#messages .reaction-add{border:1px dashed rgba(190,130,145,.45);background:transparent;border-radius:15px;padding:2px 7px;font-size:11px;color:inherit;cursor:pointer}
+#messages .chat-composer{margin-top:3px}
+
 /* Editor de perfil inspirado no X */
 .edit-profile-box{max-width:560px!important;padding:0!important;border-radius:22px!important;overflow-y:auto!important}
 .edit-profile-topbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:13px;padding:14px 18px;background:var(--card-bg);border-bottom:1px solid var(--line)}
@@ -2270,9 +2285,15 @@ body.theme-dark #app .home-overview-stat b{color:#E8B9C0}
           <button class="secondary" style="padding:6px 10px;font-size:14px" onclick="addEmoji('🌷')">🌷</button>
           <button class="secondary" style="padding:6px 10px;font-size:14px" onclick="addEmoji('☕')">☕</button>
         </div>
-        <div class="row" style="display:flex;gap:8px">
+        <div class="chat-attachment-tools">
+          <button type="button" class="chat-tool-btn" title="Enviar foto" onclick="$('chatImageInput').click()"><i class="fa-regular fa-image"></i></button>
+          <input id="chatImageInput" type="file" accept="image/*" hidden onchange="sendChatImage(this.files[0]);this.value=''">
+          <button type="button" class="chat-tool-btn" id="recordAudioButton" title="Gravar áudio" onclick="toggleAudioRecording()"><i class="fa-solid fa-microphone"></i></button>
+          <span id="audioRecordStatus" class="audio-record-status">Envie fotos ou grave um áudio</span>
+        </div>
+        <div class="row chat-composer" style="display:flex;gap:8px">
           <input id="messageInput" placeholder="Escreva uma mensagem..." oninput="handleTyping()" onkeydown="if(event.key==='Enter')sendMessage()" style="margin:0">
-          <button onclick="sendMessage()" style="padding:10px 16px"><i class="fa-solid fa-paper-plane"></i></button>
+          <button onclick="sendMessage()" style="padding:10px 16px" title="Enviar mensagem"><i class="fa-solid fa-paper-plane"></i></button>
         </div>
         <p id="messageStatus" class="status"></p>
       </div>
@@ -5183,6 +5204,10 @@ async function loadMessages(){
     }
   }
   if(!data?.length){$('messageBox').innerHTML='<p class="muted" style="text-align:center">Ainda não há mensagens. Diga oi para começar! 👋</p>';checkUnreadBadges();return;}
+  let reactionsByMessage={};
+  const {data:reactionRows,error:reactionError}=await db.from('direct_message_reactions').select('message_id,user_id,reaction').in('message_id',data.map(m=>m.id));
+  if(reactionError)console.warn('Reações indisponíveis; aplique o SQL chat_features.sql:',reactionError.message);
+  (reactionRows||[]).forEach(r=>{(reactionsByMessage[r.message_id]??=[]).push(r);});
   let previousDay='';
   $('messageBox').innerHTML=(data||[]).map(m=>{
     const mine=m.sender_id===user.id;
@@ -5193,7 +5218,10 @@ async function loadMessages(){
     previousDay=dayKey;
     const time=date.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     const receipt=mine?(m.read_at?'<span class="message-receipt read">✓✓ Lida</span>':'<span class="message-receipt">✓ Enviada</span>'):'';
-    return `${divider}<div class="bubble ${mine?'mine':'other'}" style="position:relative;padding-right:${mine?'30px':'12px'}">${mine?`<button type="button" class="message-options-btn" title="Opções da mensagem" aria-label="Opções da mensagem" onclick="toggleMessageMenu('${m.id}',this);event.stopPropagation()" style="position:absolute;right:5px;top:4px;border:0;background:transparent;color:inherit;opacity:.85;padding:2px 7px;cursor:pointer;z-index:3">⋯</button>`:''}<div>${esc(m.content)}</div>${m.shared_post_id?`<button class="secondary" style="margin-top:7px;font-size:12px" onclick="openSharedPost('${m.shared_post_id}')"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver publicação compartilhada</button>`:''}<div class="bubble-time">${time} ${receipt}</div>${mine?`<div id="message-menu-${m.id}" class="message-options-menu hidden" style="position:absolute;right:5px;top:25px;z-index:20;background:var(--card,#fff);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:6px;box-shadow:0 5px 18px #0002;min-width:155px"><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" type="button" onclick="event.preventDefault();event.stopPropagation();deleteMessageForMe('${m.id}');return false">Apagar para mim</button><button class="danger" style="display:block;width:100%;text-align:left;margin:2px 0" type="button" onclick="event.preventDefault();event.stopPropagation();deleteMessageForEveryone('${m.id}');return false">Apagar para todos</button></div>`:''}</div>`;
+    const media=m.attachment_type==='audio'&&m.attachment_url?`<audio class="chat-audio-player" controls preload="metadata" src="${esc(m.attachment_url)}"></audio>`:m.attachment_type==='image'&&m.attachment_url?`<a href="${esc(m.attachment_url)}" target="_blank" rel="noopener"><img class="chat-media-image" src="${esc(m.attachment_url)}" alt="Imagem enviada"></a>`:''; 
+    const grouped={};(reactionsByMessage[m.id]||[]).forEach(r=>{grouped[r.reaction]??=[];grouped[r.reaction].push(r.user_id);});
+    const reactions=Object.entries(grouped).map(([emoji,ids])=>`<button class="message-reaction ${ids.includes(user.id)?'mine':''}" onclick="toggleMessageReaction('${m.id}','${emoji}')">${emoji} ${ids.length}</button>`).join('');
+    return `${divider}<div class="bubble ${mine?'mine':'other'}" style="position:relative;padding-right:${mine?'30px':'12px'}">${mine?`<button type="button" class="message-options-btn" title="Opções da mensagem" aria-label="Opções da mensagem" onclick="toggleMessageMenu('${m.id}',this);event.stopPropagation()" style="position:absolute;right:5px;top:4px;border:0;background:transparent;color:inherit;opacity:.85;padding:2px 7px;cursor:pointer;z-index:3">⋯</button>`:''}<div>${media}${m.attachment_type?'':esc(m.content)}</div>${m.shared_post_id?`<button class="secondary" style="margin-top:7px;font-size:12px" onclick="openSharedPost('${m.shared_post_id}')"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver publicação compartilhada</button>`:''}<div class="bubble-time">${time} ${receipt}</div><div class="message-reactions">${reactions}<button class="reaction-add" title="Adicionar reação" onclick="chooseMessageReaction('${m.id}')">＋ ☺</button></div>${mine?`<div id="message-menu-${m.id}" class="message-options-menu hidden" style="position:absolute;right:5px;top:25px;z-index:20;background:var(--card,#fff);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:6px;box-shadow:0 5px 18px #0002;min-width:155px"><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" type="button" onclick="event.preventDefault();event.stopPropagation();deleteMessageForMe('${m.id}');return false">Apagar para mim</button><button class="danger" style="display:block;width:100%;text-align:left;margin:2px 0" type="button" onclick="event.preventDefault();event.stopPropagation();deleteMessageForEveryone('${m.id}');return false">Apagar para todos</button></div>`:''}</div>`;
   }).join('');
   $('messageBox').scrollTop=$('messageBox').scrollHeight;
   checkUnreadBadges();
@@ -5250,6 +5278,53 @@ async function deleteMessageForEveryone(messageId){
   if(error){showToast('Não foi possível apagar para todos',error.message||'Confira as permissões de mensagens.');console.error(error);return;}
   await loadMessages();
   await loadChats();
+}
+
+let chatMediaRecorder=null,chatAudioChunks=[],chatAudioStream=null;
+async function toggleAudioRecording(){
+  const btn=$('recordAudioButton'),label=$('audioRecordStatus');
+  if(chatMediaRecorder&&chatMediaRecorder.state==='recording'){chatMediaRecorder.stop();btn.classList.remove('recording');btn.innerHTML='<i class="fa-solid fa-microphone"></i>';label.textContent='Processando áudio...';return;}
+  if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){showToast('Áudio indisponível','Use um navegador atualizado em HTTPS e permita o acesso ao microfone.');return;}
+  try{
+    chatAudioStream=await navigator.mediaDevices.getUserMedia({audio:true});
+    chatAudioChunks=[];
+    chatMediaRecorder=new MediaRecorder(chatAudioStream);
+    chatMediaRecorder.ondataavailable=e=>{if(e.data.size)chatAudioChunks.push(e.data);};
+    chatMediaRecorder.onstop=async()=>{
+      const blob=new Blob(chatAudioChunks,{type:chatMediaRecorder.mimeType||'audio/webm'});
+      chatAudioStream?.getTracks().forEach(t=>t.stop());chatAudioStream=null;
+      btn.classList.remove('recording');btn.innerHTML='<i class="fa-solid fa-microphone"></i>';
+      label.textContent='Enviando áudio...';
+      try{await uploadChatAttachment(new File([blob],'audio-'+Date.now()+'.webm',{type:blob.type}),'audio');label.textContent='Áudio enviado!';}
+      catch(e){label.textContent='Falha ao enviar áudio';showToast('Não foi possível enviar o áudio',e.message);}
+    };
+    chatMediaRecorder.start();btn.classList.add('recording');btn.innerHTML='<i class="fa-solid fa-stop"></i>';label.textContent='Gravando... toque para parar';
+  }catch(e){showToast('Microfone bloqueado','Permita o acesso ao microfone nas configurações do navegador.');}
+}
+async function sendChatImage(file){if(file)await uploadChatAttachment(file,'image');}
+async function uploadChatAttachment(file,type){
+  if(!user||!activeChat)throw new Error('Abra uma conversa antes de enviar arquivos.');
+  if(file.size>15*1024*1024)throw new Error('O arquivo deve ter até 15 MB.');
+  const ext=(file.name.split('.').pop()|| (type==='audio'?'webm':'jpg')).replace(/[^a-z0-9]/gi,'');
+  const path=user.id+'/'+activeChat+'/'+Date.now()+'.'+ext;
+  const {error:uploadError}=await db.storage.from('chat-media').upload(path,file,{contentType:file.type,upsert:false});
+  if(uploadError)throw uploadError;
+  const {data:urlData}=db.storage.from('chat-media').getPublicUrl(path);
+  const {error}=await db.from('direct_messages').insert({sender_id:user.id,receiver_id:activeChat,content:type==='audio'?'Áudio':'Imagem',attachment_url:urlData.publicUrl,attachment_type:type});
+  if(error)throw error;
+  await loadMessages();await loadChats();
+}
+async function toggleMessageReaction(messageId,emoji){
+  if(!user)return;
+  const {data:existing,error:readError}=await db.from('direct_message_reactions').select('id').eq('message_id',messageId).eq('user_id',user.id).eq('reaction',emoji).maybeSingle();
+  if(readError){showToast('Reações ainda não configuradas','Execute o arquivo supabase/chat_features.sql no SQL Editor do Supabase.');return;}
+  const result=existing?await db.from('direct_message_reactions').delete().eq('id',existing.id):await db.from('direct_message_reactions').insert({message_id:messageId,user_id:user.id,reaction:emoji});
+  if(result.error){showToast('Não foi possível reagir',result.error.message);return;}
+  await loadMessages();
+}
+async function chooseMessageReaction(messageId){
+  const emoji=await openAppActionModal({title:'Reagir à mensagem',description:'Escolha um emoji para demonstrar o que sentiu: ❤️ 😂 🥹 🤍 🌷 ✨',confirmText:'Adicionar reação',input:true,placeholder:'Digite um emoji'});
+  if(emoji)await toggleMessageReaction(messageId,Array.from(emoji)[0]);
 }
 
 async function sendMessage(){
