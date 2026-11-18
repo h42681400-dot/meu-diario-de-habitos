@@ -5544,6 +5544,7 @@ async function inspectProfile(id){
   if(followersCountResult.error)console.warn('Erro ao contar seguidores:',followersCountResult.error);
   let {data:isF}=await db.from('follows').select('*').eq('follower_id',user.id).eq('following_id',id).maybeSingle();
   let {data:isB}=await db.from('blocks').select('*').eq('blocker_id',user.id).eq('blocked_id',id).maybeSingle();
+  let {data:pendingFollowRequest}=await db.from('follow_requests').select('id,status').eq('requester_id',user.id).eq('target_id',id).eq('status','pending').maybeSingle();
 
   let isPrivateAndNotFollowing = u?.is_private && !isF && id !== user.id;
 
@@ -5573,7 +5574,7 @@ async function inspectProfile(id){
       </div>
       
       <div style="display:flex;gap:10px;justify-content:center;margin-top:16px">
-        <button onclick="toggleFollowModal('${id}',${!!isF})">${isF?'Seguindo':'Seguir'}</button>
+        <button ${pendingFollowRequest?'disabled':''} onclick="toggleFollowModal('${id}',${!!isF})">${isF?'Seguindo':(pendingFollowRequest?'Solicitação enviada':'Seguir')}</button>
         <button class="secondary" onclick="closeUserModal();openChat('${id}')">Mensagem</button>
         <button class="ghost" onclick="toggleBlockUser('${id}',${!!isB})" style="color:var(--red);border-color:var(--red)">${isB?'Desbloquear':'Bloquear'}</button>
       </div>
