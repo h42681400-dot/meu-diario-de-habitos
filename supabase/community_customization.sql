@@ -144,3 +144,11 @@ grant execute on function public.cottontail_decide_community_join_request(uuid,b
 
 -- A capa usa o bucket community-media já utilizado pelas mídias das publicações.
 -- O upload permanece no escopo da pasta do usuário autenticado.
+
+-- Permite que a própria pessoa reenvie um pedido anteriormente recusado.
+drop policy if exists "cottontail_community_requests_retry_own" on public.wellness_community_join_requests;
+create policy "cottontail_community_requests_retry_own" on public.wellness_community_join_requests
+  for update to authenticated
+  using (user_id = auth.uid() and status = 'rejected')
+  with check (user_id = auth.uid() and status = 'pending');
+grant update on public.wellness_community_join_requests to authenticated;
