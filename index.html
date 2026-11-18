@@ -5516,7 +5516,7 @@ function clearRecentSearches(){
   renderRecentSearches();
 }
 
-async async function inspectProfile(id){
+async function inspectProfile(id){
   inspectedProfileId=id;
   const {data:loadedProfile,error:profileError}=await db.from('user_profiles').select('*').eq('user_id',id).maybeSingle();
   if(profileError){
@@ -5989,7 +5989,7 @@ async function toggleMessageReaction(messageId,emoji){
   if(result.error){showToast('Não foi possível reagir',result.error.message);return;}
   await loadMessages();
 }
-async async function chooseMessageReaction(messageId){
+async function chooseMessageReaction(messageId){
   const emoji=await openAppActionModal({title:'Mais reações',description:'Escolha um emoji para reagir à mensagem.',confirmText:'Adicionar reação',input:true,placeholder:'Digite um emoji'});
   if(emoji)await toggleMessageReaction(messageId,Array.from(emoji)[0]);
 }
@@ -6135,7 +6135,7 @@ function notificationIcon(type){
   if(type==='community_join'||type==='community_post') return 'fa-people-group';
   return 'fa-bell';
 }
-async async function openNotification(notificationId,actorId,type,postId,communityId,challengeId){
+async function openNotification(notificationId,actorId,type,postId,communityId,challengeId){
   await db.from('notifications').update({read:true}).eq('id',notificationId).eq('user_id',user.id);
   checkUnreadBadges();
   if(type==='follow_request'){if(actorId)await inspectProfile(actorId);return;}
