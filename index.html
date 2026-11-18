@@ -2098,6 +2098,45 @@ body.theme-dark #messages #chatRoomView .chat-composer .chat-tool-btn{background
   #messages #chatRoomView .chat-composer .chat-send-btn{flex-basis:40px!important;width:40px!important;height:40px!important;min-width:40px!important}
 }
 
+
+/* Cottontail Daily — receitas, yoga e autocuidado */
+#app .lifestyle-hub{margin:22px 0 25px;padding:23px;border:1px solid rgba(214,154,163,.24);border-radius:23px;background:linear-gradient(145deg,rgba(248,237,235,.68),var(--card-bg) 52%,rgba(237,241,232,.55));box-shadow:0 10px 28px rgba(76,54,49,.045)}
+#app .lifestyle-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+#app .lifestyle-eyebrow{font-size:9px;font-weight:800;letter-spacing:1.5px;color:var(--app-rose-deep)}
+#app .lifestyle-heading h3{font-family:"Cormorant Garamond",Georgia,serif;font-size:29px;margin:5px 0 2px;color:var(--app-rose-deep)}
+#app .lifestyle-heading p{font-size:12px;color:var(--muted);margin:0;line-height:1.5}
+#app .lifestyle-date{flex:none;padding:7px 10px;border:1px solid var(--line);border-radius:20px;background:var(--card-bg);font-size:10px;color:var(--muted)}
+#app .lifestyle-tabs{display:flex;gap:7px;overflow-x:auto;padding:17px 0 13px;scrollbar-width:none}
+#app .lifestyle-tabs::-webkit-scrollbar{display:none}
+#app .lifestyle-tabs button{flex:none;padding:9px 12px;border:1px solid var(--line);border-radius:30px;background:var(--card-bg);color:var(--muted);font-size:11px;box-shadow:none}
+#app .lifestyle-tabs button i{margin-right:5px;color:var(--app-rose)}
+#app .lifestyle-tabs button.active{background:var(--app-rose-deep);color:white;border-color:var(--app-rose-deep)}
+#app .lifestyle-tabs button.active i{color:white}
+#app .lifestyle-card{padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--card-bg)}
+#app .lifestyle-card-kicker{font-size:9px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--app-rose-deep)}
+#app .lifestyle-card h4{font-family:"Cormorant Garamond",Georgia,serif;font-size:25px;margin:6px 0;color:var(--ink)}
+#app .lifestyle-card p{font-size:12px;line-height:1.65;color:var(--muted)}
+#app .lifestyle-meta{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+#app .lifestyle-meta span{padding:6px 9px;border-radius:20px;background:var(--bg);font-size:10px;color:var(--muted)}
+#app .lifestyle-columns{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+#app .lifestyle-columns h5{font-size:11px;margin:0 0 7px;color:var(--app-rose-deep)}
+#app .lifestyle-columns ul,#app .lifestyle-columns ol{padding-left:17px;margin:0;color:var(--muted);font-size:11px;line-height:1.8}
+#app .lifestyle-yoga-video{width:100%;aspect-ratio:16/9;border:0;border-radius:14px;background:#eee;margin-top:12px}
+#app .lifestyle-pose-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px}
+#app .lifestyle-pose{padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}
+#app .lifestyle-pose b{display:block;font-size:11px;color:var(--app-rose-deep);margin-bottom:4px}
+#app .lifestyle-pose span{display:block;font-size:10px;line-height:1.55;color:var(--muted)}
+#app .lifestyle-tip{display:flex;gap:12px;align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--line)}
+#app .lifestyle-tip:last-child{border-bottom:0}
+#app .lifestyle-tip-icon{width:36px;height:36px;flex:none;border-radius:12px;display:grid;place-items:center;background:var(--app-blush);color:var(--app-rose-deep)}
+#app .lifestyle-tip b{display:block;font-size:12px;margin:1px 0 4px}
+#app .lifestyle-tip span{display:block;font-size:11px;line-height:1.6;color:var(--muted)}
+#app .lifestyle-disclaimer{font-size:10px;line-height:1.55;color:var(--muted);margin:13px 2px 0}
+#app .lifestyle-disclaimer i{color:var(--app-rose);margin-right:5px}
+body.theme-dark #app .lifestyle-hub{background:linear-gradient(145deg,rgba(73,54,59,.7),var(--card-bg) 55%,rgba(52,60,52,.45))}
+body.theme-dark #app .lifestyle-tabs button.active{background:#A66F7A;border-color:#A66F7A}
+@media(max-width:520px){#app .lifestyle-hub{padding:15px;border-radius:19px}#app .lifestyle-heading h3{font-size:25px}#app .lifestyle-date{font-size:9px;padding:6px 8px}#app .lifestyle-columns{grid-template-columns:1fr}#app .lifestyle-pose-list{grid-template-columns:1fr 1fr}#app .lifestyle-card{padding:14px}}
+
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
      crossorigin="anonymous"></script>
@@ -2281,6 +2320,23 @@ body.theme-dark #messages #chatRoomView .chat-composer .chat-tool-btn{background
       <button type="button" onclick="openDiarySection('gratitude')"><i class="fa-solid fa-book-heart"></i>Reflexões</button>
       <button type="button" onclick="openDiarySection('careSkincare')"><i class="fa-solid fa-spa"></i>Autocuidado</button>
     </div>
+    <section class="lifestyle-hub" id="lifestyleHub">
+      <div class="lifestyle-heading">
+        <div><span class="lifestyle-eyebrow">COTTONTAIL DAILY · BEM-ESTAR</span><h3>Um cuidado novo a cada dia</h3><p>Receitinhas, movimento e pequenos rituais para você.</p></div>
+        <span class="lifestyle-date" id="lifestyleDate"></span>
+      </div>
+      <div class="lifestyle-tabs" role="tablist" aria-label="Conteúdos de bem-estar">
+        <button type="button" class="active" data-lifestyle-tab="recipes" onclick="showLifestyleTab('recipes')"><i class="fa-solid fa-bowl-food"></i> Receitinhas</button>
+        <button type="button" data-lifestyle-tab="yoga" onclick="showLifestyleTab('yoga')"><i class="fa-solid fa-person"></i> Yoga</button>
+        <button type="button" data-lifestyle-tab="skin" onclick="showLifestyleTab('skin')"><i class="fa-solid fa-spa"></i> Pele</button>
+        <button type="button" data-lifestyle-tab="hair" onclick="showLifestyleTab('hair')"><i class="fa-solid fa-wand-magic-sparkles"></i> Cabelo</button>
+      </div>
+      <div id="lifestyleRecipes" class="lifestyle-panel" role="tabpanel" aria-live="polite"></div>
+      <div id="lifestyleYoga" class="lifestyle-panel hidden" role="tabpanel" aria-live="polite"></div>
+      <div id="lifestyleSkin" class="lifestyle-panel hidden" role="tabpanel" aria-live="polite"></div>
+      <div id="lifestyleHair" class="lifestyle-panel hidden" role="tabpanel" aria-live="polite"></div>
+      <p class="lifestyle-disclaimer"><i class="fa-regular fa-heart"></i> Conteúdo educativo e sugestões gerais. Respeite seu corpo e suas necessidades; não substitui orientação profissional.</p>
+    </section>
     <div class="diary-feed-heading">
       <h3>Seu mural de momentos</h3>
       <span>Memórias só suas</span>
@@ -5936,5 +5992,63 @@ window.handleLoginClick = function(event) {
   else applyDiaryTypographyAndEmoji();
 })();
 </script>
+
+<script>
+/* Conteúdo editorial rotativo por dia: não depende de serviço externo nem de dados pessoais. */
+(function(){
+  const recipes=[
+    {title:"Panquequinha de banana e aveia",desc:"Uma opção simples para o café da manhã ou lanche.",time:"10 min",tag:"3 ingredientes",ingredients:["1 banana madura","1 ovo","2 colheres (sopa) de aveia"],steps:["Amasse a banana e misture com o ovo e a aveia.","Despeje pequenas porções em frigideira antiaderente.","Doure dos dois lados e sirva com canela ou fruta."]},
+    {title:"Wrap de frango cremoso",desc:"Uma refeição prática que combina proteína e vegetais.",time:"15 min",tag:"Almoço rápido",ingredients:["1 pão tipo wrap","Frango cozido e desfiado","Iogurte natural, cenoura e folhas"],steps:["Misture o frango com uma colher de iogurte e temperos.","Espalhe no wrap e acrescente cenoura e folhas.","Enrole e doure rapidamente na frigideira, se quiser."]},
+    {title:"Iogurte com fruta e crocância",desc:"Monte uma tigela gostosa com o que tiver em casa.",time:"5 min",tag:"Sem fogão",ingredients:["Iogurte natural","1 porção de fruta picada","Aveia ou castanhas"],steps:["Coloque o iogurte em uma tigela.","Acrescente a fruta que estiver na estação.","Finalize com aveia ou castanhas e sirva."]},
+    {title:"Omelete colorida",desc:"Uma ideia versátil para almoço leve ou jantar.",time:"12 min",tag:"Rica em proteína",ingredients:["2 ovos","Tomate e espinafre picados","Sal, pimenta e ervas"],steps:["Bata os ovos e misture os vegetais picados.","Despeje em frigideira antiaderente em fogo baixo.","Tampe até firmar, dobre e sirva com salada ou pão."]},
+    {title:"Creme rápido de abóbora",desc:"Conforto em uma tigela, com poucos ingredientes.",time:"20 min",tag:"Pode congelar",ingredients:["Abóbora em cubos","Cebola e alho","Água ou caldo e temperos"],steps:["Refogue cebola e alho, junte a abóbora e cubra com água.","Cozinhe até ficar macia.","Amasse ou bata com cuidado e ajuste os temperos."]},
+    {title:"Torrada com ricota temperada",desc:"Lanche fácil para variar o pão de todo dia.",time:"7 min",tag:"Lanche",ingredients:["Pão integral ou de sua preferência","Ricota amassada","Tomate, azeite e ervas"],steps:["Amasse a ricota com ervas e um fio de azeite.","Toste o pão e espalhe a mistura.","Finalize com tomate picado e pimenta, se gostar."]},
+    {title:"Salada morna de grão-de-bico",desc:"Uma refeição prática, saborosa e que sustenta.",time:"15 min",tag:"Vegetariana",ingredients:["Grão-de-bico cozido","Pepino, tomate e cenoura","Limão, azeite e cheiro-verde"],steps:["Escorra e aqueça levemente o grão-de-bico.","Misture os vegetais picados.","Tempere com limão, azeite e cheiro-verde."]}
+  ];
+  const yoga=[
+    {title:"Despertar suave",level:"Iniciante",time:"10–15 min",poses:[["Respiração sentada","Sente-se confortável, alongue a coluna e respire sem forçar por 5 ciclos."],["Gato e vaca","Em quatro apoios, alterne arredondar e alongar suavemente a coluna."],["Postura da criança","Leve o quadril em direção aos calcanhares e descanse com a testa apoiada, se confortável."],["Montanha","Em pé, distribua o peso nos dois pés e cresça pelo topo da cabeça."]]},
+    {title:"Mobilidade e alongamento",level:"Iniciante",time:"12–15 min",poses:[["Círculos de ombros","Faça movimentos lentos para trás e para frente, sem elevar os ombros com tensão."],["Gato e vaca","Coordene os movimentos com a respiração, sem comprimir o pescoço."],["Cachorro olhando para baixo","Apoie mãos e pés, eleve o quadril; dobre os joelhos se necessário."],["Relaxamento deitado","Deite-se com braços soltos e observe a respiração por alguns instantes."]]},
+    {title:"Pausa para desacelerar",level:"Leve",time:"8–10 min",poses:[["Respiração tranquila","Sente-se com apoio e deixe a respiração seguir naturalmente."],["Borboleta sentada","Una as plantas dos pés e permita que os joelhos desçam apenas até onde for confortável."],["Torção suave sentada","Gire o tronco poucos graus, sem puxar o pescoço; repita do outro lado."],["Postura da criança","Descanse com apoio de almofadas se isso deixar a posição mais confortável."]]}
+  ];
+  const skin=[
+    ["Limpeza gentil","Lave o rosto com um produto suave e água morna, sem esfregar. Se a pele repuxar, pode ser sinal de limpeza agressiva."],
+    ["Protetor solar é rotina","Use protetor de amplo espectro FPS 30 ou superior durante o dia e reaplique conforme o rótulo, especialmente ao ar livre."],
+    ["Hidratação sem complicar","Um hidratante adequado ao seu tipo de pele ajuda a manter a barreira cutânea. Introduza produtos novos aos poucos."],
+    ["Menos atrito, mais cuidado","Evite esfoliar em excesso ou combinar vários ativos fortes de uma vez. Ardor persistente não é sinal de que o produto está funcionando."],
+    ["Cuide também dos lábios","Use um balm hidratante e, durante o dia, prefira uma opção com proteção solar. Evite lamber os lábios repetidamente."]
+  ];
+  const hair=[
+    ["Massagem delicada no couro cabeludo","Ao lavar, use as pontas dos dedos e movimentos suaves. Unhas e fricção forte podem irritar."],
+    ["Menos calor, menos quebra","Quando possível, reduza a temperatura do secador e use protetor térmico conforme as instruções do produto."],
+    ["Desembarace com paciência","Comece pelas pontas e suba aos poucos, usando pente adequado e sem puxar os fios molhados."],
+    ["Atenção à tração","Alterne penteados muito presos e evite prender o cabelo com força todos os dias."],
+    ["Crescimento leva tempo","Comprimento depende do ciclo natural do fio e da saúde do couro cabeludo. Desconfie de promessas de crescimento rápido; queda intensa ou persistente merece avaliação dermatológica."]
+  ];
+  const dayIndex=()=>Math.floor(Date.now()/86400000);
+  const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  window.showLifestyleTab=function(tab){
+    document.querySelectorAll('#lifestyleHub [data-lifestyle-tab]').forEach(b=>b.classList.toggle('active',b.dataset.lifestyleTab===tab));
+    ['Recipes','Yoga','Skin','Hair'].forEach(k=>document.getElementById('lifestyle'+k)?.classList.toggle('hidden',k.toLowerCase()!==tab));
+  };
+  function render(){
+    const date=new Date();
+    const dateEl=document.getElementById('lifestyleDate');
+    if(dateEl)dateEl.textContent=date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+    const recipe=recipes[dayIndex()%recipes.length];
+    const recipeEl=document.getElementById('lifestyleRecipes');
+    if(recipeEl)recipeEl.innerHTML='<article class="lifestyle-card"><span class="lifestyle-card-kicker">RECEITA DO DIA · '+date.toLocaleDateString('pt-BR',{weekday:'long'})+'</span><h4>'+escapeHtml(recipe.title)+'</h4><p>'+escapeHtml(recipe.desc)+'</p><div class="lifestyle-meta"><span><i class="fa-regular fa-clock"></i> '+recipe.time+'</span><span>'+recipe.tag+'</span></div><div class="lifestyle-columns"><div><h5>Ingredientes</h5><ul>'+recipe.ingredients.map(x=>'<li>'+escapeHtml(x)+'</li>').join('')+'</ul></div><div><h5>Como preparar</h5><ol>'+recipe.steps.map(x=>'<li>'+escapeHtml(x)+'</li>').join('')+'</ol></div></div><p style="margin:13px 0 0">Ajuste as quantidades à sua fome e às suas necessidades. A proposta é praticidade e variedade, não restrição.</p></article>';
+    const session=yoga[dayIndex()%yoga.length];
+    const yogaEl=document.getElementById('lifestyleYoga');
+    if(yogaEl)yogaEl.innerHTML='<article class="lifestyle-card"><span class="lifestyle-card-kicker">PRÁTICA DO DIA · '+session.level+'</span><h4>'+session.title+'</h4><p>Separe um espaço confortável e faça cada movimento no seu ritmo. Não force amplitude nem continue se sentir dor.</p><div class="lifestyle-meta"><span><i class="fa-regular fa-clock"></i> '+session.time+'</span><span>Sem equipamento</span></div><div class="lifestyle-pose-list">'+session.poses.map((p,i)=>'<div class="lifestyle-pose"><b>'+String(i+1).padStart(2,'0')+' · '+escapeHtml(p[0])+'</b><span>'+escapeHtml(p[1])+'</span></div>').join('')+'</div><iframe class="lifestyle-yoga-video" src="https://www.youtube-nocookie.com/embed/gbXWBZXmaSo" title="Yoga para iniciantes — aula de 15 minutos, Cheila Yoga" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><p><a href="https://www.youtube.com/watch?v=gbXWBZXmaSo" target="_blank" rel="noopener">Abrir aula no YouTube</a> · Aula para iniciantes, com adaptações e pausas quando necessário.</p></article>';
+    const skinTip=skin[dayIndex()%skin.length],hairTip=hair[dayIndex()%hair.length];
+    const skinEl=document.getElementById('lifestyleSkin');
+    if(skinEl)skinEl.innerHTML='<article class="lifestyle-card"><span class="lifestyle-card-kicker">PELE · DICA DO DIA</span><h4>Seu ritual de skincare</h4><div class="lifestyle-tip"><span class="lifestyle-tip-icon"><i class="fa-solid fa-droplet"></i></span><div><b>'+escapeHtml(skinTip[0])+'</b><span>'+escapeHtml(skinTip[1])+'</span></div></div><div class="lifestyle-tip"><span class="lifestyle-tip-icon"><i class="fa-regular fa-sun"></i></span><div><b>Uma rotina simples funciona</b><span>Limpeza gentil, hidratação e proteção solar costumam ser uma boa base. Procure dermatologista se houver irritação persistente ou condição de pele.</span></div></div></article>';
+    const hairEl=document.getElementById('lifestyleHair');
+    if(hairEl)hairEl.innerHTML='<article class="lifestyle-card"><span class="lifestyle-card-kicker">CABELO · DICA DO DIA</span><h4>Cuide dos fios com constância</h4><div class="lifestyle-tip"><span class="lifestyle-tip-icon"><i class="fa-solid fa-leaf"></i></span><div><b>'+escapeHtml(hairTip[0])+'</b><span>'+escapeHtml(hairTip[1])+'</span></div></div><div class="lifestyle-tip"><span class="lifestyle-tip-icon"><i class="fa-solid fa-seedling"></i></span><div><b>Para acompanhar o crescimento</b><span>Observe o couro cabeludo e a quebra ao longo dos meses. Alimentação suficiente, cuidado gentil e investigação de causas de queda são mais importantes que receitas milagrosas.</span></div></div></article>';
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',render);else render();
+})();
+</script>
+
 </body>
 </html>
