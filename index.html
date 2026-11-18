@@ -2434,6 +2434,58 @@ body.theme-dark #messages #chatRoomView .chat-composer #messageInput{background:
  #messages #chatRoomView .chat-composer,#messages #chatRoomView .chat-composer[style]{padding:9px!important;gap:5px!important}
 }
 
+
+/* Mensagens: correção estrutural, lista sem overflow e composer sempre acessível */
+#messages, #messages>.card, #messages #chatListView, #messages #chatList, #messages #chatRoomView{min-width:0!important;max-width:100%!important;box-sizing:border-box!important}
+#messages>.card{overflow:hidden!important}
+#messages .chat-list{width:100%!important;overflow-x:hidden!important}
+#messages .iphone-chat-list-item{width:100%!important;min-width:0!important;box-sizing:border-box!important;overflow:hidden!important;display:flex!important;align-items:center!important}
+#messages .chat-list-copy{flex:1 1 0!important;min-width:0!important;max-width:100%!important;overflow:hidden!important}
+#messages .chat-list-copy>b,#messages .chat-list-copy>.muted,#messages .chat-list-preview{display:block!important;max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;overflow-wrap:normal!important;word-break:normal!important}
+#messages .chat-list-state{flex:0 0 auto!important;margin-left:auto!important}
+#messages .chat-search{display:flex!important;min-width:0!important;box-sizing:border-box!important}
+#messages .chat-search input{min-width:0!important;width:100%!important}
+#messages.has-open-chat>.card{display:grid!important;grid-template-columns:minmax(260px,310px) minmax(0,1fr)!important;min-height:680px!important;height:min(78vh,820px)!important;max-height:820px!important;overflow:hidden!important}
+#messages.has-open-chat #chatListView{min-width:0!important;max-height:100%!important;overflow-y:auto!important;overflow-x:hidden!important;border-right:1px solid var(--line)!important}
+#messages.has-open-chat #chatRoomView:not(.hidden){display:flex!important;flex-direction:column!important;min-width:0!important;min-height:0!important;height:100%!important;max-height:100%!important;overflow:hidden!important;border:0!important}
+#messages #chatRoomView .iphone-chat-header{flex:0 0 auto!important;min-width:0!important}
+#messages #chatRoomView #messageBox.messages{flex:1 1 0!important;height:auto!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;overscroll-behavior:contain!important}
+#messages #chatRoomView .chat-composer{display:flex!important;position:relative!important;flex:0 0 auto!important;visibility:visible!important;opacity:1!important;min-height:66px!important;margin:0!important;padding:10px 13px!important;z-index:5!important;box-sizing:border-box!important}
+#messages #chatRoomView .chat-composer>*{flex-shrink:0}
+#messages #chatRoomView .chat-composer #messageInput{flex:1 1 auto!important;width:0!important;min-width:0!important}
+#messages #chatRoomView .audio-record-status,#messages #chatRoomView #messageStatus{flex:0 0 auto!important;margin:0!important;padding:2px 12px!important;font-size:10px!important;background:#fff!important}
+#messages #chatRoomView .chat-attachment-tools{display:flex!important;gap:5px!important}
+#messages #chatRoomView .chat-tool-btn{display:inline-flex!important;align-items:center!important;justify-content:center!important}
+#messages .bubble{touch-action:pan-y;user-select:text}
+.message-quick-actions{position:absolute!important;z-index:30!important;top:-53px!important;left:0!important;display:flex!important;align-items:center!important;gap:7px!important;padding:6px 8px!important;border-radius:999px!important;background:#fff!important;border:1px solid #eee6ef!important;box-shadow:0 8px 25px rgba(48,35,55,.18)!important;color:#44394b!important;white-space:nowrap!important}
+.message-quick-actions.hidden{display:none!important}
+.message-quick-actions .quick-reaction-row{display:flex!important;gap:4px!important}
+.quick-reaction-emoji{border:0!important;background:#f7f3f8!important;border-radius:50%!important;width:31px!important;height:31px!important;padding:0!important;font-size:17px!important;line-height:1!important}
+.message-quick-actions>button:last-child{border:0!important;background:#f0ebf6!important;border-radius:999px!important;padding:7px 10px!important;font-size:11px!important;color:#715d91!important}
+.message-reactions{display:flex!important;align-items:center!important;flex-wrap:wrap!important;gap:5px!important;margin-top:6px!important}
+.message-reaction{border:1px solid #eadfeb!important;background:rgba(255,255,255,.8)!important;border-radius:999px!important;padding:3px 8px!important;font-size:11px!important}
+.message-reaction.mine{background:#eee8f7!important;border-color:#cbbce1!important}
+.reaction-add{border:1px solid #eadfeb!important;background:rgba(255,255,255,.72)!important;border-radius:999px!important;padding:3px 8px!important;color:#826f9c!important}
+.message-reply-quote{display:flex!important;flex-direction:column!important;gap:3px!important;padding:7px 10px!important;margin:0 0 7px!important;border-left:3px solid #927bb2!important;border-radius:7px!important;background:rgba(255,255,255,.24)!important;font-size:11px!important;max-width:100%!important}
+.message-reply-quote span{opacity:.8!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;max-width:280px!important}
+.reply-composer{position:absolute!important;left:12px!important;right:12px!important;bottom:100%!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;padding:9px 12px!important;background:#fff!important;border:1px solid #eadfeb!important;border-radius:14px 14px 0 0!important;box-shadow:0 -5px 18px rgba(60,45,65,.07)!important}
+.reply-composer.hidden{display:none!important}
+.reply-composer>div{display:flex!important;flex-direction:column!important;min-width:0!important;overflow:hidden!important}
+.reply-composer b{font-size:10px!important;color:#80699f!important}
+.reply-composer span{font-size:11px!important;color:#777!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.reply-composer>button{border:0!important;background:#f4eff7!important;border-radius:50%!important;width:27px!important;height:27px!important;font-size:18px!important;color:#80699f!important}
+body.theme-dark .message-quick-actions,body.theme-dark .reply-composer{background:#302b36!important;border-color:#4a414f!important;color:#f5eff6!important}
+body.theme-dark .quick-reaction-emoji,body.theme-dark .message-reaction,body.theme-dark .reaction-add{background:#3a3341!important;border-color:#51465a!important}
+body.theme-dark #messages #chatRoomView .audio-record-status,body.theme-dark #messages #chatRoomView #messageStatus{background:#26232b!important}
+@media(max-width:767px){
+ #messages.has-open-chat>.card{display:block!important;height:auto!important;max-height:none!important;min-height:0!important}
+ #messages.has-open-chat #chatListView{display:none!important}
+ #messages.has-open-chat #chatRoomView:not(.hidden){height:calc(100dvh - 170px)!important;min-height:420px!important;max-height:none!important}
+ #messages #chatRoomView #messageBox.messages{height:auto!important;min-height:0!important;flex:1 1 0!important}
+ #messages #chatRoomView .chat-composer{position:sticky!important;bottom:0!important;background:#fff!important}
+ #messages #chatRoomView .audio-record-status{display:none!important}
+}
+
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
      crossorigin="anonymous"></script>
@@ -2821,6 +2873,7 @@ body.theme-dark #messages #chatRoomView .chat-composer #messageInput{background:
         </div>
         <div id="messageBox" class="messages"></div>
         <div class="row chat-composer" style="display:flex;gap:8px">
+          <div id="replyComposer" class="reply-composer hidden"><div><b id="replyComposerName">Respondendo</b><span id="replyComposerText"></span></div><button type="button" onclick="cancelReply()" aria-label="Cancelar resposta">×</button></div>
           <div class="chat-attachment-tools">
             <button type="button" class="chat-tool-btn" title="Enviar foto" aria-label="Enviar foto" onclick="$('chatImageInput').click()"><i class="fa-regular fa-image"></i></button>
             <input id="chatImageInput" type="file" accept="image/*" hidden onchange="sendChatImage(this.files[0]);this.value=''">
@@ -3200,6 +3253,7 @@ window.cottontailDb=db;
 let user=null, selected=new Date(), entries={}, profile=null, activeChat=null, chatProfiles={}, inspectedProfileId=null, isCottontailAdmin=false;
 let currentFloatingPostImage=null, editAvatarFile=null, editBannerFile=null, postToDeleteId=null, postToReportId=null;
 let chatInterval=null, presenceTimer=null, typingTimer=null;
+let replyingToMessage=null, messagePressTimer=null, longPressTriggered=false;
 let notificationPollTimer=null, notificationCursor=null, appActionResolver=null;
 
 const FORBIDDEN_WORDS = ['gore', 'mutilacao', 'suicidio', 'sangue', 'morte', 'estupro', 'assidio', 'mutilação', 'suicídio'];
@@ -5819,7 +5873,12 @@ async function loadMessages(){
     const media=m.attachment_type==='audio'&&m.attachment_url?`<audio class="chat-audio-player" controls preload="metadata" src="${esc(m.attachment_url)}"></audio>`:m.attachment_type==='image'&&m.attachment_url?`<a href="${esc(m.attachment_url)}" target="_blank" rel="noopener"><img class="chat-media-image" src="${esc(m.attachment_url)}" alt="Imagem enviada"></a>`:''; 
     const grouped={};(reactionsByMessage[m.id]||[]).forEach(r=>{grouped[r.reaction]??=[];grouped[r.reaction].push(r.user_id);});
     const reactions=Object.entries(grouped).map(([emoji,ids])=>`<button class="message-reaction ${ids.includes(user.id)?'mine':''}" onclick="toggleMessageReaction('${m.id}','${emoji}')">${emoji} ${ids.length}</button>`).join('');
-    return `${divider}<div class="bubble ${mine?'mine':'other'}" style="position:relative;padding-right:${mine?'30px':'12px'}">${mine?`<button type="button" class="message-options-btn" title="Opções da mensagem" aria-label="Opções da mensagem" onclick="toggleMessageMenu('${m.id}',this);event.stopPropagation()" style="position:absolute;right:5px;top:4px;border:0;background:transparent;color:inherit;opacity:.85;padding:2px 7px;cursor:pointer;z-index:3">⋯</button>`:''}<div>${media}${m.attachment_type?'':esc(m.content)}</div>${m.shared_post_id?`<button class="secondary" style="margin-top:7px;font-size:12px" onclick="openSharedPost('${m.shared_post_id}')"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver publicação compartilhada</button>`:''}<div class="bubble-time">${time} ${receipt}</div><div class="message-reactions">${reactions}<button class="reaction-add" title="Adicionar reação" onclick="chooseMessageReaction('${m.id}')">＋ ☺</button></div>${mine?`<div id="message-menu-${m.id}" class="message-options-menu hidden" style="position:absolute;right:5px;top:25px;z-index:20;background:var(--card,#fff);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:6px;box-shadow:0 5px 18px #0002;min-width:155px"><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" type="button" onclick="event.preventDefault();event.stopPropagation();deleteMessageForMe('${m.id}');return false">Apagar para mim</button><button class="danger" style="display:block;width:100%;text-align:left;margin:2px 0" type="button" onclick="event.preventDefault();event.stopPropagation();deleteMessageForEveryone('${m.id}');return false">Apagar para todos</button></div>`:''}</div>`;
+    const replyTarget=m.reply_to_message_id?(data||[]).find(x=>x.id===m.reply_to_message_id):null;
+    const quickEmojis=['❤️','😂','😮','🥹','🙏'];
+    const quickReactionBar=quickEmojis.map(emoji=>`<button type="button" class="quick-reaction-emoji" onclick="event.stopPropagation();toggleMessageReaction('${m.id}','${emoji}')">${emoji}</button>`).join('');
+    const replyMarkup=replyTarget?`<div class="message-reply-quote"><b>${replyTarget.sender_id===user.id?'Você':esc(chatProfiles[replyTarget.sender_id]?.full_name||'Mensagem')}</b><span>${esc(replyTarget.content||'Anexo')}</span></div>`:'';
+
+    return `${divider}<div class="bubble ${mine?'mine':'other'}" data-message-id="${m.id}" onpointerdown="startMessagePress(event,'${m.id}')" onpointerup="cancelMessagePress()" onpointerleave="cancelMessagePress()" onpointercancel="cancelMessagePress()" oncontextmenu="event.preventDefault();showMessageQuickActions('${m.id}')"><div class="message-quick-actions hidden" id="quick-actions-${m.id}"><div class="quick-reaction-row">${quickReactionBar}</div><button type="button" onclick="event.stopPropagation();replyToMessage('${m.id}')" title="Responder"><i class="fa-solid fa-reply"></i> Responder</button></div>${replyMarkup}<div>${media}${m.attachment_type?'':esc(m.content)}</div>${m.shared_post_id?`<button class="secondary" style="margin-top:7px;font-size:12px" onclick="openSharedPost('${m.shared_post_id}')"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver publicação compartilhada</button>`:''}<div class="bubble-time">${time} ${receipt}</div><div class="message-reactions">${reactions}<button class="reaction-add" title="Mais reações" onclick="chooseMessageReaction('${m.id}')">＋</button></div>${mine?`<div id="message-menu-${m.id}" class="message-options-menu hidden" style="position:absolute;right:5px;top:25px;z-index:20;background:var(--card,#fff);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:6px;box-shadow:0 5px 18px #0002;min-width:155px"><button class="secondary" style="display:block;width:100%;text-align:left;margin:2px 0" type="button" onclick="event.preventDefault();event.stopPropagation();deleteMessageForMe('${m.id}');return false">Apagar para mim</button><button class="danger" style="display:block;width:100%;text-align:left;margin:2px 0" type="button" onclick="event.preventDefault();event.stopPropagation();deleteMessageForEveryone('${m.id}');return false">Apagar para todos</button></div>`:''}</div>`;
   }).join('');
   $('messageBox').scrollTop=$('messageBox').scrollHeight;
   checkUnreadBadges();
@@ -5920,9 +5979,35 @@ async function toggleMessageReaction(messageId,emoji){
   if(result.error){showToast('Não foi possível reagir',result.error.message);return;}
   await loadMessages();
 }
-async function chooseMessageReaction(messageId){
-  const emoji=await openAppActionModal({title:'Reagir à mensagem',description:'Escolha um emoji para demonstrar o que sentiu: ❤️ 😂 🥹 🤍 🌷 ✨',confirmText:'Adicionar reação',input:true,placeholder:'Digite um emoji'});
+async async function chooseMessageReaction(messageId){
+  const emoji=await openAppActionModal({title:'Mais reações',description:'Escolha um emoji para reagir à mensagem.',confirmText:'Adicionar reação',input:true,placeholder:'Digite um emoji'});
   if(emoji)await toggleMessageReaction(messageId,Array.from(emoji)[0]);
+}
+function startMessagePress(event,messageId){
+  if(event.target.closest('button,a,input'))return;
+  longPressTriggered=false;
+  cancelMessagePress();
+  messagePressTimer=setTimeout(()=>{longPressTriggered=true;showMessageQuickActions(messageId);},520);
+}
+function cancelMessagePress(){if(messagePressTimer){clearTimeout(messagePressTimer);messagePressTimer=null;}}
+function showMessageQuickActions(messageId){
+  document.querySelectorAll('.message-quick-actions').forEach(el=>el.classList.add('hidden'));
+  const bar=$('quick-actions-'+messageId);if(bar)bar.classList.remove('hidden');
+}
+function replyToMessage(messageId){
+  const bubble=document.querySelector(`#messageBox [data-message-id="${messageId}"]`);
+  if(!bubble)return;
+  const content=bubble.querySelector(':scope > div:not(.message-quick-actions)')?.innerText?.trim()||'Mensagem';
+  replyingToMessage={id:messageId,content:content.slice(0,140),sender: bubble.classList.contains('mine')?'Você':(chatProfiles[activeChat]?.full_name||'Mensagem')};
+  $('replyComposerName').textContent='Respondendo a '+replyingToMessage.sender;
+  $('replyComposerText').textContent=replyingToMessage.content;
+  $('replyComposer').classList.remove('hidden');
+  document.querySelectorAll('.message-quick-actions').forEach(el=>el.classList.add('hidden'));
+  $('messageInput').focus();
+}
+function cancelReply(){
+  replyingToMessage=null;
+  $('replyComposer')?.classList.add('hidden');
 }
 
 async function sendMessage(){
@@ -5941,11 +6026,9 @@ async function sendMessage(){
   status('messageStatus','Enviando...');
 
   try{
-    const {error}=await db.from('direct_messages').insert({
-      sender_id:user.id,
-      receiver_id:activeChat,
-      content
-    });
+    const payload={sender_id:user.id,receiver_id:activeChat,content};
+    if(replyingToMessage?.id)payload.reply_to_message_id=replyingToMessage.id;
+    const {error}=await db.from('direct_messages').insert(payload);
 
     if(error)throw error;
     await db.from('direct_conversation_settings').upsert({user_id:user.id,peer_id:activeChat,hidden:false},{onConflict:'user_id,peer_id'});
@@ -5958,6 +6041,7 @@ async function sendMessage(){
     }
 
     input.value='';
+    cancelReply();
     await clearMyTypingState();
     status('messageStatus','');
 
