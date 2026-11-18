@@ -12,8 +12,8 @@
     "minimal-ui"
   ],
   "orientation": "portrait",
-  "background_color": "#FFF9F5",
-  "theme_color": "#D6A0A3",
+  "background_color": "#F4F2F8",
+  "theme_color": "#F4F2F8",
   "icons": [
     {
       "src": "/icons/cottontail-cotton.svg?v=1",
