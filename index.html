@@ -5497,12 +5497,7 @@ async function searchProfilesAndPosts(){
 async function toggleFollowFromExplore(targetId){
   const {data:existing}=await db.from('follows').select('follower_id').eq('follower_id',user.id).eq('following_id',targetId).maybeSingle();
   if(existing){await db.from('follows').delete().eq('follower_id',user.id).eq('following_id',targetId);showToast('Tudo certo','Você deixou de seguir este perfil.',{type:'follow'});}
-  else{
-    const {error}=await db.from('follows').insert({follower_id:user.id,following_id:targetId});
-    if(error){showToast('Ops!','Não foi possível seguir este perfil.',{type:'follow'});return;}
-    await createSmartNotification({user_id:targetId,actor_id:user.id,type:'follow'});
-    showToast('Novo seguindo!','Você começou a seguir um perfil. ✨',{type:'follow'});
-  }
+  else{try{const result=await requestOrFollow(targetId);showToast(result.pending?'Solicitação enviada':'Novo seguindo!',result.pending?'A pessoa receberá seu pedido nas notificações.':'Você começou a seguir um perfil. ✨',{type:'follow'});}catch(error){console.error(error);showToast('Ops!','Não foi possível seguir este perfil. '+(error.message||''));}}
   await searchProfilesAndPosts();
 }
 let exploreSearchTimer=null;
@@ -5612,15 +5607,36 @@ async function loadUserConnections(targetId,kind){
  box.innerHTML='<div class="connections-count">'+(people||[]).length+' pessoas</div>'+(people||[]).map(p=>'<div class="friend-person"><div class="friend-person-main" onclick="closeConnectionsModal();inspectProfile(\''+p.user_id+'\')"><div class="avatar">'+(p.avatar_url?'<img src="'+esc(p.avatar_url)+'">':esc((p.full_name||'?')[0]))+'</div><div><b>'+esc(p.full_name||'Usuário')+verifiedBadge(p.is_verified)+'</b><div class="muted">@'+esc((p.username||'').replace(/^@/,''))+'</div></div></div><button class="secondary" onclick="closeConnectionsModal();inspectProfile(\''+p.user_id+'\')">Ver perfil</button></div>').join('');
 }
 
-async function toggleFollowModal(targetId,isFollowing){
-  if(isFollowing){await db.from('follows').delete().eq('follower_id',user.id).eq('following_id',targetId);showToast('Tudo certo','Você deixou de seguir este perfil.',{type:'follow'});}
-  else{
-    const {error}=await db.from('follows').insert({follower_id:user.id,following_id:targetId});
-    if(error){showToast('Ops!','Não foi possível seguir este perfil.',{type:'follow'});return;}
-    await createSmartNotification({user_id:targetId,actor_id:user.id,type:'follow'});
-    showToast('Novo seguindo!','Você começou a seguir um perfil. ✨',{type:'follow'});
+async function requestOrFollow(targetId){
+  const {data:target,error:profileError}=await db.from('user_profiles').select('is_private').eq('user_id',targetId).maybeSingle();
+  if(profileError)throw profileError;
+  if(target?.is_private){
+    const {data:existing,error}=await db.from('follow_requests').select('id,status').eq('requester_id',user.id).eq('target_id',targetId).maybeSingle();
+    if(error)throw error;
+    if(existing?.status==='pending')return {pending:true};
+    if(existing?.status==='accepted')return {following:true};
+    const {error:requestError}=await db.from('follow_requests').upsert({requester_id:user.id,target_id:targetId,status:'pending',updated_at:new Date().toISOString()},{onConflict:'requester_id,target_id'});
+    if(requestError)throw requestError;
+    return {pending:true};
   }
-  await inspectProfile(targetId);
+  const {error}=await db.from('follows').insert({follower_id:user.id,following_id:targetId});
+  if(error&&error.code!=='23505')throw error;
+  if(!error)await createSmartNotification({user_id:targetId,actor_id:user.id,type:'follow'});
+  return {following:true};
+}
+async function toggleFollowModal(targetId,isFollowing){
+  try{
+    if(isFollowing){const {error}=await db.from('follows').delete().eq('follower_id',user.id).eq('following_id',targetId);if(error)throw error;showToast('Tudo certo','Você deixou de seguir este perfil.',{type:'follow'});}
+    else{const result=await requestOrFollow(targetId);showToast(result.pending?'Solicitação enviada':'Novo seguindo!',result.pending?'A pessoa será avisada para aprovar seu pedido.':'Você começou a seguir um perfil. ✨',{type:'follow'});}
+    await inspectProfile(targetId);
+  }catch(error){console.error(error);showToast('Ops!','Não foi possível atualizar: '+(error.message||''));}
+}
+async function respondToFollowRequest(requesterId,approved,notificationId){
+  const {error}=await db.rpc('cottontail_decide_follow_request',{p_requester_id:requesterId,p_approve:approved});
+  if(error){console.error(error);showToast('Não foi possível responder',error.message||'Tente novamente.');return;}
+  if(notificationId)await db.from('notifications').update({read:true}).eq('id',notificationId).eq('user_id',user.id);
+  showToast(approved?'Novo seguidor!':'Solicitação recusada',approved?'A pessoa agora segue seu perfil.':'A solicitação foi recusada.');
+  await loadNotifications();await loadProfile();
 }
 
 async function toggleBlockUser(targetId, isBlocked){
@@ -6097,6 +6113,7 @@ function notificationDescription(type){
   if(type==='like') return 'curtiu sua publicação. 🤍';
   if(type==='repost') return 'repostou sua publicação. 🔁';
   if(type==='follow') return 'começou a seguir você. ✨';
+  if(type==='follow_request') return 'solicitou seguir seu perfil privado. 🔒';
   if(type==='comment') return 'comentou na sua publicação. 💬';
   if(type==='message') return 'enviou uma mensagem. 💌';
   if(type==='challenge_join') return 'entrou em um desafio que você criou. 🌱';
@@ -6110,7 +6127,7 @@ function notificationDescription(type){
 function notificationIcon(type){
   if(type==='like') return 'fa-heart';
   if(type==='repost') return 'fa-retweet';
-  if(type==='follow') return 'fa-user-plus';
+  if(type==='follow'||type==='follow_request') return 'fa-user-plus';
   if(type==='comment') return 'fa-comment';
   if(type==='message') return 'fa-paper-plane';
   if(type==='challenge_join'||type==='challenge_complete'||type==='challenge_update') return 'fa-seedling';
@@ -6120,6 +6137,7 @@ function notificationIcon(type){
 async function openNotification(notificationId,actorId,type,postId,communityId,challengeId){
   await db.from('notifications').update({read:true}).eq('id',notificationId).eq('user_id',user.id);
   checkUnreadBadges();
+  if(type==='follow_request'){if(actorId)await inspectProfile(actorId);return;}
   if(type==='follow'){if(actorId) await inspectProfile(actorId);return;}
   if(type==='message'){if(actorId) await openChat(actorId);return;}
   if(type==='challenge_join'||type==='challenge_complete'||type==='challenge_update'){showPage('community');communityView='challenges';activeCommunityId=null;await loadCommunityHub();if(challengeId)setTimeout(()=>$('challenge-card-'+challengeId)?.scrollIntoView({behavior:'smooth',block:'center'}),120);return;}
@@ -6194,6 +6212,7 @@ async function loadNotifications(){
       ? '<img src="'+esc(actor.avatar_url)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'
       : '<i class="fa-solid '+notificationIcon(n.type)+'"></i>';
     const collaborationActions=n.type==='post_collaboration'?'<div style="display:flex;gap:8px;margin-top:8px"><button onclick="event.stopPropagation();respondToCollaboration(\''+n.post_id+'\',true,\''+n.id+'\')">Aceitar</button><button class="secondary" onclick="event.stopPropagation();respondToCollaboration(\''+n.post_id+'\',false,\''+n.id+'\')">Recusar</button></div>':'';
+    const followRequestActions=n.type==='follow_request'?'<div class="follow-request-actions"><button onclick="event.stopPropagation();respondToFollowRequest(\\''+n.actor_id+'\\',true,\\''+n.id+'\\')">Aceitar</button><button class="secondary" onclick="event.stopPropagation();respondToFollowRequest(\\''+n.actor_id+'\\',false,\\''+n.id+'\\')">Recusar</button></div>':'';
     return `
       <div class="notif-item ${unread?'unread':''}" role="button" tabindex="0"
         onclick="openNotification('${n.id}','${n.actor_id||''}','${n.type||''}','${n.post_id||''}','${n.community_id||''}','${n.challenge_id||''}')"
@@ -6205,6 +6224,7 @@ async function loadNotifications(){
           ${count>1?'<div class="muted" style="font-size:10px;margin-top:3px">'+count+' interações nesta publicação</div>':''}
           ${unread?'<div class="muted" style="font-size:10px;margin-top:3px">Nova</div>':''}
           ${collaborationActions}
+          ${followRequestActions}
         </div>
         <i class="fa-solid fa-chevron-right muted" style="font-size:12px"></i>
       </div>
