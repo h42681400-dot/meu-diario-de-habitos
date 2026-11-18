@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#d4a5a5">
+<meta name="theme-color" content="#F3F1F8">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Cottontail">
@@ -41,34 +41,34 @@ if(!window.supabase){
 <style>
 html.cottontail-native #androidDownloadCard{display:none!important;visibility:hidden!important;pointer-events:none!important}
 :root{
-  --bg:#F8F3F0;
+  --bg:#F4F2F8;
   --card-bg:#FFFFFF;
-  --ink:#352C2A;
-  --muted:#897B77;
-  --rose:#D69AA3;
-  --rose-hover:#C78590;
-  --line:#EDE3DF;
-  --red:#ff4d4f;
-  --bubble-me:#007aff;
-  --bubble-me-text:#ffffff;
-  --bubble-other:#e9e9eb;
-  --bubble-other-text:#000000;
+  --ink:#302D3A;
+  --muted:#858194;
+  --rose:#9A89D4;
+  --rose-hover:#8876C7;
+  --line:#E7E4EF;
+  --red:#D85F78;
+  --bubble-me:#9786D2;
+  --bubble-me-text:#FFFFFF;
+  --bubble-other:#ECEAF1;
+  --bubble-other-text:#393645;
   --font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 body.theme-dark {
-  --bg:#211D1D;
-  --card-bg:#2C2626;
-  --ink:#F5ECE8;
-  --muted:#B6A5A0;
-  --rose:#D69AA3;
-  --rose-hover:#E2AEB5;
-  --line:#443838;
-  --red:#ff4d4f;
-  --bubble-me:#0a84ff;
-  --bubble-me-text:#ffffff;
-  --bubble-other:#262628;
-  --bubble-other-text:#f5ecea;
+  --bg:#211F2A;
+  --card-bg:#2C2938;
+  --ink:#F1EFF7;
+  --muted:#B4AEC5;
+  --rose:#A998E3;
+  --rose-hover:#B8A9EA;
+  --line:#454052;
+  --red:#E4778D;
+  --bubble-me:#8F7CCB;
+  --bubble-me-text:#FFFFFF;
+  --bubble-other:#393645;
+  --bubble-other-text:#F1EFF7;
 }
 
 *{box-sizing:border-box}
@@ -5516,7 +5516,7 @@ function clearRecentSearches(){
   renderRecentSearches();
 }
 
-async function inspectProfile(id){
+async async function inspectProfile(id){
   inspectedProfileId=id;
   const {data:loadedProfile,error:profileError}=await db.from('user_profiles').select('*').eq('user_id',id).maybeSingle();
   if(profileError){
@@ -6135,7 +6135,7 @@ function notificationIcon(type){
   if(type==='community_join'||type==='community_post') return 'fa-people-group';
   return 'fa-bell';
 }
-async function openNotification(notificationId,actorId,type,postId,communityId,challengeId){
+async async function openNotification(notificationId,actorId,type,postId,communityId,challengeId){
   await db.from('notifications').update({read:true}).eq('id',notificationId).eq('user_id',user.id);
   checkUnreadBadges();
   if(type==='follow_request'){if(actorId)await inspectProfile(actorId);return;}
