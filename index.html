@@ -6213,7 +6213,7 @@ async function loadNotifications(){
       ? '<img src="'+esc(actor.avatar_url)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'
       : '<i class="fa-solid '+notificationIcon(n.type)+'"></i>';
     const collaborationActions=n.type==='post_collaboration'?'<div style="display:flex;gap:8px;margin-top:8px"><button onclick="event.stopPropagation();respondToCollaboration(\''+n.post_id+'\',true,\''+n.id+'\')">Aceitar</button><button class="secondary" onclick="event.stopPropagation();respondToCollaboration(\''+n.post_id+'\',false,\''+n.id+'\')">Recusar</button></div>':'';
-    const followRequestActions=n.type==='follow_request'?'<div class="follow-request-actions"><button onclick="event.stopPropagation();respondToFollowRequest(\\''+n.actor_id+'\\',true,\\''+n.id+'\\')">Aceitar</button><button class="secondary" onclick="event.stopPropagation();respondToFollowRequest(\\''+n.actor_id+'\\',false,\\''+n.id+'\\')">Recusar</button></div>':'';
+    const followRequestActions=n.type==='follow_request'?'<div class="follow-request-actions"><button onclick="event.stopPropagation();respondToFollowRequest(\''+n.actor_id+'\',true,\''+n.id+'\')">Aceitar</button><button class="secondary" onclick="event.stopPropagation();respondToFollowRequest(\''+n.actor_id+'\',false,\''+n.id+'\')">Recusar</button></div>':'';
     return `
       <div class="notif-item ${unread?'unread':''}" role="button" tabindex="0"
         onclick="openNotification('${n.id}','${n.actor_id||''}','${n.type||''}','${n.post_id||''}','${n.community_id||''}','${n.challenge_id||''}')"
