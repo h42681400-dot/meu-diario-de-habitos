@@ -4389,17 +4389,31 @@ async function submitFloatingPost(){
   } catch(err){ status('modalPostStatus',err.message); }
 }
 
-function togglePostMenu(id,button){
-  // Fecha os outros menus e posiciona este dentro da área visível da tela.
-  document.querySelectorAll('.post-options-menu').forEach(el=>{
-    if(el!==button?.nextElementSibling){el.classList.add('hidden');el.style.removeProperty('top');el.style.removeProperty('left');el.style.removeProperty('right');}
-  });
-  const menu=button?.nextElementSibling;
+function closePostOptionsMenu(menu){
   if(!menu)return;
-  const opening=menu.classList.contains('hidden');
-  menu.classList.toggle('hidden',!opening);
-  if(!opening)return;
+  menu.classList.add('hidden');
+  menu.style.removeProperty('top');menu.style.removeProperty('left');menu.style.removeProperty('right');
+  menu.style.removeProperty('position');menu.style.removeProperty('width');menu.style.removeProperty('z-index');
+  if(menu._postMenuPlaceholder?.parentNode){
+    menu._postMenuPlaceholder.parentNode.insertBefore(menu,menu._postMenuPlaceholder);
+    menu._postMenuPlaceholder.remove();
+    delete menu._postMenuPlaceholder;
+  }
+}
+function togglePostMenu(id,button){
+  // Leva o popup para o body para escapar do empilhamento/overflow dos cards do feed.
+  document.querySelectorAll('.post-options-menu').forEach(el=>{
+    if(el.id!=='post-menu-'+id)closePostOptionsMenu(el);
+  });
+  const menu=document.getElementById('post-menu-'+id);
+  if(!menu)return;
+  if(!menu.classList.contains('hidden')){closePostOptionsMenu(menu);return;}
+  menu._postMenuPlaceholder=document.createComment('post-menu-placeholder');
+  menu.parentNode.insertBefore(menu._postMenuPlaceholder,menu);
+  document.body.appendChild(menu);
+  menu.classList.remove('hidden');
   menu.style.position='fixed';menu.style.right='auto';menu.style.left='0px';menu.style.top='0px';
+  menu.style.zIndex='2147483647';
   const rect=button.getBoundingClientRect();
   const width=Math.min(238,window.innerWidth-24);
   menu.style.width=width+'px';menu.style.minWidth='0';
@@ -6311,7 +6325,7 @@ async function checkNewNotifications(){
 window.handlePinPostClick = async function(event, postId){
   if(event){event.preventDefault();event.stopPropagation();}
   const button=event?.currentTarget;
-  button?.closest('.post-options-menu')?.classList.add('hidden');
+  closePostOptionsMenu(button?.closest('.post-options-menu'));
   if(!postId){
     window.alert('Não foi possível fixar: ID da publicação ausente.');
     return false;
