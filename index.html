@@ -2256,6 +2256,184 @@ body.theme-dark #app #messages #messageBox .bubble.other{background:#34303a;bord
 }
 @media(prefers-reduced-motion:reduce){#app .page.active{animation:none}}
 
+
+/* Cottontail — editorial social profile + split inbox v2 */
+#profile>.profile-card{
+ overflow:hidden!important;padding:0!important;border:1px solid #eee5eb!important;
+ border-radius:28px!important;background:#fff!important;box-shadow:0 18px 55px rgba(75,52,77,.075)!important;
+}
+#profile .profile-banner{
+ height:clamp(220px,28vw,330px)!important;position:relative!important;overflow:hidden!important;
+ background:linear-gradient(115deg,#f5dce5 0%,#e9e2f4 48%,#e6eddf 100%)!important;
+}
+#profile .profile-banner:after{
+ content:"";position:absolute;inset:0;pointer-events:none;
+ background:linear-gradient(180deg,rgba(255,255,255,.08),transparent 45%,rgba(65,47,72,.13));
+}
+#profile .profile-banner img{width:100%!important;height:100%!important;object-fit:cover!important}
+#profile .profile-top-actions{top:18px!important;right:20px!important}
+#profile .gear-btn{width:42px!important;height:42px!important;background:rgba(255,255,255,.76)!important;color:#67566e!important;backdrop-filter:blur(12px);box-shadow:0 5px 18px rgba(50,35,60,.1)}
+#profile .profile-avatar-area{
+ display:flex!important;align-items:flex-end!important;justify-content:space-between!important;
+ padding:0 34px!important;margin-top:-58px!important;position:relative!important;z-index:2!important;
+}
+#profile .profile-big-avatar{
+ width:132px!important;height:132px!important;flex:none!important;border:6px solid #fff!important;
+ box-shadow:0 0 0 1px #eadde8,0 10px 28px rgba(61,44,69,.15)!important;
+ background:#f5eaf0!important;color:#8b6e91!important;font-size:42px!important;
+}
+#profile .profile-avatar-area>div:last-child{padding-bottom:7px}
+#profile .profile-avatar-area>div:last-child button{
+ border-radius:999px!important;padding:11px 20px!important;background:#6e5b91!important;
+ color:#fff!important;border:0!important;font-size:12px!important;font-weight:700!important;
+ box-shadow:0 6px 16px rgba(110,91,145,.2)!important;
+}
+#profile .profile-card>div[style*="padding:18px 20px"]{
+ padding:15px 36px 22px!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
+ align-items:start!important;column-gap:24px!important;
+}
+#profile #viewProfileName{font-family:"DM Sans",sans-serif!important;font-size:26px!important;font-weight:750!important;letter-spacing:-.8px!important;color:#302b35!important}
+#profile #viewProfileUsername{font-size:13px!important;color:#9b879b!important;margin-top:3px}
+#profile #viewProfileBio{grid-column:1/-1!important;max-width:620px!important;margin:13px 0 8px!important;font-size:13px!important;line-height:1.7!important;color:#726b76!important}
+#profile #viewProfileLink{grid-column:1/-1!important;margin:0 0 10px!important}
+#profile .profile-count-actions{
+ grid-column:2!important;grid-row:1/span 3!important;align-self:center!important;
+ display:flex!important;gap:10px!important;margin:0!important;
+}
+#profile .profile-count-btn{
+ min-width:104px!important;display:flex!important;flex-direction:column!important;align-items:center!important;
+ gap:3px!important;padding:12px 16px!important;border:1px solid #eee8f0!important;border-radius:16px!important;
+ background:#faf8fb!important;color:#887b8c!important;
+}
+#profile .profile-count-btn b{font-size:19px!important;color:#4d4253!important;font-weight:800!important}
+#profile .profile-count-btn span{font-size:10px!important;letter-spacing:.2px}
+#profile #profilePrivacyBadge{grid-column:1/-1!important;font-size:10px!important;color:#8f8190!important;margin-top:2px}
+#profile #androidDownloadCard{grid-column:1/-1!important;margin:16px 0 0!important;border-radius:18px!important}
+#profile .profile-tabs{
+ margin:0!important;padding:0 24px!important;display:flex!important;gap:26px!important;
+ border-top:1px solid #f0eaf0!important;border-bottom:0!important;background:#fff!important;
+}
+#profile .profile-tab{
+ flex:0 0 auto!important;padding:17px 10px!important;font-size:11px!important;font-weight:800!important;
+ letter-spacing:1.1px!important;text-transform:uppercase!important;color:#a69aa8!important;
+ border-bottom:2px solid transparent!important;
+}
+#profile .profile-tab.active{color:#735f98!important;border-bottom-color:#8a73b2!important}
+#profile>#profileTabContent{
+ margin-top:16px!important;padding:22px!important;border:1px solid #eee8ef!important;
+ border-radius:24px!important;background:#fff!important;box-shadow:0 12px 36px rgba(75,52,77,.045)!important;
+}
+#profile #profileTabContent .explore-grid{gap:8px!important}
+#profile #profileTabContent .explore-post-card{border-radius:13px!important;overflow:hidden!important}
+#profile #profileTabContent .person{padding:13px 4px!important;border-bottom:1px solid #f0eaf0!important}
+#messages>.card{
+ padding:0!important;overflow:hidden!important;border:1px solid #eae3ec!important;border-radius:27px!important;
+ background:#fff!important;box-shadow:0 20px 60px rgba(75,52,77,.08)!important;
+}
+#messages .messages-hero{
+ padding:22px 22px 17px!important;margin:0!important;border:0!important;border-radius:0!important;
+ border-bottom:1px solid #f0eaf0!important;background:#fff!important;
+}
+#messages .messages-hero h2{font-family:"DM Sans",sans-serif!important;font-size:27px!important;font-weight:800!important;letter-spacing:-1px!important;color:#302b35!important}
+#messages .messages-hero p{font-size:11px!important;color:#9b909e!important}
+#messages .messages-hero-icon{width:42px!important;height:42px!important;border-radius:15px!important;background:#f1edf8!important;color:#806ca6!important;box-shadow:none!important}
+#messages .chat-search{margin:14px 18px 15px!important;height:42px!important;border:0!important;border-radius:999px!important;background:#f5f3f6!important;padding:0 15px!important}
+#messages .chat-list-caption{margin:0 20px 8px!important;font-size:9px!important;letter-spacing:1.4px!important;color:#a49aa6!important}
+#messages #chatList{padding:0 10px 15px!important}
+#messages .iphone-chat-list-item{
+ display:flex!important;align-items:center!important;gap:12px!important;padding:13px 10px!important;
+ border:0!important;border-bottom:1px solid #f1edf2!important;border-radius:14px!important;
+ transition:background .18s ease!important;
+}
+#messages .iphone-chat-list-item:hover{background:#f6f3fa!important;transform:none!important}
+#messages .chat-list-avatar-wrap .avatar{width:49px!important;height:49px!important;border:2px solid #fff!important;box-shadow:0 2px 9px rgba(68,48,74,.12)!important}
+#messages .chat-list-copy>b{font-size:12px!important;font-weight:750!important;color:#38313c!important}
+#messages .chat-list-copy>.muted{font-size:10px!important;color:#a79ba9!important}
+#messages .chat-list-preview{font-size:10px!important;color:#968d99!important;max-width:220px}
+#messages #chatRoomView:not(.hidden){
+ display:flex!important;flex-direction:column!important;min-width:0!important;min-height:640px!important;
+ border:0!important;border-left:1px solid #eee8ef!important;border-radius:0!important;background:#fff!important;
+ overflow:hidden!important;
+}
+#messages .iphone-chat-header{
+ min-height:76px!important;padding:13px 20px!important;border:0!important;border-bottom:1px solid #eee8ef!important;
+ border-radius:0!important;background:#fff!important;
+}
+#messages .iphone-chat-header>button{border-radius:50%!important;width:36px!important;height:36px!important;padding:0!important}
+#messages .iphone-chat-person{gap:11px!important}
+#messages .iphone-chat-person .avatar{width:43px!important;height:43px!important;border:2px solid #f0eaf2!important}
+#messages #chatTitle{font-family:"DM Sans",sans-serif!important;font-size:13px!important;font-weight:800!important;color:#39323d!important}
+#messages #chatPresence{font-size:10px!important;color:#a198a4!important}
+#messages #messageBox.messages{
+ flex:1 1 auto!important;height:auto!important;min-height:490px!important;margin:0!important;padding:26px 24px!important;
+ border:0!important;border-radius:0!important;background-color:#faf9fb!important;
+ background-image:radial-gradient(rgba(153,135,172,.09) .7px,transparent .7px)!important;background-size:18px 18px!important;
+}
+#messages #messageBox .bubble{max-width:min(72%,490px)!important;padding:12px 15px!important;border-radius:18px!important;font-size:12px!important;line-height:1.55!important}
+#messages #messageBox .bubble.mine{background:linear-gradient(135deg,#75639f,#55447f)!important;color:#fff!important;border-bottom-right-radius:5px!important}
+#messages #messageBox .bubble.other{background:#efedf0!important;border:0!important;color:#403943!important;border-bottom-left-radius:5px!important}
+#messages #chatRoomView .chat-composer,#messages #chatRoomView .chat-composer[style]{
+ min-height:72px!important;padding:12px 16px!important;border-top:1px solid #eee8ef!important;
+ background:#fff!important;gap:9px!important;
+}
+#messages #chatRoomView .chat-composer .chat-tool-btn{
+ width:36px!important;min-width:36px!important;height:36px!important;border-radius:12px!important;
+ background:#f4f0f7!important;color:#806ca6!important;border:0!important;
+}
+#messages #chatRoomView .chat-composer #messageInput{
+ height:43px!important;border-radius:999px!important;background:#f5f3f6!important;padding:0 16px!important;
+}
+#messages #chatRoomView .chat-composer .chat-send-btn{
+ width:42px!important;min-width:42px!important;height:42px!important;border-radius:50%!important;
+ background:#76639f!important;color:#fff!important;
+}
+#messages.has-open-chat>.card{
+ display:grid!important;grid-template-columns:minmax(285px,340px) minmax(0,1fr)!important;
+ align-items:stretch!important;min-height:690px!important;
+}
+#messages.has-open-chat #chatListView{display:block!important;min-width:0!important;max-height:760px!important;overflow-y:auto!important;background:#fff!important}
+#messages.has-open-chat #chatListView .messages-hero{padding:22px 18px 15px!important}
+#messages.has-open-chat #chatListView .messages-hero-icon{display:none!important}
+#messages.has-open-chat #chatListView .messages-hero h2{font-size:23px!important}
+#messages.has-open-chat #chatRoomView:not(.hidden){min-height:690px!important}
+body.theme-dark #profile>.profile-card,body.theme-dark #profile>#profileTabContent,
+body.theme-dark #messages>.card,body.theme-dark #messages #chatListView,
+body.theme-dark #messages #chatRoomView:not(.hidden),body.theme-dark #messages .iphone-chat-header,
+body.theme-dark #messages #messages-hero{background:#26232b!important;border-color:#403944!important}
+body.theme-dark #profile #viewProfileName,body.theme-dark #messages .messages-hero h2,
+body.theme-dark #messages #chatTitle{color:#f4edf5!important}
+body.theme-dark #profile .profile-tabs,body.theme-dark #messages .iphone-chat-header{border-color:#403944!important}
+body.theme-dark #profile .profile-count-btn{background:#302c35!important;border-color:#48404b!important}
+body.theme-dark #profile .profile-count-btn b{color:#f3ebf3!important}
+body.theme-dark #messages .iphone-chat-list-item{border-color:#403944!important}
+body.theme-dark #messages .iphone-chat-list-item:hover{background:#332e3a!important}
+body.theme-dark #messages #messageBox.messages{background:#211e25!important;background-image:radial-gradient(rgba(195,179,237,.08) .7px,transparent .7px)!important}
+body.theme-dark #messages #messageBox .bubble.other{background:#39343f!important;color:#f3edf4!important}
+body.theme-dark #messages #chatRoomView .chat-composer{background:#26232b!important;border-color:#403944!important}
+body.theme-dark #messages #chatRoomView .chat-composer #messageInput{background:#35303a!important;color:#f5edf5!important}
+@media(max-width:767px){
+ #profile>.profile-card{border-radius:21px!important}
+ #profile .profile-banner{height:175px!important}
+ #profile .profile-avatar-area{padding:0 16px!important;margin-top:-43px!important}
+ #profile .profile-big-avatar{width:92px!important;height:92px!important;border-width:4px!important}
+ #profile .profile-avatar-area>div:last-child button{padding:9px 13px!important;font-size:10px!important}
+ #profile .profile-card>div[style*="padding:18px 20px"]{padding:13px 17px 18px!important;display:block!important}
+ #profile #viewProfileName{font-size:22px!important}
+ #profile .profile-count-actions{display:flex!important;margin:13px 0!important;gap:7px!important}
+ #profile .profile-count-btn{min-width:0!important;flex:1!important;padding:10px 8px!important}
+ #profile .profile-tabs{padding:0 12px!important;gap:14px!important}
+ #profile .profile-tab{padding:14px 8px!important;font-size:10px!important}
+ #profile>#profileTabContent{padding:12px!important;border-radius:19px!important}
+ #messages>.card{padding:0!important;border-radius:20px!important}
+ #messages.has-open-chat>.card{display:block!important;min-height:0!important}
+ #messages.has-open-chat #chatListView{display:none!important}
+ #messages #chatRoomView:not(.hidden){min-height:calc(100dvh - 155px)!important;border:0!important}
+ #messages #messageBox.messages{min-height:0!important;height:calc(100dvh - 300px)!important;padding:17px 12px!important}
+ #messages #messageBox .bubble{max-width:86%!important;font-size:12px!important}
+ #messages #chatRoomView .iphone-chat-header{padding:10px 11px!important}
+ #messages #chatRoomView .chat-composer,#messages #chatRoomView .chat-composer[style]{padding:9px!important;gap:5px!important}
+}
+
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
      crossorigin="anonymous"></script>
@@ -5534,8 +5712,9 @@ async function openChat(id, username=''){
   updateChatPresence(p);
 
   chatProfiles[id]=p;
-  $('chatListView').classList.add('hidden');
+  $('chatListView').classList.remove('hidden');
   $('chatRoomView').classList.remove('hidden');
+  $('messages').classList.add('has-open-chat');
   $('messageBox').innerHTML='<p class="muted" style="text-align:center">Esta é sua primeira conversa com '+esc(p.full_name||username||'esta pessoa')+'. Envie um oi! 👋</p>';
   status('messageStatus','');
 
@@ -5553,6 +5732,7 @@ function backToChatList(){
   try{localStorage.removeItem('cottontailActiveChat');}catch(e){}
   $('chatRoomView').classList.add('hidden');
   $('chatListView').classList.remove('hidden');
+  $('messages').classList.remove('has-open-chat');
   loadChats();
   checkUnreadBadges();
 }
