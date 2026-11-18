@@ -2486,6 +2486,7 @@ body.theme-dark #messages #chatRoomView .audio-record-status,body.theme-dark #me
  #messages #chatRoomView .audio-record-status{display:none!important}
 }
 
+.connections-modal{position:fixed;inset:0;z-index:10080;display:grid;place-items:center;padding:18px;box-sizing:border-box}.connections-modal.hidden{display:none!important}.connections-modal-backdrop{position:absolute;inset:0;background:rgba(35,27,39,.42);backdrop-filter:blur(5px)}.connections-modal-panel{position:relative;width:min(100%,460px);max-height:min(76vh,680px);display:flex;flex-direction:column;overflow:hidden;background:var(--card-bg,#fff);border:1px solid var(--line);border-radius:24px;box-shadow:0 24px 80px rgba(44,30,48,.22)}.connections-modal-panel>header{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 14px;border-bottom:1px solid var(--line)}.connections-modal-panel>header h3{margin:4px 0 0;font-size:20px}.connections-eyebrow{font-size:9px;letter-spacing:1.5px;color:var(--rose);font-weight:800}.connections-modal-panel>header>button{width:34px;height:34px;border:0;border-radius:50%;background:var(--soft-bg,#f7f2f4);color:var(--text);font-size:22px}.connections-modal-body{padding:10px 18px 18px;overflow:auto;min-height:120px}.connections-count{font-size:11px;color:var(--muted);padding:3px 4px 10px}.connections-loading{display:grid;place-items:center;min-height:130px;color:var(--muted)}.connections-empty{display:flex;flex-direction:column;align-items:center;gap:7px;padding:32px 12px;text-align:center}.connections-empty>span{font-size:34px;color:var(--rose)}.connections-empty small{color:var(--muted)}.connections-modal .friend-person{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 4px;border-bottom:1px solid var(--line)}.connections-modal .friend-person-main{display:flex;align-items:center;gap:11px;min-width:0;cursor:pointer}.connections-modal .friend-person .avatar{width:42px;height:42px;flex:0 0 42px;border-radius:50%;overflow:hidden}.connections-modal .friend-person .avatar img{width:100%;height:100%;object-fit:cover}.follow-request-actions{display:flex;gap:8px;margin-top:10px}.follow-request-actions button{padding:7px 14px;border-radius:999px;font-size:11px}
 </style>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2954438051582600"
      crossorigin="anonymous"></script>
@@ -2917,8 +2918,8 @@ body.theme-dark #messages #chatRoomView .audio-record-status,body.theme-dark #me
         <p id="viewProfileBio" style="margin:12px 0;font-size:14px"></p>
         <div id="viewProfileLink"></div>
         <div class="profile-count-actions">
-          <button class="profile-count-btn" onclick="switchProfileTab('following')"><b id="countFollowing">0</b><span>Seguindo</span></button>
-          <button class="profile-count-btn" onclick="switchProfileTab('followers')"><b id="countFollowers">0</b><span>Seguidores</span></button>
+          <button class="profile-count-btn" onclick="openMyConnections('following')"><b id="countFollowing">0</b><span>Seguindo</span></button>
+          <button class="profile-count-btn" onclick="openMyConnections('followers')"><b id="countFollowers">0</b><span>Seguidores</span></button>
         </div>
         <div id="profilePrivacyBadge" class="muted" style="font-size:12px">🔓 Perfil Público</div>
         <div id="androidDownloadCard" class="card" style="margin:16px 18px;padding:16px;border:1px solid var(--line);background:var(--card-bg);border-radius:16px">
@@ -5571,11 +5572,11 @@ async function inspectProfile(id){
       <p style="font-size:14px;margin:12px 0">${esc(u?.bio||'')}</p>
       ${u?.website_url?'<p style="margin:8px 0"><a class="profile-website-link" href="'+esc(normalizeProfileLink(u.website_url))+'" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-link"></i> '+esc(u.website_url)+'</a></p>':''}
       <div class="friend-stats">
-        <button onclick="loadUserConnections('${id}','followers')"><b>${wCount??'—'}</b><span>Seguidores</span></button>
-        <button onclick="loadUserConnections('${id}','following')"><b>${fCount??'—'}</b><span>Seguindo</span></button>
-        <button onclick="loadUserConnections('${id}','mutual')"><b>♡</b><span>Em comum</span></button>
+        <button onclick="openUserConnections('${id}','followers')"><b>${wCount??'—'}</b><span>Seguidores</span></button>
+        <button onclick="openUserConnections('${id}','following')"><b>${fCount??'—'}</b><span>Seguindo</span></button>
+        <button onclick="openUserConnections('${id}','mutual')"><b>♡</b><span>Em comum</span></button>
       </div>
-      <div id="friendConnections" class="friend-connections"></div>
+      
       <div style="display:flex;gap:10px;justify-content:center;margin-top:16px">
         <button onclick="toggleFollowModal('${id}',${!!isF})">${isF?'Seguindo':'Seguir'}</button>
         <button class="secondary" onclick="closeUserModal();openChat('${id}')">Mensagem</button>
@@ -5591,33 +5592,25 @@ async function inspectProfile(id){
 function closeUserModal(){ $('userModal').classList.add('hidden'); }
 function closeFriendConnections(){const box=$('friendConnections');if(box)box.innerHTML='';}
 
-async function loadUserConnections(targetId,kind){
-  const box=$('friendConnections'),labels={followers:'Seguidores',following:'Seguindo',mutual:'Seguidores em comum'};
-  box.innerHTML='<p class="muted">Carregando pessoas...</p>';
-  let ids=[];
-  if(kind==='followers'||kind==='mutual'){
-    const {data,error}=await db.from('follows').select('follower_id').eq('following_id',targetId);
-    if(error){box.innerHTML='<p class="muted">Não foi possível carregar esta lista.</p>';return;}
-    ids=(data||[]).map(x=>x.follower_id);
-    if(kind==='mutual'){
-      const {data:mine,error:mineError}=await db.from('follows').select('follower_id').eq('following_id',user.id);
-      if(mineError){box.innerHTML='<p class="muted">Não foi possível carregar os seguidores em comum.</p>';return;}
-      const mineSet=new Set((mine||[]).map(x=>x.follower_id));ids=ids.filter(x=>mineSet.has(x));
-    }
-  }else{
-    const {data,error}=await db.from('follows').select('following_id').eq('follower_id',targetId);
-    if(error){box.innerHTML='<p class="muted">Não foi possível carregar esta lista.</p>';return;}
-    ids=(data||[]).map(x=>x.following_id);
-  }
-  ids=[...new Set(ids)];
-  if(!ids.length){box.innerHTML='<div class="friend-list-heading">'+labels[kind]+'</div><p class="muted">Ninguém por aqui ainda.</p>';return;}
-  const {data:people,error}=await db.from('user_profiles').select('*').in('user_id',ids);
-  if(error){box.innerHTML='<p class="muted">Não foi possível carregar os perfis.</p>';return;}
-  box.innerHTML='<div class="friend-list-heading"><span>'+labels[kind]+' · '+(people||[]).length+'</span><button class="friend-list-close" onclick="closeFriendConnections()" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></div>'+(people||[]).map(p=>
-    '<div class="friend-person"><div class="friend-person-main" onclick="closeUserModal();inspectProfile(\''+p.user_id+'\')"><div class="avatar">'+(p.avatar_url?'<img src="'+esc(p.avatar_url)+'">':esc((p.full_name||'?')[0]))+'</div><div><b>'+esc(p.full_name||'Usuário')+verifiedBadge(p.is_verified)+'</b><div class="muted">@'+esc((p.username||'').replace(/^@/,''))+'</div></div></div><button class="secondary" onclick="inspectProfile(\''+p.user_id+'\')">Ver perfil</button></div>'
-  ).join('');
+function ensureConnectionsModal(){
+ let modal=$('connectionsModal'); if(modal)return modal;
+ modal=document.createElement('div'); modal.id='connectionsModal'; modal.className='connections-modal hidden';
+ modal.innerHTML='<div class="connections-modal-backdrop" onclick="closeConnectionsModal()"></div><section class="connections-modal-panel" role="dialog" aria-modal="true"><header><div><span class="connections-eyebrow">COTTONTAIL SOCIAL</span><h3 id="connectionsModalTitle">Conexões</h3></div><button type="button" onclick="closeConnectionsModal()" aria-label="Fechar">×</button></header><div id="connectionsModalBody" class="connections-modal-body"></div></section>';
+ document.body.appendChild(modal); return modal;
 }
-
+function openMyConnections(kind){openUserConnections(user.id,kind);}
+function openUserConnections(targetId,kind){ensureConnectionsModal().classList.remove('hidden');document.body.classList.add('connections-modal-open');loadUserConnections(targetId,kind);}
+function closeConnectionsModal(){$('connectionsModal')?.classList.add('hidden');document.body.classList.remove('connections-modal-open');}
+async function loadUserConnections(targetId,kind){
+ const box=$('connectionsModalBody'), labels={followers:'Seguidores',following:'Seguindo',mutual:'Seguidores em comum'}; $('connectionsModalTitle').textContent=labels[kind]||'Conexões';
+ box.innerHTML='<div class="connections-loading">Carregando pessoas...</div>'; let ids=[];
+ if(kind==='followers'||kind==='mutual'){const {data,error}=await db.from('follows').select('follower_id').eq('following_id',targetId);if(error){box.innerHTML='<p class="muted">Não foi possível carregar esta lista.</p>';return;}ids=(data||[]).map(x=>x.follower_id);
+ if(kind==='mutual'){const {data:mine,error:mineError}=await db.from('follows').select('follower_id').eq('following_id',user.id);if(mineError){box.innerHTML='<p class="muted">Não foi possível carregar.</p>';return;}const mineSet=new Set((mine||[]).map(x=>x.follower_id));ids=ids.filter(x=>mineSet.has(x));}}
+ else{const {data,error}=await db.from('follows').select('following_id').eq('follower_id',targetId);if(error){box.innerHTML='<p class="muted">Não foi possível carregar esta lista.</p>';return;}ids=(data||[]).map(x=>x.following_id);}
+ ids=[...new Set(ids)];if(!ids.length){box.innerHTML='<div class="connections-empty"><span>♡</span><b>Ninguém por aqui ainda</b><small>Quando houver novas conexões, elas aparecerão aqui.</small></div>';return;}
+ const {data:people,error}=await db.from('user_profiles').select('*').in('user_id',ids);if(error){box.innerHTML='<p class="muted">Não foi possível carregar os perfis.</p>';return;}
+ box.innerHTML='<div class="connections-count">'+(people||[]).length+' pessoas</div>'+(people||[]).map(p=>'<div class="friend-person"><div class="friend-person-main" onclick="closeConnectionsModal();inspectProfile(\''+p.user_id+'\')"><div class="avatar">'+(p.avatar_url?'<img src="'+esc(p.avatar_url)+'">':esc((p.full_name||'?')[0]))+'</div><div><b>'+esc(p.full_name||'Usuário')+verifiedBadge(p.is_verified)+'</b><div class="muted">@'+esc((p.username||'').replace(/^@/,''))+'</div></div></div><button class="secondary" onclick="closeConnectionsModal();inspectProfile(\''+p.user_id+'\')">Ver perfil</button></div>').join('');
+}
 
 async function toggleFollowModal(targetId,isFollowing){
   if(isFollowing){await db.from('follows').delete().eq('follower_id',user.id).eq('following_id',targetId);showToast('Tudo certo','Você deixou de seguir este perfil.',{type:'follow'});}
