@@ -1576,7 +1576,7 @@ body.theme-dark .youtube-settings-card{background:linear-gradient(145deg,rgba(21
       </details>
 
       <div class="field" style="margin-top:16px"><label>📝 Anotações gerais</label><textarea id="legacyDiaryNotes" placeholder="Anotações livres do dia..."></textarea></div>
-      <button class="diary-save" onclick="saveEntry()" style="width:100%;margin-top:12px"><i class="fa-solid fa-heart"></i> Salvar meu dia</button>
+      <button class="diary-save" onclick="window.saveEntry()" style="width:100%;margin-top:12px"><i class="fa-solid fa-heart"></i> Salvar meu dia</button>
       <p id="diaryStatus" class="status" aria-live="polite"></p>
     </div>
   </section>
@@ -2747,7 +2747,7 @@ async function selectDay(d){
   selected=new Date(d.getFullYear(),d.getMonth(),d.getDate());
   drawCalendar();
   $('selectedDate').textContent=selected.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  const {data,error}=await db.from('diary_entries').select('*').eq('user_id',user.id).eq('entry_date',dateKey(selected)).maybeSingle();
+  const {data,error}=await db.from('diary_entries').select('*').eq('user_id',user.id).eq('entry_date',dateKey(selected)).order('id',{ascending:true}).limit(1).maybeSingle();
   if(error){console.warn('Erro ao carregar o dia selecionado:',error);status('diaryStatus','Não foi possível abrir este dia.');return;}
   const row=data||{},parsed=diaryMetaFromRow(row);
   ['breakfast','lunch','snacks','dinner','exercise'].forEach(id=>$(id).value=row[id]||'');
@@ -2769,30 +2769,82 @@ function collectDiaryPayload(){
   };
 }
 async function saveEntry(){
-  if(!user)return;
   const button=document.querySelector('#diary .diary-save');
+  const message=(text,type='info')=>{
+    let el=$('diaryStatus');
+    if(!el&&button){
+      el=document.createElement('div');
+      el.id='diaryStatus';
+      button.insertAdjacentElement('afterend',el);
+    }
+    if(!el){window.alert(text);return;}
+    el.textContent=text;
+    el.setAttribute('role',type==='error'?'alert':'status');
+    el.style.cssText='display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:20!important;min-height:24px!important;margin:12px 0 4px!important;padding:12px 14px!important;border-radius:12px!important;font-size:13px!important;line-height:1.45!important;font-weight:600!important;background:'+(type==='error'?'#fff0f0':type==='success'?'#edf8f0':'#f7f1f1')+'!important;color:'+(type==='error'?'#a12b2b':type==='success'?'#27633b':'#674d4d')+'!important;border:1px solid '+(type==='error'?'#f2cccc':type==='success'?'#cfe8d5':'#eadede')+'!important;';
+  };
+  message('Conectando e preparando seu Diário...');
   if(button){button.disabled=true;button.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';}
   try{
-    const values=collectDiaryPayload(),key=dateKey(selected);
-    const hasContent=Boolean(values.breakfast||values.lunch||values.snacks||values.dinner||values.water_ml!==null||values.exercise||values.notes);
-    const {data:old,error:lookupError}=await db.from('diary_entries').select('id').eq('user_id',user.id).eq('entry_date',key).maybeSingle();
-    if(lookupError)throw lookupError;
-    if(!hasContent&&old){
-      const {error}=await db.from('diary_entries').delete().eq('id',old.id).eq('user_id',user.id);if(error)throw error;
-    }else if(hasContent&&old){
-      const {error}=await db.from('diary_entries').update(values).eq('id',old.id).eq('user_id',user.id);if(error)throw error;
-    }else if(hasContent){
-      const {error}=await db.from('diary_entries').insert({user_id:user.id,entry_date:key,...values});if(error)throw error;
+    // Confirma a sessão diretamente no Supabase antes de gravar.
+    const {data:authData,error:authError}=await db.auth.getUser();
+    if(authError)throw new Error('Não foi possível confirmar seu login: '+authError.message);
+    if(authData?.user)user=authData.user;
+    if(!user?.id)throw new Error('Sua sessão expirou. Entre novamente na sua conta e tente salvar.');
+
+    const values=collectDiaryPayload();
+    const key=dateKey(selected);
+    const parsed=diaryMetaFromRow(values);
+    const hasMeta=Object.values(parsed.meta||{}).some(value=>value!==''&&value!==null&&value!==false);
+    const hasContent=Boolean(
+      values.breakfast||values.lunch||values.snacks||values.dinner||
+      values.water_ml!==null||values.exercise||parsed.notes||hasMeta
+    );
+
+    // Busca só um registro para evitar falha caso já existam linhas duplicadas antigas.
+    const {data:old,error:lookupError}=await db.from('diary_entries')
+      .select('id').eq('user_id',user.id).eq('entry_date',key)
+      .order('id',{ascending:true}).limit(1).maybeSingle();
+    if(lookupError)throw new Error('Falha ao localizar o registro: '+lookupError.message);
+
+    if(!hasContent){
+      if(old){
+        const {data:deleted,error}=await db.from('diary_entries').delete()
+          .eq('id',old.id).eq('user_id',user.id).select('id').maybeSingle();
+        if(error)throw new Error('Falha ao apagar o registro vazio: '+error.message);
+      }
+      message('Este dia está vazio. Preencha algum campo antes de salvar.');
+      await loadMonth();
+      return;
     }
-    status('diaryStatus','Seu dia foi salvo com carinho. 🤍');
+
+    let writeResult;
+    if(old){
+      writeResult=await db.from('diary_entries').update(values)
+        .eq('id',old.id).eq('user_id',user.id).select('id').maybeSingle();
+    }else{
+      writeResult=await db.from('diary_entries')
+        .insert({user_id:user.id,entry_date:key,...values}).select('id').single();
+    }
+    if(writeResult.error)throw new Error('O Supabase recusou a gravação: '+writeResult.error.message);
+    if(!writeResult.data?.id)throw new Error('O Supabase não confirmou a gravação. Verifique as permissões de acesso (RLS) da tabela diary_entries.');
+
+    // Confirma que o registro realmente pode ser lido antes de mostrar sucesso.
+    const {data:check,error:checkError}=await db.from('diary_entries')
+      .select('id').eq('user_id',user.id).eq('entry_date',key)
+      .order('id',{ascending:true}).limit(1).maybeSingle();
+    if(checkError)throw new Error('O registro foi enviado, mas não foi possível confirmá-lo: '+checkError.message);
+    if(!check?.id)throw new Error('A gravação não apareceu na leitura do Diário. Confira as políticas RLS da tabela.');
+
     await loadMonth();
+    message('Seu dia foi salvo e confirmado! 🤍','success');
   }catch(error){
     console.error('Erro ao salvar Diário:',error);
-    status('diaryStatus','Não foi possível salvar: '+(error.message||'tente novamente.'));
+    message('Não foi possível salvar: '+(error?.message||'verifique sua conexão e tente novamente.'),'error');
   }finally{
     if(button){button.disabled=false;button.innerHTML='<i class="fa-solid fa-heart"></i> Salvar meu dia';}
   }
 }
+window.saveEntry=saveEntry;
 
 /* CONFIGURAÇÕES */
 function changeTheme(theme){
@@ -4715,8 +4767,18 @@ window.handleLoginClick = function(event) {
 (function(){
   if(!('serviceWorker' in navigator)) return;
   window.addEventListener('load',function(){
-    navigator.serviceWorker.register('/sw.js',{scope:'/'})
-      .catch(function(error){console.warn('PWA: não foi possível registrar o service worker.',error);});
+    navigator.serviceWorker.register('/sw.js',{scope:'/',updateViaCache:'none'})
+      .then(function(registration){
+        // Solicita a verificação da versão mais recente sempre que o app é aberto.
+        return registration.update();
+      })
+      .catch(function(error){console.warn('PWA: não foi possível atualizar o aplicativo.',error);});
+    // Quando a nova versão assumir o controle, recarrega a tela com os arquivos atuais.
+    navigator.serviceWorker.addEventListener('controllerchange',function(){
+      if(window.__cottontailPwaReloading)return;
+      window.__cottontailPwaReloading=true;
+      window.location.reload();
+    });
   });
   let installPrompt=null;
   window.addEventListener('beforeinstallprompt',function(event){
