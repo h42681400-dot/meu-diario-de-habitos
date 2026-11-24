@@ -3315,7 +3315,7 @@ function showPage(id){
   if(id==='explore')searchProfilesAndPosts();
   if(id==='community')loadCommunityHub();
   if(id==='messages'){ backToChatList(); }
-  if(id==='feed'){loadHomeOverview();loadFeed('all');}
+  if(id==='feed'){loadHomeOverview();loadStories();loadFeed('all');}
   if(id==='notifications'){ $('notifBadge').classList.add('hidden'); loadNotifications(); }
   if(id==='profile'){
     // Reconsulta os dados do cabeçalho sempre que a página de perfil é aberta,
