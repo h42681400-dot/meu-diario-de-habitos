@@ -5803,7 +5803,7 @@ window.handleLoginClick = function(event) {
   const ua=navigator.userAgent||'';
   const isNativeApp=document.documentElement.classList.contains('cottontail-native')
     || window.Capacitor?.isNativePlatform?.()===true
-    || (/Android/i.test(ua)&&(/;\\s*wv\\)/i.test(ua)||/Version\\/4\\.0/i.test(ua)));
+    || (/Android/i.test(ua)&&(/;\s*wv\)/i.test(ua)||/Version\/4\.0/i.test(ua)));
   if(isNativeApp) document.getElementById('androidDownloadCard')?.remove();
   if(!('serviceWorker' in navigator)) return;
   window.addEventListener('load',function(){
